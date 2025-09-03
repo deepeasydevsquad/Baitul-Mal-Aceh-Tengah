@@ -22,7 +22,7 @@ Aplikasi ini merupakan sistem manajemen transaksi penerimaan **zakat, infak, dan
 
 1. **Clone repository**
    ```bash
-   git clone git@github.com:muammar88/Baitulmalacehtengah.git
+   git clone git@github.com:deepeasydevsquad/Baitul-Mal-Aceh-Tengah.git
    cd Baitulmalacehtengah
    ```
 
