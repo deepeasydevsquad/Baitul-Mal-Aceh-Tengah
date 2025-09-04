@@ -3,7 +3,7 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class Menu extends Model {
+  class Desa extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -11,20 +11,25 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      Menu.hasMany(models.Submenu, {
-        foreignKey: "menu_id",
+      Desa.belongsTo(models.Kecamatan, {
+        foreignKey: "kecamatan_id",
+      });
+      Desa.hasMany(models.Member, {
+        foreignKey: "desa_id",
+        onDelete: "CASCADE",
+      });
+      Desa.hasMany(models.Desa_area_kegiatan, {
+        foreignKey: "desa_id",
         onDelete: "CASCADE",
       });
     }
   }
-  Menu.init({
-    name: DataTypes.STRING,
-    path: DataTypes.STRING,
-    icon: DataTypes.STRING,
-    tab: DataTypes.STRING
+  Desa.init({
+    kecamatan_id: DataTypes.INTEGER,
+    name: DataTypes.STRING
   }, {
     sequelize,
-    modelName: 'Menu',
+    modelName: 'Desa',
   });
-  return Menu;
+  return Desa;
 };

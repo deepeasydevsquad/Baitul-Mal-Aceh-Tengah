@@ -1,0 +1,37 @@
+'use strict';
+const {
+  Model
+} = require('sequelize');
+module.exports = (sequelize, DataTypes) => {
+  class Member extends Model {
+    /**
+     * Helper method for defining associations.
+     * This method is not a part of Sequelize lifecycle.
+     * The `models/index` file will call this method automatically.
+     */
+    static associate(models) {
+      // define association here
+      Member.belongsTo(models.Desa, {
+        foreignKey: "desa_id",
+      });
+    }
+  }
+  Member.init({
+    kode: DataTypes.STRING,
+    desa_id: DataTypes.INTEGER,
+    tipe: DataTypes.ENUM(["perorangan", "instansi"]),
+    status: DataTypes.ENUM(["unverified", "verified"]),
+    fullname: DataTypes.STRING,
+    nomor_ktp: DataTypes.STRING,
+    nomor_kk: DataTypes.STRING,
+    whatsapp_number: DataTypes.STRING,
+    birth_date: DataTypes.DATEONLY,
+    alamat: DataTypes.TEXT,
+    username: DataTypes.STRING,
+    password: DataTypes.STRING
+  }, {
+    sequelize,
+    modelName: 'Member',
+  });
+  return Member;
+};

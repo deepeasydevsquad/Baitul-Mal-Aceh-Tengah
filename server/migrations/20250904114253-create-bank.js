@@ -2,25 +2,17 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('System_logs', {
+    await queryInterface.createTable('Banks', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      msg: {
-        type: Sequelize.TEXT
+      img: {
+        type: Sequelize.STRING
       },
-      user_id: {
-        type: Sequelize.INTEGER,
-        references: {
-          model: "Users",
-          key: "id",
-        },
-        onDelete: 'CASCADE',
-      },
-      ip: {
+      name: {
         type: Sequelize.STRING
       },
       createdAt: {
@@ -34,6 +26,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('System_logs');
+    await queryInterface.dropTable('Banks');
   }
 };
