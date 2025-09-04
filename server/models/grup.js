@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       Grup.hasMany(models.User, {
         foreignKey: "grup_id",
-        onDelete: 'CASCADE',
+        onDelete: "CASCADE",
       });
     }
   }
