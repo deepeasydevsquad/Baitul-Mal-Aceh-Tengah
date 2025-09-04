@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
+import MemberAreaView from '@/views/MemberAreaView.vue'
 // import UserView from '@/views/UserView.vue'
 // import LoginView from '@/views/LoginView.vue'
 // import RegisterView from '@/views/RegisterView.vue'
@@ -71,10 +72,15 @@ const router = createRouter({
     //   component: KwitansiView,
     // },
     // {
-    //   path: '/tab-tes',
-    //   name: 'tab-tes',
-    //   component: () => import('../views/MemberAreaView.vue'),
-    // },
+    {
+      path: '/member-area',
+      name: 'member-area',
+      component: MemberAreaView,
+      meta: {
+        title: 'Member Area || AMRA :: Aplikasi Manajemen Travel Haji dan Umrah',
+        description: 'Ini adalah deskripsi halaman Member Area',
+      },
+    },
     // {
     //   path: '/User',
     //   name: 'user',
