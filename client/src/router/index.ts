@@ -1,40 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
-// import UserView from '@/views/UserView.vue'
-// import LoginView from '@/views/LoginView.vue'
-// import RegisterView from '@/views/RegisterView.vue'
-// import KwitansiView from '@/views/KwitansiView.vue'
-// import InvoicePaketLa from '@/components/User/Modules/Invoice/InvoicePaketLa.vue'
-// import InvoiceDeposit from '@/components/User/Modules/Invoice/InvoiceDeposit.vue'
-// import InvoiceKwitansiTerakhir from '@/components/User/Modules/Invoice/InvoiceKwitansiTerakhir.vue'
-// import InvoicePembayranPerbulan from '../components/User/Modules/Invoice/InvoicePembayranPerbulan.vue'
-// import KwitansiTabunganUmrah from '@/components/User/Modules/Invoice/KwitansiTabunganUmrah.vue'
-// import CetakSurat from '@/components/User/Modules/DaftarSuratMenyurat/widgets/CetakSurat.vue'
-// import KwitansiHandoverFasilitas from '@/components/User/Modules/Invoice/KwitansiHandoverFasilitas.vue'
-// import CetakDataJamaah from '@/components/User/Modules/TabunganUmrah/Widget/CetakDataJamaah.vue'
-// import KwitansiHandoverBarang from '@/components/User/Modules/Invoice/KwitansiHandoverBarang.vue'
-// import KwitansiPengembalianBarang from '@/components/User/Modules/Invoice/KwitansiPengembalianBarang.vue'
-// import TransaksiVisa from '@/components/User/Modules/TransaksiVisa/TransaksiVisa.vue'
-// import CetakKwitansiVisa from '@/components/User/Modules/Invoice/InvoiceTransaksiVisa.vue'
-// import InvoicePembayaranFeeAgen from '@/components/User/Modules/Invoice/InvoicePembayaranFeeAgen.vue'
-// import KwitansiPembayaranTransaksiPaket from '@/components/User/Modules/Invoice/KwitansiPembayaranTransaksiPaket.vue'
-// import InvoiceTransHotel from '@/components/User/Modules/Invoice/InvoiceTransHotel.vue'
-// import InvoiceKasKeluarMasuk from '@/components/User/Modules/Invoice/InvoiceKasKeluarMasuk.vue'
-// import TransaksiPassport from '@/components/User/Modules/TransaksiPassport/TransaksiPassport.vue'
-// import CetakKwitansiPassport from '@/components/User/Modules/Invoice/InvoiceTransaksiPassport.vue'
-// import CetakDataJamaahPaket from '@/components/User/Modules/DaftarJamaahPaket/Widgets/CetakDataJamaah.vue'
-// import KwitansiHandoverFasilitasPaket from '@/components/User/Modules/Invoice/KwitansiHandoverFasilitasPaket.vue'
-// import KwitansiHandoverBarangPaket from '@/components/User/Modules/Invoice/KwitansiHandoverBarangPaket.vue'
-// import KwitansiPengembalianBarangPaket from '@/components/User/Modules/Invoice/KwitansiPengembalianBarangPaket.vue'
-// import CetakDataAbsensiJamaah from '@/components/User/Modules/DaftarJamaahPaket/Widgets/CetakDataAbsensiJamaah.vue'
-// import DownloadDaftarKamar from '@/components/User/Modules/KamarPaket/Widget/DownloadDaftarKamar.vue'
-// import InvoiceTransTransport from '@/components/User/Modules/Invoice/InvoiceTransTransport.vue'
-// import InvoiceTransFasilitas from '@/components/User/Modules/Invoice/InvoiceTransFasilitas.vue'
-// import CetakRekapitulasi from '@/components/User/Modules/RekapitulasiTicket/Widget/CetakRekapitulasi.vue'
-// import Profile from '@/components/User/Modules/Profile/Profile.vue'
-// import CabangPertama from '@/components/User/Modules/CabangPertama/CabangPertama.vue'
-// import InvoiceTransTiket from '@/components/User/Modules/Invoice/InvoiceTransTiket.vue'
-
+import LoginView from '@/views/LoginView.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -47,15 +13,11 @@ const router = createRouter({
         description: 'Ini adalah deskripsi halaman Home',
       },
     },
-    // {
-    //   path: '/Login',
-    //   name: 'login',
-    //   component: LoginView,
-    //   meta: {
-    //     title: 'Login || AMRA :: Aplikasi Manajemen Travel Haji dan Umrah',
-    //     description: 'Ini adalah deskripsi halaman Home',
-    //   },
-    // },
+    {
+      path: '/Login',
+      name: 'login',
+      component: LoginView,
+    },
     // {
     //   path: '/Register',
     //   name: 'register',
