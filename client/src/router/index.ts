@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
 import MemberAreaView from '@/views/MemberAreaView.vue'
+import LoginAdminView from '@/views/LoginAdminView.vue'
+
 // import UserView from '@/views/UserView.vue'
 // import LoginView from '@/views/LoginView.vue'
 // import RegisterView from '@/views/RegisterView.vue'
@@ -48,6 +50,12 @@ const router = createRouter({
         description: 'Ini adalah deskripsi halaman Home',
       },
     },
+    {
+      path: '/login-admin',
+      name: 'login-admin',
+      component: LoginAdminView,
+    },
+    
     // {
     //   path: '/Login',
     //   name: 'login',
