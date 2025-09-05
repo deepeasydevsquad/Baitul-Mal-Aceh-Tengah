@@ -10,16 +10,11 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: HomeView,
-      // meta: {
-      //   title: 'AMRA :: Aplikasi Manajemen Travel Haji dan Umrah',
-      //   description: 'Ini adalah deskripsi halaman Home',
-      // },
-    },
-    {
-       path: '/Login',
-      name: 'login',
       component: LoginView,
+      meta: {
+        title: 'AMRA :: Aplikasi Manajemen Travel Haji dan Umrah',
+        description: 'Ini adalah deskripsi halaman Home',
+      },
     },
     {
       path: '/login-admin',
