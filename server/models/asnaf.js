@@ -11,6 +11,10 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      Asnaf.hasMany(models.Kegiatan, {
+        foreignKey: "asnaf_id",
+        onDelete: "CASCADE",
+      });
     }
   }
   Asnaf.init({
