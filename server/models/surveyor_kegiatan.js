@@ -11,6 +11,18 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      Surveyor_kegiatan.belongsTo(models.Kegiatan, {
+        foreignKey: "kegiatan_id",
+        onDelete: "CASCADE",
+      });
+      Surveyor_kegiatan.belongsTo(models.Surveyor, {
+        foreignKey: "surveyor_id",
+        onDelete: "CASCADE",
+      });
+      Surveyor_kegiatan.hasMany(models.Survey_permohonan, {
+        foreignKey: "surveyor_kegiatan_id",
+        onDelete: "CASCADE",
+      });
     }
   }
   Surveyor_kegiatan.init({

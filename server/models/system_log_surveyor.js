@@ -3,7 +3,7 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class Surveyor extends Model {
+  class System_log_surveyor extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -11,23 +11,18 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-       Surveyor.hasMany(models.System_log_surveyor, {
+      System_System_log_surveyorlog.belongsTo(models.Surveyor, {
         foreignKey: "surveyor_id",
-        onDelete: "CASCADE",
-      });
-      Surveyor.hasMany(models.Surveyor_kegiatan, {
-        foreignKey: "surveyor_id",
-        onDelete: "CASCADE",
       });
     }
   }
-  Surveyor.init({
-    name: DataTypes.STRING,
-    nik: DataTypes.STRING,
-    whatsapp_number: DataTypes.STRING
+  System_log_surveyor.init({
+    message: DataTypes.TEXT,
+    surveyor_id: DataTypes.INTEGER,
+    ip: DataTypes.STRING
   }, {
     sequelize,
-    modelName: 'Surveyor',
+    modelName: 'System_log_surveyor',
   });
-  return Surveyor;
+  return System_log_surveyor;
 };

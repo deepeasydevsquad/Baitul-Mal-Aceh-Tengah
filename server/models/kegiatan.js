@@ -36,6 +36,10 @@ module.exports = (sequelize, DataTypes) => {
       Kegiatan.hasMany(models.Permohonan, {
         foreignKey: "kegiatan_id",
       });
+      Kegiatan.hasMany(models.Surveyor_kegiatan, {
+        foreignKey: "kegiatan_id",
+        onDelete: "CASCADE",
+      });
     }
   }
   Kegiatan.init({
