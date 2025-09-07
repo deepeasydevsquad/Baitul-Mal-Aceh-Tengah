@@ -2,31 +2,50 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Kecamatan_area_kegiatans', {
+    await queryInterface.createTable('Permohonans', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+      member_id: {
+        type: Sequelize.INTEGER,
+         references: {
+          model: "Members",
+          key: "id",
+        },
+        onDelete: 'CASCADE',
+      },
       kegiatan_id: {
         type: Sequelize.INTEGER,
-        references: {
+         references: {
           model: "Kegiatans",
           key: "id",
         },
         onDelete: 'CASCADE',
       },
-      kecamatan_id: {
+      bank_id: {
         type: Sequelize.INTEGER,
-        references: {
-          model: "Kecamatans",
+         references: {
+          model: "Banks",
           key: "id",
         },
         onDelete: 'CASCADE',
       },
-      kuota: {
-        type: Sequelize.INTEGER
+      nomor_akun_bank: {
+        type: Sequelize.STRING
+      },
+      nama_akun_bank: {
+        type: Sequelize.STRING
+      },
+      status: {
+        type: Sequelize.ENUM,
+        values: ["sedang_berlangsung", "terhenti"],
+        defaultValue : "terhenti"
+      },
+      alasan_penolakan: {
+        type: Sequelize.TEXT
       },
       createdAt: {
         allowNull: false,
@@ -39,6 +58,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Kecamatan_area_kegiatans');
+    await queryInterface.dropTable('Permohonans');
   }
 };

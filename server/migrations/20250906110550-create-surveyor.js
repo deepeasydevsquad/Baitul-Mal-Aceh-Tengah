@@ -2,31 +2,21 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Desa_area_kegiatans', {
+    await queryInterface.createTable('Surveyors', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      kegiatan_id: {
-        type: Sequelize.INTEGER,
-        references: {
-          model: "Kegiatans",
-          key: "id",
-        },
-        onDelete: 'CASCADE',
+      name: {
+        type: Sequelize.STRING
       },
-      desa_id: {
-        type: Sequelize.INTEGER,
-        references: {
-          model: "Desas",
-          key: "id",
-        },
-        onDelete: 'CASCADE',
+      nik: {
+        type: Sequelize.STRING
       },
-      kuota: {
-        type: Sequelize.INTEGER
+      whatsapp_number: {
+        type: Sequelize.STRING
       },
       createdAt: {
         allowNull: false,
@@ -39,6 +29,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Desa_area_kegiatans');
+    await queryInterface.dropTable('Surveyors');
   }
 };

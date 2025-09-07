@@ -22,7 +22,8 @@ module.exports = (sequelize, DataTypes) => {
   Syarat_kegiatan.init({
     kegiatan_id: DataTypes.INTEGER,
     syarat_id: DataTypes.INTEGER
-  }, {
+  },
+  {
     sequelize,
     modelName: 'Syarat_kegiatan',
   });

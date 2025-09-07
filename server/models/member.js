@@ -14,6 +14,15 @@ module.exports = (sequelize, DataTypes) => {
       Member.belongsTo(models.Desa, {
         foreignKey: "desa_id",
       });
+      Member.hasMany(models.Riwayat_donasi, {
+        foreignKey: "member_id",
+      });
+      Member.hasMany(models.Riwayat_pengumpulan, {
+        foreignKey: "member_id",
+      });
+      Member.hasMany(models.Permohonan, {
+        foreignKey: "member_id",
+      });
     }
   }
   Member.init({

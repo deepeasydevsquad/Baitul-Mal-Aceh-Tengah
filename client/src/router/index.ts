@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '@/views/HomeView.vue'
 import LoginView from '@/views/LoginView.vue'
 import MemberAreaView from '@/views/MemberAreaView.vue'
 import LoginAdminView from '@/views/LoginAdminView.vue'
@@ -10,16 +9,7 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: HomeView,
-    },
-    {
-       path: '/Login',
-      name: 'login',
       component: LoginView,
-      meta: {
-        title: 'AMRA :: Aplikasi Manajemen Travel Haji dan Umrah',
-        description: 'Ini adalah deskripsi halaman Home',
-      },
     },
     {
       path: '/login-admin',
