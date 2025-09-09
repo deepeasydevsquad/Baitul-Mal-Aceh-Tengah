@@ -5,9 +5,9 @@ import Header from './widgets/Header.vue'
 </script>
 
 <template>
+   <LoaderOverlay />
   <div class="min-h-screen flex flex-col bg-white">
     <Header />
     <Content />
-    <Footer />
   </div>
 </template>

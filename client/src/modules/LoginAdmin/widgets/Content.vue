@@ -1,6 +1,6 @@
 <template>
   <div class="h-screen flex bg-white">
-    <!-- Left Column -->
+
     <div class="bg-left hidden lg:flex w-full lg:w-1/2 px-[75px] items-center justify-center">
       <div class="pt-8 inline-flex flex-col justify-start items-start gap-8">
         <div class="self-stretch flex flex-col justify-start items-start gap-3">
@@ -29,51 +29,30 @@
     <div class="w-full lg:w-1/2 flex items-center justify-center p-6">
       <div class="w-full max-w-md">
         <form class="bg-white rounded-lg shadow-md px-8 pt-6 pb-8 mb-4 mt-8 lg:mt-0">
-          <div
-            class="text-center justify-center text-gray-800 text-xl font-bold capitalize leading-loose tracking-tight mb-[32px]"
-          >
+          <div class="text-center justify-center text-gray-800 text-xl font-bold capitalize leading-loose tracking-tight mb-[32px]">
             login area Admin
           </div>
-
           <div>
             <div class="mb-4">
-              <label class="block text-gray-700 text-sm mb-2" for="emailAddress">
-                Email Adress
-              </label>
-              <input
-                class="border border-gray-200 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:border-green-900 focus:ring-green-900"
-                id="emailAddress"
-                type="text"
-                placeholder="Masukkan email anda"
-              />
+              <label class="block text-gray-700 text-sm mb-2" for="username">Username</label>
+              <input class="border border-gray-200 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:border-green-900 focus:ring-green-900"
+                id="username" type="text" placeholder="Masukkan username anda" />
             </div>
-
-            <div class="mb-4">
+            <div class="mb-10">
               <div class="flex justify-between mb-2">
-                <label class="block text-gray-700 text-sm" for="password"> Password </label>
+                <label class="block text-gray-700 text-sm" for="password">Password</label>
               </div>
-              <input
-                class="border border-gray-200 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:border-green-900 focus:ring-green-900"
-                id="password"
-                type="password"
-                placeholder="Masukkan password anda"
-              />
+              <input class="border border-gray-200 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:border-green-900 focus:ring-green-900"
+                id="password" type="password" placeholder="Masukkan password anda"/>
             </div>
-
-            <div class="flex mb-4">
-              <input
-                type="checkbox"
-                class="shrink-0 mt-0.5 border-gray-200 rounded-sm text-blue-600 focus:ring-blue-500 checked:border-blue-500 disabled:opacity-50 disabled:pointer-events-none"
-                id="hs-default-checkbox"
-              />
+            <!-- <div class="flex mb-4">
+              <input type="checkbox" class="shrink-0 mt-0.5 border-gray-200 rounded-sm text-blue-600 focus:ring-blue-500 checked:border-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+                id="hs-default-checkbox" />
               <label for="hs-default-checkbox" class="text-sm text-gray-500 ms-3">Ingat Saya</label>
-            </div>
-
+            </div> -->
             <div class="flex flex-col items-center justify-between gap-3">
-              <button
-                class="w-full bg-[#0E561E] text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline"
-                type="submit"
-              >
+              <button class="w-full bg-[#0E561E] text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline"
+                type="submit">
                 Masuk
               </button>
             </div>

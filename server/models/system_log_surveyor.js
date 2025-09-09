@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      System_System_log_surveyorlog.belongsTo(models.Surveyor, {
+      System_log_surveyor.belongsTo(models.Surveyor, {
         foreignKey: "surveyor_id",
       });
     }
