@@ -28,9 +28,6 @@ validation.password = async ( value, { req } ) => {
         console.log(value);
         console.log(q.password);
         console.log(' Username Password ');
-        
-
-
 
         const valid_password = await bcrypt.compare(value, q.password);
         if (!valid_password) {

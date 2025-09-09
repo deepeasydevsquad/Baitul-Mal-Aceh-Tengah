@@ -6,7 +6,6 @@
   import MainContent from './widgets/MainContent.vue';
   import Stats from './widgets/Stats.vue';
   import LoadOverlay from '@/components/Loading/LoadOverlay.vue'
-
   onMounted(() => {
     const token = localStorage.getItem('member_access_token');
     if (!token) {
@@ -15,9 +14,7 @@
       // get data utama di area member
     }
   });
-
 </script>
-
 <template>
   <LoadOverlay />
   <Header />

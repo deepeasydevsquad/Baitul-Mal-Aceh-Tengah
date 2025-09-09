@@ -85,7 +85,6 @@
     localStorage.removeItem('member_access_token');
     localStorage.removeItem('member_refresh_token');
   });
-
 </script>
 <template>
   <div class="h-screen h-screen-not-full flex">
@@ -122,7 +121,7 @@
               <input v-model="form.username" class="border border-gray-200 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:border-green-900 focus:ring-green-900"
                 id="usernameMember" type="text" placeholder="Masukkan username anda"/>
             </div>
-            <div class="mb-4">
+            <div class="mb-8">
               <div class="flex justify-between mb-2">
                 <label class="block text-gray-700 text-sm" for="password"> Password </label>
                 <a class="text-green-900 text-sm font-semibold leading-tight" @click="lupaPassword" >Lupa Password?</a>
@@ -130,11 +129,11 @@
               <input v-model="form.password" class="border border-gray-200 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:border-green-900 focus:ring-green-900"
                 id="password" type="password" placeholder="Masukkan password anda" />
             </div>
-            <div class="flex mb-4">
+            <!-- <div class="flex mb-4">
               <input type="checkbox" class="shrink-0 mt-0.5 border-gray-200 rounded-sm text-blue-600 focus:ring-blue-500 checked:border-blue-500 disabled:opacity-50 disabled:pointer-events-none"
                 id="hs-default-checkbox"/>
               <label for="hs-default-checkbox" class="text-sm text-gray-500 ms-3">Ingat Saya</label>
-            </div>
+            </div> -->
             <div class="flex flex-col items-center justify-between gap-3">
               <button class="w-full bg-[#0E561E] text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline" type="submit"
                  >

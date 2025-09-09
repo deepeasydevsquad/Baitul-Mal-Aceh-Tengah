@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import homeView from '@/views/HomeView.vue'
 import MemberAreaView from '@/views/MemberAreaView.vue'
 import LoginAdminView from '@/views/LoginAdminView.vue'
+import AdministratorAreaView from '@/views/AdministratorView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -39,6 +40,15 @@ const router = createRouter({
       component: MemberAreaView,
       meta: {
         title: 'Member Area || Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah',
+        description: 'Member Area Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah memberikan akses mudah untuk melihat data zakat, status permohonan, serta laporan transaksi secara aman dan transparan',
+      },
+    },
+    {
+      path: '/administrator-area',
+      name: 'administrator-area',
+      component: AdministratorAreaView,
+      meta: {
+        title: 'Administrator Area || Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah',
         description: 'Member Area Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah memberikan akses mudah untuk melihat data zakat, status permohonan, serta laporan transaksi secara aman dan transparan',
       },
     },

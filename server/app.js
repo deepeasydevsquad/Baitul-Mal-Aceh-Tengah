@@ -47,7 +47,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Load router dinamis
 const arr_router = [
-    "member"
+    "auth"
 //   "user",
 //   "otp",
 //   "registrasi",
