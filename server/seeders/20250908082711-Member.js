@@ -10,7 +10,6 @@ module.exports = {
           desa_id: 1, 
           kode: 'AABBCC',
           tipe: 'perorangan',
-          status: 'verified',
           fullname: 'Member Admin Akun',
           nomor_ktp: '1175427237712',
           nomor_kk: '1175427237712',

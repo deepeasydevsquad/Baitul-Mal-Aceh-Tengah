@@ -3,7 +3,7 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class Member extends Model {
+  class Request_member extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -11,24 +11,16 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      Member.belongsTo(models.Desa, {
+      Request_member.belongsTo(models.Desa, {
         foreignKey: "desa_id",
-      });
-      Member.hasMany(models.Riwayat_donasi, {
-        foreignKey: "member_id",
-      });
-      Member.hasMany(models.Riwayat_pengumpulan, {
-        foreignKey: "member_id",
-      });
-      Member.hasMany(models.Permohonan, {
-        foreignKey: "member_id",
       });
     }
   }
-  Member.init({
-    kode: DataTypes.STRING,
+  Request_member.init({
+     kode: DataTypes.STRING,
     desa_id: DataTypes.INTEGER,
     tipe: DataTypes.ENUM(["perorangan", "instansi"]),
+    status: DataTypes.ENUM(['process', 'verified', 'unverified']),
     fullname: DataTypes.STRING,
     nomor_ktp: DataTypes.STRING,
     nomor_kk: DataTypes.STRING,
@@ -39,7 +31,7 @@ module.exports = (sequelize, DataTypes) => {
     password: DataTypes.STRING
   }, {
     sequelize,
-    modelName: 'Member',
+    modelName: 'Request_member',
   });
-  return Member;
+  return Request_member;
 };

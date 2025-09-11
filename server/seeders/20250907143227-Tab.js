@@ -41,6 +41,7 @@ module.exports = {
       { name: 'Laporan Asnaf Ibnu Sabil', icon : 'fa-solid fa-route', path: 'laporan_asnaf_ibnu_sabil', desc:'Laporan penyaluran bantuan untuk asnaf ibnu sabil.',  createdAt: new Date(), updatedAt: new Date() },
       { name: 'Laporan Asnaf Gharim', icon : 'fa-solid fa-hand-holding-droplet', path: 'laporan_asnaf_gharim', desc:'Laporan penyaluran bantuan untuk asnaf gharim.',  createdAt: new Date(), updatedAt: new Date() },
       { name: 'Laporan Asnaf Muallaf', icon : 'fa-solid fa-handshake-angle', path: 'laporan_asnaf_muallaf', desc:'Laporan penyaluran bantuan untuk asnaf muallaf.',  createdAt: new Date(), updatedAt: new Date() },
+      { name: 'Request Keanggotaan', icon : 'fa-solid fa-user-plus', path: 'request_keanggotaan', desc:'Permintaan pendaftaran keanggotaan baru.',  createdAt: new Date(), updatedAt: new Date() },
     ], {});
   },
 

@@ -35,7 +35,7 @@ module.exports = {
       { menu_id : menus[4].id, name: 'Laporan Perencanaan', path: 'laporan_perencanaan', tab:`[]`,  createdAt: new Date(), updatedAt: new Date() },
       { menu_id : menus[4].id, name: 'Laporan Pendistribusian', path: 'laporan_pendistribusian', tab:`[{"id":"${tabs[32].id}"},{"id":"${tabs[33].id}"},{"id":"${tabs[34].id}"},{"id":"${tabs[35].id}"},{"id":"${tabs[36].id}"},{"id":"${tabs[37].id}"}]`,  createdAt: new Date(), updatedAt: new Date() },
       { menu_id : menus[4].id, name: 'Laporan Kesekretariatan', path: 'laporan_kesekretariatan', tab:`[]`,  createdAt: new Date(), updatedAt: new Date() },
-      { menu_id : menus[5].id, name: 'Pengaturan Umum', path: 'pengaturan_umum', tab:`[{"id":"${tabs[22].id}"}]`,  createdAt: new Date(), updatedAt: new Date() },
+      { menu_id : menus[5].id, name: 'Pengaturan Umum', path: 'pengaturan_umum', tab:`[{"id":"${tabs[22].id}"}, {"id":"${tabs[38].id}"}]`,  createdAt: new Date(), updatedAt: new Date() },
       { menu_id : menus[5].id, name: 'Grup Akses', path: 'grup_akses', tab:`[{"id":"${tabs[24].id}"}]`,  createdAt: new Date(), updatedAt: new Date() },
       { menu_id : menus[5].id, name: 'Daftar Pengguna', path: 'daftar_pengguna', tab:`[{"id":"${tabs[25].id}"}]`,  createdAt: new Date(), updatedAt: new Date() },
       { menu_id : menus[5].id, name: 'Konten Publik', path: 'konten_publik', tab:`[{"id":"${tabs[30].id}"}]`,  createdAt: new Date(), updatedAt: new Date() },

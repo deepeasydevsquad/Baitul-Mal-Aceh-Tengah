@@ -2,7 +2,8 @@
   import Header from './widgets/Header/HeaderArea.vue'
   import Sidebar from './widgets/Sidebar/SidebarArea.vue'
   import Content from './widgets/Content/ContentViews.vue'
-  import api from '../../service/api' // Impor file API
+  import LoadOverlay from '@/components/Loading/LoadOverlay.vue'
+  import api from '@/service/api_administrator' // Impor file API
   import { ref, onMounted } from 'vue';
 
   // useGlobalTab
@@ -106,6 +107,7 @@
   });
 </script>
 <template>
+  <LoadOverlay />
   <div>
     <div class="flex h-screen overflow-hidden">
       <Sidebar :menu_info="menu_info"/>

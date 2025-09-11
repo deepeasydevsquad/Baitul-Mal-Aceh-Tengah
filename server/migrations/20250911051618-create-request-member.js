@@ -2,7 +2,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Members', {
+    await queryInterface.createTable('Request_members', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -24,6 +24,11 @@ module.exports = {
         type: Sequelize.ENUM,
         values: ['perorangan', 'instansi'],
         defaultValue : "perorangan"
+      },
+      status: {
+        type: Sequelize.ENUM,
+        values: ['process', "unverified", "verified"],
+        defaultValue : "process"
       },
       fullname: {
         type: Sequelize.STRING
@@ -60,6 +65,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Members');
+    await queryInterface.dropTable('Request_members');
   }
 };
