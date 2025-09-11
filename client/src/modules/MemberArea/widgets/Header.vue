@@ -14,7 +14,7 @@ const dummyUser = {
     >
       <div class="w-full max-w-[1340px] mx-auto flex justify-between items-center">
         <div class="w-48 h-14 relative">
-          <img class="w-48 h-14 left-0 top-0 absolute" src="/images/logo.png" />
+          <img class="w-48 h-14 left-0 top-0 absolute" src="/images/ziwah.png" />
         </div>
         <div class="text-center justify-center text-sm italic">Hai, {{ dummyUser.name }}</div>
       </div>
