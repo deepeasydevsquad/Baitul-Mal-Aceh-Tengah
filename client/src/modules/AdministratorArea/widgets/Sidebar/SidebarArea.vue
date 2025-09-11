@@ -83,7 +83,7 @@ onMounted(() => {
     class="absolute left-0 top-0 z-9998 flex h-screen w-72.5 flex-col overflow-y-hidden bg-white duration-300 ease-linear dark:bg-boxdark lg:static lg:translate-x-0 shadow-lg">
     <div class="flex items-center justify-center gap-2 px-6 py-2.5 lg:py-3.5">
       <router-link to="/">
-        <img :src="'/images/logo.png'" alt="Logo" class="h-14" />
+        <img :src="'/images/ziwah.png'" alt="Logo" class="h-14" />
       </router-link>
       <button class="block lg:hidden" >
         <svg class="fill-current" width="20" height="18" viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg">

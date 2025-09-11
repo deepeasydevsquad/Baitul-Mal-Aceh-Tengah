@@ -77,7 +77,7 @@ api.interceptors.response.use(
         console.error('Refresh token gagal, harap login ulang')
         localStorage.removeItem('administrator_access_token')
         localStorage.removeItem('administrator_refresh_token')
-        // window.location.href = '/login-admin'
+        window.location.href = '/login-admin'
         return Promise.reject(refreshError)
       } finally {
         isRefreshing = false
