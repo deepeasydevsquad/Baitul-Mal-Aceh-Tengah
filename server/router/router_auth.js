@@ -20,6 +20,12 @@ router.post('/auth/login_administrator',
   controllersAdministrator.login_administrator_process
 );
 
+router.post('/auth/administrator/refresh', 
+   controllersAdministrator.refreshToken
+);
+
+// administrator
+
 // auth/login_administrator
 
 module.exports = router;
