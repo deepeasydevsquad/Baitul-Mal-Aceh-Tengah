@@ -7,8 +7,8 @@ module.exports = {
       "Grups",
       [
         {
-            name: 'Staff',
-            group_access: '[{"id":1,"name":"Beranda","path":"beranda","icon":"fas fa-home","Submenus":[]}]',
+            name: 'Administrator',
+            group_access: null,
             createdAt: new Date(),
             updatedAt: new Date(),
         },

@@ -59,7 +59,7 @@ defineExpose({
   <div>
     <button
       @click="showLogoutConfirmation"
-      class="flex items-center gap-3.5 py-4 px-6 text-sm font-medium duration-300 ease-in-out text-green-900 hover:text-primary lg:text-base w-full text-left"
+      class="flex items-center gap-3.5 py-4 px-6 text-sm font-medium duration-300 ease-in-out text-green-900 hover:text-green-700 lg:text-base w-full text-left"
     >
       <svg
         class="fill-current"

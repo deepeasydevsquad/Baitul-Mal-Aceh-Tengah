@@ -22,11 +22,12 @@ useHead({
 
 <template>
   <header
-    class="sticky top-0 z-999 flex w-full bg-left drop-shadow-1 dark:bg-boxdark dark:drop-shadow-none"
+    class="sticky top-0 z-999 bg-left  flex w-full  drop-shadow-1 dark:bg-boxdark dark:drop-shadow-none"
   >
     <!-- <title>AMRA :: Aplikasi Manajemen Travel Haji dan Umrah</title> -->
     <!-- <font-awesome-icon :icon="['fas', 'user']" /> -->
-    <div class="flex flex-grow items-center justify-between py-4 px-4 shadow-2 md:px-6 2xl:px-11">
+     <!-- bg-gradient-to-r from-green-900 from-30% to-white/0 to-100% -->
+    <div class="flex bg-gradient-to-r from-green-900 from-5% to-white/0 to-100% flex-grow items-center justify-between py-4 px-4 shadow-2 md:px-6 2xl:px-11">
       <div class="flex items-center gap-2 sm:gap-4 lg:hidden">
         <button class="z-99999 block rounded-sm border border-stroke bg-white p-1.5 shadow-sm dark:border-strokedark dark:bg-boxdark lg:hidden"
           @click="() => { toggleSidebar() }"
@@ -61,8 +62,8 @@ useHead({
       </div>
       <div class="hidden sm:block">
         <span class="hidden text-left lg:block">
-          <span class="block text-sm font-bold text-green-900 dark:text-white">APLIKASI MUSTAHIK & MUZAKKI</span>
-          <span class="block text-sm font-medium text-green-900 dark:text-white">Kabupaten Aceh Tengah</span>
+          <span class="block text-sm font-semibold text-white dark:text-white">APLIKASI MUSTAHIK & MUZAKKI</span>
+          <span class="block text-sm font-normal text-white dark:text-white">Kabupaten Aceh Tengah</span>
         </span>
       </div>
       <div class="flex items-center gap-3 2xsm:gap-7">

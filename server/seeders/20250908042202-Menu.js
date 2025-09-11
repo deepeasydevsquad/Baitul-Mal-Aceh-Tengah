@@ -18,7 +18,7 @@ module.exports = {
       { name: 'Keanggotaan', path: '#', icon: 'fas fa-users', tab:'',  createdAt: new Date(), updatedAt: new Date() },
       { name: 'Master Data', path: '#', icon: 'fas fa-database', tab:'',  createdAt: new Date(), updatedAt: new Date() },
       { name: 'Laporan', path: '#', icon: 'fas fa-chart-area', tab:'',  createdAt: new Date(), updatedAt: new Date() },
-      { name: 'Pengaturan Umum', path: '#', icon: 'fas fa-cogs', tab:'',  createdAt: new Date(), updatedAt: new Date() },
+      { name: 'Pengaturan', path: '#', icon: 'fas fa-cogs', tab:'',  createdAt: new Date(), updatedAt: new Date() },
     ], {});
   },
 

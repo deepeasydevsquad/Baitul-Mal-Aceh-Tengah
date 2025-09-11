@@ -12,8 +12,8 @@ const api = axios.create({
 })
 
 // Fungsi untuk mengambil token dari localStorage
-const getAccessToken = () => localStorage.getItem('access_token')
-const getRefreshToken = () => localStorage.getItem('refresh_token')
+const getAccessToken = () => localStorage.getItem('administrator_access_token')
+const getRefreshToken = () => localStorage.getItem('administrator_refresh_token')
 
 // Tambahkan interceptor untuk menyisipkan token di setiap request
 api.interceptors.request.use(
@@ -65,7 +65,7 @@ api.interceptors.response.use(
         })
 
         const newAccessToken = response.data.access_token
-        localStorage.setItem('access_token', newAccessToken)
+        localStorage.setItem('administrator_access_token', newAccessToken)
 
         // Jalankan semua request yang tertunda
         failedRequestsQueue.forEach((cb) => cb(newAccessToken))
@@ -75,9 +75,9 @@ api.interceptors.response.use(
         return api(originalRequest)
       } catch (refreshError) {
         console.error('Refresh token gagal, harap login ulang')
-        localStorage.removeItem('access_token')
-        localStorage.removeItem('refresh_token')
-        window.location.href = '/Login'
+        localStorage.removeItem('administrator_access_token')
+        localStorage.removeItem('administrator_refresh_token')
+        window.location.href = '/login-admin'
         return Promise.reject(refreshError)
       } finally {
         isRefreshing = false
@@ -88,4 +88,7 @@ api.interceptors.response.use(
   },
 )
 
+
+        // localStorage.setItem('administrator_access_token', response.data.access_token)
+        // localStorage.setItem('administrator_refresh_token', response.data.refresh_token)
 export default api

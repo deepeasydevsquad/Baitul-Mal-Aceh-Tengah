@@ -1,11 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import {
-  useSelectedTab,
-  useGlobalTab,
-  useGlobalActiveTab,
-  useTabTerpilih,
-} from '../../../../stores/sidebar'
+import { useSelectedTab, useGlobalTab, useGlobalActiveTab, useTabTerpilih } from '../../../../stores/sidebar'
 import 'flowbite'
 
 // import BerandaUtama from '../../Modules/BerandaUtama/BerandaUtama.vue'
@@ -149,18 +144,8 @@ const selectTab = (tabPath: string, key: number) => {
 <template>
   <!--  -->
   <div class="mb-0 dark:border-gray-700">
-    <ul
-      class="flex flex-wrap -mb-px text-sm font-medium text-center text-graydark"
-      id="default-tab"
-      data-tabs-toggle="#default-tab-content"
-      role="tablist"
-    >
-      <li
-        class="me-2"
-        role="presentation"
-        v-for="(item, key) in selectedTab.sharedArray"
-        :key="key"
-      >
+    <ul class="flex flex-wrap -mb-px text-sm font-medium text-center text-graydark" id="default-tab" data-tabs-toggle="#default-tab-content" role="tablist" >
+      <li class="me-2" role="presentation" v-for="(item, key) in selectedTab.sharedArray" :key="key">
         <button
           class="inline-block p-4 rounded-t-lg rrr"
           :id="`${tab.sharedObject[item.id].path}-tab`"
@@ -178,7 +163,7 @@ const selectTab = (tabPath: string, key: number) => {
           :class="
             activeTab.sharedString === tab.sharedObject[item.id].path ||
             (tabTerpilih.sharedNumber === 0 && key === 0)
-              ? 'AAA bg-white !text-[#3a477d] font-bold hover:text-[#3a477d] dark:text-[#3a477d] dark:hover:text-[#3a477d] border-[#3a477d] dark:border-[#3a477d]'
+              ? 'AAA bg-white !text-green-900 font-semibold hover:text-green-700 dark:text-green-900 dark:hover:text-green-900 border-[#3a477d] dark:border-[#3a477d]'
               : 'BBB inline-block p-4 rounded-t-lg dark:border-transparent text-gray-500 hover:text-gray-600 dark:text-gray-400 border-gray-100 hover:border-gray-300 dark:border-gray-700 dark:hover:text-gray-300'
           "
         >
