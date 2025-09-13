@@ -14,6 +14,7 @@ module.exports = {
           return res.status(403).json({ message: "Token tidak valid" });
         }
       }
+      console.log(user);
       req.user = user;
       next();
     });

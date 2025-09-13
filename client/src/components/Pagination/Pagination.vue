@@ -1,5 +1,5 @@
 <template>
-  <tr class="border">
+  <tr class="border-t border-gray-300 bg-gray-200 font-bold">
     <td class="px-4 py-4 text-center min-h-[200px]" :colspan="totalColumns-2">
       <nav class="flex mt-0">
         <ul class="inline-flex items-center -space-x-px">
@@ -21,7 +21,7 @@
               @click="$emit('page-now', page)"
               class="px-3 py-2 leading-tight border"
               :class="currentPage === page
-                ? 'text-white bg-[#3a477d] border-[#3a477d]'
+                ? 'text-white bg-[#2b6443] border-[#2b6443]'
                 : 'text-gray-500 bg-white border-gray-300 hover:bg-gray-100 hover:text-gray-700'"
             >
               {{ page }}
