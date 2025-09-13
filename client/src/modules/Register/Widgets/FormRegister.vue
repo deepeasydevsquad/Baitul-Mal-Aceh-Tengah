@@ -35,15 +35,7 @@ const tipeAkun = ref<'instansi' | 'perorangan' | ''>('')
 const kecamatan = ref<any[]>([])
 const desa = ref<any[]>([])
 
-// Fetch daftar kecamatan pas component mount
-// Fetch daftar kecamatan pas component mount
-onMounted(async () => {
-  try {
-    kecamatan.value = await Register.list_kecamatan({})
-  } catch (error) {
-    console.error('Gagal fetch kecamatan:', error)
-  }
-})
+
 
 // form gabungan
 const form = reactive({
@@ -194,6 +186,15 @@ async function onSubmit(e: Event) {
     console.error('Error register:', err)
   }
 }
+
+onMounted(async () => {
+  try {
+    kecamatan.value = await Register.list_kecamatan({})
+  } catch (error) {
+    console.error('Gagal fetch kecamatan:', error)
+  }
+})
+
 </script>
 
 <template>

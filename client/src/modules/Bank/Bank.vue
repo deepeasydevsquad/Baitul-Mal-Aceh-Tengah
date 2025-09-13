@@ -145,58 +145,41 @@ async function deleteData(id: number) {
           />
         </div>
       </div>
-
       <!-- Table -->
       <div class="overflow-hidden rounded-xl border border-gray-200 shadow">
         <SkeletonTable v-if="isTableLoading" :columns="totalColumns" :rows="itemsPerPage" />
         <table v-else class="w-full border-collapse bg-white text-sm">
           <thead class="bg-gray-50 text-gray-700 text-center border-b border-gray-300">
             <tr>
-              <th class="w-[30%] px-6 py-3 font-medium">Logo Bank</th>
-              <th class="w-[50%] px-6 py-3 font-medium">Nama Bank</th>
-              <th class="w-[20%] px-6 py-3 font-medium">Aksi</th>
+              <th class="w-[10%] text-center px-6 py-4 font-medium font-bold text-gray-900 text-center">Logo Bank</th>
+              <th class="w-[70%] text-center px-6 py-4 font-medium font-bold text-gray-900 text-center">Nama Bank</th>
+              <th class="w-[20%] text-center px-6 py-4 font-medium font-bold text-gray-900 text-center">Aksi</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
             <template v-if="dataBanks.length > 0">
-              <tr
-                v-for="bank in dataBanks"
-                :key="bank.id"
-                class="hover:bg-gray-50 transition-colors"
-              >
-                <td class="px-6 py-4">
-                  <div
-                    class="relative aspect-video max-w-sm rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden"
-                    :class="{ 'bg-gray-200': !bank.img || bank.img === '-' }"
-                  >
-                    <img
-                      v-if="bank.img && bank.img !== '-'"
-                      :src="BASE_URL + '/uploads/img/bank/' + bank.img"
-                      :alt="`Foto Bank ${bank.name}`"
-                      class="w-full h-full object-cover"
-                      @error="bank.img = '-'"
-                    />
-                    <div v-else class="text-gray-500 text-center px-4">
+              <tr v-for="bank in dataBanks" :key="bank.id" class="hover:bg-gray-50 transition-colors">
+                <td class="px-6 py-4 text-center align-middle">
+                  <center>
+                    <div v-if="bank.img && bank.img !== '-'" class="relative rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden" style="width: 100px; height: 33px;" :class="{ 'bg-gray-200': !bank.img || bank.img === '-' }">
+                      <img :src="BASE_URL + '/uploads/img/bank/' + bank.img" :alt="`Foto Bank ${bank.name}`" class="object-contain max-w-full max-h-full mx-auto" @error="bank.img = '-'" />
+                    </div>
+                    <div v-else class="bg-gray-200 text-gray-500 text-center px-4 relative aspect-video max-w-sm rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden">
                       <p class="font-medium">Gambar tidak tersedia</p>
                     </div>
-                  </div>
+                  </center>
                 </td>
                 <td class="px-6 py-4 text-center font-medium text-gray-800">
                   {{ bank.name }}
                 </td>
                 <td class="px-6 py-4">
                   <div class="flex justify-center gap-2">
-                    <LightButton @click="openModalEdit(bank)">
-                      <EditIcon />
-                    </LightButton>
-                    <DangerButton @click="deleteData(bank.id)">
-                      <DeleteIcon />
-                    </DangerButton>
+                    <LightButton @click="openModalEdit(bank)"><EditIcon /></LightButton>
+                    <DangerButton @click="deleteData(bank.id)"><DeleteIcon /></DangerButton>
                   </div>
                 </td>
               </tr>
             </template>
-
             <!-- Empty State -->
             <tr v-else>
               <td :colspan="totalColumns" class="px-6 py-8 text-center text-gray-500">
@@ -205,19 +188,9 @@ async function deleteData(id: number) {
               </td>
             </tr>
           </tbody>
-
           <!-- Pagination -->
           <tfoot>
-            <Pagination
-              :current-page="currentPage"
-              :total-pages="totalPages"
-              :pages="pages"
-              :total-columns="totalColumns"
-              :total-row="totalRow"
-              @prev-page="prevPage"
-              @next-page="nextPage"
-              @page-now="pageNow"
-            />
+            <Pagination :current-page="currentPage" :total-pages="totalPages" :pages="pages" :total-columns="totalColumns" :total-row="totalRow" @prev-page="prevPage" @next-page="nextPage" @page-now="pageNow" />
           </tfoot>
         </table>
       </div>
