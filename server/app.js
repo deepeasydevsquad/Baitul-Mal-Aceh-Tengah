@@ -49,6 +49,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 const arr_router = [
     "auth",
     "administrator",
+    "system_log_surveyor",
     "bank",
     "register",
     "request_keanggotaan",

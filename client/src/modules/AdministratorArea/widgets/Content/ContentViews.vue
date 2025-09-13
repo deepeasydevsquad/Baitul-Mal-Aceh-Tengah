@@ -7,10 +7,10 @@ import {
   useTabTerpilih,
 } from '../../../../stores/sidebar'
 import 'flowbite'
+import SystemLogSurveyor from "@/modules/SystemLogSurveyor/SystemLogSurveyor.vue"
 import Bank from '@/modules/Bank/Bank.vue'
 import RequestKeanggotaan from '@/modules/RequestKeanggotaan/RequestKeanggotaan.vue'
 import RunningText from '@/modules/RunningText/RunningText.vue'
-
 // import BerandaUtama from '../../Modules/BerandaUtama/BerandaUtama.vue'
 // import TransPaket from '../../Modules/TransPaket/TransPaket.vue'
 // import DaftarKota from '../../Modules/DaftarKota/DaftarKota.vue'
@@ -72,6 +72,7 @@ import RunningText from '@/modules/RunningText/RunningText.vue'
 // import RiwayatDepositMaskapai from '../../Modules/RiwayatDepositMaskapai/RiwayatDepositMaskapai.vue'
 
 const tabComponents = {
+system_log_surveyor: SystemLogSurveyor,
 daftar_bank: Bank,
 running_text: RunningText,
 request_keanggotaan: RequestKeanggotaan,
