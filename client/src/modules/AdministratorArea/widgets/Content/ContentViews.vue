@@ -1,7 +1,14 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useSelectedTab, useGlobalTab, useGlobalActiveTab, useTabTerpilih } from '../../../../stores/sidebar'
+import {
+  useSelectedTab,
+  useGlobalTab,
+  useGlobalActiveTab,
+  useTabTerpilih,
+} from '../../../../stores/sidebar'
 import 'flowbite'
+
+import RequestKeanggotaan from '@/modules/RequestKeanggotaan/RequestKeanggotaan.vue'
 
 // import BerandaUtama from '../../Modules/BerandaUtama/BerandaUtama.vue'
 // import TransPaket from '../../Modules/TransPaket/TransPaket.vue'
@@ -64,6 +71,7 @@ import 'flowbite'
 // import RiwayatDepositMaskapai from '../../Modules/RiwayatDepositMaskapai/RiwayatDepositMaskapai.vue'
 
 const tabComponents = {
+  request_keanggotaan: RequestKeanggotaan,
   // beranda_utama: BerandaUtama,
   // trans_paket: TransPaket,
   // trans_tiket: TransTiket,
@@ -144,8 +152,18 @@ const selectTab = (tabPath: string, key: number) => {
 <template>
   <!--  -->
   <div class="mb-0 dark:border-gray-700">
-    <ul class="flex flex-wrap -mb-px text-sm font-medium text-center text-graydark" id="default-tab" data-tabs-toggle="#default-tab-content" role="tablist" >
-      <li class="me-2" role="presentation" v-for="(item, key) in selectedTab.sharedArray" :key="key">
+    <ul
+      class="flex flex-wrap -mb-px text-sm font-medium text-center text-graydark"
+      id="default-tab"
+      data-tabs-toggle="#default-tab-content"
+      role="tablist"
+    >
+      <li
+        class="me-2"
+        role="presentation"
+        v-for="(item, key) in selectedTab.sharedArray"
+        :key="key"
+      >
         <button
           class="inline-block p-4 rounded-t-lg rrr"
           :id="`${tab.sharedObject[item.id].path}-tab`"
