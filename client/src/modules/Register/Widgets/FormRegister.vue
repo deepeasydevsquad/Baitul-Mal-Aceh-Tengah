@@ -34,7 +34,6 @@ const tipeAkun = ref<'instansi' | 'perorangan' | ''>('')
 
 const kecamatan = ref<any[]>([])
 const desa = ref<any[]>([])
-const selectedKecamatan = ref<number | null>(null)
 
 // Fetch daftar kecamatan pas component mount
 // Fetch daftar kecamatan pas component mount
@@ -49,15 +48,12 @@ onMounted(async () => {
 // form gabungan
 const form = reactive({
   tipe_akun: '',
-  // instansi
   fullname: '',
   kecamatan_id: '',
   desa_id: '',
-  // perorangan
   nomor_ktp: '',
   nomor_kk: '',
   birth_date: '',
-  // shared
   whatsapp_number: '',
   alamat: '',
   otp: '',
@@ -92,8 +88,6 @@ watch(tipeAkun, (v) => {
   form.tipe_akun = v || ''
 })
 
-// OTP dummy
-// replace getOtp dummy
 async function getOtp() {
   errors.whatsapp_number = null
 
