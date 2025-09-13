@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useSelectedTab, useGlobalTab, useGlobalActiveTab, useTabTerpilih } from '../../../../stores/sidebar'
 import 'flowbite'
-
+import SystemLogSurveyor from "@/modules/SystemLogSurveyor/SystemLogSurveyor.vue"
 // import BerandaUtama from '../../Modules/BerandaUtama/BerandaUtama.vue'
 // import TransPaket from '../../Modules/TransPaket/TransPaket.vue'
 // import DaftarKota from '../../Modules/DaftarKota/DaftarKota.vue'
@@ -64,6 +64,7 @@ import 'flowbite'
 // import RiwayatDepositMaskapai from '../../Modules/RiwayatDepositMaskapai/RiwayatDepositMaskapai.vue'
 
 const tabComponents = {
+  system_log_surveyor: SystemLogSurveyor
   // beranda_utama: BerandaUtama,
   // trans_paket: TransPaket,
   // trans_tiket: TransTiket,
