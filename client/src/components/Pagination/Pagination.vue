@@ -20,11 +20,9 @@
             <button
               @click="$emit('page-now', page)"
               class="px-3 py-2 leading-tight border"
-              :class="
-                currentPage === page
-                  ? 'text-white bg-[#0E561E] border-[#3a477d]'
-                  : 'text-gray-500 bg-white border-gray-300 hover:bg-gray-100 hover:text-gray-700'
-              "
+              :class="currentPage === page
+                ? 'text-white bg-[#2b6443] border-[#2b6443]'
+                : 'text-gray-500 bg-white border-gray-300 hover:bg-gray-100 hover:text-gray-700'"
             >
               {{ page }}
             </button>

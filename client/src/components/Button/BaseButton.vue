@@ -7,7 +7,7 @@ const emit = defineEmits(['click']);
 const props = defineProps({
   variant: {
     type: String,
-    default: 'primary', // primary, secondary
+    default: 'primary', // primary, secondary, warning, danger
   },
   size: {
     type: String,
@@ -40,8 +40,9 @@ const buttonClasses = computed(() => {
   ];
 
   const variantClasses = {
-    primary: 'bg-[#14532d] text-white hover:bg-[#2b6443] focus:ring-[#14532d]',
+    primary: 'bg-green-900 text-white hover:bg-[#2b6443] focus:ring-green-900',
     secondary: 'bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-400',
+    warning: 'bg-yellow-600 text-white hover:bg-yellow-700 focus:ring-yellow-500',
     danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
   };
 
