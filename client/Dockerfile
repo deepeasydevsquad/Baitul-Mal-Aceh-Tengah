@@ -1,7 +1,7 @@
 # ========================
 # Build Stage
 # ========================
-FROM node:lts-alpine as build-stage
+FROM node:lts-alpine AS build-stage
 
 # Set working directory
 WORKDIR /app
@@ -17,7 +17,7 @@ RUN npm run build
 # ========================
 # Production Stage
 # ========================
-FROM httpd:2.4-alpine as production-stage
+FROM httpd:2.4-alpine AS production-stage
 
 # Copy built files to Apache's public folder
 COPY --from=build-stage /app/dist/ /usr/local/apache2/htdocs/

@@ -1,6 +1,7 @@
 <template>
   <tr class="border-t border-gray-300 bg-gray-200 font-bold">
     <td class="px-4 py-4 text-center min-h-[200px]" :colspan="totalColumns-2">
+
       <nav class="flex mt-0">
         <ul class="inline-flex items-center -space-x-px">
           <!-- Tombol Previous -->
@@ -8,8 +9,7 @@
             <button
               @click="$emit('prev-page')"
               :disabled="currentPage === 1"
-              class="px-3 py-2 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg
-                hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="px-3 py-2 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Previous
             </button>
@@ -33,8 +33,7 @@
             <button
               @click="$emit('next-page')"
               :disabled="currentPage === totalPages"
-              class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg
-                hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Next
             </button>
@@ -54,7 +53,7 @@ defineProps({
   totalPages: Number,
   pages: Array,
   totalColumns: Number,
-  totalRow: { type: Number, default: 0}
+  totalRow: { type: Number, default: 0 },
 })
 
 defineEmits(['prev-page', 'next-page', 'page-now'])

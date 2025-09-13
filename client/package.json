@@ -43,6 +43,7 @@
     "vue-meta": "^3.0.0-alpha.2",
     "vue-router": "^4.5.0",
     "vue3-apexcharts": "^1.4.4",
+    "vuedraggable": "^4.1.0",
     "vueperslides": "^3.6.0"
   },
   "devDependencies": {
