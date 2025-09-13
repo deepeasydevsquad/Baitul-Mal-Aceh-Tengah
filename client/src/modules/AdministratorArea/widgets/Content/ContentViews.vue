@@ -9,6 +9,7 @@ import {
 import 'flowbite'
 
 import RequestKeanggotaan from '@/modules/RequestKeanggotaan/RequestKeanggotaan.vue'
+import RunningText from '@/modules/RunningText/RunningText.vue'
 
 // import BerandaUtama from '../../Modules/BerandaUtama/BerandaUtama.vue'
 // import TransPaket from '../../Modules/TransPaket/TransPaket.vue'
@@ -71,7 +72,8 @@ import RequestKeanggotaan from '@/modules/RequestKeanggotaan/RequestKeanggotaan.
 // import RiwayatDepositMaskapai from '../../Modules/RiwayatDepositMaskapai/RiwayatDepositMaskapai.vue'
 
 const tabComponents = {
-  request_keanggotaan: RequestKeanggotaan,
+running_text: RunningText,
+request_keanggotaan: RequestKeanggotaan,
   // beranda_utama: BerandaUtama,
   // trans_paket: TransPaket,
   // trans_tiket: TransTiket,
