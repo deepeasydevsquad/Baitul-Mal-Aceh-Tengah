@@ -159,14 +159,13 @@ const handleReject = async (id: number) => {
         <!-- Header dengan grouping -->
         <thead class="bg-gray-50">
           <tr>
-            <th class="text-center px-6 py-4 font-medium font-bold text-gray-900 text-center">Nama</th>
-            <th class="text-center px-6 py-4 font-medium font-bold text-gray-900 text-center">Tgl Lahir</th>
-            <th class="text-center px-6 py-4 font-medium font-bold text-gray-900 text-center">WhatsApp</th>
-            <th class="text-center px-6 py-4 font-medium font-bold text-gray-900 text-center">Username</th>
-
-            <th class="text-center px-6 py-4 font-medium font-bold text-gray-900 text-center">Desa</th>
-            <th class="text-center px-6 py-4 font-medium font-bold text-gray-900 text-center">Status</th>
-            <th class="text-center px-6 py-4 font-medium font-bold text-gray-900 text-center">Aksi</th>
+            <th class="px-6 py-4 font-medium text-gray-900 text-center">Nama</th>
+            <th class="px-6 py-4 font-medium text-gray-900 text-center">Tgl Lahir</th>
+            <th class="px-6 py-4 font-medium text-gray-900 text-center">WhatsApp</th>
+            <th class="px-6 py-4 font-medium text-gray-900 text-center">Username</th>
+            <th class="px-6 py-4 font-medium text-gray-900 text-center">Desa</th>
+            <th class="px-6 py-4 font-medium text-gray-900 text-center">Status</th>
+            <th class="px-6 py-4 font-medium text-gray-900 text-center">Aksi</th>
           </tr>
         </thead>
 
@@ -271,7 +270,7 @@ const handleReject = async (id: number) => {
         </tbody>
 
         <!-- Footer -->
-        <tfoot class="bg-gray-100 font-bold">
+        <tfoot class="bg-gray-50 font-bold">
           <Pagination
             :total-row="totalItems"
             :currentPage="currentPage"

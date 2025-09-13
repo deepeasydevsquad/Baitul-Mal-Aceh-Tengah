@@ -1,5 +1,5 @@
 <template>
-  <tr class="border-t border-gray-300 bg-gray-200 font-bold">
+  <tr class="border-t border-gray-300 bg-gray-50 font-bold">
     <td class="px-4 py-4 text-center min-h-[200px]" :colspan="totalColumns-2">
 
       <nav class="flex mt-0">

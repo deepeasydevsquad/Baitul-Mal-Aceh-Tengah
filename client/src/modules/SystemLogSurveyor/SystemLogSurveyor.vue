@@ -116,17 +116,16 @@ const showConfirmation = (title: string, message: string, action: () => void) =>
     <div class="overflow-hidden rounded-lg border border-gray-200 shadow-md">
       <table class="w-full border-collapse bg-white text-left text-sm text-gray-500">
         <!-- Header dengan grouping -->
-        <thead class="bg-gray-100 text-gray-900">
+        <thead class="bg-gray-50">
           <tr>
-            <th class="text-center px-3 py-2">Datetimes</th>
-            <th class="text-center px-3 py-2">Message</th>
-            <th class="text-center px-3 py-2">Surveyor</th>
-            <th class="text-center px-3 py-2">Ip</th>
-                  </tr>
+            <th class="px-6 py-4 font-medium text-gray-900 text-center">Datetimes</th>
+            <th class="px-6 py-4 font-medium text-gray-900 text-center">Message</th>
+            <th class="px-6 py-4 font-medium text-gray-900 text-center">Surveyor</th>
+            <th class="px-6 py-4 font-medium text-gray-900 text-center">Ip</th>
+          </tr>
         </thead>
-
         <!-- Isi Data -->
-        <tbody class="divide-y divide-gray-200">
+        <tbody class="divide-y divide-gray-100 border-t border-gray-100">
           <tr v-for="(item, idx) in data" :key="item.id">
             <td class="px-3 py-2 text-center">{{ item.createdAt }}</td>
             <td class="px-3 py-2 text-center">{{ item.message }}</td>
@@ -134,7 +133,6 @@ const showConfirmation = (title: string, message: string, action: () => void) =>
             <td class="px-3 py-2 text-center">{{ item.ip }}</td>
           </tr>
 
-          <!-- Kalau data kosong -->
           <tr v-if="data.length === 0">
             <td :colspan="totalColumns" class="text-center py-6 text-gray-500">Data tidak ada</td>
           </tr>
