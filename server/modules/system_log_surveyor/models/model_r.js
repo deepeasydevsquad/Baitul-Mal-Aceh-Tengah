@@ -1,8 +1,12 @@
 "use strict";
 
-const { sequelize, System_log_surveyor, Surveyor, Sequelize } = require("../../../models");
-const { Op } = Sequelize;
-const moment = require("moment");
+const {
+    sequelize,
+    Op,
+    System_log_surveyor,
+    Surveyor,
+    Sequelize,
+} = require("../../../models");
 
 class Model_r {
     constructor(req) {
@@ -12,38 +16,40 @@ class Model_r {
         this.t = null;
     }
 
-    async system_log_surveyor() {
+    async daftar_surveyor() {
         const body = this.req.body;
-        const limit = parseInt(body.perpage) || 10;
-        const page = body.pageNumber && body.pageNumber !== "0"
-            ? parseInt(body.pageNumber)
-            : 1;
+        const limit = parseInt(body.perpage, 10) || 10;
+        const page =
+            body.pageNumber && body.pageNumber !== "0"
+                ? parseInt(body.pageNumber, 10)
+                : 1;
 
-        let where = {};
-
-        if (body.search && body.search !== "") {
-            where.fullname = { [Op.like]: `%${body.search}%` }; // ganti sesuai kolom
-        }
-
-        const include = [
-            {
-                model: Surveyor,
-                attributes: ["id", "name"],
-            },
-        ];
+        const where = body.search
+            ? {
+                  [Op.or]: [{ name: { [Op.like]: `%${body.search}%` } }],
+              }
+            : {};
 
         const sql = {
             limit,
             offset: (page - 1) * limit,
             order: [["id", "ASC"]],
             attributes: ["id", "message", "ip", "createdAt", "updatedAt"],
-            where,
-            include,
+            include: [
+                {
+                    model: Surveyor,
+                    attributes: ["id", "name"],
+                    where: where,
+                    required: true,
+                },
+            ],
         };
 
         try {
             const q = await System_log_surveyor.findAndCountAll(sql);
             const total = q.count;
+            console.log("total", total);
+
             const data = q.rows.map((item) => {
                 const row = item.toJSON();
                 return {
@@ -55,6 +61,7 @@ class Model_r {
                     updatedAt: row.updatedAt,
                 };
             });
+            console.log("data", data);
             return { data, total };
         } catch (error) {
             console.error("🔥 ERROR in daftar request member:", error);

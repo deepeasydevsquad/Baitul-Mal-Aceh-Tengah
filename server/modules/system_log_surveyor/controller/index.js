@@ -4,19 +4,23 @@ const {
     handleServerError,
 } = require("../../../helper/handleError");
 
-// list agen
-exports.list = async (req, res) => {
-    console.log("controller item");
+const controllers = {};
+
+controllers.daftar_surveyor = async (req, res) => {
+    if (!(await handleValidationErrors(req, res))) return;
+
     try {
-        const model = new Model_r(req);
-        const data = await model.system_log_surveyor();
-        return res.status(200).json(data); // pake return
+        const model_r = new Model_r(req);
+        const feedBack = await model_r.daftar_surveyor();
+
+        res.status(200).json({
+            error: false,
+            data: feedBack.data,
+            total: feedBack.total,
+        });
     } catch (error) {
-        console.error("DDDDD");
-        console.error(error);
-        console.error("DDDDD");
-        return handleServerError(res, error); // kasih full error object
+        handleServerError(res, error);
     }
 };
 
-
+module.exports = controllers;

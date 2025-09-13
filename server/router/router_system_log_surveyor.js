@@ -2,8 +2,9 @@ const express = require("express");
 const router = express.Router();
 const { body } = require("express-validator");
 const controller = require("../modules/system_log_surveyor/controller/index"); // Pastikan ini benar
-const {authenticateTokenAdministrator} = require("../middleware/authenticateToken");
-
+const {
+    authenticateTokenAdministrator,
+} = require("../middleware/authenticateToken");
 
 router.post(
     "/system_log_surveyor/list",
@@ -20,7 +21,7 @@ router.post(
         body("search").trim(),
         body("status").trim(),
     ],
-    controller.list
-); // Pastikan tidak typo
+    controller.daftar_surveyor // Pastikan tidak typo
+);
 
 module.exports = router;

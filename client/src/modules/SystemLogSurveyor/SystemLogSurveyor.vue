@@ -101,14 +101,14 @@ const showConfirmation = (title: string, message: string, action: () => void) =>
   <div class="container mx-auto px-4 mt-10">
     <div class="flex justify-end items-center mb-6">
       <div class="inline-flex rounded-md shadow-xs" role="group">
-        <label for="search" class="block text-sm font-medium text-gray-700 mr-2 mt-3">Filter</label>
+        <label for="search" class="block text-sm font-medium text-gray-700 mr-2 mt-3">Cari</label>
         <input
           type="text"
           id="search"
           class="block w-64 px-3 py-2 text-gray-700 bg-white border border-gray-300 rounded-s-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
           v-model="searchQuery"
           @change="fetchData()"
-          placeholder="Nama Surveyor/ IP . . . ."
+          placeholder="Nama Surveyor . . . ."
         />
       </div>
     </div>
