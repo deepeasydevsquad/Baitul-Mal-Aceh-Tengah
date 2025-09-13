@@ -3,6 +3,7 @@ import homeView from '@/views/HomeView.vue'
 import MemberAreaView from '@/views/MemberAreaView.vue'
 import LoginAdminView from '@/views/LoginAdminView.vue'
 import AdministratorAreaView from '@/views/AdministratorView.vue'
+import Register from '@/modules/Register/Register.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -28,7 +29,7 @@ const router = createRouter({
     {
       path: '/registrasi',
       name: 'registrasi',
-      component: LoginAdminView,
+      component: Register,
       meta: {
         title: 'Registrasi Area || Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah',
         description: 'Daftar sekarang di Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah. Nikmati kemudahan layanan zakat online, mulai dari registrasi hingga pendataan, dengan sistem yang aman, transparan, dan terpercaya.',
