@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   Whatsapp_template.init({
     name: DataTypes.STRING,
-    type: DataTypes.ENUM,
+    type: DataTypes.ENUM(['pesan_biasa', 'semua_member', 'semua_surveyor', 'semua_user']),
     message: DataTypes.TEXT,
     variable: DataTypes.TEXT
   }, {

@@ -42,6 +42,7 @@ module.exports = {
       { name: 'Laporan Asnaf Gharim', icon : 'fa-solid fa-hand-holding-droplet', path: 'laporan_asnaf_gharim', desc:'Laporan penyaluran bantuan untuk asnaf gharim.',  createdAt: new Date(), updatedAt: new Date() },
       { name: 'Laporan Asnaf Muallaf', icon : 'fa-solid fa-handshake-angle', path: 'laporan_asnaf_muallaf', desc:'Laporan penyaluran bantuan untuk asnaf muallaf.',  createdAt: new Date(), updatedAt: new Date() },
       { name: 'Request Keanggotaan', icon : 'fa-solid fa-user-plus', path: 'request_keanggotaan', desc:'Permintaan pendaftaran keanggotaan baru.',  createdAt: new Date(), updatedAt: new Date() },
+      { name: 'Template Pesan Whatsapp', icon : 'fa-solid fa-message', path: 'template_pesan_whatsapp', desc:'Template pesan otomatis untuk Whatsapp.',  createdAt: new Date(), updatedAt: new Date() },
     ], {});
   },
 
