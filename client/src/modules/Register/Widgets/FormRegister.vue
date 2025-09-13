@@ -72,12 +72,12 @@ watch(
   async (val) => {
     if (!val) {
       desa.value = []
-      form.desa_id = null
+      form.desa_id = ''
       return
     }
     try {
       desa.value = await Register.list_desa({ kecamatan_id: val })
-      form.desa_id = null // reset desa kalau ganti kecamatan
+      form.desa_id = '' // reset desa kalau ganti kecamatan
     } catch (error) {
       console.error('Gagal fetch desa:', error)
     }
@@ -203,7 +203,7 @@ async function onSubmit(e: Event) {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-start justify-center bg-gray-100 py-10 pt-30">
+  <div class="bg-white min-h-screen flex items-start justify-center bg-gray-100 py-10 pt-10">
     <div class="w-full max-w-3xl bg-white shadow-lg rounded-2xl p-8">
       <h2 class="text-2xl text-center font-semibold text-black mb-4">DAFTAR AKUN</h2>
 

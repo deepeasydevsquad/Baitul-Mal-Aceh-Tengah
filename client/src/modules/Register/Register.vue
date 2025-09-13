@@ -7,11 +7,12 @@ import Footer from './Widgets/Footer.vue'
 </script>
 
 <template>
-  <Header />
-  <section class="mt-8 flex justify-center">
-    <div class="w-full max-w-3xl">
-      <FormRegister />
-    </div>
-  </section>
-  <Footer />
+  <div class="bg-white">
+    <Header />
+    <section class="mt-8 flex justify-center">
+      <div class="w-full max-w-3xl">
+        <FormRegister />
+      </div>
+    </section>
+  </div>
 </template>
