@@ -121,28 +121,13 @@ async function deleteData(id: number) {
     <LoadingSpinner v-if="isLoading" label="Memuat halaman..." />
     <div v-else class="space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <BaseButton
-          @click="openModalAdd()"
-          variant="primary"
-          :loading="isModalAddOpen"
-          type="button"
-        >
-          <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" />
-          Tambah Bank
+        <BaseButton @click="openModalAdd()" variant="primary" :loading="isModalAddOpen" type="button" >
+          <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" /> Tambah Bank
         </BaseButton>
-
         <!-- Search -->
         <div class="flex items-center w-full sm:w-auto">
           <label for="search" class="mr-2 text-sm font-medium text-gray-600">Cari</label>
-          <input
-            id="search"
-            type="text"
-            v-model="search"
-            @change="fetchData"
-            placeholder="Cari bank..."
-            class="w-full sm:w-64 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700
-                   focus:border-green-900 focus:ring-2 focus:ring-green-900 transition"
-          />
+          <input id="search" type="text" v-model="search" @change="fetchData" placeholder="Cari bank..." class="w-full sm:w-64 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:border-green-900 focus:ring-2 focus:ring-green-900 transition" />
         </div>
       </div>
       <!-- Table -->
@@ -197,37 +182,16 @@ async function deleteData(id: number) {
     </div>
 
     <!-- Modal FormAdd -->
-    <FormAdd
-      :is-modal-open="isModalAddOpen"
-      @close="isModalAddOpen = false; fetchData()"
-      @status="(payload: any) => displayNotification(payload.error_msg || 'Tambah/Update Bank gagal', payload.error ? 'error' : 'success')"
-    />
-
+    <FormAdd :is-modal-open="isModalAddOpen" @close="isModalAddOpen = false; fetchData()" @status="(payload: any) => displayNotification(payload.error_msg || 'Tambah/Update Bank gagal', payload.error ? 'error' : 'success')" />
     <!-- Modal FormEdit -->
-    <FormEdit
-      :is-modal-open="isModalEditOpen"
-      :selected-bank="selectedBank"
-      @close="isModalEditOpen = false; fetchData()"
-      @status="(payload: any) => displayNotification(payload.error_msg || 'Tambah/Update Bank gagal', payload.error ? 'error' : 'success')"
-    />
-
+    <FormEdit :is-modal-open="isModalEditOpen" :selected-bank="selectedBank" @close="isModalEditOpen = false; fetchData()" @status="(payload: any) => displayNotification(payload.error_msg || 'Tambah/Update Bank gagal', payload.error ? 'error' : 'success')"/>
     <!-- Confirmation -->
-    <Confirmation
-      :showConfirmDialog="showConfirmDialog"
-      :confirmTitle="confirmTitle"
-      :confirmMessage="confirmMessage"
-    >
+    <Confirmation :showConfirmDialog="showConfirmDialog" :confirmTitle="confirmTitle" :confirmMessage="confirmMessage" >
       <BaseButton variant="secondary" @click="cancel">Tidak</BaseButton>
       <BaseButton variant="warning" @click="confirm">Ya</BaseButton>
     </Confirmation>
-
     <!-- Notification -->
-    <Notification
-      :showNotification="showNotification"
-      :notificationType="notificationType"
-      :notificationMessage="notificationMessage"
-      @close="showNotification = false"
-    />
+    <Notification :showNotification="showNotification" :notificationType="notificationType" :notificationMessage="notificationMessage" @close="showNotification = false" />
   </div>
 </template>
 
