@@ -205,16 +205,10 @@ async function onSubmit(e: Event) {
 <template>
   <div class="bg-white min-h-screen flex items-start justify-center bg-gray-100 py-10 pt-10">
     <div class="w-full max-w-3xl bg-white shadow-lg rounded-2xl p-8">
-      <h2 class="text-2xl text-center font-semibold text-black mb-4">DAFTAR AKUN</h2>
-
+      <h2 class="text-2xl text-center font-bold text-green-900 mb-4">Daftar Akun Member</h2>
       <form @submit="onSubmit" class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Select tipe akun -->
-        <SelectField
-          v-model="tipeAkun"
-          id="tipe_akun"
-          label="Tipe Akun"
-          placeholder="Pilih Tipe Akun"
-          :error="errors.tipe_akun"
+        <SelectField v-model="tipeAkun" id="tipe_akun" label="Tipe Akun" placeholder="Pilih Tipe Akun" :error="errors.tipe_akun"
           :options="[
             { id: '', name: '-- Pilih Tipe Akun --' }, // opsi default
             { id: 'instansi', name: 'Instansi' },
@@ -222,171 +216,38 @@ async function onSubmit(e: Event) {
           ]"
           class="md:col-span-2"
         />
-
         <!-- INSTANSI -->
         <template v-if="tipeAkun === 'instansi'">
-          <Input
-            v-model="form.fullname"
-            id="fullname"
-            label="Nama Instansi / Organisasi"
-            placeholder="Nama Instansi / Organisasi"
-            :error="errors.nama_instansi"
-            class="md:col-span-2"
-          />
-
-          <SelectField
-            v-model="form.kecamatan_id"
-            id="kecamatan_instansi"
-            label="Kecamatan"
-            placeholder="Pilih Kecamatan"
-            :error="errors.kecamatan_id"
-            :options="[{ id: '', name: '-- Pilih Kecamatan --' }, ...kecamatan]"
-          />
-
-          <SelectField
-            v-model="form.desa_id"
-            id="desa_instansi"
-            label="Desa"
-            placeholder="Pilih Desa"
-            :error="errors.desa_id"
-            :options="[{ id: '', name: '-- Pilih Desa --' }, ...desa]"
-          />
+          <Input v-model="form.fullname" id="fullname" label="Nama Instansi / Organisasi" placeholder="Nama Instansi / Organisasi" :error="errors.nama_instansi" class="md:col-span-2" />
+          <SelectField v-model="form.kecamatan_id" id="kecamatan_instansi" label="Kecamatan" placeholder="Pilih Kecamatan" :error="errors.kecamatan_id" :options="[{ id: '', name: '-- Pilih Kecamatan --' }, ...kecamatan]" />
+          <SelectField v-model="form.desa_id" id="desa_instansi" label="Desa" placeholder="Pilih Desa" :error="errors.desa_id" :options="[{ id: '', name: '-- Pilih Desa --' }, ...desa]"/>
         </template>
-
         <!-- PERORANGAN -->
         <template v-else-if="tipeAkun === 'perorangan'">
-          <Input
-            v-model="form.fullname"
-            id="fullname"
-            label="Nama Lengkap"
-            placeholder="Nama Lengkap"
-            :error="errors.nama_lengkap"
-            class="md:col-span-2"
-          />
-
-          <Input
-            v-model="form.nomor_ktp"
-            id="nomor_ktp"
-            label="Nomor KTP"
-            placeholder="Nomor KTP"
-            :error="errors.nomor_ktp"
-          />
-
-          <Input
-            v-model="form.nomor_kk"
-            id="nomor_kk"
-            label="Nomor KK"
-            placeholder="Nomor KK"
-            :error="errors.nomor_kk"
-          />
-
-          <InputDate
-            v-model="form.birth_date"
-            id="birth_date"
-            label="Tanggal Lahir"
-            placeholder="mm/dd/yyyy"
-            :error="errors.birth_date"
-            class="md:col-span-2"
-          />
-
-          <SelectField
-            v-model="form.kecamatan_id"
-            id="kecamatan_instansi"
-            label="Kecamatan"
-            placeholder="Pilih Kecamatan"
-            :error="errors.kecamatan_id"
-            :options="[{ id: '', name: '-- Pilih Kecamatan --' }, ...kecamatan]"
-          />
-
-          <SelectField
-            v-model="form.desa_id"
-            id="desa_instansi"
-            label="Desa"
-            placeholder="Pilih Desa"
-            :error="errors.desa_id"
-            :options="[{ id: '', name: '-- Pilih Desa --' }, ...desa]"
-          />
+          <Input v-model="form.fullname" id="fullname" label="Nama Lengkap" placeholder="Nama Lengkap" :error="errors.nama_lengkap" class="md:col-span-2" />
+          <Input v-model="form.nomor_ktp" id="nomor_ktp" label="Nomor KTP" placeholder="Nomor KTP" :error="errors.nomor_ktp" />
+          <Input v-model="form.nomor_kk" id="nomor_kk" label="Nomor KK" placeholder="Nomor KK" :error="errors.nomor_kk" />
+          <InputDate v-model="form.birth_date" id="birth_date" label="Tanggal Lahir" placeholder="mm/dd/yyyy" :error="errors.birth_date" class="md:col-span-2"/>
+          <SelectField v-model="form.kecamatan_id" id="kecamatan_instansi" label="Kecamatan" placeholder="Pilih Kecamatan" :error="errors.kecamatan_id" :options="[{ id: '', name: '-- Pilih Kecamatan --' }, ...kecamatan]" />
+          <SelectField v-model="form.desa_id" id="desa_instansi" label="Desa" placeholder="Pilih Desa" :error="errors.desa_id" :options="[{ id: '', name: '-- Pilih Desa --' }, ...desa]" />
         </template>
-
         <!-- COMMON -->
-
-        <Input
-          v-model="form.whatsapp_number"
-          id="whatsapp_number"
-          label="Nomor Whatsapp"
-          placeholder="Nomor Whatsapp"
-          :error="errors.whatsapp"
-          class="md:col-span-2"
-        />
-
+        <Input v-model="form.whatsapp_number" id="whatsapp_number" label="Nomor Whatsapp" placeholder="Nomor Whatsapp" :error="errors.whatsapp" class="md:col-span-2" />
         <div class="md:col-span-2 grid grid-cols-3 gap-4 items-end">
-          <Input
-            v-model="form.otp"
-            id="otp"
-            label="OTP"
-            placeholder="Masukkan OTP"
-            :error="errors.otp"
-            class="col-span-2"
-          />
-          <button
-            type="button"
-            @click="getOtp"
-            class="bg-[#0E561E] hover:bg-green-700 text-white px-4 py-2 rounded-lg transition"
-          >
+          <Input v-model="form.otp" id="otp" label="OTP" placeholder="Masukkan OTP" :error="errors.otp" class="col-span-2"/>
+          <button type="button" @click="getOtp" class="bg-[#0E561E] hover:bg-green-700 text-white px-4 py-2 rounded-lg transition">
             Dapatkan OTP
           </button>
         </div>
-
-        <Input
-          v-model="form.alamat"
-          id="alamat"
-          label="alamat"
-          placeholder="alamat"
-          class="md:col-span-2"
-        />
-        <Input
-          v-model="form.username"
-          id="username"
-          label="Username"
-          placeholder="Username"
-          :error="errors.username"
-          class="md:col-span-2"
-        />
-
-        <Input
-          v-model="form.password"
-          id="password"
-          type="password"
-          label="Password"
-          placeholder="Password"
-          :error="errors.password"
-        />
-
-        <Input
-          v-model="form.confirm_password"
-          id="confirm_password"
-          type="password"
-          label="Konfirmasi Password"
-          placeholder="Konfirmasi Password"
-          :error="errors.confirm_password"
-        />
-
+        <Input v-model="form.alamat" id="alamat" label="alamat" placeholder="alamat" class="md:col-span-2" />
+        <Input v-model="form.username" id="username" label="Username" placeholder="Username" :error="errors.username" class="md:col-span-2" />
+        <Input v-model="form.password" id="password" type="password" label="Password" placeholder="Password" :error="errors.password"/>
+        <Input v-model="form.confirm_password" id="confirm_password" type="password" label="Konfirmasi Password" placeholder="Konfirmasi Password" :error="errors.confirm_password"/>
         <div class="md:col-span-2 flex justify-end">
-          <button
-            type="submit"
-            class="bg-[#0E561E] hover:bg-green-700 text-white font-medium px-6 py-2 rounded-lg transition"
-          >
-            Daftar
-          </button>
+          <button type="submit" class="bg-[#0E561E] hover:bg-green-700 text-white font-medium px-6 py-2 rounded-lg transition" >Daftar</button>
         </div>
       </form>
     </div>
   </div>
-
-  <Notification
-    :showNotification="showNotification"
-    :notificationType="notificationType"
-    :notificationMessage="notificationMessage"
-    @close="showNotification = false"
-  />
+  <Notification :showNotification="showNotification" :notificationType="notificationType" :notificationMessage="notificationMessage" @close="showNotification = false" />
 </template>
