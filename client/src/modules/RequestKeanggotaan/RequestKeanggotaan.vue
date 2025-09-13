@@ -157,21 +157,21 @@ const handleReject = async (id: number) => {
     <div class="overflow-hidden rounded-lg border border-gray-200 shadow-md">
       <table class="w-full border-collapse bg-white text-left text-sm text-gray-500">
         <!-- Header dengan grouping -->
-        <thead class="bg-gray-100 text-gray-900">
+        <thead class="bg-gray-50">
           <tr>
-            <th class="text-center px-3 py-2">Nama</th>
-            <th class="text-center px-3 py-2">Tgl Lahir</th>
-            <th class="text-center px-3 py-2">WhatsApp</th>
-            <th class="text-center px-3 py-2">Username</th>
+            <th class="text-center px-6 py-4 font-medium font-bold text-gray-900 text-center">Nama</th>
+            <th class="text-center px-6 py-4 font-medium font-bold text-gray-900 text-center">Tgl Lahir</th>
+            <th class="text-center px-6 py-4 font-medium font-bold text-gray-900 text-center">WhatsApp</th>
+            <th class="text-center px-6 py-4 font-medium font-bold text-gray-900 text-center">Username</th>
 
-            <th class="text-center px-3 py-2">Desa</th>
-            <th class="text-center px-3 py-2">Status</th>
-            <th class="text-center px-3 py-2">Aksi</th>
+            <th class="text-center px-6 py-4 font-medium font-bold text-gray-900 text-center">Desa</th>
+            <th class="text-center px-6 py-4 font-medium font-bold text-gray-900 text-center">Status</th>
+            <th class="text-center px-6 py-4 font-medium font-bold text-gray-900 text-center">Aksi</th>
           </tr>
         </thead>
 
         <!-- Isi Data -->
-        <tbody class="divide-y divide-gray-200">
+        <tbody class="divide-y divide-gray-100 border-t border-gray-100">
           <tr v-for="(item, idx) in data" :key="item.id">
             <td class="px-3 py-2 text-center">{{ item.fullname }}</td>
             <td class="px-3 py-2 text-center">{{ item.birth_date }}</td>
