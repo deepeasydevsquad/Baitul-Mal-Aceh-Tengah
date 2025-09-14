@@ -1,4 +1,5 @@
 import api_administrator from './api_administrator'
+
 export const getRunningText = async (param: any) => {
   try {
     const response = await api_administrator.post('/running_text/list', param)
@@ -9,32 +10,12 @@ export const getRunningText = async (param: any) => {
   }
 }
 
-export const getInfoAddRunningText = async () => {
-  try {
-    const response = await api_administrator.get('/running_text/get_info_add')
-    return response.data
-  } catch (error) {
-    console.error('Gagal mengambil info add Running Text:', error)
-    throw error
-  }
-}
-
 export const addRunningText = async (param: any) => {
   try {
     const response = await api_administrator.post('/running_text/add', param)
     return response.data
   } catch (error) {
     console.error('Gagal MENAMBAH Running Text:', error)
-    throw error
-  }
-}
-
-export const getInfoEditRunningText = async (id: number) => {
-  try {
-    const response = await api_administrator.post('/running_text/get_info_edit', { id })
-    return response.data
-  } catch (error) {
-    console.error(`Gagal mengambil info edit Running Text ID ${id}:`, error)
     throw error
   }
 }

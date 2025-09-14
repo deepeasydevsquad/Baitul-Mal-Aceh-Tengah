@@ -50,7 +50,7 @@ const { showNotification, notificationType, notificationMessage, displayNotifica
 const { showConfirmDialog, confirmTitle, confirmMessage, displayConfirmation, confirm, cancel } =
   useConfirmation()
 
-// Data variables
+// Interface definitions
 interface RunningText {
   id: number
   content: string
@@ -58,7 +58,13 @@ interface RunningText {
   order: number
 }
 
+
+// Data variables
 const dataRunningText = ref<RunningText[]>([])
+
+// Modal variables
+const isModalAddOpen = ref(false)
+const isModalEditOpen = ref(false)
 const editData = ref<RunningText | null>(null)
 
 // Computed properties
@@ -88,11 +94,12 @@ async function fetchData() {
       perpage: perPage.value,
       pageNumber: currentPage.value,
     })
-
-    ;(dataRunningText.value = response.data), (totalRow.value = response.total)
-  } catch (error: any) {
+    dataRunningText.value = response,
+    totalRow.value = response.total,
+    console.log('[RunningText.vue] Data fetched successfully:', response.data.length, 'items')
+  } catch (error) {
     console.error('Error fetching data:', error)
-    displayNotification(error.response?.data?.message || 'Gagal mengambil data teks.', 'error')
+    displayNotification('Gagal mengambil data teks.', 'error')
   } finally {
     isTableLoading.value = false
   }
@@ -103,10 +110,8 @@ onMounted(async () => {
   totalColumns.value = document.querySelectorAll('thead th').length
 })
 
-// Function: handler untuk menambahkan teks
-const isModalAddOpen = ref(false)
-
-const handleSubmit = async (formData: { content: string }) => {
+// Handler untuk menyimpan teks baru
+const handleSaveNewText = async (formData: { content: string }) => {
   try {
     console.log('[RunningText.vue] Menerima data dari FormAdd:', formData)
 
@@ -128,10 +133,8 @@ const handleSubmit = async (formData: { content: string }) => {
   }
 }
 
-// Function: handler untuk menyimpan perubahan
-const isModalEditOpen = ref(false)
-
-const handleSubmitEdit = async (formData: { id: number; content: string }) => {
+// Handler untuk menyimpan perubahan teks
+const handleSaveEditText = async (formData: { id: number; content: string }) => {
   try {
     console.log('[RunningText.vue] Menerima data dari FormEdit:', formData)
 
@@ -153,7 +156,6 @@ const handleSubmitEdit = async (formData: { id: number; content: string }) => {
   }
 }
 
-// Function: handler untuk mengubah status
 const handleToggle = async (runningText: RunningText) => {
   try {
     const originalStatus = runningText.is_active
@@ -177,7 +179,6 @@ const handleToggle = async (runningText: RunningText) => {
   }
 }
 
-// Function: handler untuk mengubah urutan
 const updateOrder = async (orderIds: number[]) => {
   try {
     console.log('[RunningText.vue] Sending order update request:', orderIds)
@@ -210,7 +211,7 @@ const openModalEdit = (runningText: RunningText) => {
   isModalEditOpen.value = true
 }
 
-// Function: handler untuk menghapus
+// Action handlers
 const handleDelete = (id: number) => {
   const textToDelete = dataRunningText.value.find((t) => t.id === id)
   const truncatedContent = textToDelete
@@ -243,7 +244,6 @@ const handleDelete = (id: number) => {
   )
 }
 
-// Function: handler untuk mengedit
 const handleEdit = (runningText: RunningText) => {
   openModalEdit(runningText)
 }
@@ -251,10 +251,11 @@ const handleEdit = (runningText: RunningText) => {
 
 <template>
   <div class="mx-auto px-4">
+
     <div class="flex justify-between items-center mb-6">
       <BaseButton @click="openModalAdd()" variant="primary" :loading="isModalAddOpen" type="button">
         <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" />
-        Tambahkan Teks</BaseButton
+        Tambahkan Teks    </BaseButton
       >
       <div class="flex items-center">
         <label for="search" class="sr-only">Search</label>
@@ -270,67 +271,63 @@ const handleEdit = (runningText: RunningText) => {
       </div>
     </div>
 
-    <div class="overflow-hidden rounded-xl border border-gray-200 shadow">
+    <div class="overflow-hidden rounded-lg border border-gray-200 shadow-md">
       <SkeletonTable v-if="isTableLoading" :columns="totalColumns" :rows="itemsPerPage" />
-      <table v-else class="w-full border-collapse bg-white text-sm">
-        <thead class="bg-gray-50 text-gray-700 text-center border-b border-gray-300">
+      <table class="w-full border-collapse bg-white text-left text-sm text-gray-500">
+        <thead class="bg-gray-50 border-b border-gray-300">
           <tr>
-            <th class="w-[65%] px-6 py-3 font-medium">Isi Text</th>
-            <th class="w-[15%] px-6 py-3 font-medium">Status</th>
-            <th class="w-[20%] px-6 py-3 font-medium">Aksi</th>
+            <th class="w-[65%] px-6 py-4 font-medium text-gray-900 text-center">Isi Text</th>
+            <th class="w-[15%] px-6 py-4 font-medium text-gray-900 text-center">Status</th>
+            <th class="w-[20%] px-6 py-4 font-medium text-gray-900 text-center">Aksi</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-100">
-          <template v-if="dataRunningText.length > 0">
-            <tr
-              v-for="data in dataRunningText"
-              :key="data.id"
-              class="hover:bg-gray-50 transition-colors"
-            >
-              <td class="px-6 py-4 text-center font-medium text-gray-800 whitespace-nowrap">
-                <p
-                  class="text-gray-900 break-words whitespace-normal leading-relaxed max-w-[600px] line-clamp-4"
-                >
-                  {{ data.content }}
-                </p>
-              </td>
-              <td class="px-6 py-4 text-center font-medium text-gray-800">
-                <span
-                  :class="[
-                    'inline-flex px-2 py-1 text-xs font-semibold rounded-full',
-                    data.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800',
-                  ]"
-                >
-                  {{ data.is_active ? 'Aktif' : 'Tidak Aktif' }}
-                </span>
-              </td>
-              <td class="px-6 py-4 flex">
-                <div class="flex justify-center items-center gap-2">
-                  <ToggleSwitch
-                    :id="data.id"
-                    :checked="data.is_active"
-                    @change="handleToggle(data)"
-                  />
-                  <LightButton @click="handleEdit(data)">
-                    <EditIcon />
-                  </LightButton>
-                  <DangerButton @click="handleDelete(data.id)">
-                    <DeleteIcon />
-                  </DangerButton>
-                </div>
-              </td>
-            </tr>
-          </template>
-
-          <!-- Empty State -->
+        <tbody class="divide-y divide-gray-100 border-t border-gray-100">
+          <tr
+            v-if="dataRunningText && dataRunningText.length > 0"
+            v-for="runningText in dataRunningText"
+            :key="runningText.id"
+            class="hover:bg-gray-50"
+          >
+            <td class="px-6 py-4 w-[65%]">
+              <p class="text-gray-900 break-words whitespace-normal leading-relaxed">
+                {{ runningText.content }}
+              </p>
+            </td>
+            <td class="px-6 py-4 text-center w-[15%]">
+              <span
+                :class="[
+                  'inline-flex px-2 py-1 text-xs font-semibold rounded-full',
+                  runningText.is_active
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-gray-100 text-gray-800',
+                ]"
+              >
+                {{ runningText.is_active ? 'Aktif' : 'Tidak Aktif' }}
+              </span>
+            </td>
+            <td class="px-6 py-4 w-[20%]">
+              <div class="flex justify-center items-center gap-4">
+                <ToggleSwitch
+                  :id="runningText.id"
+                  :checked="runningText.is_active"
+                  @change="handleToggle(runningText)"
+                />
+                <LightButton @click="handleEdit(runningText)">
+                  <EditIcon />
+                </LightButton>
+                <DangerButton @click="handleDelete(runningText.id)">
+                  <DeleteIcon />
+                </DangerButton>
+              </div>
+            </td>
+          </tr>
           <tr v-else>
-            <td :colspan="totalColumns" class="px-6 py-8 text-center text-gray-500">
-              <font-awesome-icon
-                icon="fa-solid fa-file-lines"
-                class="text-4xl mb-2 text-gray-400"
-              />
-              <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ada data</h3>
-              <p class="text-sm">Belum ada data running text.</p>
+            <td :colspan="totalColumns" class="px-6 py-4 text-center text-gray-600">
+              <div class="py-8">
+                <font-awesome-icon icon="fa-solid fa-file-lines" class="text-4xl mb-2 text-gray-400" />
+                <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ada data</h3>
+                <p class="mt-1 text-sm text-gray-500">Belum ada running text.</p>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -387,10 +384,19 @@ const handleEdit = (runningText: RunningText) => {
         v-else
         class="mt-4 text-center py-8 px-4 border-2 border-dashed border-gray-300 rounded-lg"
       >
-        <font-awesome-icon
-          icon="fa-solid fa-clipboard-question"
-          class="text-4xl mb-2 text-gray-400"
-        />
+        <svg
+          class="mx-auto h-12 w-12 text-gray-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+          ></path>
+        </svg>
         <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ada teks aktif</h3>
         <p class="mt-1 text-sm text-gray-500">
           Aktifkan teks pada tabel di atas untuk mengatur urutannya.
@@ -399,14 +405,18 @@ const handleEdit = (runningText: RunningText) => {
     </div>
 
     <!-- Modal Form Add -->
-    <FormAdd :showModal="isModalAddOpen" @close="isModalAddOpen = false" @save="handleSubmit" />
+    <FormAdd
+      :showModal="isModalAddOpen"
+      @close="isModalAddOpen = false"
+      @save="handleSaveNewText"
+    />
 
     <!-- Modal Form Edit -->
     <FormEdit
       :showModal="isModalEditOpen"
       :editData="editData"
       @close="isModalEditOpen = false"
-      @save="handleSubmitEdit"
+      @save="handleSaveEditText"
     />
 
     <!-- Confirmation -->
