@@ -1,0 +1,492 @@
+<script setup lang="ts">
+//Import Components
+import { ref, onMounted, computed } from 'vue'
+import draggable from 'vuedraggable'
+import {
+  getRunningText,
+  addRunningText,
+  editRunningText,
+  deleteRunningText,
+  toggleRunningTextStatus,
+  updateRunningTextOrder,
+} from '@/service/running_text'
+
+import DeleteIcon from '@/components/Icons/DeleteIcon.vue'
+import EditIcon from '@/components/Icons/EditIcon.vue'
+import DangerButton from '@/components/Button/DangerButton.vue'
+import Notification from '@/components/Modal/Notification.vue'
+import Confirmation from '@/components/Modal/Confirmation.vue'
+import PrimaryButton from '@/components/Button/PrimaryButton.vue'
+import BaseButton from '@/components/Button/BaseButton.vue'
+import ToggleSwitch from '@/components/Button/ToggleSwitch.vue'
+import LightButton from '@/components/Button/LightButton.vue'
+import Pagination from '@/components/Pagination/Pagination.vue'
+import FormAdd from './Widgets/FormAdd.vue'
+import FormEdit from './Widgets/FormEdit.vue'
+
+// Interface definitions
+interface RunningText {
+  id: number
+  content: string
+  is_active: boolean
+  order: number
+}
+
+// Pagination variables
+const itemsPerPage = 100
+const currentPage = ref(1)
+const search = ref('')
+const totalPages = ref(0)
+const totalItems = ref(0)
+
+// Data variables
+const dataRunningText = ref<RunningText[]>([])
+const totalColumns = ref(4)
+
+// Modal variables
+const isModalAddOpen = ref(false)
+const isModalEditOpen = ref(false)
+const editData = ref<RunningText | null>(null)
+
+// Variabel notification
+const showNotification = ref<boolean>(false)
+const notificationMessage = ref<string>('')
+const notificationType = ref<'success' | 'error'>('success')
+const timeoutId = ref<number | null>(null)
+
+// Notification function
+const displayNotification = (message: string, type: 'success' | 'error' = 'success') => {
+  notificationMessage.value = message
+  notificationType.value = type
+  showNotification.value = true
+  if (timeoutId.value) clearTimeout(timeoutId.value)
+  timeoutId.value = window.setTimeout(() => {
+    showNotification.value = false
+  }, 3000)
+}
+
+// Confirmation variables
+const showConfirmDialog = ref<boolean>(false)
+const confirmMessage = ref<string>('')
+const confirmTitle = ref<string>('')
+const confirmAction = ref<(() => void) | null>(null)
+
+// Confirmation function
+const showConfirmation = (title: string, message: string, action: () => void) => {
+  confirmTitle.value = title
+  confirmMessage.value = message
+  confirmAction.value = action
+  showConfirmDialog.value = true
+}
+
+// Computed properties
+const activeTexts = computed({
+  get: () => dataRunningText.value.filter((t) => t.is_active).sort((a, b) => a.order - b.order),
+  set: (newValue) => {
+    console.log(
+      '[RunningText.vue] Draggable triggered with new order:',
+      newValue.map((item) => ({ id: item.id, content: item.content.substring(0, 30) + '...' })),
+    )
+
+    const newOrder = newValue.map((item) => item.id)
+    console.log('[RunningText.vue] New order IDs:', newOrder)
+
+    updateOrder(newOrder)
+  },
+})
+
+const pages = computed(() => {
+  return Array.from({ length: totalPages.value }, (_, i) => i + 1)
+})
+
+const fetchData = async () => {
+  try {
+    const response = await getRunningText({
+      search: search.value,
+      perpage: itemsPerPage,
+      pageNumber: currentPage.value,
+    })
+    totalPages.value = Math.ceil(response.total / itemsPerPage)
+    totalItems.value = response.total || response.data.length || 0
+    dataRunningText.value = response.data
+    console.log('[RunningText.vue] Data fetched successfully:', response.data.length, 'items')
+  } catch (error) {
+    console.error('Error fetching data:', error)
+    displayNotification('Gagal mengambil data.', 'error')
+  }
+}
+
+// Handler untuk menyimpan teks baru
+const handleSaveNewText = async (formData: { content: string }) => {
+  try {
+    console.log('[RunningText.vue] Menerima data dari FormAdd:', formData)
+
+    const response = await addRunningText({
+      content: formData.content.trim(),
+    })
+
+    console.log('[RunningText.vue] Response dari API:', response)
+
+    isModalAddOpen.value = false
+    displayNotification('Teks baru berhasil ditambahkan.', 'success')
+
+    await fetchData()
+  } catch (error: any) {
+    console.error('[RunningText.vue] Error saat menyimpan teks baru:', error)
+    const errorMessage =
+      error.response?.data?.message || 'Gagal menambahkan teks baru. Silakan coba lagi.'
+    displayNotification(errorMessage, 'error')
+  }
+}
+
+// Handler untuk menyimpan perubahan teks
+const handleSaveEditText = async (formData: { id: number; content: string }) => {
+  try {
+    console.log('[RunningText.vue] Menerima data dari FormEdit:', formData)
+
+    const response = await editRunningText(formData.id, {
+      content: formData.content.trim(),
+    })
+
+    console.log('[RunningText.vue] Response dari API edit:', response)
+
+    isModalEditOpen.value = false
+    editData.value = null
+    displayNotification('Teks berhasil diperbarui.', 'success')
+
+    await fetchData()
+  } catch (error: any) {
+    console.error('[RunningText.vue] Error saat mengedit teks:', error)
+    const errorMessage = error.response?.data?.message || 'Gagal mengedit teks. Silakan coba lagi.'
+    displayNotification(errorMessage, 'error')
+  }
+}
+
+const handleToggle = async (runningText: RunningText) => {
+  try {
+    const originalStatus = runningText.is_active
+    runningText.is_active = !runningText.is_active
+
+    console.log(
+      `[RunningText.vue] Toggling status for ID ${runningText.id} from ${originalStatus} to ${runningText.is_active}`,
+    )
+
+    await toggleRunningTextStatus(runningText.id)
+    displayNotification('Status berhasil diperbarui', 'success')
+
+    setTimeout(async () => {
+      await fetchData()
+      console.log('[RunningText.vue] Data refreshed after toggle')
+    }, 300)
+  } catch (error) {
+    console.error('[RunningText.vue] Error toggling status:', error)
+    runningText.is_active = !runningText.is_active
+    displayNotification('Gagal memperbarui status', 'error')
+  }
+}
+
+const updateOrder = async (orderIds: number[]) => {
+  try {
+    console.log('[RunningText.vue] Sending order update request:', orderIds)
+
+    const response = await updateRunningTextOrder(orderIds)
+    console.log('[RunningText.vue] Order update response:', response)
+
+    displayNotification('Urutan teks berhasil disimpan', 'success')
+
+    setTimeout(async () => {
+      await fetchData()
+      console.log('[RunningText.vue] Data refreshed after order update')
+    }, 500)
+  } catch (error) {
+    console.error('[RunningText.vue] Error updating order:', error)
+    displayNotification('Gagal menyimpan urutan', 'error')
+    await fetchData()
+  }
+}
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++
+    fetchData()
+  }
+}
+const prevPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--
+    fetchData()
+  }
+}
+const pageNow = (page: number) => {
+  currentPage.value = page
+  fetchData()
+}
+
+// Modal functions
+const openModalAdd = () => {
+  console.log('[RunningText.vue] Opening modal for adding new text')
+  isModalAddOpen.value = true
+}
+
+const openModalEdit = (runningText: RunningText) => {
+  console.log('[RunningText.vue] Opening modal for editing text:', runningText)
+  editData.value = { ...runningText }
+  isModalEditOpen.value = true
+}
+
+// Action handlers
+const handleDelete = (id: number) => {
+  const textToDelete = dataRunningText.value.find((t) => t.id === id)
+  const truncatedContent = textToDelete
+    ? textToDelete.content.length > 50
+      ? textToDelete.content.substring(0, 50) + '...'
+      : textToDelete.content
+    : 'data ini'
+
+  showConfirmation(
+    'Konfirmasi Hapus',
+    `Apakah Anda yakin ingin menghapus "${truncatedContent}"?`,
+    async () => {
+      try {
+        console.log('[RunningText.vue] Deleting text with ID:', id)
+
+        await deleteRunningText(id)
+
+        showConfirmDialog.value = false
+        displayNotification('Data berhasil dihapus.', 'success')
+
+        await fetchData()
+      } catch (error: any) {
+        console.error('[RunningText.vue] Error deleting text:', error)
+        showConfirmDialog.value = false
+        const errorMessage =
+          error.response?.data?.message || 'Gagal menghapus data. Silakan coba lagi.'
+        displayNotification(errorMessage, 'error')
+      }
+    },
+  )
+}
+
+const handleEdit = (runningText: RunningText) => {
+  openModalEdit(runningText)
+}
+
+onMounted(async () => {
+  console.log('[RunningText.vue] Component mounted, fetching initial data')
+  await fetchData()
+})
+</script>
+
+<template>
+  <div class="container mx-auto px-4 mt-10">
+    <div class="flex justify-between items-center mb-6">
+      <BaseButton
+          @click="openModalAdd()"
+          variant="primary"
+          :loading="isModalAddOpen"
+          type="button"
+        >
+          <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" />
+          Tambahkan Teks
+        </BaseButton>
+      <div class="flex items-center">
+        <label for="search" class="sr-only">Search</label>
+        <input
+          type="text"
+          id="search"
+          class="block w-64 px-3 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          v-model="search"
+          @input="fetchData()"
+          @keyup.enter="fetchData()"
+          placeholder="Cari teks..."
+        />
+      </div>
+    </div>
+
+    <div class="overflow-hidden rounded-lg border border-gray-200 shadow-md">
+      <table class="w-full border-collapse bg-white text-left text-sm text-gray-500">
+        <thead class="bg-gray-50 border-b border-gray-300">
+          <tr>
+            <th class="w-[65%] px-6 py-4 font-medium text-gray-900 text-center">Isi Text</th>
+            <th class="w-[15%] px-6 py-4 font-medium text-gray-900 text-center">Status</th>
+            <th class="w-[20%] px-6 py-4 font-medium text-gray-900 text-center">Aksi</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100 border-t border-gray-100">
+          <tr
+            v-if="dataRunningText && dataRunningText.length > 0"
+            v-for="runningText in dataRunningText"
+            :key="runningText.id"
+            class="hover:bg-gray-50"
+          >
+            <td class="px-6 py-4 w-[65%]">
+              <p class="text-gray-900 break-words whitespace-normal leading-relaxed">
+                {{ runningText.content }}
+              </p>
+            </td>
+            <td class="px-6 py-4 text-center w-[15%]">
+              <span
+                :class="[
+                  'inline-flex px-2 py-1 text-xs font-semibold rounded-full',
+                  runningText.is_active
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-gray-100 text-gray-800',
+                ]"
+              >
+                {{ runningText.is_active ? 'Aktif' : 'Tidak Aktif' }}
+              </span>
+            </td>
+            <td class="px-6 py-4 w-[20%]">
+              <div class="flex justify-center items-center gap-4">
+                <ToggleSwitch
+                  :id="runningText.id"
+                  :checked="runningText.is_active"
+                  @change="handleToggle(runningText)"
+                />
+                <LightButton @click="handleEdit(runningText)">
+                  <EditIcon />
+                </LightButton>
+                <DangerButton @click="handleDelete(runningText.id)">
+                  <DeleteIcon />
+                </DangerButton>
+              </div>
+            </td>
+          </tr>
+          <tr v-else>
+            <td :colspan="totalColumns" class="px-6 py-4 text-center text-gray-600">
+              <div class="py-8">
+                <svg
+                  class="mx-auto h-12 w-12 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  ></path>
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ada data</h3>
+                <p class="mt-1 text-sm text-gray-500">Belum ada running text yang ditambahkan.</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+        <tfoot class="bg-gray-100 font-bold">
+          <Pagination
+            :current-page="currentPage"
+            :total-pages="totalPages"
+            :pages="pages"
+            :total-columns="totalColumns"
+            @prev-page="prevPage"
+            @next-page="nextPage"
+            @page-now="pageNow"
+            :total-row="totalItems"
+          />
+        </tfoot>
+      </table>
+    </div>
+
+    <!-- Urutan Teks Aktif Section -->
+    <div class="mt-10 p-6 bg-white rounded-lg border border-gray-200 shadow-md">
+      <h3 class="text-lg font-bold text-gray-900">Urutan Teks Aktif</h3>
+      <p class="mt-1 text-sm text-gray-500">
+        Seret dan lepas untuk mengubah urutan teks yang akan ditampilkan di footer.
+      </p>
+      <div v-if="activeTexts.length > 0" class="mt-4">
+        <draggable
+          v-model="activeTexts"
+          item-key="id"
+          tag="ul"
+          class="divide-y divide-gray-200 border border-gray-300 rounded-lg"
+        >
+          <template #item="{ element }">
+            <li
+              class="p-4 flex items-center bg-white hover:bg-gray-50 cursor-grab active:cursor-grabbing"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5 mr-3 text-gray-400 flex-shrink-0"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+                />
+              </svg>
+              <span class="text-gray-800 break-words whitespace-normal leading-relaxed">{{
+                element.content
+              }}</span>
+            </li>
+          </template>
+        </draggable>
+      </div>
+      <div
+        v-else
+        class="mt-4 text-center py-8 px-4 border-2 border-dashed border-gray-300 rounded-lg"
+      >
+        <svg
+          class="mx-auto h-12 w-12 text-gray-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+          ></path>
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ada teks aktif</h3>
+        <p class="mt-1 text-sm text-gray-500">
+          Aktifkan teks pada tabel di atas untuk mengatur urutannya.
+        </p>
+      </div>
+    </div>
+
+    <!-- Modal Form Add -->
+    <FormAdd
+      :showModal="isModalAddOpen"
+      @close="isModalAddOpen = false"
+      @save="handleSaveNewText"
+    />
+
+    <!-- Modal Form Edit -->
+    <FormEdit
+      :showModal="isModalEditOpen"
+      :editData="editData"
+      @close="isModalEditOpen = false"
+      @save="handleSaveEditText"
+    />
+
+    <Confirmation
+      :showConfirmDialog="showConfirmDialog"
+      :confirmTitle="confirmTitle"
+      :confirmMessage="confirmMessage"
+    >
+      <button
+        @click="confirmAction && confirmAction()"
+        class="inline-flex justify-center rounded-md border bg-yellow-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-yellow-700 sm:w-auto sm:text-sm"
+      >
+        Ya
+      </button>
+      <button
+        @click="showConfirmDialog = false"
+        class="mt-3 inline-flex justify-center rounded-md border bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+      >
+        Tidak
+      </button>
+    </Confirmation>
+
+    <!-- Notification Popup -->
+    <Notification
+      :showNotification="showNotification"
+      :notificationType="notificationType"
+      :notificationMessage="notificationMessage"
+      @close="showNotification = false"
+    />
+  </div>
+</template>

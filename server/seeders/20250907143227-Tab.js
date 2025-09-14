@@ -13,7 +13,7 @@ module.exports = {
       { name: 'Pertanyaan Monev', icon : 'fa-solid fa-question-circle', path: 'pertanyaan_monev', desc:'Daftar pertanyaan yang digunakan dalam proses monitoring dan evaluasi.',  createdAt: new Date(), updatedAt: new Date() },
       { name: 'Urutan Bagian Monev', icon : 'fa-solid fa-list-ol', path: 'urutan_bagian_monev', desc:'Pengaturan urutan bagian dalam proses monitoring dan evaluasi.',  createdAt: new Date(), updatedAt: new Date() },
       { name: 'Permohonan Bantuan', icon : 'fa-solid fa-file-signature', path: 'permohonan_bantuan', desc:'Fitur untuk mengelola permohonan bantuan dari masyarakat.',  createdAt: new Date(), updatedAt: new Date() },
-      { name: 'Penetapan Kriteria & Syarat', icon : 'fa-solid fa-clipboard-check', path: 'penetapan_kriteria_syarat', desc:'Menetapkan kriteria dan syarat untuk program bantuan.',  createdAt: new Date(), updatedAt: new Date() },
+      { name: 'Penetapan Kriteria, Syarat & Surveyor', icon : 'fa-solid fa-clipboard-check', path: 'penetapan_kriteria_syarat_surveyor', desc:'Menetapkan kriteria, syarat dan surveyor untuk program bantuan.',  createdAt: new Date(), updatedAt: new Date() },
       { name: 'Syarat', icon : 'fa-solid fa-file-contract', path: 'syarat', desc:'Daftar syarat yang harus dipenuhi untuk mengikuti program.',  createdAt: new Date(), updatedAt: new Date() },
       { name: 'Kriteria', icon : 'fa-solid fa-list-check', path: 'kriteria', desc:'Daftar kriteria penerima bantuan.',  createdAt: new Date(), updatedAt: new Date() },
       { name: 'Daftar Surveyor', icon : 'fa-solid fa-user-tie', path: 'daftar_surveyor', desc:'Menampilkan daftar surveyor yang terlibat dalam program.',  createdAt: new Date(), updatedAt: new Date() },
@@ -42,6 +42,8 @@ module.exports = {
       { name: 'Laporan Asnaf Gharim', icon : 'fa-solid fa-hand-holding-droplet', path: 'laporan_asnaf_gharim', desc:'Laporan penyaluran bantuan untuk asnaf gharim.',  createdAt: new Date(), updatedAt: new Date() },
       { name: 'Laporan Asnaf Muallaf', icon : 'fa-solid fa-handshake-angle', path: 'laporan_asnaf_muallaf', desc:'Laporan penyaluran bantuan untuk asnaf muallaf.',  createdAt: new Date(), updatedAt: new Date() },
       { name: 'Request Keanggotaan', icon : 'fa-solid fa-user-plus', path: 'request_keanggotaan', desc:'Permintaan pendaftaran keanggotaan baru.',  createdAt: new Date(), updatedAt: new Date() },
+      { name: 'Template Pesan Whatsapp', icon : 'fa-solid fa-message', path: 'template_pesan_whatsapp', desc:'Template pesan otomatis untuk Whatsapp.',  createdAt: new Date(), updatedAt: new Date() },
+      { name: 'Bakal Penerima Bantuan', icon : 'fa-solid fa-user-clock', path: 'bakal_penerima_bantuan', desc:'Daftar penerima bantuan yang masih dalam proses penyaluran bantuan.',  createdAt: new Date(), updatedAt: new Date() },
     ], {});
   },
 

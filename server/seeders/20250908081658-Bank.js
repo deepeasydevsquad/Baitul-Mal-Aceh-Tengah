@@ -13,7 +13,7 @@ module.exports = {
           updatedAt: new Date(),
         },
         {
-          img: 'bank_bsi.png',
+          img: 'bank_syariah_indonesia.png',
           name: 'Bank Syariah Indonesia',
           createdAt: new Date(),
           updatedAt: new Date(),
