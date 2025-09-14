@@ -23,7 +23,7 @@ export const add_syarat = async (param: any) => {
 
 export const get_info_edit_syarat = async (id: number) => {
   try {
-    const response = await api.get(`/syarat/${id}`)
+    const response = await api.post('/syarat/syarat_by_id', { id: id })
     return response.data
   } catch (error) {
     console.error('Gagal mengambil informasi syarat:', error)
