@@ -7,6 +7,7 @@ import {
   useTabTerpilih,
 } from '../../../../stores/sidebar'
 import 'flowbite'
+import syarat from '@/modules/Syarat/syarat.vue'
 import SystemLogSurveyor from "@/modules/SystemLogSurveyor/SystemLogSurveyor.vue"
 import Bank from '@/modules/Bank/Bank.vue'
 import RequestKeanggotaan from '@/modules/RequestKeanggotaan/RequestKeanggotaan.vue'
@@ -73,6 +74,7 @@ import GrupAkses from '@/modules/GrupAkses/GrupAkses.vue'
 // import RiwayatDepositMaskapai from '../../Modules/RiwayatDepositMaskapai/RiwayatDepositMaskapai.vue'
 
 const tabComponents = {
+  syarat: syarat,
   daftar_bank: Bank,
   running_text: RunningText,
   request_keanggotaan: RequestKeanggotaan,
