@@ -99,3 +99,30 @@ exports.delete = async (req, res) => {
         handleServerError(res, error);
     }
 };
+
+// ambil detail syarat
+exports.detail = async (req, res) => {
+    if (!(await handleValidationErrors(req, res))) return;
+
+    try {
+        const model = new Model_r(req);
+        const data = await model.detail_syarat(); // method baru di model_r
+
+        if (data) {
+            res.status(200).json({
+                message: "Berhasil mengambil detail syarat",
+                status: "success",
+                data,
+            });
+        } else {
+            res.status(404).json({
+                message: "Syarat tidak ditemukan",
+                status: "failed",
+            });
+        }
+    } catch (error) {
+        console.error("Terjadi error saat mengambil detail syarat:", error);
+        handleServerError(res, error);
+    }
+};
+

@@ -1,140 +1,101 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
-import Notification from '@/components/Modal/Notification.vue'
-import BaseButton from '@/components/Button/BaseButton.vue'
-import InputFile from '@/components/Form/InputFile.vue'
-import InputText from '@/components/Form/InputText.vue'
-import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
-
-const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL
+import { ref, onMounted, onBeforeUnmount } from "vue"
+import Notification from "@/components/Modal/Notification.vue"
+import BaseButton from "@/components/Button/BaseButton.vue"
+import InputText from "@/components/Form/InputText.vue"
+import LoadingSpinner from "@/components/Loading/LoadingSpinner.vue"
 
 // Composable
-import { useNotification } from '@/composables/useNotification'
+import { useNotification } from "@/composables/useNotification"
 
 // Service
-import { edit_syarat, get_info_edit_syarat } from '@/service/syarat'
+import { add_syarat } from "@/service/syarat"
 
-// Composable: notification
+// Notification
 const { showNotification, notificationType, notificationMessage, displayNotification } =
-useNotification()
+  useNotification()
 
+// Props
 interface Props {
   isModalOpen: boolean
-  selectedBank: any
-  selectedSyarat: any
 }
-
 const props = defineProps<Props>()
 
+// Emit
 const emit = defineEmits<{
-  (e: 'close'): void
-  (e: 'status', payload: { error_msg?: string; error?: boolean }): void
+  (e: "close"): void
+  (e: "status", payload: { error_msg?: string; error?: boolean }): void
 }>()
 
-// Function: Close modal
-const closeModal = () => {
-  resetForm()
-  emit('close')
-}
+// State
+const isSubmitting = ref(false)
+const form = ref<{ name: string; path: string }>({ name: "", path: "" })
+const errors = ref<Record<string, string>>({})
 
-const preview = ref<string | null>(null)
-
+// Reset form
 const resetForm = () => {
-  form.value.name = ''
-  form.value.img = null
-  preview.value = null
+  form.value = { name: "", path: "" }
   errors.value = {}
 }
 
-// Function: Validate form
-const errors = ref<Record<string, string>>({
-  name: '',
-  img: '',
-})
-
+// Validasi
 const validateForm = () => {
   let isValid = true
-
-  // Reset errors
   errors.value = {}
 
-  if (form.value.name === '') {
-    errors.value.name = 'Nama syarat tidak boleh kosong.'
+  if (!form.value.name) {
+    errors.value.name = "Nama syarat tidak boleh kosong."
     isValid = false
   }
 
-  console.log(errors.value)
+  if (!form.value.path) {
+    errors.value.path = "Path tidak boleh kosong."
+    isValid = false
+  } else if (/\s/.test(form.value.path)) {
+    errors.value.path = 'Path tidak boleh mengandung spasi, gunakan "_" sebagai pengganti.'
+    isValid = false
+  }
 
   return isValid
 }
 
-// State: Loading
-const isLoading = ref(true)
-
-// Function: Fetch Data
-const fetchData = async () => {
-  if (!props.selectedSyarat || !props.selectedSyarat.id) return
-  try {
-    const response =  await get_info_edit_syarat(props.selectedSyarat.id)
-    form.value.name = response.data.name
-  } catch {
-    displayNotification('Gagal mengambil data syarat', 'error')
-  } finally {
-    isLoading.value = false
-  }
-}
-
-// Function: Handle submit
-const isSubmitting = ref(false)
-const form = ref<{ name: string; img: File | null }>({
-  name: '',
-  img: null,
-})
-
+// Submit
 const handleSubmit = async () => {
   if (!validateForm()) return
 
-  const syarat_id = props.selectedSyarat.id
-  const formData = new FormData()
-  formData.append('id', syarat_id.toString())
-  formData.append('name', form.value.name)
-  if (form.value.img) formData.append('img', form.value.img)
+  // Ganti spasi menjadi _
+  form.value.path = form.value.path.replace(/\s+/g, "_")
 
   isSubmitting.value = true
-
-  console.log(formData.get('name'))
-  console.log(formData.get('img'))
-
   try {
-    const response = await edit_syarat(formData)
-    emit('status', { error_msg: response.error_msg, error: response.error })
+    console.log( "form.value", form.value )
+    const response = await add_syarat(form.value)
+    emit("status", { error_msg: response.error_msg, error: response.error })
     closeModal()
-
   } catch (error: any) {
-    displayNotification(error.response.data.error_msg || error.response.data.message, 'error')
+    const msg =
+      error.response?.data?.error_msg ||
+      error.response?.data?.message ||
+      "Terjadi kesalahan"
+    displayNotification(msg, "error")
   } finally {
     isSubmitting.value = false
   }
 }
 
-// Function: Handle escape & Fetch Data
-const handleEscape = (e: KeyboardEvent) => {
-  if (e.key === 'Escape' && props.isModalOpen) closeModal()
+// Close modal
+const closeModal = () => {
+  resetForm()
+  emit("close")
 }
-onMounted(async () => {
-  await fetchData()
-  document.addEventListener('keydown', handleEscape)
-})
 
-onBeforeUnmount(async () => {
-  await fetchData()
-  document.removeEventListener('keydown', handleEscape)
-})
-
-watch(() => props.selectedSyarat, (val) => {
-  if (props.isModalOpen && val?.id) fetchData()
-})
+// Escape key
+const handleEscape = (e: KeyboardEvent) => {
+  if (e.key === "Escape" && props.isModalOpen) closeModal()
+}
+onMounted(() => document.addEventListener("keydown", handleEscape))
+onBeforeUnmount(() => document.removeEventListener("keydown", handleEscape))
 </script>
 
 <template>
@@ -151,18 +112,15 @@ watch(() => props.selectedSyarat, (val) => {
       class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
-      aria-labelledby="modal-title"
     >
-      <LoadingSpinner v-if="isLoading" label="Memuat halaman..." />
+      <LoadingSpinner v-if="isSubmitting" label="Menyimpan..." />
       <div
         v-else
         class="relative max-w-md w-full bg-white shadow-2xl rounded-2xl p-6 space-y-6"
       >
         <!-- Header -->
         <div class="flex items-center justify-between">
-          <h2 id="modal-title" class="text-xl font-semibold text-gray-800">
-            Edit Syarat
-          </h2>
+          <h2 class="text-xl font-semibold text-gray-800">TAMBAH SYARAT BARU</h2>
           <button
             class="text-gray-400 text-lg hover:text-gray-600"
             @click="closeModal"
@@ -172,29 +130,33 @@ watch(() => props.selectedSyarat, (val) => {
           </button>
         </div>
 
-        <!-- Nama Bank -->
-        <div>
-          <InputText
-            id="name"
-            v-model="form.name"
-            label="syarat"
-            type="text"
-            placeholder="Masukkan syarat"
-            :error="errors.name"
-          />
-        </div>
+        <!-- Nama syarat -->
+        <InputText
+          v-model="form.name"
+          label="Nama Syarat"
+          type="text"
+          placeholder="Masukkan nama syarat"
+          :error="errors.name"
+        />
+
+        <!-- Path syarat -->
+        <InputText
+          v-model="form.path"
+          label="Path"
+          type="text"
+          placeholder="Masukkan path"
+          :error="errors.path"
+        />
 
         <!-- Actions -->
         <div class="pt-4">
           <BaseButton
-            type="submit"
             fullWidth
             variant="primary"
             :disabled="isSubmitting"
             @click="handleSubmit"
           >
-            <span v-if="isSubmitting">Menyimpan...</span>
-            <span v-else>Simpan</span>
+            Simpan
           </BaseButton>
         </div>
       </div>

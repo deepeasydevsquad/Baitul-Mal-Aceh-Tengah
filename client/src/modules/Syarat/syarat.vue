@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import Notification from '@/components/Modal/Notification.vue'
 import Confirmation from '@/components/Modal/Confirmation.vue'
 import BaseButton from '@/components/Button/BaseButton.vue'
@@ -11,8 +11,10 @@ import DeleteIcon from '@/components/Icons/DeleteIcon.vue'
 import Pagination from '@/components/Pagination/Pagination.vue'
 import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue'
 import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
-import FormAdd from '@/modules/Syarat/widgets/FormAdd.vue'
 
+// Form
+import FormAdd from '@/modules/Syarat/widgets/FormAdd.vue'
+import FormEdit from '@/modules/Syarat/widgets/FormEdit.vue'
 
 // Composable
 import { usePagination } from '@/composables/usePagination'
@@ -22,43 +24,51 @@ import { useNotification } from '@/composables/useNotification'
 // Service API
 import { get_syarat, delete_syarat } from '@/service/syarat'
 
-// Function: Loading
+// Loading
 const isLoading = ref(false)
 const isTableLoading = ref(false)
 
-// Composable: pagination
-const itemsPerPage = ref<number>(100)
-const totalColumns = ref<number>(3)
+// Pagination
+const itemsPerPage = ref<number>(10)
+const totalColumns = ref<number>(4)
 
 const { currentPage, perPage, totalRow, totalPages, nextPage, prevPage, pageNow, pages } =
-usePagination(fetchData, { perPage: itemsPerPage.value })
+  usePagination(fetchData, { perPage: itemsPerPage.value })
 
-// Composable: notification
+// Notification
 const { showNotification, notificationType, notificationMessage, displayNotification } =
-useNotification()
+  useNotification()
 
-// Composable: confirmation
+// Confirmation
 const { showConfirmDialog, confirmTitle, confirmMessage, displayConfirmation, confirm, cancel } =
-useConfirmation()
+  useConfirmation()
 
+// Interface
 interface Syarat {
   id: number
-  img: string
   name: string
+  path: string
+  createdAt: string
+  updatedAt: string
 }
 
 const dataSyarat = ref<Syarat[]>([])
 
-// Function Modal
-const isModalOpen = ref(false)
+// Modal state
+const isAddModalOpen = ref(false)
+const isEditModalOpen = ref(false)
 const selectedSyarat = ref<any>(null)
 
-function openModal(syarat: any = null) {
-  selectedSyarat.value = syarat
-  isModalOpen.value = true
+function openAddModal() {
+  isAddModalOpen.value = true
 }
 
-// Function: fetch data
+function openEditModal(syarat: any) {
+  selectedSyarat.value = syarat
+  isEditModalOpen.value = true
+}
+
+// Fetch data
 const search = ref('')
 
 async function fetchData() {
@@ -84,7 +94,7 @@ onMounted(async () => {
   totalColumns.value = document.querySelectorAll('thead th').length
 })
 
-// Function: Delete Data
+// Delete
 async function deleteData(id: number) {
   displayConfirmation(
     'Hapus Syarat',
@@ -112,9 +122,8 @@ async function deleteData(id: number) {
     <div v-else class="space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <BaseButton
-          @click="openModal()"
+          @click="openAddModal"
           variant="primary"
-          :loading="isModalOpen"
           type="button"
         >
           <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" />
@@ -137,30 +146,37 @@ async function deleteData(id: number) {
       </div>
 
       <!-- Table -->
-      <div class="overflow-hidden rounded-xl border border-gray-200 shadow">
+      <div class=" rounded-xl border border-gray-200 shadow">
         <SkeletonTable v-if="isTableLoading" :columns="totalColumns" :rows="itemsPerPage" />
-        <table v-else class="w-full border-collapse bg-white text-sm">
+        <table v-else class="table-fixed w-full border-collapse bg-white text-sm">
           <thead class="bg-gray-50 text-gray-700 text-center">
             <tr>
-              <th class="w-[30%] px-6 py-3 font-medium">Syarat</th>
-              <th class="w-[30%] px-6 py-3 font-medium">Path</th>
-              <th class="w-[30%] px-6 py-3 font-medium">Datetimes</th>
-              <th class="w-[10%] px-6 py-3 font-medium">Aksi</th>
+              <th class="w-[25%] px-6 py-3 font-medium">Syarat</th>
+              <th class="w-[35%] px-6 py-3 font-medium">Path</th>
+              <th class="w-[25%] px-6 py-3 font-medium">Datetimes</th>
+              <th class="w-[15%] px-6 py-3 font-medium">Aksi</th>
             </tr>
           </thead>
+
           <tbody class="divide-y divide-gray-100">
             <template v-if="dataSyarat.length > 0">
               <tr
                 v-for="syarat in dataSyarat"
                 :key="syarat.id"
-                class="hover:bg-gray-50 transition-colors"
+                class="hover:bg-gray-50 transition-colors text-center"
               >
-                <td class="px-6 py-4 text-center font-medium text-gray-800">
+                <td class="px-4 py-2 text-gray-600 ">
                   {{ syarat.name }}
+                </td>
+                <td class="px-6 py-4 text-gray-600 break-words">
+                  {{ syarat.path }}
+                </td>
+                <td class="px-6 py-4 text-gray-600">
+                  {{ syarat.createdAt }}
                 </td>
                 <td class="px-6 py-4">
                   <div class="flex justify-center gap-2">
-                    <LightButton @click="openModal(syarat)">
+                    <LightButton @click="openEditModal(syarat)">
                       <EditIcon />
                     </LightButton>
                     <DangerButton @click="deleteData(syarat.id)">
@@ -173,7 +189,7 @@ async function deleteData(id: number) {
 
             <!-- Empty State -->
             <tr v-else>
-              <td :colspan="totalColumns" class="px-6 py-8 text-center text-gray-500">
+              <td :colspan="4" class="px-6 py-8 text-center text-gray-500">
                 <font-awesome-icon icon="fa-solid fa-database" class="text-2xl mb-2 text-gray-400" />
                 <p class="text-sm">Belum ada syarat.</p>
               </td>
@@ -197,12 +213,19 @@ async function deleteData(id: number) {
       </div>
     </div>
 
-    <!-- Modal FormAdd -->
+    <!-- Modal Tambah -->
     <FormAdd
-      :is-modal-open="isModalOpen"
+      :is-modal-open="isAddModalOpen"
+      @close="isAddModalOpen = false; fetchData()"
+      @status="(payload) => displayNotification(payload.error_msg || 'Berhasil', payload.error ? 'error' : 'success')"
+    />
+
+    <!-- Modal Edit -->
+    <FormEdit
+      :is-modal-open="isEditModalOpen"
       :selected-syarat="selectedSyarat"
-      @close="isModalOpen = false; fetchData()"
-      @status="(payload: any) => displayNotification(payload.err_msg || 'Tambah/Update syarat gagal', payload.error ? 'error' : 'success')"
+      @close="isEditModalOpen = false; fetchData()"
+      @status="(payload) => displayNotification(payload.error_msg || 'Berhasil', payload.error ? 'error' : 'success')"
     />
 
     <!-- Confirmation -->

@@ -1,11 +1,10 @@
 const express = require("express");
-const { body } = require("express-validator");
+const { body, param } = require("express-validator");
 const controllers = require("../modules/syarat/controllers/index");
 const { authenticateTokenAdministrator } = require("../middleware/authenticateToken");
 
 const router = express.Router();
 
-// custom validator
 const check_nama_syarat = async (value) => {
   if (!/^[a-zA-Z0-9_]+$/.test(value)) {
     throw new Error("Nama syarat hanya boleh huruf, angka, dan underscore");
@@ -33,12 +32,15 @@ router.post(
 router.post(
   "/syarat/add",
   authenticateTokenAdministrator,
+  (req, res, next) => {
+    console.log("body", req.body);
+    next();
+  },
   [
     body("name")
-      .notEmpty().withMessage("Nama Syarat Tidak Boleh Kosong")
-      .isString().withMessage("Nama Syarat Harus String"),
-        body("path")
-      .notEmpty().withMessage("Path Syarat Tidak Boleh Kosong")
+      .notEmpty().withMessage("Nama Syarat Tidak Boleh Kosong"),
+    body("path")
+      .notEmpty().withMessage("Path Syarat Tidak Boleh Kosong"),
   ],
   controllers.add
 );
@@ -47,11 +49,14 @@ router.post(
   "/syarat/update",
   authenticateTokenAdministrator,
   [
+    body("id")
+      .notEmpty().withMessage("ID Tidak Boleh Kosong")
+      .isInt().withMessage("ID harus angka"),
     body("name")
       .notEmpty().withMessage("Name Tidak Boleh Kosong")
       .isString().withMessage("Name Harus String"),
     body("path")
-      .notEmpty().withMessage("Path Tidak Boleh Kosong")
+      .notEmpty().withMessage("Path Tidak Boleh Kosong"),
   ],
   controllers.update
 );
@@ -62,8 +67,20 @@ router.post(
   [
     body("id")
       .notEmpty().withMessage("ID Tidak Boleh Kosong")
+      .isInt().withMessage("ID harus angka"),
   ],
   controllers.delete
+);
+
+router.get(
+  "/syarat/:id",
+  authenticateTokenAdministrator,
+  [
+    param("id")
+      .notEmpty().withMessage("ID Tidak Boleh Kosong")
+      .isInt().withMessage("ID harus angka"),
+  ],
+  controllers.detail
 );
 
 module.exports = router;

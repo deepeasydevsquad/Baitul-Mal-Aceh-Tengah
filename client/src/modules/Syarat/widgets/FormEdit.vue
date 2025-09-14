@@ -1,122 +1,146 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import Notification from '@/components/Modal/Notification.vue'
 import BaseButton from '@/components/Button/BaseButton.vue'
-import InputFile from '@/components/Form/InputFile.vue'
 import InputText from '@/components/Form/InputText.vue'
 
 // Composable
 import { useNotification } from '@/composables/useNotification'
 
 // Service
-import { add_syarat } from '@/service/syarat'
+import { edit_syarat, get_info_edit_syarat } from '@/service/syarat'
 
-// Composable: notification
+// Notification
 const { showNotification, notificationType, notificationMessage, displayNotification } =
-useNotification()
+  useNotification()
 
+// Props
 interface Props {
   isModalOpen: boolean
+  selectedSyarat: any
 }
-
 const props = defineProps<Props>()
 
+// Emit
 const emit = defineEmits<{
   (e: 'close'): void
   (e: 'status', payload: { error_msg?: string; error?: boolean }): void
 }>()
 
-// Function: Close modal
-const closeModal = () => {
-  resetForm()
-  emit('close')
-}
+// Form state
+const form = ref<{ name: string; path: string }>({ name: '', path: '' })
+const errors = ref<Record<string, string>>({})
+const isSubmitting = ref(false)
+const isLoading = ref(false)
 
-// Function: Reset form
+// Reset form
 const resetForm = () => {
-  form.value.name = ''
-  form.value.img = null
-  preview.value = null
-
-  // Reset errors
+  form.value = { name: '', path: '' }
   errors.value = {}
 }
 
-// Function:
-const errors = ref<Record<string, string>>({
-  name: '',
-  img: '',
-})
-
+// Validasi
 const validateForm = () => {
   let isValid = true
-
-  // Reset errors
   errors.value = {}
 
-  if (form.value.name === '') {
-    errors.value.name = 'syarat tidak boleh kosong.'
+  if (!form.value.name) {
+    errors.value.name = 'Nama syarat tidak boleh kosong.'
     isValid = false
   }
-
+  if (!form.value.path) {
+    errors.value.path = 'Path tidak boleh kosong.'
+    isValid = false
+  }
   return isValid
 }
 
-// Function: Handle file
-const preview = ref<string | null>(null)
-
-const handleFile = (file: File | null) => {
-  if (!file) {
-    form.value.img = null
-    preview.value = null
-    return
+// Ambil data syarat untuk edit
+const fetchData = async () => {
+  if (!props.selectedSyarat?.id) return
+  isLoading.value = true
+  try {
+    const response = await get_info_edit_syarat(props.selectedSyarat.id)
+    form.value.name = response.data.name
+    form.value.path = response.data.path
+  } catch (error) {
+    displayNotification('Gagal mengambil data syarat', 'error')
+  } finally {
+    isLoading.value = false
   }
-
-// Function: Handle submit
-const isSubmitting = ref(false)
-const form = ref<{ name: string; img: File | null }>({
-  name: '',
-  img: null,
-})
+}
 
 const handleSubmit = async () => {
   if (!validateForm()) return
 
-  const formData = new FormData()
-  formData.append('name', form.value.name)
-  if (form.value.img) formData.append('img', form.value.img)
+  // Pastikan data sudah di-fetch
+  if (!props.selectedSyarat?.id) {
+    displayNotification("ID syarat tidak valid", "error")
+    return
+  }
 
   isSubmitting.value = true
 
-  console.log(formData.get('name'))
-  console.log(formData.get('img'))
-
   try {
-    const response = await add_syarat(formData)
-    console.log(response)
-    emit('status', { error_msg: response.error_msg || response, error: response.error })
-    closeModal()
+    const payload = {
+      id: Number(props.selectedSyarat.id),
+      name: String(form.value.name).trim(),
+      path: String(form.value.path).trim().replace(/\s+/g, "_"),
+    }
 
+    console.log("Payload dikirim ke backend:", payload)
+
+    const response = await edit_syarat(payload)
+
+    const msg = response.message || response.error_msg || "Berhasil"
+    const isError = response.error || false
+
+    emit("status", { error_msg: msg, error: isError })
+    closeModal()
   } catch (error: any) {
-    console.error(error)
-    displayNotification(error.response.data.error_msg || error.response.data.message, 'error')
+    const msg =
+      error.response?.data?.error_msg ||
+      error.response?.data?.message ||
+      "Terjadi kesalahan"
+    displayNotification(msg, "error")
   } finally {
     isSubmitting.value = false
   }
 }
 
-// Function: Handle escape
+
+
+// Tutup modal
+const closeModal = () => {
+  resetForm()
+  emit('close')
+}
+
+// Escape
 const handleEscape = (e: KeyboardEvent) => {
   if (e.key === 'Escape' && props.isModalOpen) closeModal()
 }
-onMounted(async () => {
+
+onMounted(() => {
   document.addEventListener('keydown', handleEscape)
 })
 
-onBeforeUnmount(async () => {
+onBeforeUnmount(() => {
   document.removeEventListener('keydown', handleEscape)
 })
+
+// Watch perubahan modal + data
+watch(
+  () => props.isModalOpen,
+  (val) => {
+    if (val && props.selectedSyarat?.id) {
+      fetchData()
+    } else if (!val) {
+      resetForm()
+    }
+  }
+)
 </script>
 
 <template>
@@ -135,14 +159,10 @@ onBeforeUnmount(async () => {
       aria-modal="true"
       aria-labelledby="modal-title"
     >
-      <div
-        class="relative max-w-md w-full bg-white shadow-2xl rounded-2xl p-6 space-y-6"
-      >
+      <div class="relative max-w-md w-full bg-white shadow-2xl rounded-2xl p-6 space-y-6">
         <!-- Header -->
         <div class="flex items-center justify-between">
-          <h2 id="modal-title" class="text-xl font-semibold text-gray-800">
-            Tambah Bank
-          </h2>
+          <h2 id="modal-title" class="text-xl font-semibold text-gray-800">EDIT SYARAT</h2>
           <button
             class="text-gray-400 text-lg hover:text-gray-600"
             @click="closeModal"
@@ -152,18 +172,26 @@ onBeforeUnmount(async () => {
           </button>
         </div>
 
-        <!-- Nama Bank -->
+        <!-- Input -->
         <div>
           <InputText
             id="name"
             v-model="form.name"
-            label="Syarat"
+            label="Nama Syarat"
             type="text"
-            placeholder="Masukkan syarat"
+            placeholder="Masukkan nama syarat"
             :error="errors.name"
           />
         </div>
-
+        <div>
+          <InputText
+            id="path"
+            v-model="form.path"
+            label="Path"
+            type="text"
+            placeholder="Masukkan path"
+            :error="errors.path"
+          />
         </div>
 
         <!-- Actions -->

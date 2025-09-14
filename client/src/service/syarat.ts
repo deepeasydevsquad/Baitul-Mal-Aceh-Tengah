@@ -3,7 +3,7 @@ import api from '@/service/api_administrator'
 export const get_syarat = async (param: any) => {
   try {
     const response = await api.post('/syarat/list', param)
-    return response.data
+    return response.data.data
   } catch (error) {
     console.error('Gagal mengambil syarat:', error)
     throw error
@@ -13,9 +13,6 @@ export const get_syarat = async (param: any) => {
 export const add_syarat = async (param: any) => {
   try {
     const response = await api.post('/syarat/add', param, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
     })
     return response.data
   } catch (error) {
@@ -26,7 +23,7 @@ export const add_syarat = async (param: any) => {
 
 export const get_info_edit_syarat = async (id: number) => {
   try {
-    const response = await api.post('/syarat/get_info_edit_syarat', { id: id })
+    const response = await api.get(`/syarat/${id}`)
     return response.data
   } catch (error) {
     console.error('Gagal mengambil informasi syarat:', error)
@@ -36,11 +33,7 @@ export const get_info_edit_syarat = async (id: number) => {
 
 export const edit_syarat = async (param: any) => {
   try {
-    const response = await api.post(`/syarat/edit`, param,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+    const response = await api.post('/syarat/update', param, {
     })
     return response.data
   } catch (error) {
