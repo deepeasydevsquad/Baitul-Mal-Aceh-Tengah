@@ -37,6 +37,7 @@ const itemsPerPage = 100
 const currentPage = ref(1)
 const search = ref('')
 const totalPages = ref(0)
+const totalItems = ref(0)
 
 // Data variables
 const dataRunningText = ref<RunningText[]>([])
@@ -106,6 +107,7 @@ const fetchData = async () => {
       pageNumber: currentPage.value,
     })
     totalPages.value = Math.ceil(response.total / itemsPerPage)
+    totalItems.value = response.total || response.data.length || 0
     dataRunningText.value = response.data
     console.log('[RunningText.vue] Data fetched successfully:', response.data.length, 'items')
   } catch (error) {
@@ -305,9 +307,9 @@ onMounted(async () => {
       <table class="w-full border-collapse bg-white text-left text-sm text-gray-500">
         <thead class="bg-gray-50 border-b border-gray-300">
           <tr>
-            <th class="w-[65%] px-6 py-4 font-bold text-gray-900 text-center">Isi Text</th>
-            <th class="w-[15%] px-6 py-4 font-bold text-gray-900 text-center">Status</th>
-            <th class="w-[20%] px-6 py-4 font-bold text-gray-900 text-center">Aksi</th>
+            <th class="w-[65%] px-6 py-4 font-medium text-gray-900 text-center">Isi Text</th>
+            <th class="w-[15%] px-6 py-4 font-medium text-gray-900 text-center">Status</th>
+            <th class="w-[20%] px-6 py-4 font-medium text-gray-900 text-center">Aksi</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100 border-t border-gray-100">
@@ -381,6 +383,7 @@ onMounted(async () => {
             @prev-page="prevPage"
             @next-page="nextPage"
             @page-now="pageNow"
+            :total-row="totalItems"
           />
         </tfoot>
       </table>

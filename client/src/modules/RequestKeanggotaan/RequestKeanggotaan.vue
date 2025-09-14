@@ -159,7 +159,7 @@ const handleReject = async (id: number) => {
         <!-- Header dengan grouping -->
         <thead class="bg-gray-50">
           <tr>
-            <th class="w-[20%] text-center px-6 py-4 font-medium font-bold text-gray-900">Nama</th>
+           <th class="w-[20%] text-center px-6 py-4 font-medium font-bold text-gray-900">Nama</th>
             <th class="w-[15%] text-center px-6 py-4 font-medium font-bold text-gray-900">
               Tgl Lahir
             </th>
@@ -278,7 +278,7 @@ const handleReject = async (id: number) => {
         </tbody>
 
         <!-- Footer -->
-        <tfoot class="bg-gray-100 font-bold">
+        <tfoot class="bg-gray-50 font-bold">
           <Pagination
             :total-row="totalItems"
             :currentPage="currentPage"
