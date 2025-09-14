@@ -132,7 +132,7 @@ const showConfirmation = (title: string, message: string, action: () => void) =>
             <td class="px-3 py-2 text-center">{{ item.nama_surveyor }}</td>
             <td class="px-3 py-2 text-center">{{ item.ip }}</td>
           </tr>
-
+          <!-- Kalau data kosong -->
           <tr v-if="data.length === 0">
             <td :colspan="totalColumns" class="text-center py-6 text-gray-500">Data tidak ada</td>
           </tr>
