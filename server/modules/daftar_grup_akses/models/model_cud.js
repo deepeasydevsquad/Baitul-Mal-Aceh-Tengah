@@ -23,7 +23,7 @@ class Model_cud {
       const insert = await Grup.create(
         {
           name: body.name,
-          group_access: JSON.stringify(body.group_access),
+          group_access: body.group_access,
           createdAt: myDate,
           updatedAt: myDate,
         },
@@ -47,7 +47,7 @@ class Model_cud {
       const update = await Grup.update(
         {
           name: body.name,
-          group_access: JSON.stringify(body.group_access),
+          group_access: body.group_access,
           updatedAt: myDate,
         },
         {

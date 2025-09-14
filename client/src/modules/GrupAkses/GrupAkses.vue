@@ -195,11 +195,25 @@ const handleStatus = (payload: any) => {
           </thead>
           <tbody class="divide-y divide-gray-100">
             <template v-if="datas.length > 0">
-              <tr v-for="data in datas" :key="data.id" class="hover:bg-gray-50 transition-colors">
+              <tr v-for="data in datas" :key="data.id" class="hover:bg-gray-50 transition-colors" :class="data.id === 1 ? ' pointer-events-none opacity-50 ' : '' ">
                 <td class="px-6 py-4 text-center font-medium text-gray-800 align-top">
                   {{ data.name }}
                 </td>
                 <td class="px-6 py-4 text-left font-medium text-gray-800">
+                 <template v-if="data.id == 1">
+                  <div v-if="data.group_access.length > 0 " v-for="menu in data.group_access" :key="menu.id" class="mb-2">
+                    <div class="font-semibold">{{ menu.name }}</div>
+                    <ul v-if="menu.Submenus?.length" class="ml-6 list-disc text-sm text-gray-600">
+                      <li v-for="sub in menu.Submenus" :key="sub.id">
+                        {{ sub.name }}
+                      </li>
+                    </ul>
+                  </div>
+                  <div v-else class="font-normal">
+                    <span class="text-gray-400 italic">Full Access</span>
+                  </div>
+                 </template>
+                 <template v-else>
                   <div v-for="menu in data.group_access" :key="menu.id" class="mb-2">
                     <div class="font-semibold">{{ menu.name }}</div>
                     <ul v-if="menu.Submenus?.length" class="ml-6 list-disc text-sm text-gray-600">
@@ -208,6 +222,8 @@ const handleStatus = (payload: any) => {
                       </li>
                     </ul>
                   </div>
+                 </template>
+
                 </td>
 
                 <td class="px-6 py-4 align-top">
