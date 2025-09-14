@@ -192,7 +192,9 @@ const selectTab = (tabPath: string, key: number) => {
           "
         >
           <font-awesome-icon :icon="tab.sharedObject[item.id].icon" />
-          {{ tab.sharedObject[item.id].name }}
+          <span class="hidden lg:inline ml-2">
+            {{ tab.sharedObject[item.id].name }}
+          </span>
         </button>
       </li>
     </ul>
