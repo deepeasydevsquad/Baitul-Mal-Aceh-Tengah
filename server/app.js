@@ -55,6 +55,7 @@ const arr_router = [
     "request_keanggotaan",
     "otp",
     "running_text",
+    "bank_pengumpulan",
 ];
 
 const arr = {};

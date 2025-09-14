@@ -11,6 +11,7 @@ import SystemLogSurveyor from "@/modules/SystemLogSurveyor/SystemLogSurveyor.vue
 import Bank from '@/modules/Bank/Bank.vue'
 import RequestKeanggotaan from '@/modules/RequestKeanggotaan/RequestKeanggotaan.vue'
 import RunningText from '@/modules/RunningText/RunningText.vue'
+import BankPengumpulan from '@/modules/BankPengumpulan/BankPengumpulan.vue'
 // import BerandaUtama from '../../Modules/BerandaUtama/BerandaUtama.vue'
 // import TransPaket from '../../Modules/TransPaket/TransPaket.vue'
 // import DaftarKota from '../../Modules/DaftarKota/DaftarKota.vue'
@@ -76,6 +77,7 @@ system_log_surveyor: SystemLogSurveyor,
 daftar_bank: Bank,
 running_text: RunningText,
 request_keanggotaan: RequestKeanggotaan,
+daftar_bank_pengumpulan: BankPengumpulan,
   // beranda_utama: BerandaUtama,
   // trans_paket: TransPaket,
   // trans_tiket: TransTiket,
