@@ -52,11 +52,12 @@
     "sequelize": "^6.37.5",
     "sharp": "^0.33.5",
     "striptags": "^3.2.0"
-    },
-    "devDependencies": {
-      "jest": "^29.7.0",
-      "mock-express-response": "^0.3.0",
-      "node-mocks-http": "^1.17.2",
-      "supertest": "^7.1.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "mock-express-response": "^0.3.0",
+    "node-mocks-http": "^1.17.2",
+    "sequelize-cli": "^6.6.3",
+    "supertest": "^7.1.1"
   }
 }
