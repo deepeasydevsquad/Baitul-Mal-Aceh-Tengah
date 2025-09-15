@@ -1,14 +1,16 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from "vue"
-import Notification from "@/components/Modal/Notification.vue"
-import BaseButton from "@/components/Button/BaseButton.vue"
-import InputText from "@/components/Form/InputText.vue"
-import LoadingSpinner from "@/components/Loading/LoadingSpinner.vue"
-import { useNotification } from "@/composables/useNotification"
-import { add_daftar_pengguna, list_grup } from "@/service/daftar_pengguna"
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+import Notification from '@/components/Modal/Notification.vue'
+import BaseButton from '@/components/Button/BaseButton.vue'
+import InputText from '@/components/Form/InputText.vue'
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
+import { useNotification } from '@/composables/useNotification'
+import { add_daftar_pengguna, list_grup } from '@/service/daftar_pengguna'
+import SelectField from '@/components/Form/SelectField.vue'
 
 // Notification
-const { showNotification, notificationType, notificationMessage, displayNotification } = useNotification()
+const { showNotification, notificationType, notificationMessage, displayNotification } =
+  useNotification()
 
 // Props
 interface Props {
@@ -18,24 +20,25 @@ const props = defineProps<Props>()
 
 // Emit
 const emit = defineEmits<{
-  (e: "close"): void
-  (e: "status", payload: { error_msg?: string; error?: boolean }): void
+  (e: 'close'): void
+  (e: 'status', payload: { error_msg?: string; error?: boolean }): void
 }>()
 
 // State
 const isSubmitting = ref(false)
 const form = ref({
-  name: "",
-  grup_id: "",
-  password: "",
-  password_confirmation: ""
+  name: '',
+  username: '',
+  grup_id: '',
+  password: '',
+  password_confirmation: '',
 })
 const errors = ref<Record<string, string>>({})
 const grupData = ref<{ id: string | number; name: string }[]>([])
 
 // Reset form
 const resetForm = () => {
-  form.value = { name: "", grup_id: "", password: "", password_confirmation: "" }
+  form.value = { name: '', username: '', grup_id: '', password: '', password_confirmation: '' }
   errors.value = {}
 }
 
@@ -45,10 +48,10 @@ const fetch_grup = async () => {
     const response = await list_grup()
     grupData.value = response.data.map((grup: any) => ({
       id: grup.id,
-      name: grup.name
+      name: grup.name,
     }))
   } catch (error) {
-    console.error("Failed to fetch grup data:", error)
+    console.error('Failed to fetch grup data:', error)
   }
 }
 
@@ -58,19 +61,23 @@ const validateForm = () => {
   errors.value = {}
 
   if (!form.value.name) {
-    errors.value.name = "Nama pengguna tidak boleh kosong."
+    errors.value.name = 'Nama pengguna tidak boleh kosong.'
+    isValid = false
+  }
+  if (!form.value.username) {
+    errors.value.username = 'Username tidak boleh kosong.'
     isValid = false
   }
   if (!form.value.grup_id) {
-    errors.value.grup_id = "Grup tidak boleh kosong."
+    errors.value.grup_id = 'Grup tidak boleh kosong.'
     isValid = false
   }
   if (!form.value.password) {
-    errors.value.password = "Password tidak boleh kosong."
+    errors.value.password = 'Password tidak boleh kosong.'
     isValid = false
   }
   if (form.value.password !== form.value.password_confirmation) {
-    errors.value.password_confirmation = "Konfirmasi password tidak sama."
+    errors.value.password_confirmation = 'Konfirmasi password tidak sama.'
     isValid = false
   }
 
@@ -84,11 +91,12 @@ const handleSubmit = async () => {
   isSubmitting.value = true
   try {
     const response = await add_daftar_pengguna(form.value)
-    emit("status", { error_msg: response.error_msg, error: response.error })
+    emit('status', { error_msg: response.error_msg, error: response.error })
     closeModal()
   } catch (error: any) {
-    const msg = error.response?.data?.error_msg || error.response?.data?.message || "Terjadi kesalahan"
-    displayNotification(msg, "error")
+    const msg =
+      error.response?.data?.error_msg || error.response?.data?.message || 'Terjadi kesalahan'
+    displayNotification(msg, 'error')
   } finally {
     isSubmitting.value = false
   }
@@ -97,21 +105,21 @@ const handleSubmit = async () => {
 // Close modal
 const closeModal = () => {
   resetForm()
-  emit("close")
+  emit('close')
 }
 
 // Escape key
 const handleEscape = (e: KeyboardEvent) => {
-  if (e.key === "Escape" && props.isModalOpen) closeModal()
+  if (e.key === 'Escape' && props.isModalOpen) closeModal()
 }
 
 onMounted(() => {
-  document.addEventListener("keydown", handleEscape)
+  document.addEventListener('keydown', handleEscape)
   fetch_grup()
 })
 
 onBeforeUnmount(() => {
-  document.removeEventListener("keydown", handleEscape)
+  document.removeEventListener('keydown', handleEscape)
 })
 </script>
 
@@ -131,10 +139,7 @@ onBeforeUnmount(() => {
       aria-modal="true"
     >
       <LoadingSpinner v-if="isSubmitting" label="Menyimpan..." />
-      <div
-        v-else
-        class="relative max-w-md w-full bg-white shadow-2xl rounded-2xl p-6 space-y-6"
-      >
+      <div v-else class="relative max-w-md w-full bg-white shadow-2xl rounded-2xl p-6 space-y-6">
         <!-- Header -->
         <div class="flex items-center justify-between">
           <h2 class="text-xl font-semibold text-gray-800">TAMBAH PENGGUNA BARU</h2>
@@ -156,20 +161,32 @@ onBeforeUnmount(() => {
           :error="errors.name"
         />
 
+        <!-- Username -->
+        <InputText
+          v-model="form.username"
+          label="Username"
+          type="text"
+          placeholder="Masukkan username"
+          :error="errors.username"
+        />
         <!-- Grup -->
-        <div class="flex flex-col">
+        <!-- <div class="flex flex-col">
           <label class="mb-1 text-gray-700">Grup</label>
-          <select
-            v-model="form.grup_id"
-            class="border rounded px-3 py-2"
-          >
+          <select v-model="form.grup_id" class="border rounded px-3 py-2">
             <option disabled value="">Pilih grup</option>
             <option v-for="grup in grupData" :key="grup.id" :value="grup.id">
               {{ grup.name }}
             </option>
           </select>
           <p v-if="errors.grup_id" class="text-red-500 text-sm mt-1">{{ errors.grup_id }}</p>
-        </div>
+        </div> -->
+
+        <SelectField
+          v-model="form.grup_id"
+          label="Grup"
+          :options="[{ id: '', name: '-- Pilih Grup --' }, ...grupData]"
+          :error="errors.grup_id"
+        />
 
         <!-- Password -->
         <InputText
@@ -191,12 +208,7 @@ onBeforeUnmount(() => {
 
         <!-- Actions -->
         <div class="pt-4">
-          <BaseButton
-            fullWidth
-            variant="primary"
-            :disabled="isSubmitting"
-            @click="handleSubmit"
-          >
+          <BaseButton fullWidth variant="primary" :disabled="isSubmitting" @click="handleSubmit">
             Simpan
           </BaseButton>
         </div>

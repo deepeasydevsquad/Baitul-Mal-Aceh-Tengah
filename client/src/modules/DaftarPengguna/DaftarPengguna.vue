@@ -23,7 +23,6 @@ import { useNotification } from '@/composables/useNotification'
 // Service API
 import { list_daftar_pengguna, delete_daftar_pengguna } from '@/service/daftar_pengguna'
 
-
 // Loading
 const isLoading = ref(false)
 const isTableLoading = ref(false)
@@ -45,12 +44,12 @@ const { showConfirmDialog, confirmTitle, confirmMessage, displayConfirmation, co
 
 // Interface
 interface daftar_pengguna {
-    id: number
-    kode: string
-    username: string
-    grup: string
-    createdAt: string
-    updatedAt: string
+  id: number
+  kode: string
+  username: string
+  grup: string
+  createdAt: string
+  updatedAt: string
 }
 
 const dataDaftarPengguna = ref<daftar_pengguna[]>([])
@@ -122,11 +121,7 @@ async function deleteData(id: number) {
     <LoadingSpinner v-if="isLoading" label="Memuat halaman..." />
     <div v-else class="space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <BaseButton
-          @click="openAddModal"
-          variant="primary"
-          type="button"
-        >
+        <BaseButton @click="openAddModal" variant="primary" type="button">
           <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" />
           Tambah Pengguna
         </BaseButton>
@@ -140,14 +135,13 @@ async function deleteData(id: number) {
             v-model="search"
             @change="fetchData"
             placeholder="Cari pengguna..."
-            class="w-full sm:w-64 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700
-                   focus:border-[#14532d] focus:ring-2 focus:ring-[#14532d] transition"
+            class="w-full sm:w-64 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:border-[#14532d] focus:ring-2 focus:ring-[#14532d] transition"
           />
         </div>
       </div>
 
       <!-- Table -->
-      <div class=" rounded-xl border border-gray-200 shadow">
+      <div class="rounded-xl border border-gray-200 shadow">
         <SkeletonTable v-if="isTableLoading" :columns="totalColumns" :rows="itemsPerPage" />
         <table v-else class="table-fixed w-full border-collapse bg-white text-sm">
           <thead class="bg-gray-50 text-gray-700 text-center">
@@ -167,7 +161,7 @@ async function deleteData(id: number) {
                 :key="pengguna.id"
                 class="hover:bg-gray-50 transition-colors text-center"
               >
-                <td class="px-4 py-2 text-gray-600 ">
+                <td class="px-4 py-2 text-gray-600">
                   {{ pengguna.kode }}
                 </td>
                 <td class="px-6 py-4 text-gray-600 break-words">
@@ -195,7 +189,10 @@ async function deleteData(id: number) {
             <!-- Empty State -->
             <tr v-else>
               <td :colspan="4" class="px-6 py-8 text-center text-gray-500">
-                <font-awesome-icon icon="fa-solid fa-database" class="text-2xl mb-2 text-gray-400" />
+                <font-awesome-icon
+                  icon="fa-solid fa-database"
+                  class="text-2xl mb-2 text-gray-400"
+                />
                 <p class="text-sm">Belum ada pengguna.</p>
               </td>
             </tr>
@@ -221,18 +218,29 @@ async function deleteData(id: number) {
     <!-- Modal Tambah -->
     <FormAdd
       :is-modal-open="isAddModalOpen"
-      @close="isAddModalOpen = false; fetchData()"
-      @status="(payload) => displayNotification(payload.error_msg || 'Berhasil', payload.error ? 'error' : 'success')"
+      @close="((isAddModalOpen = false), fetchData())"
+      @status="
+        (payload) =>
+          displayNotification(
+            payload.error_msg || 'Berhasil Menambah Pengguna',
+            payload.error ? 'error' : 'success',
+          )
+      "
     />
 
     <!-- Modal Edit -->
     <FormEdit
-    :is-modal-open="isEditModalOpen"
-    :selected-pengguna="selectedDaftarPengguna"
-    @close="isEditModalOpen = false; fetchData()"
-    @status="(payload) => displayNotification(payload.error_msg || 'Berhasil', payload.error ? 'error' : 'success')"
+      :is-modal-open="isEditModalOpen"
+      :selected-pengguna="selectedDaftarPengguna"
+      @close="((isEditModalOpen = false), fetchData())"
+      @status="
+        (payload) =>
+          displayNotification(
+            payload.error_msg || 'Berhasil Update Pengguna',
+            payload.error ? 'error' : 'success',
+          )
+      "
     />
-
 
     <!-- Confirmation -->
     <Confirmation

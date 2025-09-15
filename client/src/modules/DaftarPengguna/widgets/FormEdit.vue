@@ -1,24 +1,24 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted, onBeforeUnmount, watch } from "vue"
-import Notification from "@/components/Modal/Notification.vue"
-import BaseButton from "@/components/Button/BaseButton.vue"
-import InputText from "@/components/Form/InputText.vue"
-import SelectField from "@/components/Form/SelectField.vue"
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
+import Notification from '@/components/Modal/Notification.vue'
+import BaseButton from '@/components/Button/BaseButton.vue'
+import InputText from '@/components/Form/InputText.vue'
+import SelectField from '@/components/Form/SelectField.vue'
 
 // Composable
-import { useNotification } from "@/composables/useNotification"
+import { useNotification } from '@/composables/useNotification'
 
 // Service
-import {  edit_daftar_pengguna, get_info_edit_daftar_pengguna, list_grup} from "@/service/daftar_pengguna"
+import {
+  edit_daftar_pengguna,
+  get_info_edit_daftar_pengguna,
+  list_grup,
+} from '@/service/daftar_pengguna'
 
 // Notification
-const {
-  showNotification,
-  notificationType,
-  notificationMessage,
-  displayNotification
-} = useNotification()
+const { showNotification, notificationType, notificationMessage, displayNotification } =
+  useNotification()
 
 // Props
 interface Props {
@@ -29,8 +29,8 @@ const props = defineProps<Props>()
 
 // Emit
 const emit = defineEmits<{
-  (e: "close"): void
-  (e: "status", payload: { error_msg?: string; error?: boolean }): void
+  (e: 'close'): void
+  (e: 'status', payload: { error_msg?: string; error?: boolean }): void
 }>()
 
 // State
@@ -39,15 +39,17 @@ const isLoading = ref(false)
 const form = ref<{
   id?: number
   name: string
+  username: string
   grup_id: string
   password: string
   password_confirmation: string
 }>({
   id: undefined,
-  name: "",
-  grup_id: "",
-  password: "",
-  password_confirmation: ""
+  name: '',
+  username: '',
+  grup_id: '',
+  password: '',
+  password_confirmation: '',
 })
 const errors = ref<Record<string, string>>({})
 const grupData = ref<any[]>([])
@@ -56,10 +58,11 @@ const grupData = ref<any[]>([])
 const resetForm = () => {
   form.value = {
     id: undefined,
-    name: "",
-    grup_id: "",
-    password: "",
-    password_confirmation: ""
+    username: '',
+    name: '',
+    grup_id: '',
+    password: '',
+    password_confirmation: '',
   }
   errors.value = {}
 }
@@ -70,10 +73,9 @@ const fetch_grup = async () => {
     // Fetch grup data from the server
     const response = await list_grup()
     grupData.value = response.data
-    console.log("grupData.value", grupData.value)
-
+    console.log('grupData.value', grupData.value)
   } catch (error) {
-    console.error("Failed to fetch grup data:", error)
+    console.error('Failed to fetch grup data:', error)
   }
 }
 // Validasi
@@ -82,15 +84,19 @@ const validateForm = () => {
   errors.value = {}
 
   if (!form.value.name) {
-    errors.value.name = "Nama pengguna tidak boleh kosong."
+    errors.value.name = 'Nama pengguna tidak boleh kosong.'
+    isValid = false
+  }
+  if (!form.value.username) {
+    errors.value.username = 'Username tidak boleh kosong.'
     isValid = false
   }
   if (!form.value.grup_id) {
-    errors.value.grup_id = "Grup tidak boleh kosong."
+    errors.value.grup_id = 'Grup tidak boleh kosong.'
     isValid = false
   }
   if (form.value.password && form.value.password !== form.value.password_confirmation) {
-    errors.value.password_confirmation = "Konfirmasi password tidak sama."
+    errors.value.password_confirmation = 'Konfirmasi password tidak sama.'
     isValid = false
   }
   return isValid
@@ -105,10 +111,11 @@ const fetchData = async () => {
     form.value.id = response.data.id
     form.value.name = response.data.name
     form.value.grup_id = response.data.grup_id
-    form.value.password = ""
-    form.value.password_confirmation = ""
+    form.value.username = response.data.username
+    form.value.password = ''
+    form.value.password_confirmation = ''
   } catch (error) {
-    displayNotification("Gagal mengambil data pengguna", "error")
+    displayNotification('Gagal mengambil data pengguna', 'error')
   } finally {
     isLoading.value = false
   }
@@ -118,7 +125,7 @@ const fetchData = async () => {
 const handleSubmit = async () => {
   if (!validateForm()) return
   if (!props.selectedPengguna?.id) {
-    displayNotification("ID pengguna tidak valid", "error")
+    displayNotification('ID pengguna tidak valid', 'error')
     return
   }
 
@@ -127,22 +134,21 @@ const handleSubmit = async () => {
     const payload = {
       id: Number(props.selectedPengguna.id),
       name: String(form.value.name).trim(),
+      username: String(form.value.username).trim(),
       grup_id: String(form.value.grup_id).trim(),
-      password: form.value.password || undefined
+      password: form.value.password || undefined,
     }
 
     const response = await edit_daftar_pengguna(payload)
-    const msg = response.message || response.error_msg || "Berhasil"
+    const msg = response.message || response.error_msg || 'Berhasil'
     const isError = response.error || false
 
-    emit("status", { error_msg: msg, error: isError })
+    emit('status', { error_msg: msg, error: isError })
     closeModal()
   } catch (error: any) {
     const msg =
-      error.response?.data?.error_msg ||
-      error.response?.data?.message ||
-      "Terjadi kesalahan"
-    displayNotification(msg, "error")
+      error.response?.data?.error_msg || error.response?.data?.message || 'Terjadi kesalahan'
+    displayNotification(msg, 'error')
   } finally {
     isSubmitting.value = false
   }
@@ -151,18 +157,18 @@ const handleSubmit = async () => {
 // Tutup modal
 const closeModal = () => {
   resetForm()
-  emit("close")
+  emit('close')
 }
 
 // Escape
 const handleEscape = (e: KeyboardEvent) => {
-  if (e.key === "Escape" && props.isModalOpen) closeModal()
+  if (e.key === 'Escape' && props.isModalOpen) closeModal()
 }
 onMounted(() => {
-  document.addEventListener("keydown", handleEscape)
+  document.addEventListener('keydown', handleEscape)
   fetch_grup()
 })
-onBeforeUnmount(() => document.removeEventListener("keydown", handleEscape))
+onBeforeUnmount(() => document.removeEventListener('keydown', handleEscape))
 
 // Watch perubahan modal
 watch(
@@ -173,7 +179,7 @@ watch(
     } else if (!val) {
       resetForm()
     }
-  }
+  },
 )
 </script>
 
@@ -196,9 +202,7 @@ watch(
       <div class="relative max-w-md w-full bg-white shadow-2xl rounded-2xl p-6 space-y-6">
         <!-- Header -->
         <div class="flex items-center justify-between">
-          <h2 id="modal-title" class="text-xl font-semibold text-gray-800">
-            EDIT PENGGUNA
-          </h2>
+          <h2 id="modal-title" class="text-xl font-semibold text-gray-800">EDIT PENGGUNA</h2>
           <button
             class="text-gray-400 text-lg hover:text-gray-600"
             @click="closeModal"
@@ -218,20 +222,32 @@ watch(
           :error="errors.name"
         />
 
+        <InputText
+          v-model="form.username"
+          label="Username"
+          type="text"
+          placeholder="Masukkan username"
+          :error="errors.username"
+        />
+
         <!-- Grup -->
-        <div class="flex flex-col">
+        <!-- <div class="flex flex-col">
           <label class="mb-1 text-gray-700">Grup</label>
-          <select
-            v-model="form.grup_id"
-            class="border rounded px-3 py-2"
-          >
+          <select v-model="form.grup_id" class="border rounded px-3 py-2">
             <option disabled value="">Pilih grup</option>
             <option v-for="grup in grupData" :key="grup.id" :value="grup.id">
               {{ grup.name }}
             </option>
           </select>
           <p v-if="errors.grup_id" class="text-red-500 text-sm mt-1">{{ errors.grup_id }}</p>
-        </div>
+        </div> -->
+
+        <SelectField
+          v-model="form.grup_id"
+          label="Grup"
+          :options="[{ id: '', name: '-- Pilih Grup --' }, ...grupData]"
+          :error="errors.grup_id"
+        />
 
         <!-- Password -->
         <InputText
