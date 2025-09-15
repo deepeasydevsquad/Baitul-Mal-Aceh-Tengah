@@ -60,6 +60,7 @@ const arr_router = [
   "kecamatan",
   "kegiatan_kesekretariatan",
   "bank_pengumpulan",
+  "surveyor",
 ];
 
 const arr = {};

@@ -7,6 +7,7 @@ import {
   useTabTerpilih,
 } from '../../../../stores/sidebar'
 import 'flowbite'
+import Surveyor from '@/modules/Surveyor/Surveyor.vue'
 import syarat from '@/modules/Syarat/syarat.vue'
 import SystemLogSurveyor from '@/modules/SystemLogSurveyor/SystemLogSurveyor.vue'
 import Bank from '@/modules/Bank/Bank.vue'
@@ -27,6 +28,7 @@ const tabComponents = {
   system_log_surveyor: SystemLogSurveyor,
   program_kegiatan_kesekretariatan: KegiatanKeseketariatan,
   daftar_bank_pengumpulan: BankPengumpulan,
+  daftar_surveyor: Surveyor,
 }
 
 const selectedTab = useSelectedTab() // untuk menampung daftar tab yang menu / submenunya di click

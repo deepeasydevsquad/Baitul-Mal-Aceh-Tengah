@@ -96,4 +96,4 @@ function handleClick(event) {
 
     <slot name="icon-right"></slot>
   </button>
- </template>
+</template>
