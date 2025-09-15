@@ -17,7 +17,7 @@ module.exports = {
           birth_date: '1999-01-01',
           alamat: 'Jln Utama, Kabupaten Aceh Tengah',
           username: 'admin',
-          password: '$2a$10$Ck6lr65BJZyHCKcORjf47eLiOwTxqEVUJYltyHlhSJ.zPuDOahhxm',
+          password: '$2a$10$0nIvAjMEhKk2S2T2GbP1ou0OIpItaEtlHqb9Dns1NSQdkVM1r6o82',
           createdAt: new Date(),
           updatedAt: new Date(),
         },

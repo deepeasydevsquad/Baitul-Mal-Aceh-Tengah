@@ -12,7 +12,7 @@ controllers.login_administrator_process = async (req, res) => {
     const userPayload = { id: data.id, username : data.username, name : data.name };
     const access_token = jwt.sign(userPayload, process.env.ADMINISTRATOR_SECRET_KEY, { expiresIn: "5m" });
     const refresh_token = jwt.sign(userPayload, process.env.ADMINISTRATOR_REFRESH_SECRET_KEY, { expiresIn: "7d" });
-    
+
     refreshTokens.push(refresh_token);
 
     res.status(200).json({
@@ -24,6 +24,18 @@ controllers.login_administrator_process = async (req, res) => {
   } catch (error) {
     handleServerError(res, error);
   }
+};
+
+controllers.logout_administrator_process = async (req, res) => {
+  const { refresh_token } = req.body;
+  if (!refresh_token) {
+    return res.status(401).json({ error: true, error_msg: "Token diperlukan" });
+  }
+  if (!refreshTokens.includes(refresh_token)) {
+    return res.status(403).json({ error: true, error_msg: "Token tidak dikenali" });
+  }
+  refreshTokens = refreshTokens.filter((token) => token !== refresh_token);
+  res.status(200).json({ error: false, error_msg: "Logout berhasil dilakukan" });
 };
 
 controllers.administrator = async (req, res) => {
