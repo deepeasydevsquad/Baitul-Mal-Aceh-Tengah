@@ -124,6 +124,7 @@ async function deleteData(id: number) {
         <BaseButton @click="openModalAdd()" variant="primary" :loading="isModalAddOpen" type="button" >
           <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" /> Tambah Bank
         </BaseButton>
+
         <!-- Search -->
         <div class="flex items-center w-full sm:w-auto">
           <label for="search" class="mr-2 text-sm font-medium text-gray-600">Cari</label>
