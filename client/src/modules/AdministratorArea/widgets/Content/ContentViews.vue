@@ -15,8 +15,10 @@ import RunningText from '@/modules/RunningText/RunningText.vue'
 import BankPengumpulan from '@/modules/BankPengumpulan/BankPengumpulan.vue'
 import GrupAkses from '@/modules/GrupAkses/GrupAkses.vue'
 import KegiatanKeseketariatan from '@/modules/KegiatanKeseketariatan/KegiatanKeseketariatan.vue'
+import kecamatan from '@/modules/Kecamatan/Kecamatan.vue'
 
 const tabComponents = {
+  daftar_kecamatan: kecamatan,
   syarat: syarat,
   daftar_bank: Bank,
   running_text: RunningText,
