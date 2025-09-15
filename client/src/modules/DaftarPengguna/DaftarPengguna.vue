@@ -121,7 +121,7 @@ async function deleteData(id: number) {
     <LoadingSpinner v-if="isLoading" label="Memuat halaman..." />
     <div v-else class="space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <BaseButton @click="openAddModal" variant="primary" type="button">
+        <BaseButton :loading="isAddModalOpen || isEditModalOpen" @click="openAddModal" variant="primary" type="button">
           <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" />
           Tambah Pengguna
         </BaseButton>
