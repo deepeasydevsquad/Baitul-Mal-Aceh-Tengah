@@ -57,7 +57,7 @@ class Model_r {
       };
     } catch (error) {
       console.error("Error fetching bank data:", error);
-      return {};
+      return { data: [] };
     }
   }
 

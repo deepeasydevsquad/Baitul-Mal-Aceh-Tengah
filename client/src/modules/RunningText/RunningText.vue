@@ -21,10 +21,36 @@ import BaseButton from '@/components/Button/BaseButton.vue'
 import ToggleSwitch from '@/components/Button/ToggleSwitch.vue'
 import LightButton from '@/components/Button/LightButton.vue'
 import Pagination from '@/components/Pagination/Pagination.vue'
+import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue'
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
 import FormAdd from './Widgets/FormAdd.vue'
 import FormEdit from './Widgets/FormEdit.vue'
 
-// Interface definitions
+// Composable
+import { usePagination } from '@/composables/usePagination'
+import { useConfirmation } from '@/composables/useConfirmation'
+import { useNotification } from '@/composables/useNotification'
+
+// State: Loading
+const isLoading = ref(false)
+const isTableLoading = ref(false)
+
+// Composable: pagination
+const itemsPerPage = ref<number>(100)
+const totalColumns = ref<number>(3)
+
+const { currentPage, perPage, totalRow, totalPages, nextPage, prevPage, pageNow, pages } =
+  usePagination(fetchData, { perPage: itemsPerPage.value })
+
+// Composable: notification
+const { showNotification, notificationType, notificationMessage, displayNotification } =
+  useNotification()
+
+// Composable: confirmation
+const { showConfirmDialog, confirmTitle, confirmMessage, displayConfirmation, confirm, cancel } =
+  useConfirmation()
+
+// Data variables
 interface RunningText {
   id: number
   content: string
@@ -32,52 +58,8 @@ interface RunningText {
   order: number
 }
 
-// Pagination variables
-const itemsPerPage = 100
-const currentPage = ref(1)
-const search = ref('')
-const totalPages = ref(0)
-const totalItems = ref(0)
-
-// Data variables
 const dataRunningText = ref<RunningText[]>([])
-const totalColumns = ref(4)
-
-// Modal variables
-const isModalAddOpen = ref(false)
-const isModalEditOpen = ref(false)
 const editData = ref<RunningText | null>(null)
-
-// Variabel notification
-const showNotification = ref<boolean>(false)
-const notificationMessage = ref<string>('')
-const notificationType = ref<'success' | 'error'>('success')
-const timeoutId = ref<number | null>(null)
-
-// Notification function
-const displayNotification = (message: string, type: 'success' | 'error' = 'success') => {
-  notificationMessage.value = message
-  notificationType.value = type
-  showNotification.value = true
-  if (timeoutId.value) clearTimeout(timeoutId.value)
-  timeoutId.value = window.setTimeout(() => {
-    showNotification.value = false
-  }, 3000)
-}
-
-// Confirmation variables
-const showConfirmDialog = ref<boolean>(false)
-const confirmMessage = ref<string>('')
-const confirmTitle = ref<string>('')
-const confirmAction = ref<(() => void) | null>(null)
-
-// Confirmation function
-const showConfirmation = (title: string, message: string, action: () => void) => {
-  confirmTitle.value = title
-  confirmMessage.value = message
-  confirmAction.value = action
-  showConfirmDialog.value = true
-}
 
 // Computed properties
 const activeTexts = computed({
@@ -95,29 +77,36 @@ const activeTexts = computed({
   },
 })
 
-const pages = computed(() => {
-  return Array.from({ length: totalPages.value }, (_, i) => i + 1)
-})
+// Function: fetch data
+const search = ref('')
 
-const fetchData = async () => {
+async function fetchData() {
+  isTableLoading.value = true
   try {
     const response = await getRunningText({
       search: search.value,
-      perpage: itemsPerPage,
+      perpage: perPage.value,
       pageNumber: currentPage.value,
     })
-    totalPages.value = Math.ceil(response.total / itemsPerPage)
-    totalItems.value = response.total || response.data.length || 0
-    dataRunningText.value = response.data
-    console.log('[RunningText.vue] Data fetched successfully:', response.data.length, 'items')
-  } catch (error) {
+
+    ;(dataRunningText.value = response.data), (totalRow.value = response.total)
+  } catch (error: any) {
     console.error('Error fetching data:', error)
-    displayNotification('Gagal mengambil data.', 'error')
+    displayNotification(error.response?.data?.message || 'Gagal mengambil data teks.', 'error')
+  } finally {
+    isTableLoading.value = false
   }
 }
 
-// Handler untuk menyimpan teks baru
-const handleSaveNewText = async (formData: { content: string }) => {
+onMounted(async () => {
+  await fetchData()
+  totalColumns.value = document.querySelectorAll('thead th').length
+})
+
+// Function: handler untuk menambahkan teks
+const isModalAddOpen = ref(false)
+
+const handleSubmit = async (formData: { content: string }) => {
   try {
     console.log('[RunningText.vue] Menerima data dari FormAdd:', formData)
 
@@ -139,8 +128,10 @@ const handleSaveNewText = async (formData: { content: string }) => {
   }
 }
 
-// Handler untuk menyimpan perubahan teks
-const handleSaveEditText = async (formData: { id: number; content: string }) => {
+// Function: handler untuk menyimpan perubahan
+const isModalEditOpen = ref(false)
+
+const handleSubmitEdit = async (formData: { id: number; content: string }) => {
   try {
     console.log('[RunningText.vue] Menerima data dari FormEdit:', formData)
 
@@ -162,6 +153,7 @@ const handleSaveEditText = async (formData: { id: number; content: string }) => 
   }
 }
 
+// Function: handler untuk mengubah status
 const handleToggle = async (runningText: RunningText) => {
   try {
     const originalStatus = runningText.is_active
@@ -185,6 +177,7 @@ const handleToggle = async (runningText: RunningText) => {
   }
 }
 
+// Function: handler untuk mengubah urutan
 const updateOrder = async (orderIds: number[]) => {
   try {
     console.log('[RunningText.vue] Sending order update request:', orderIds)
@@ -205,23 +198,6 @@ const updateOrder = async (orderIds: number[]) => {
   }
 }
 
-const nextPage = () => {
-  if (currentPage.value < totalPages.value) {
-    currentPage.value++
-    fetchData()
-  }
-}
-const prevPage = () => {
-  if (currentPage.value > 1) {
-    currentPage.value--
-    fetchData()
-  }
-}
-const pageNow = (page: number) => {
-  currentPage.value = page
-  fetchData()
-}
-
 // Modal functions
 const openModalAdd = () => {
   console.log('[RunningText.vue] Opening modal for adding new text')
@@ -234,7 +210,7 @@ const openModalEdit = (runningText: RunningText) => {
   isModalEditOpen.value = true
 }
 
-// Action handlers
+// Function: handler untuk menghapus
 const handleDelete = (id: number) => {
   const textToDelete = dataRunningText.value.find((t) => t.id === id)
   const truncatedContent = textToDelete
@@ -243,7 +219,7 @@ const handleDelete = (id: number) => {
       : textToDelete.content
     : 'data ini'
 
-  showConfirmation(
+  displayConfirmation(
     'Konfirmasi Hapus',
     `Apakah Anda yakin ingin menghapus "${truncatedContent}"?`,
     async () => {
@@ -267,28 +243,19 @@ const handleDelete = (id: number) => {
   )
 }
 
+// Function: handler untuk mengedit
 const handleEdit = (runningText: RunningText) => {
   openModalEdit(runningText)
 }
-
-onMounted(async () => {
-  console.log('[RunningText.vue] Component mounted, fetching initial data')
-  await fetchData()
-})
 </script>
 
 <template>
-  <div class="container mx-auto px-4 mt-10">
+  <div class="mx-auto px-4">
     <div class="flex justify-between items-center mb-6">
-      <BaseButton
-          @click="openModalAdd()"
-          variant="primary"
-          :loading="isModalAddOpen"
-          type="button"
-        >
-          <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" />
-          Tambahkan Teks
-        </BaseButton>
+      <BaseButton @click="openModalAdd()" variant="primary" :loading="isModalAddOpen" type="button">
+        <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" />
+        Tambahkan Teks</BaseButton
+      >
       <div class="flex items-center">
         <label for="search" class="sr-only">Search</label>
         <input
@@ -303,74 +270,67 @@ onMounted(async () => {
       </div>
     </div>
 
-    <div class="overflow-hidden rounded-lg border border-gray-200 shadow-md">
-      <table class="w-full border-collapse bg-white text-left text-sm text-gray-500">
-        <thead class="bg-gray-50 border-b border-gray-300">
+    <div class="overflow-hidden rounded-xl border border-gray-200 shadow">
+      <SkeletonTable v-if="isTableLoading" :columns="totalColumns" :rows="itemsPerPage" />
+      <table v-else class="w-full border-collapse bg-white text-sm">
+        <thead class="bg-gray-50 text-gray-700 text-center border-b border-gray-300">
           <tr>
-            <th class="w-[65%] px-6 py-4 font-medium text-gray-900 text-center">Isi Text</th>
-            <th class="w-[15%] px-6 py-4 font-medium text-gray-900 text-center">Status</th>
-            <th class="w-[20%] px-6 py-4 font-medium text-gray-900 text-center">Aksi</th>
+            <th class="w-[65%] px-6 py-3 font-medium">Isi Text</th>
+            <th class="w-[15%] px-6 py-3 font-medium">Status</th>
+            <th class="w-[20%] px-6 py-3 font-medium">Aksi</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-100 border-t border-gray-100">
-          <tr
-            v-if="dataRunningText && dataRunningText.length > 0"
-            v-for="runningText in dataRunningText"
-            :key="runningText.id"
-            class="hover:bg-gray-50"
-          >
-            <td class="px-6 py-4 w-[65%]">
-              <p class="text-gray-900 break-words whitespace-normal leading-relaxed">
-                {{ runningText.content }}
-              </p>
-            </td>
-            <td class="px-6 py-4 text-center w-[15%]">
-              <span
-                :class="[
-                  'inline-flex px-2 py-1 text-xs font-semibold rounded-full',
-                  runningText.is_active
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-gray-100 text-gray-800',
-                ]"
-              >
-                {{ runningText.is_active ? 'Aktif' : 'Tidak Aktif' }}
-              </span>
-            </td>
-            <td class="px-6 py-4 w-[20%]">
-              <div class="flex justify-center items-center gap-4">
-                <ToggleSwitch
-                  :id="runningText.id"
-                  :checked="runningText.is_active"
-                  @change="handleToggle(runningText)"
-                />
-                <LightButton @click="handleEdit(runningText)">
-                  <EditIcon />
-                </LightButton>
-                <DangerButton @click="handleDelete(runningText.id)">
-                  <DeleteIcon />
-                </DangerButton>
-              </div>
-            </td>
-          </tr>
-          <tr v-else>
-            <td :colspan="totalColumns" class="px-6 py-4 text-center text-gray-600">
-              <div class="py-8">
-                <svg
-                  class="mx-auto h-12 w-12 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+        <tbody class="divide-y divide-gray-100">
+          <template v-if="dataRunningText.length > 0">
+            <tr
+              v-for="data in dataRunningText"
+              :key="data.id"
+              class="hover:bg-gray-50 transition-colors"
+            >
+              <td class="px-6 py-4 text-center font-medium text-gray-800 whitespace-nowrap">
+                <p
+                  class="text-gray-900 break-words whitespace-normal leading-relaxed max-w-[600px] line-clamp-4"
                 >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  ></path>
-                </svg>
-                <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ada data</h3>
-                <p class="mt-1 text-sm text-gray-500">Belum ada running text yang ditambahkan.</p>
-              </div>
+                  {{ data.content }}
+                </p>
+              </td>
+              <td class="px-6 py-4 text-center font-medium text-gray-800">
+                <span
+                  :class="[
+                    'inline-flex px-2 py-1 text-xs font-semibold rounded-full',
+                    data.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800',
+                  ]"
+                >
+                  {{ data.is_active ? 'Aktif' : 'Tidak Aktif' }}
+                </span>
+              </td>
+              <td class="px-6 py-4 flex">
+                <div class="flex justify-center items-center gap-2">
+                  <ToggleSwitch
+                    :id="data.id"
+                    :checked="data.is_active"
+                    @change="handleToggle(data)"
+                  />
+                  <LightButton @click="handleEdit(data)">
+                    <EditIcon />
+                  </LightButton>
+                  <DangerButton @click="handleDelete(data.id)">
+                    <DeleteIcon />
+                  </DangerButton>
+                </div>
+              </td>
+            </tr>
+          </template>
+
+          <!-- Empty State -->
+          <tr v-else>
+            <td :colspan="totalColumns" class="px-6 py-8 text-center text-gray-500">
+              <font-awesome-icon
+                icon="fa-solid fa-file-lines"
+                class="text-4xl mb-2 text-gray-400"
+              />
+              <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ada data</h3>
+              <p class="text-sm">Belum ada data running text.</p>
             </td>
           </tr>
         </tbody>
@@ -383,7 +343,7 @@ onMounted(async () => {
             @prev-page="prevPage"
             @next-page="nextPage"
             @page-now="pageNow"
-            :total-row="totalItems"
+            :total-row="totalRow"
           />
         </tfoot>
       </table>
@@ -427,19 +387,10 @@ onMounted(async () => {
         v-else
         class="mt-4 text-center py-8 px-4 border-2 border-dashed border-gray-300 rounded-lg"
       >
-        <svg
-          class="mx-auto h-12 w-12 text-gray-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-          ></path>
-        </svg>
+        <font-awesome-icon
+          icon="fa-solid fa-clipboard-question"
+          class="text-4xl mb-2 text-gray-400"
+        />
         <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ada teks aktif</h3>
         <p class="mt-1 text-sm text-gray-500">
           Aktifkan teks pada tabel di atas untuk mengatur urutannya.
@@ -448,40 +399,27 @@ onMounted(async () => {
     </div>
 
     <!-- Modal Form Add -->
-    <FormAdd
-      :showModal="isModalAddOpen"
-      @close="isModalAddOpen = false"
-      @save="handleSaveNewText"
-    />
+    <FormAdd :showModal="isModalAddOpen" @close="isModalAddOpen = false" @save="handleSubmit" />
 
     <!-- Modal Form Edit -->
     <FormEdit
       :showModal="isModalEditOpen"
       :editData="editData"
       @close="isModalEditOpen = false"
-      @save="handleSaveEditText"
+      @save="handleSubmitEdit"
     />
 
+    <!-- Confirmation -->
     <Confirmation
       :showConfirmDialog="showConfirmDialog"
       :confirmTitle="confirmTitle"
       :confirmMessage="confirmMessage"
     >
-      <button
-        @click="confirmAction && confirmAction()"
-        class="inline-flex justify-center rounded-md border bg-yellow-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-yellow-700 sm:w-auto sm:text-sm"
-      >
-        Ya
-      </button>
-      <button
-        @click="showConfirmDialog = false"
-        class="mt-3 inline-flex justify-center rounded-md border bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-      >
-        Tidak
-      </button>
+      <BaseButton variant="secondary" @click="cancel">Tidak</BaseButton>
+      <BaseButton variant="warning" @click="confirm">Ya</BaseButton>
     </Confirmation>
 
-    <!-- Notification Popup -->
+    <!-- Notification -->
     <Notification
       :showNotification="showNotification"
       :notificationType="notificationType"

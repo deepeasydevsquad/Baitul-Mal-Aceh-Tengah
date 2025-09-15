@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import BaseButton from '@/components/Button/BaseButton.vue'
 
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 
 // Props dan Emits
 const props = defineProps<{
@@ -90,12 +90,18 @@ const closeModal = () => {
   emit('close')
 }
 
-// Handle escape key
-const handleKeydown = (event: KeyboardEvent) => {
-  if (event.key === 'Escape') {
-    closeModal()
-  }
+// Function: Handle escape
+const handleEscape = (e: KeyboardEvent) => {
+  if (e.key === 'Escape' && props.showModal) closeModal()
 }
+
+onMounted(async () => {
+  document.addEventListener('keydown', handleEscape)
+})
+
+onBeforeUnmount(async () => {
+  document.removeEventListener('keydown', handleEscape)
+})
 
 // Handle backdrop click
 const handleBackdropClick = (event: MouseEvent) => {
@@ -134,14 +140,7 @@ const handleBackdropClick = (event: MouseEvent) => {
             :disabled="isSubmitting"
             aria-label="Close modal"
           >
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M6 18L18 6M6 6l12 12"
-              ></path>
-            </svg>
+            <font-awesome-icon icon="fa-solid fa-xmark" class="w-6 h-6" />
           </button>
         </div>
 
@@ -154,7 +153,7 @@ const handleBackdropClick = (event: MouseEvent) => {
               id="runningText"
               v-model="formAdd.content"
               rows="4"
-              class="mt-1 block w-full px-3 py-2 text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              class="mt-1 block w-full px-3 py-2 text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-green-900 focus:border-green-900 transition-colors"
               :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': error }"
               placeholder="Ketik teks yang akan ditampilkan di running text..."
               :disabled="isSubmitting"
