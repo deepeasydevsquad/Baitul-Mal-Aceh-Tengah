@@ -221,10 +221,7 @@ async function deleteData(id: number) {
     <!-- Modal FormAdd -->
     <FormAdd
       :is-modal-open="isModalAddOpen"
-      @close="
-        isModalAddOpen = false
-        fetchData()
-      "
+      @close="isModalAddOpen = false;fetchData();"
       @status="
         (payload: any) =>
           displayNotification(
@@ -237,10 +234,7 @@ async function deleteData(id: number) {
     <FormEdit
       :is-modal-open="isModalEditOpen"
       :selected-kecamatan="selectedKecamatan"
-      @close="
-        isModalEditOpen = false
-        fetchData()
-      "
+      @close="isModalEditOpen = false;fetchData()"
       @status="
         (payload: any) =>
           displayNotification(
