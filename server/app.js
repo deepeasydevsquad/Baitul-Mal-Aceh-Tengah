@@ -56,6 +56,7 @@ const arr_router = [
   "otp",
   "running_text",
   "daftar_grup_acces",
+  "daftar_pengguna",
 ];
 
 const arr = {};
