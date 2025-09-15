@@ -8,71 +8,13 @@ import {
 } from '../../../../stores/sidebar'
 import 'flowbite'
 import syarat from '@/modules/Syarat/syarat.vue'
-import SystemLogSurveyor from "@/modules/SystemLogSurveyor/SystemLogSurveyor.vue"
+import SystemLogSurveyor from '@/modules/SystemLogSurveyor/SystemLogSurveyor.vue'
 import Bank from '@/modules/Bank/Bank.vue'
 import RequestKeanggotaan from '@/modules/RequestKeanggotaan/RequestKeanggotaan.vue'
 import RunningText from '@/modules/RunningText/RunningText.vue'
 import BankPengumpulan from '@/modules/BankPengumpulan/BankPengumpulan.vue'
 import GrupAkses from '@/modules/GrupAkses/GrupAkses.vue'
-// import BerandaUtama from '../../Modules/BerandaUtama/BerandaUtama.vue'
-// import TransPaket from '../../Modules/TransPaket/TransPaket.vue'
-// import DaftarKota from '../../Modules/DaftarKota/DaftarKota.vue'
-// import DaftarFasilitas from '../../Modules/DaftarFasilitas/DaftarFasilitas.vue'
-// import DaftarHotel from '../../Modules/DaftarHotel/DaftarHotel.vue'
-// import JenisMobil from '../../Modules/JenisMobil/JenisMobil.vue'
-// import Cabang from '../../Modules/Cabang/Cabang.vue'
-// import Airlines from '../../Modules/Airlines/Airlines.vue'
-// import Pengaturan from '../../Modules/Pengaturan/Pengaturan.vue'
-// import SistemLog from '../../Modules/SistemLog/SistemLog.vue'
-// import DaftarBandara from '../../Modules/DaftarBandara/DaftarBandara.vue'
-// import DaftarAsuransi from '../../Modules/DaftarAsuransi/DaftarAsuransi.vue'
-// import DaftarProviderVisa from '../../Modules/DaftarProviderVisa/DaftarProviderVisa.vue'
-// import DaftarBank from '../../Modules/DaftarBank/DaftarBank.vue'
-// import DaftarTipePaket from '../../Modules/DaftarTipePaket/DaftarTipePaket.vue'
-// import Grup from '../../Modules/Grup/Grup.vue'
-// import Supplier from '../../Modules/Supplier/Supplier.vue'
-// import Akun from '../../Modules/Akun/Akun.vue'
-// import DaftarMember from '../../Modules/Member/DaftarMember.vue'
-// import Pengguna from '../../Modules/Pengguna/Pengguna.vue'
-// import Kostumer from '../../Modules/Kostumer/Kostumer.vue'
-// import DaftarPaketLa from '../../Modules/DaftarPaketLa/DaftarPaketLa.vue'
-// import LevelAgen from '../../Modules/LevelAgen/LevelAgen.vue'
-// import DaftarAgen from '../../Modules/DaftarAgen/DaftarAgen.vue'
-// import DepositSaldo from '../../Modules/DepositSaldo/DepositSaldo.vue'
-// import DaftarJamaah from '../../Modules/DaftarJamaah/DaftarJamaah.vue'
-// import DaftarPeminjaman from '../../Modules/DaftarPeminjaman/DaftarPeminjaman.vue'
-// import Jurnal from '../../Modules/Jurnal/Jurnal.vue'
-// import Investor from '../../Modules/Investor/Investor.vue'
-// import DaftarPaket from '../../Modules/DaftarPaket/DaftarPaket.vue'
-// import TabunganUmrah from '../../Modules/TabunganUmrah/TabunganUmrah.vue'
-// import RiwayatPeminjaman from '../../Modules/RiwayatPeminjaman/RiwayatPeminjaman.vue'
-// import TransTiket from '../../Modules/TransTiket/TransTiket.vue'
-// import DaftarSuratMenyurat from '../../Modules/DaftarSuratMenyurat/DaftarSuratMenyurat.vue'
-// import BukuBesar from '../../Modules/BukuBesar/BukuBesar.vue'
-// import NeracaLajur from '../../Modules/NeracaLajur/NeracaLajur.vue'
-// import LabaRugi from '../../Modules/LabaRugi/LabaRugi.vue'
-// import Neraca from '../../Modules/Neraca/Neraca.vue'
-// import PengaturanPerangkanWhatsap from '../../Modules/PengaturanPerangkatWhatsapp/PengaturanPerangkanWhatsap.vue'
-// import TemplatePesanWhatsapp from '../../Modules/TemplatePesanWhatsapp/TemplatePesanWhatsapp.vue'
-// import TransaksiVisa from '../../Modules/TransaksiVisa/TransaksiVisa.vue'
-// import PesanWhatsapp from '../../Modules/PesanWhatsapp/PesanWhatsapp.vue'
-// import PembayaranFeeAgen from '../../Modules/PembayaranFeeAgen/PembayaranFeeAgen.vue'
-// import TransaksiPassport from '../../Modules/TransaksiPassport/TransaksiPassport.vue'
-// import TransHotel from '../../Modules/TransHotel/TransHotel.vue'
-// import Modal from '../../Modules/Modal/Modal.vue'
-// import TransTransport from '../../Modules/TransTransport/TransTransport.vue'
-// import RekapitulasiTicket from '../../Modules/RekapitulasiTicket/RekapitulasiTicket.vue'
-// import KasKeluarMasuk from '../../Modules/KasKeluarMasuk/KasKeluarMasuk.vue'
-// import DaftarPembayaran from '../../Modules/PembayaranGaji/DaftarPembayaran.vue'
-// import DaftarStokFasilitas from '../../Modules/DaftarStokFasilitas/DaftarStokFasilitas.vue'
-// import Headline from '../../Modules/Headline/Headline.vue'
-// import ItemFasilitas from '../../Modules/ItemFasilitas/ItemFasilitas.vue'
-// import AkunBank from '../../Modules/AkunBank/AkunBank.vue'
-// import DaftarProdukPpob from '../../Modules/DaftarProdukPpob/DaftarProdukPpob.vue'
-// import TransFasilitas from '../../Modules/TransFasilitas/TransFasilitas.vue'
-// import RiwayatTransaksiPpob from '../../Modules/RiwayatTransaksiPpob/RiwayatTransaksiPpob.vue'
-// import PermintaanDepositMember from '../../Modules/PermintaanDepositMember/PermintaanDepositMember.vue'
-// import RiwayatDepositMaskapai from '../../Modules/RiwayatDepositMaskapai/RiwayatDepositMaskapai.vue'
+import KegiatanKeseketariatan from '@/modules/KegiatanKeseketariatan/KegiatanKeseketariatan.vue'
 
 const tabComponents = {
   syarat: syarat,
@@ -81,66 +23,8 @@ const tabComponents = {
   request_keanggotaan: RequestKeanggotaan,
   daftar_grup_akses: GrupAkses,
   system_log_surveyor: SystemLogSurveyor,
+  program_kegiatan_kesekretariatan: KegiatanKeseketariatan,
   daftar_bank_pengumpulan: BankPengumpulan,
-  // beranda_utama: BerandaUtama,
-  // trans_paket: TransPaket,
-  // trans_tiket: TransTiket,
-  // daftar_kota: DaftarKota,
-  // daftar_fasilitas: DaftarFasilitas,
-  // daftar_mobil: JenisMobil,
-  // daftar_cabang: Cabang,
-  // pengaturan: Pengaturan,
-  // daftar_hotel: DaftarHotel,
-  // airlines: Airlines,
-  // daftar_bandara: DaftarBandara,
-  // daftar_asuransi: DaftarAsuransi,
-  // daftar_provider_visa: DaftarProviderVisa,
-  // daftar_bank: DaftarBank,
-  // system_log: SistemLog,
-  // daftar_grup: Grup,
-  // daftar_tipe_paket: DaftarTipePaket,
-  // supplier: Supplier,
-  // akun: Akun,
-  // daftar_member: DaftarMember,
-  // kostumer: Kostumer,
-  // daftar_paket_la: DaftarPaketLa,
-  // pengguna: Pengguna,
-  // level_agen: LevelAgen,
-  // daftar_agen: DaftarAgen,
-  // deposit_saldo: DepositSaldo,
-  // daftar_jamaah: DaftarJamaah,
-  // daftar_peminjaman: DaftarPeminjaman,
-  // jurnal: Jurnal,
-  // investor: Investor,
-  // daftar_paket: DaftarPaket,
-  // tabungan_umrah: TabunganUmrah,
-  // riwayat_transaksi_peminjaman: RiwayatPeminjaman,
-  // buku_besar: BukuBesar,
-  // daftar_surat_menyurat: DaftarSuratMenyurat,
-  // neraca_lajur: NeracaLajur,
-  // laba_rugi: LabaRugi,
-  // neraca: Neraca,
-  // pengaturan_perangkat_whatsapp: PengaturanPerangkanWhatsap,
-  // template_pesan_whatsapp: TemplatePesanWhatsapp,
-  // trans_visa: TransaksiVisa,
-  // pesan_whatsapp: PesanWhatsapp,
-  // pembayaran_fee_agen: PembayaranFeeAgen,
-  // trans_passport: TransaksiPassport,
-  // trans_hotel: TransHotel,
-  // modal: Modal,
-  // trans_transport: TransTransport,
-  // rekapitulasi_tiket: RekapitulasiTicket,
-  // kas_keluar_masuk: KasKeluarMasuk,
-  // riwayat_pembayaran_gaji_staff: DaftarPembayaran,
-  // daftar_stok_fasilitas: DaftarStokFasilitas,
-  // daftar_item_fasilitas: ItemFasilitas,
-  // headline: Headline,
-  // daftar_akun_bank_perusahaan: AkunBank,
-  // daftar_produk_ppob: DaftarProdukPpob,
-  // riwayat_transaksi_ppob: RiwayatTransaksiPpob,
-  // permintaan_deposit_member: PermintaanDepositMember,
-  // trans_fasilitas: TransFasilitas,
-  // riwayat_deposit_maskapai: RiwayatDepositMaskapai,
 }
 
 const selectedTab = useSelectedTab() // untuk menampung daftar tab yang menu / submenunya di click
