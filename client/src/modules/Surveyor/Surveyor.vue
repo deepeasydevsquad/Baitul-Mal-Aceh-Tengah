@@ -11,6 +11,8 @@ import Confirmation from '@/components/Modal/Confirmation.vue'
 import { daftar_surveyor, delete_surveyor } from '@/service/surveyor'
 import FormAdd from './widget/FormAdd.vue'
 import FormEdit from './widget/FormEdit.vue'
+//import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue'
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
 
 import { useConfirmation } from '@/composables/useConfirmation'
 import { useNotification } from '@/composables/useNotification'
@@ -124,10 +126,13 @@ async function deleteData(id: number) {
 
 <template>
   <div class="container mx-auto px-4 mt-10">
+     <!-- Header -->
+    <LoadingSpinner v-if="isLoading" label="Memuat halaman..." />
     <div class="flex justify-end items-center mb-6">
       <div class="flex items-center justify-between w-full mb-4">
   <!-- Button di kiri -->
   <BaseButton 
+    :loading="isAddModalOpen || isEditModalOpen"
     @click="openAddModal()" 
     variant="primary" 
     type="button"
@@ -153,6 +158,9 @@ async function deleteData(id: number) {
     </div>
 
     <div class="overflow-hidden rounded-lg border border-gray-200 shadow-md">
+
+      <!-- <SkeletonTable v-if="isTableLoading" :columns="totalColumns" :rows="itemsPerPage" /> -->
+
       <table class="w-full border-collapse bg-white text-left text-sm text-gray-500">
         <!-- Header dengan grouping -->
         <thead class="bg-gray-50">
