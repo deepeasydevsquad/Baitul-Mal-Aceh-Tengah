@@ -13,6 +13,7 @@ import Bank from '@/modules/Bank/Bank.vue'
 import RequestKeanggotaan from '@/modules/RequestKeanggotaan/RequestKeanggotaan.vue'
 import RunningText from '@/modules/RunningText/RunningText.vue'
 import GrupAkses from '@/modules/GrupAkses/GrupAkses.vue'
+import kecamatan from '@/modules/Kecamatan/Kecamatan.vue'
 // import BerandaUtama from '../../Modules/BerandaUtama/BerandaUtama.vue'
 // import TransPaket from '../../Modules/TransPaket/TransPaket.vue'
 // import DaftarKota from '../../Modules/DaftarKota/DaftarKota.vue'
@@ -74,6 +75,7 @@ import GrupAkses from '@/modules/GrupAkses/GrupAkses.vue'
 // import RiwayatDepositMaskapai from '../../Modules/RiwayatDepositMaskapai/RiwayatDepositMaskapai.vue'
 
 const tabComponents = {
+  daftar_kecamatan: kecamatan,
   syarat: syarat,
   daftar_bank: Bank,
   running_text: RunningText,
