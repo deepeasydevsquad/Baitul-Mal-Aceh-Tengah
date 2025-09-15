@@ -46,6 +46,7 @@ controllers.add_running_text = async (req, res) => {
       });
     }
   } catch (error) {
+
     handleServerError(res, error);
   }
 };

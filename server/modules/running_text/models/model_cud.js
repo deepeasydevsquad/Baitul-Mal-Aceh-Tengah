@@ -14,7 +14,7 @@ class Model_cud {
 
   async add_running_text() {
     await this.initialize();
-    const body = this.req.body();
+    const body = this.req.body;
 
     try {
       // Buat record baru dengan status non-aktif dan order 0
@@ -28,6 +28,9 @@ class Model_cud {
         insert.id
       }`;
     } catch (error) {
+      console.log("xxxx222");
+      console.log(error);
+      console.log("xxxx222");
       this.state = false;
       this.message = error.message;
     }
