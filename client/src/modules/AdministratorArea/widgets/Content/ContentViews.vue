@@ -12,6 +12,7 @@ import SystemLogSurveyor from "@/modules/SystemLogSurveyor/SystemLogSurveyor.vue
 import Bank from '@/modules/Bank/Bank.vue'
 import RequestKeanggotaan from '@/modules/RequestKeanggotaan/RequestKeanggotaan.vue'
 import RunningText from '@/modules/RunningText/RunningText.vue'
+import BankPengumpulan from '@/modules/BankPengumpulan/BankPengumpulan.vue'
 import GrupAkses from '@/modules/GrupAkses/GrupAkses.vue'
 // import BerandaUtama from '../../Modules/BerandaUtama/BerandaUtama.vue'
 // import TransPaket from '../../Modules/TransPaket/TransPaket.vue'
@@ -80,6 +81,7 @@ const tabComponents = {
   request_keanggotaan: RequestKeanggotaan,
   daftar_grup_akses: GrupAkses,
   system_log_surveyor: SystemLogSurveyor,
+  daftar_bank_pengumpulan: BankPengumpulan,
   // beranda_utama: BerandaUtama,
   // trans_paket: TransPaket,
   // trans_tiket: TransTiket,
