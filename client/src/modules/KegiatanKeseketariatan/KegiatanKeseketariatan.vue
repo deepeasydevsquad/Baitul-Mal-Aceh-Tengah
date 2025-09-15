@@ -11,8 +11,7 @@ import DeleteIcon from '@/components/Icons/DeleteIcon.vue'
 import Pagination from '@/components/Pagination/Pagination.vue'
 import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue'
 import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
-import FormAdd from '@/modules/Bank/widgets/FormAdd.vue'
-import FormEdit from '@/modules/Bank/widgets/FormEdit.vue'
+import FormAdd from '@/modules/KegiatanKeseketariatan/widgets/FormAdd.vue'
 
 // Composable
 import { usePagination } from '@/composables/usePagination'
@@ -20,7 +19,7 @@ import { useConfirmation } from '@/composables/useConfirmation'
 import { useNotification } from '@/composables/useNotification'
 
 // Service API
-// import { get_bank, delete_bank } from '@/service/bank'
+import { list } from '@/service/kegiatan_keseketariatan'
 
 // State: Loading
 const isLoading = ref(false)
@@ -31,42 +30,38 @@ const itemsPerPage = ref<number>(100)
 const totalColumns = ref<number>(3)
 
 const { currentPage, perPage, totalRow, totalPages, nextPage, prevPage, pageNow, pages } =
-usePagination(fetchData, { perPage: itemsPerPage.value })
+  usePagination(fetchData, { perPage: itemsPerPage.value })
 
 // Composable: notification
 const { showNotification, notificationType, notificationMessage, displayNotification } =
-useNotification()
+  useNotification()
 
 // Composable: confirmation
 const { showConfirmDialog, confirmTitle, confirmMessage, displayConfirmation, confirm, cancel } =
-useConfirmation()
+  useConfirmation()
 
 // State Data Bank
 const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL
 
 interface Data {
   id: number
-  field1: string
-  field2: string
-  field3: string
-  ...
+  kode: string
+  nama_kegiatan: string
+  penerima: string
+  jenis_penerima: string
+  area_penyaluran: string
+  nama_desa: string
+  nominal_kegiatan: number
+  tanggal_penyaluran: string
 }
 
 const datas = ref<Data[]>([])
 
 // Function: Modal
 const isModalAddOpen = ref(false)
-const isModalEditOpen = ref(false)
-const selectedBank = ref<any>(null)
 
 function openModalAdd() {
   isModalAddOpen.value = true
-}
-
-function openModalEdit(bank: any) {
-  selectedBank.value = bank
-  console.log("selectedBank Parent", selectedBank.value)
-  isModalEditOpen.value = true
 }
 
 // Function: Fetch Data
@@ -75,11 +70,11 @@ const search = ref('')
 async function fetchData() {
   isTableLoading.value = true
   try {
-    // const response = await get_bank({
-    //   search: search.value,
-    //   perpage: perPage.value,
-    //   pageNumber: currentPage.value,
-    // })
+    const response = await list({
+      search: search.value,
+      perpage: perPage.value,
+      pageNumber: currentPage.value,
+    })
 
     datas.value = response.data
     totalRow.value = response.total
@@ -96,23 +91,15 @@ onMounted(async () => {
   totalColumns.value = document.querySelectorAll('thead th').length
 })
 
-// Function: Delete Data
-async function deleteData(id: number) {
-  displayConfirmation(
-    'Hapus Data Bank',
-    'Apakah Anda yakin ingin menghapus data bank ini?',
-    async () => {
-      try {
-        isLoading.value = true
-        // await delete_bank(id)
-        displayNotification('Data bank berhasil dihapus', 'success')
-        await fetchData()
-      } catch (error) {
-        displayNotification('Gagal menghapus data bank', 'error')
-      } finally {
-        isLoading.value = false
-      }
-    },
+const handleClose = () => {
+  isModalAddOpen.value = false
+  fetchData()
+}
+
+const handleStatus = (payload: any) => {
+  displayNotification(
+    payload.error_msg || 'Tambah Bank Berhasil',
+    payload.error ? 'error' : 'success',
   )
 }
 </script>
@@ -130,7 +117,7 @@ async function deleteData(id: number) {
           type="button"
         >
           <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" />
-          Tambah Bank
+          Tambah Program
         </BaseButton>
 
         <!-- Search -->
@@ -141,9 +128,8 @@ async function deleteData(id: number) {
             type="text"
             v-model="search"
             @change="fetchData"
-            placeholder="Cari bank..."
-            class="w-full sm:w-64 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700
-                   focus:border-green-900 focus:ring-2 focus:ring-green-900 transition"
+            placeholder="Cari Program . . . "
+            class="w-full sm:w-64 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:border-green-900 focus:ring-2 focus:ring-green-900 transition"
           />
         </div>
       </div>
@@ -154,36 +140,44 @@ async function deleteData(id: number) {
         <table v-else class="w-full border-collapse bg-white text-sm">
           <thead class="bg-gray-50 text-gray-700 text-center border-b border-gray-300">
             <tr>
-              <th class="w-[30%] px-6 py-3 font-medium">Logo Bank</th>
-              <th class="w-[50%] px-6 py-3 font-medium">Nama Bank</th>
-              <th class="w-[20%] px-6 py-3 font-medium">Aksi</th>
+              <th class="w-[10%] px-6 py-3 font-medium">Kode</th>
+              <th class="w-[20%] px-6 py-3 font-medium">Nama Kegiatan</th>
+              <th class="w-[20%] px-6 py-3 font-medium">Info Penerima</th>
+              <th class="w-[20%] px-6 py-3 font-medium">Lokasi</th>
+              <th class="w-[15%] px-6 py-3 font-medium">Nominal</th>
+              <th class="w-[15%] px-6 py-3 font-medium">Tanggal</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
-            <template v-if="datas">
-              <tr
-                v-for="data in datas"
-                :key="data.id"
-                class="hover:bg-gray-50 transition-colors"
-              >
+            <!-- Data Rows -->
+            <template v-if="datas && datas.length">
+              <tr v-for="data in datas" :key="data.id" class="hover:bg-gray-50 transition-colors">
                 <td class="px-6 py-4 text-center font-medium text-gray-800">
-                  <!-- FIELD 1 -->
+                  {{ data.kode }}
                 </td>
                 <td class="px-6 py-4 text-center font-medium text-gray-800">
-                  <!-- FIELD 2 -->
+                  {{ data.nama_kegiatan }}
                 </td>
-                <td class="px-6 py-4 text-center font-medium text-gray-800">
-                  <!-- FIELD 3 -->
-                </td>
-                <td class="px-6 py-4">
-                  <div class="flex justify-center gap-2">
-                    <LightButton @click="openModalEdit(data)">
-                      <EditIcon />
-                    </LightButton>
-                    <DangerButton @click="deleteData(data.id)">
-                      <DeleteIcon />
-                    </DangerButton>
+                <td class="px-6 py-4 text-left font-medium text-gray-800">
+                  <div class="grid grid-cols-2 gap-2">
+                    <span class="text-gray-500">Nama Penerima</span>
+                    <span>:{{ data.penerima }}</span>
+
+                    <span class="text-gray-500">Jenis Penerima</span>
+                    <span>:{{ data.jenis_penerima }}</span>
                   </div>
+                </td>
+
+                <td class="px-6 py-4 text-center font-medium text-gray-800">
+                  {{
+                    data.area_penyaluran === 'kecamatan' ? 'Kec. ' + data.nama_desa : 'Kabupaten'
+                  }}
+                </td>
+                <td class="px-6 py-4 text-center font-medium text-gray-800">
+                  Rp {{ data.nominal_kegiatan.toLocaleString('id-ID') }}
+                </td>
+                <td class="px-6 py-4 text-center font-medium text-gray-800">
+                  {{ new Date(data.tanggal_penyaluran).toLocaleDateString('id-ID') }}
                 </td>
               </tr>
             </template>
@@ -191,9 +185,11 @@ async function deleteData(id: number) {
             <!-- Empty State -->
             <tr v-else>
               <td :colspan="totalColumns" class="px-6 py-8 text-center text-gray-500">
-                <font-awesome-icon icon="fa-solid fa-database" class="text-4xl mb-2 text-gray-400" />
-                <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ada data</h3>
-                <p class="text-sm">Belum ada data field.</p>
+                <font-awesome-icon
+                  icon="fa-solid fa-database"
+                  class="text-2xl mb-2 text-gray-400"
+                />
+                <p class="text-sm">Belum ada data bank.</p>
               </td>
             </tr>
           </tbody>
@@ -216,29 +212,7 @@ async function deleteData(id: number) {
     </div>
 
     <!-- Modal FormAdd -->
-    <FormAdd
-      :is-modal-open="isModalAddOpen"
-      @close="isModalAddOpen = false; fetchData()"
-      @status="(payload: any) => displayNotification(payload.error_msg || 'Tambah/Update Bank gagal', payload.error ? 'error' : 'success')"
-    />
-
-    <!-- Modal FormEdit -->
-    <FormEdit
-      :is-modal-open="isModalEditOpen"
-      :selected-bank="selectedBank"
-      @close="isModalEditOpen = false; fetchData()"
-      @status="(payload: any) => displayNotification(payload.error_msg || 'Tambah/Update Bank gagal', payload.error ? 'error' : 'success')"
-    />
-
-    <!-- Confirmation -->
-    <Confirmation
-      :showConfirmDialog="showConfirmDialog"
-      :confirmTitle="confirmTitle"
-      :confirmMessage="confirmMessage"
-    >
-      <BaseButton variant="secondary" @click="cancel">Tidak</BaseButton>
-      <BaseButton variant="warning" @click="confirm">Ya</BaseButton>
-    </Confirmation>
+    <FormAdd :is-modal-open="isModalAddOpen" @close="handleClose" @status="handleStatus" />
 
     <!-- Notification -->
     <Notification
@@ -249,4 +223,3 @@ async function deleteData(id: number) {
     />
   </div>
 </template>
-

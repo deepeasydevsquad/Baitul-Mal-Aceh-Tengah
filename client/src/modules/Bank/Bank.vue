@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import Notification from '@/components/Modal/Notification.vue'
 import Confirmation from '@/components/Modal/Confirmation.vue'
 import BaseButton from '@/components/Button/BaseButton.vue'
@@ -124,6 +124,7 @@ async function deleteData(id: number) {
         <BaseButton @click="openModalAdd()" variant="primary" :loading="isModalAddOpen" type="button" >
           <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" /> Tambah Bank
         </BaseButton>
+
         <!-- Search -->
         <div class="flex items-center w-full sm:w-auto">
           <label for="search" class="mr-2 text-sm font-medium text-gray-600">Cari</label>
@@ -168,7 +169,8 @@ async function deleteData(id: number) {
             <!-- Empty State -->
             <tr v-else>
               <td :colspan="totalColumns" class="px-6 py-8 text-center text-gray-500">
-                <font-awesome-icon icon="fa-solid fa-database" class="text-2xl mb-2 text-gray-400" />
+                <font-awesome-icon icon="fa-solid fa-database" class="text-4xl mb-2 text-gray-400" />
+                <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ada data</h3>
                 <p class="text-sm">Belum ada data bank.</p>
               </td>
             </tr>

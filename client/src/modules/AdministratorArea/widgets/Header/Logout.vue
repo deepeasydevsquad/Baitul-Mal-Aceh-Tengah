@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, defineEmits } from 'vue'
-// import { logout } from '@/service/auth'
+import { logout_administrator } from '@/service/auth'
 
 const emit = defineEmits(['close-dropdown'])
 
@@ -25,7 +25,14 @@ const handleLogout = async () => {
   isLoading.value = true
 
   try {
-    // await logout()
+    await logout_administrator({
+      refresh_token: localStorage.getItem('administrator_refresh_token'),
+    })
+
+    // Clear localStorage di sisi client
+    localStorage.removeItem('administrator_access_token')
+    localStorage.removeItem('administrator_refresh_token')
+
     showConfirmation.value = false
     showNotification.value = true
 
@@ -35,8 +42,8 @@ const handleLogout = async () => {
   } catch (error) {
     console.error('Error during logout:', error)
 
-    localStorage.removeItem('access_token')
-    localStorage.removeItem('refresh_token')
+    localStorage.removeItem('administrator_access_token')
+    localStorage.removeItem('administrator_refresh_token')
 
     showConfirmation.value = false
     showNotification.value = true
