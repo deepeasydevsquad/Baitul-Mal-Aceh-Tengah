@@ -1,13 +1,33 @@
 <script setup lang="ts">
+// Library
+import { onMounted, ref } from 'vue'
 import Pagination from '@/components/Pagination/Pagination.vue'
-import SystemLogSurveyor from '@/service/system_log_surveyor'
-import DangerButton from '@/components/Button/DangerButton.vue'
-import SuccessButton from '@/components/Button/SuccessButton.vue'
-import { computed, onMounted, ref } from 'vue'
 import Notification from '@/components/Modal/Notification.vue'
-import Confirmation from '@/components/Modal/Confirmation.vue'
+import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue'
 
-interface Data {
+// Composable
+import { usePagination } from '@/composables/usePagination'
+import { useNotification } from '@/composables/useNotification'
+
+// Service API
+import { list } from '@/service/system_log_surveyor'
+
+// State: Loading
+const isTableLoading = ref(false)
+
+// Composable: pagination
+const itemsPerPage = ref<number>(100)
+const totalColumns = ref<number>(4)
+
+const { currentPage, perPage, totalRow, totalPages, nextPage, prevPage, pageNow, pages } =
+  usePagination(fetchData, { perPage: itemsPerPage.value })
+
+// Composable: notification
+const { showNotification, notificationType, notificationMessage, displayNotification } =
+  useNotification()
+
+// State Data Surveyor
+interface SurveyorLog {
   id: number
   message: string
   ip: string
@@ -16,167 +36,124 @@ interface Data {
   updatedAt: string
 }
 
-const searchQuery = ref('')
-const data = ref<Data[]>([])
-const totalItems = ref(0)
-const itemsPerPage = 10
-const currentPage = ref(1)
-const totalPages = ref(1)
+// Function: fetch data
+const search = ref('')
+const dataSurveyorLog = ref<SurveyorLog[]>([])
 
-const fetchData = async () => {
+async function fetchData() {
+  isTableLoading.value = true
   try {
-    const response = await SystemLogSurveyor.list({
-      search: searchQuery.value,
-      perpage: itemsPerPage,
+    const response = await list({
+      search: search.value,
+      perpage: perPage.value,
       pageNumber: currentPage.value,
     })
-    data.value = response.data
-    totalItems.value = response.total || response.data.length || 0
-    totalPages.value = Math.ceil(response.total / itemsPerPage)
-  } catch (error) {
-    console.error('Error fetching data:', error)
+
+    dataSurveyorLog.value = response.data
+    totalRow.value = response.total
+    console.log(dataSurveyorLog.value)
+  } catch (error: any) {
+    displayNotification(error.response?.data?.message || 'Gagal mengambil data surveyor', 'error')
+  } finally {
+    isTableLoading.value = false
   }
 }
 
-const timeoutId = ref<number | null>(null)
-
-const resetNotificationTimeout = () => {
-  if (timeoutId.value) clearTimeout(timeoutId.value)
-  timeoutId.value = window.setTimeout(() => {
-    showNotification.value = false
-  }, 3000)
-}
-
-const showNotification = ref(false)
-const notificationMessage = ref('')
-const notificationType = ref('')
-
-const displayNotification = (message: string, type: 'success' | 'error' = 'success') => {
-  notificationMessage.value = message
-  notificationType.value = type
-  showNotification.value = true
-  resetNotificationTimeout()
-}
-
-const pages = computed<number[]>(() => {
-  return Array.from({ length: totalPages.value }, (_, i) => i + 1)
+onMounted(async () => {
+  await fetchData()
+  totalColumns.value = document.querySelectorAll('thead th').length
 })
-const totalColumns = 4 // karena table punya 5 kolom
-
-const handlePrev = () => {
-  if (currentPage.value > 1) currentPage.value--
-}
-const handleNext = () => {
-  if (currentPage.value < totalPages.value) currentPage.value++
-}
-const handlePageNow = (page: number) => {
-  currentPage.value = page
-}
-
-onMounted(() => {
-  fetchData()
-})
-
-const filterStatus = ref('')
-const OptionFilter = [
-  { id: 'verified', name: 'Approve' },
-  { id: 'unverified', name: 'Reject' },
-  { id: '', name: 'Semua' },
-]
-
-const showConfirmDialog = ref(false)
-const confirmMessage = ref('')
-const confirmTitle = ref('')
-const confirmAction = ref<(() => void) | null>(null)
-
-const showConfirmation = (title: string, message: string, action: () => void) => {
-  confirmTitle.value = title
-  confirmMessage.value = message
-  confirmAction.value = action
-  showConfirmDialog.value = true
-}
 </script>
 
 <template>
-  <div class="container mx-auto px-4 mt-10">
-    <div class="flex justify-end items-center mb-6">
-      <div class="inline-flex rounded-md shadow-xs" role="group">
-        <label for="search" class="block text-sm font-medium text-gray-700 mr-2 mt-3">Cari</label>
-        <input
-          type="text"
-          id="search"
-          class="block w-64 px-3 py-2 text-gray-700 bg-white border border-gray-300 rounded-s-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-          v-model="searchQuery"
-          @change="fetchData()"
-          placeholder="Nama Surveyor . . . ."
-        />
+  <div class="mx-auto p-4">
+    <!-- Header -->
+    <div class="space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-end gap-4">
+        <!-- Search -->
+        <div class="flex items-center w-full sm:w-auto">
+          <label for="search" class="mr-2 text-sm font-medium text-gray-600">Cari</label>
+          <input
+            id="search"
+            type="text"
+            v-model="search"
+            @change="fetchData"
+            placeholder="Cari surveyor..."
+            class="w-full sm:w-64 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:border-green-900 focus:ring-2 focus:ring-green-900 transition"
+          />
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="overflow-hidden rounded-xl border border-gray-200 shadow">
+        <SkeletonTable v-if="isTableLoading" :columns="totalColumns" :rows="itemsPerPage" />
+        <table v-else class="w-full border-collapse bg-white text-sm">
+          <thead class="bg-gray-50 text-gray-700 text-center border-b border-gray-300">
+            <tr>
+              <th class="w-[20%] px-6 py-3 font-medium">Datetimes</th>
+              <th class="w-[40%] px-6 py-3 font-medium">Message</th>
+              <th class="w-[20%] px-6 py-3 font-medium">Surveyor</th>
+              <th class="w-[20%] px-6 py-3 font-medium">IP</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            <template v-if="dataSurveyorLog.length > 0">
+              <tr
+                v-for="data in dataSurveyorLog"
+                :key="data.id"
+                class="hover:bg-gray-50 transition-colors"
+              >
+                <td class="px-6 py-4 text-center font-medium text-gray-800">
+                  {{ data.createdAt }}
+                </td>
+                <td class="px-6 py-4 text-center font-medium text-gray-800">
+                  {{ data.message }}
+                </td>
+                <td class="px-6 py-4 text-center font-medium text-gray-800">
+                  {{ data.nama_surveyor }}
+                </td>
+                <td class="px-6 py-4 text-center font-medium text-gray-800">
+                  {{ data.ip }}
+                </td>
+              </tr>
+            </template>
+
+            <!-- Empty State -->
+            <tr v-else>
+              <td :colspan="totalColumns" class="px-6 py-8 text-center text-gray-500">
+                <font-awesome-icon
+                  icon="fa-solid fa-database"
+                  class="text-4xl mb-2 text-gray-400"
+                />
+                <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ada data</h3>
+                <p class="text-sm">Belum ada data surveyor.</p>
+              </td>
+            </tr>
+          </tbody>
+
+          <!-- Pagination -->
+          <tfoot>
+            <Pagination
+              :current-page="currentPage"
+              :total-pages="totalPages"
+              :pages="pages"
+              :total-columns="totalColumns"
+              :total-row="totalRow"
+              @prev-page="prevPage"
+              @next-page="nextPage"
+              @page-now="pageNow"
+            />
+          </tfoot>
+        </table>
       </div>
     </div>
 
-    <div class="overflow-hidden rounded-lg border border-gray-200 shadow-md">
-      <table class="w-full border-collapse bg-white text-left text-sm text-gray-500">
-        <!-- Header dengan grouping -->
-        <thead class="bg-gray-50">
-          <tr>
-            <th class="px-6 py-4 font-medium text-gray-900 text-center">Datetimes</th>
-            <th class="px-6 py-4 font-medium text-gray-900 text-center">Message</th>
-            <th class="px-6 py-4 font-medium text-gray-900 text-center">Surveyor</th>
-            <th class="px-6 py-4 font-medium text-gray-900 text-center">Ip</th>
-          </tr>
-        </thead>
-        <!-- Isi Data -->
-        <tbody class="divide-y divide-gray-100 border-t border-gray-100">
-          <tr v-for="(item, idx) in data" :key="item.id">
-            <td class="px-3 py-2 text-center">{{ item.createdAt }}</td>
-            <td class="px-3 py-2 text-center">{{ item.message }}</td>
-            <td class="px-3 py-2 text-center">{{ item.nama_surveyor }}</td>
-            <td class="px-3 py-2 text-center">{{ item.ip }}</td>
-          </tr>
-
-          <tr v-if="data.length === 0">
-            <td :colspan="totalColumns" class="text-center py-6 text-gray-500">Data tidak ada</td>
-          </tr>
-        </tbody>
-
-        <!-- Footer -->
-        <tfoot class="bg-gray-100 font-bold">
-          <Pagination
-            :total-row="totalItems"
-            :currentPage="currentPage"
-            :totalPages="totalPages"
-            :pages="pages"
-            :totalColumns="totalColumns"
-            @prev-page="handlePrev"
-            @next-page="handleNext"
-            @page-now="handlePageNow"
-          />
-        </tfoot>
-      </table>
-    </div>
+    <!-- Notification -->
+    <Notification
+      :showNotification="showNotification"
+      :notificationType="notificationType"
+      :notificationMessage="notificationMessage"
+      @close="showNotification = false"
+    />
   </div>
-
-  <Confirmation
-    :showConfirmDialog="showConfirmDialog"
-    :confirmTitle="confirmTitle"
-    :confirmMessage="confirmMessage"
-  >
-    <button
-      @click="confirmAction && confirmAction()"
-      class="inline-flex w-full justify-center rounded-md border border-transparent bg-yellow-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm"
-    >
-      Ya
-    </button>
-    <button
-      @click="showConfirmDialog = false"
-      class="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-    >
-      Tidak
-    </button>
-  </Confirmation>
-  <Notification
-    :showNotification="showNotification"
-    :notificationType="notificationType"
-    :notificationMessage="notificationMessage"
-    @close="showNotification = false"
-  />
 </template>

@@ -63,7 +63,9 @@ import {
   faScroll,
   faMessage,
   faClipboardUser,
-  faUserPlus
+  faUserPlus,
+  faUserClock,
+  faClipboardQuestion
 } from '@fortawesome/free-solid-svg-icons'
 
 // FontAwesome Icons - Regular
@@ -82,7 +84,8 @@ library.add(
   faPiggyBank, faUserCog, faUserTie, faCalculator, faList, faBalanceScale, faBalanceScaleLeft, faCommentDollar,
   faShieldAlt, faEnvelope, faClipboardCheck, faLayerGroup, faPeopleCarry, faTicketSimple, faMoneyBillWave, faPlane,
   faBuilding, faPlaneArrival, faCircle, faClock, farUser, faCcVisa, faWhatsapp, faEye, faEyeSlash, faCloudArrowUp, faCodeBranch,
-  faLock, faLockOpen, faPlaneCircleCheck, faHandshake, faGear, faRightFromBracket, faPeopleGroup, faHandHoldingHeart, faClockRotateLeft, faCoins, faChartLine, faQuestionCircle, faListOl, faFileSignature, faClipboardCheck, faFileContract, faListCheck, faBriefcase, faMap, faMapLocationDot, faBuildingColumns, faFileLines, faHandHoldingMedical, faHandHoldingHand, faHandsHoldingCircle, faRoute, faHandHoldingDroplet, faHandshakeAngle, faUserShield, faScroll, faMessage, faClipboardUser, faUserPlus
+  faLock, faLockOpen, faPlaneCircleCheck, faHandshake, faGear, faRightFromBracket, faPeopleGroup, faHandHoldingHeart, faClockRotateLeft, faCoins, faChartLine, faQuestionCircle, faListOl, faFileSignature, faClipboardCheck, faFileContract, faListCheck, faBriefcase, faMap, faMapLocationDot, faBuildingColumns, faFileLines, faHandHoldingMedical, faHandHoldingHand, faHandsHoldingCircle, faRoute, faHandHoldingDroplet, faHandshakeAngle, faUserShield, faScroll, faMessage, faClipboardUser, faUserPlus,
+  faUserClock, faClipboardQuestion
 )
 
 // Buat App Vue

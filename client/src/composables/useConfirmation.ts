@@ -36,4 +36,4 @@ export function useConfirmation() {
     confirm,
     cancel,
   }
-}
+}  

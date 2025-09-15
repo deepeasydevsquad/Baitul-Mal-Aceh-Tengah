@@ -23,7 +23,7 @@ module.exports = {
     await queryInterface.bulkInsert('Submenus', [
       { menu_id : menus[1].id, name: 'Pengumpulan', path: 'pengumpulan', tab:`[{"id":"${tabs[1].id}"},{"id":"${tabs[2].id}"},{"id":"${tabs[3].id}"},{"id":"${tabs[4].id}"}]`,  createdAt: new Date(), updatedAt: new Date() },
       { menu_id : menus[1].id, name: 'Perencanaan', path: 'perencanaan', tab:`[{"id":"${tabs[5].id}"},{"id":"${tabs[6].id}"},{"id":"${tabs[7].id}"},{"id":"${tabs[8].id}"}]`,  createdAt: new Date(), updatedAt: new Date() },
-      { menu_id : menus[1].id, name: 'Pendistribusian', path: 'pendistribusian', tab:`[{"id":"${tabs[9].id}"},{"id":"${tabs[10].id}"},{"id":"${tabs[11].id}"},{"id":"${tabs[12].id}"},{"id":"${tabs[13].id}"}]`,  createdAt: new Date(), updatedAt: new Date() },
+      { menu_id : menus[1].id, name: 'Pendistribusian', path: 'pendistribusian', tab:`[{"id":"${tabs[9].id}"},{"id":"${tabs[40].id}"},{"id":"${tabs[10].id}"},{"id":"${tabs[11].id}"},{"id":"${tabs[12].id}"},{"id":"${tabs[13].id}"}]`,  createdAt: new Date(), updatedAt: new Date() },
       { menu_id : menus[1].id, name: 'Kesekretariatan', path: 'kesekretariatan', tab:`[{"id":"${tabs[14].id}"}]`,  createdAt: new Date(), updatedAt: new Date() },
       { menu_id : menus[2].id, name: 'Keanggotaan', path: 'keanggotaan', tab:`[{"id":"${tabs[15].id}"},{"id":"${tabs[38].id}"}]`,  createdAt: new Date(), updatedAt: new Date() },
       { menu_id : menus[3].id, name: 'Asnaf', path: 'asnaf', tab:`[{"id":"${tabs[16].id}"}]`,  createdAt: new Date(), updatedAt: new Date() },

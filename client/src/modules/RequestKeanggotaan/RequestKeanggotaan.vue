@@ -159,13 +159,21 @@ const handleReject = async (id: number) => {
         <!-- Header dengan grouping -->
         <thead class="bg-gray-50">
           <tr>
-            <th class="px-6 py-4 font-medium text-gray-900 text-center">Nama</th>
-            <th class="px-6 py-4 font-medium text-gray-900 text-center">Tgl Lahir</th>
-            <th class="px-6 py-4 font-medium text-gray-900 text-center">WhatsApp</th>
-            <th class="px-6 py-4 font-medium text-gray-900 text-center">Username</th>
-            <th class="px-6 py-4 font-medium text-gray-900 text-center">Desa</th>
-            <th class="px-6 py-4 font-medium text-gray-900 text-center">Status</th>
-            <th class="px-6 py-4 font-medium text-gray-900 text-center">Aksi</th>
+           <th class="w-[20%] text-center px-6 py-4 font-medium font-bold text-gray-900">Nama</th>
+            <th class="w-[15%] text-center px-6 py-4 font-medium font-bold text-gray-900">
+              Tgl Lahir
+            </th>
+            <th class="w-[15%] text-center px-6 py-4 font-medium font-bold text-gray-900">
+              WhatsApp
+            </th>
+            <th class="w-[15%] text-center px-6 py-4 font-medium font-bold text-gray-900">
+              Username
+            </th>
+            <th class="w-[15%] text-center px-6 py-4 font-medium font-bold text-gray-900">Desa</th>
+            <th class="w-[10%] text-center px-6 py-4 font-medium font-bold text-gray-900">
+              Status
+            </th>
+            <th class="w-[10%] text-center px-6 py-4 font-medium font-bold text-gray-900">Aksi</th>
           </tr>
         </thead>
 
