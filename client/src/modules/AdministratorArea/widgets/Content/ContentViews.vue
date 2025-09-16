@@ -14,6 +14,7 @@ import Bank from '@/modules/Bank/Bank.vue'
 import RequestKeanggotaan from '@/modules/RequestKeanggotaan/RequestKeanggotaan.vue'
 import RunningText from '@/modules/RunningText/RunningText.vue'
 import BankPengumpulan from '@/modules/BankPengumpulan/BankPengumpulan.vue'
+import PengaturanUmum from '@/modules/PengaturanUmum/PengaturanUmum.vue'
 import GrupAkses from '@/modules/GrupAkses/GrupAkses.vue'
 import KegiatanKeseketariatan from '@/modules/KegiatanKeseketariatan/KegiatanKeseketariatan.vue'
 import kecamatan from '@/modules/Kecamatan/Kecamatan.vue'
@@ -31,6 +32,7 @@ const tabComponents = {
   program_kegiatan_kesekretariatan: KegiatanKeseketariatan,
   daftar_bank_pengumpulan: BankPengumpulan,
   daftar_surveyor: Surveyor,
+  pengaturan_umum: PengaturanUmum,
 }
 
 const selectedTab = useSelectedTab() // untuk menampung daftar tab yang menu / submenunya di click
