@@ -16,6 +16,7 @@ import RunningText from '@/modules/RunningText/RunningText.vue'
 import BankPengumpulan from '@/modules/BankPengumpulan/BankPengumpulan.vue'
 import PengaturanUmum from '@/modules/PengaturanUmum/PengaturanUmum.vue'
 import GrupAkses from '@/modules/GrupAkses/GrupAkses.vue'
+import DaftarPengguna from '@/modules/DaftarPengguna/DaftarPengguna.vue'
 import KegiatanKeseketariatan from '@/modules/KegiatanKeseketariatan/KegiatanKeseketariatan.vue'
 import kecamatan from '@/modules/Kecamatan/Kecamatan.vue'
 import SystemLog from '@/modules/SystemLog/SystemLog.vue'
@@ -28,6 +29,7 @@ const tabComponents = {
   request_keanggotaan: RequestKeanggotaan,
   daftar_grup_akses: GrupAkses,
   system_log_surveyor: SystemLogSurveyor,
+  daftar_pengguna: DaftarPengguna,
   system_log: SystemLog,
   program_kegiatan_kesekretariatan: KegiatanKeseketariatan,
   daftar_bank_pengumpulan: BankPengumpulan,

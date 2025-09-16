@@ -57,6 +57,7 @@ const arr_router = [
   "otp",
   "running_text",
   "daftar_grup_acces",
+  "daftar_pengguna",
   "daftar_system_log",
   "kecamatan",
   "kegiatan_kesekretariatan",
