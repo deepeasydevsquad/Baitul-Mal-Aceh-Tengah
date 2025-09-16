@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch, nextTick } from 'vue'
-import { getRunningText } from '@/service/running_text'
+import { getActiveRunningText } from '@/service/running_text'
 
 // --- State Management ---
 const combinedActiveText = ref(
@@ -11,7 +11,7 @@ const isLoading = ref(true)
 // Ref untuk elemen teks yang akan dianimasikan
 const marqueeTextRef = ref<HTMLElement | null>(null)
 
-// --- State untuk kalkulasi animasi ---
+// State untuk kalkulasi animasi
 const textWidth = ref(0)
 const containerWidth = ref(0)
 const animationDuration = ref(0)
@@ -19,11 +19,7 @@ const animationDuration = ref(0)
 const fetchData = async () => {
   try {
     isLoading.value = true
-    const response = await getRunningText({
-      perpage: 999,
-      pageNumber: 1,
-      activeOnly: true,
-    })
+    const response = await getActiveRunningText()
     const activeTexts = response.data
 
     if (activeTexts && activeTexts.length > 0) {
@@ -45,7 +41,7 @@ const updateMarqueeParameters = () => {
     textWidth.value = marqueeTextRef.value.scrollWidth
     containerWidth.value = container.offsetWidth
 
-    const speed = 80 // Kecepatan konstan dalam piksel per detik
+    const speed = 80
     const distance = textWidth.value + containerWidth.value
     animationDuration.value = distance / speed / 0.99
   }
@@ -69,6 +65,7 @@ onMounted(() => {
     resizeObserver.observe(marqueeTextRef.value.parentElement)
   }
 })
+
 watch([combinedActiveText, isLoading], async () => {
   await nextTick()
 
@@ -79,7 +76,7 @@ watch([combinedActiveText, isLoading], async () => {
 </script>
 
 <template>
-  <!-- SESUAI PEDOMAN: HTML setelah JavaScript -->
+
   <div
     class="w-full h-24 py-3.5 bg-green-900 border-t-2 border-b-2 border-yellow-400 flex items-center overflow-hidden"
   >
