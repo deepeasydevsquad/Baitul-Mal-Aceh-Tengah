@@ -364,7 +364,7 @@ const handleSubmit = async () => {
                   </div>
                   <div
                     v-else
-                    class="bg-gray-200 text-gray-500 text-center px-2 py-2 relative rounded-lg flex items-center justify-center overflow-hidden border border-gray-300"
+                    class="bg-gray-200 text-gray-500 text-center px-2 py-2 relative rounded-lg flex items-center justify-center overflow-hidden border border-gray-300 z-0"
                     style="width: 64px; height: 64px"
                   >
                     <p class="text-xs font-medium">Tidak ada</p>
@@ -397,7 +397,7 @@ const handleSubmit = async () => {
                     v-if="
                       existingData.logo && existingData.logo !== '-' && existingData.logo !== ''
                     "
-                    class="relative rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-300"
+                    class="relative rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-300 z-0"
                     :style="getImageContainerStyle('logo')"
                   >
                     <img
