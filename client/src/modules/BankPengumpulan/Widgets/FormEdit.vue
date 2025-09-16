@@ -2,6 +2,7 @@
 import BaseButton from '@/components/Button/BaseButton.vue'
 import { ref, watch, reactive } from 'vue'
 import { getBank } from '@/service/bank_pengumpulan'
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
 import type { PropType } from 'vue'
 
 interface BankPengumpulan {
@@ -197,7 +198,8 @@ defineExpose({
       @click.self="closeModal"
       role="dialog"
     >
-      <div class="w-full max-w-lg mx-4 p-6 bg-white rounded-lg shadow-xl">
+      <LoadingSpinner v-if="isLoading" label="Memuat halaman..." />
+      <div v-else class="w-full max-w-lg mx-4 p-6 bg-white rounded-lg shadow-xl">
         <div class="flex justify-between items-center mb-6">
           <h2 class="text-xl font-bold text-gray-800">Edit Bank Pemasukan</h2>
           <button

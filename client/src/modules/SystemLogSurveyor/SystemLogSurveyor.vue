@@ -61,7 +61,6 @@ async function fetchData() {
 
 onMounted(async () => {
   await fetchData()
-  totalColumns.value = document.querySelectorAll('thead th').length
 })
 </script>
 

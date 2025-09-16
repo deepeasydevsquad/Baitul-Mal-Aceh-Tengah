@@ -7,7 +7,7 @@
       v-model="model"
       :placeholder="placeholder"
       :class="[
-        'text-gray-700 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+        'text-gray-700 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-900 focus:border-green-900',
         error ? 'border-red-500' : 'border-gray-300'
       ]"
     />
