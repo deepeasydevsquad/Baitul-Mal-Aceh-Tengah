@@ -9,11 +9,14 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+      kode: {
+        type: Sequelize.STRING
+      },
       nama_kegiatan: {
         type: Sequelize.TEXT
       },
       sumber_dana: {
-        type: Sequelize.ENUM, 
+        type: Sequelize.ENUM,
         values: ['zakat', 'infaq','operasional_apbk'],
         allowNull: true
       },
@@ -21,7 +24,7 @@ module.exports = {
         type: Sequelize.STRING
       },
       jenis_penerima: {
-        type: Sequelize.ENUM, 
+        type: Sequelize.ENUM,
         values: ['perorangan','instansi'],
         defaultValue : 'perorangan'
       },
@@ -29,7 +32,7 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       area_penyaluran: {
-        type: Sequelize.ENUM, 
+        type: Sequelize.ENUM,
         values: ['kabupaten','kecamatan'],
         defaultValue: 'kabupaten'
       },

@@ -17,6 +17,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Kegiatan_keseketariatan.init({
+    kode: DataTypes.STRING,
     nama_kegiatan: DataTypes.TEXT,
     sumber_dana: DataTypes.ENUM(['zakat', 'infaq','operasional_apbk']),
     penerima: DataTypes.STRING,
