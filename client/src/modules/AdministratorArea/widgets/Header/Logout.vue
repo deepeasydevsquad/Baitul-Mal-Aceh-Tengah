@@ -77,14 +77,14 @@ defineExpose({
       </svg>
       Log Out
     </button>
-    <!-- <Transition
+    <Transition
       enter-active-class="transition ease-out duration-200"
       enter-from-class="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
       enter-to-class="opacity-100 translate-y-0 sm:scale-100"
       leave-active-class="transition ease-in duration-150"
       leave-from-class="opacity-100 translate-y-0 sm:scale-100"
       leave-to-class="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-    > -->
+    >
       <Teleport to="body">
           <div v-if="showConfirmation" class="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50" @click.self="hideLogoutConfirmation">
             <div class="bg-white rounded-lg shadow-lg max-w-md w-full mx-4">
