@@ -70,12 +70,15 @@ class Model_r {
         ? parseInt(body.pageNumber, 10)
         : 1;
 
-    const where = body.search
-      ? {
-          [Op.or]: [{ name: { [Op.like]: `%${body.search}%` } }],
-        }
-      : {};
+    let where = {};
 
+    // filter search kalau dikirim
+    if (body.search && body.search !== "") {
+      where.name = { [Op.like]: `%${body.search}%` };
+    }
+
+    // exclude user dengan grup_id = 1
+    where.id = { [Op.ne]: 1 };
     try {
       const result = await Grup.findAndCountAll({
         limit,

@@ -57,9 +57,14 @@ const arr_router = [
   "otp",
   "running_text",
   "daftar_grup_acces",
+  "daftar_pengguna",
+  "daftar_system_log",
+  "kecamatan",
   "kegiatan_kesekretariatan",
   "bank_pengumpulan",
-  "daftar_keanggotaan"
+  "daftar_keanggotaan",
+  "surveyor",
+  "pengaturan_umum"
 ];
 
 const arr = {};

@@ -24,6 +24,78 @@ module.exports = {
                     createdAt: new Date(),
                     updatedAt: new Date(),
                 },
+                {
+                    name: "icon",
+                    value: null,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                },
+                {
+                    name: "logo",
+                    value: null,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                },
+                {
+                    name: "hero_logo",
+                    value: null,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                },
+                {
+                    name: "nama_kabupaten_kota",
+                    value: "Kab. Aceh Tengah",
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                },
+                {
+                    name: "alamat",
+                    value: "Jl. Lebe Kader No.2, Asir Asir Asia, Kec. Lut Tawar, Kabupaten Aceh Tengah, Provinsi Aceh 24519",
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                },
+                {
+                    name: "quote",
+                    value: "Sucikan Harta dengan Zakat",
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                },
+                {
+                    name: "nama_jabatan1",
+                    value: null,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                },
+                {
+                    name: "nama_jabatan2",
+                    value: null,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                },
+                {
+                    name: "nama_jabatan3",
+                    value: null,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                },
+                {
+                    name: "nama_pejabat1",
+                    value: null,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                },
+                {
+                    name: "nama_pejabat2",
+                    value: null,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                },
+                {
+                    name: "nama_pejabat3",
+                    value: null,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                },
             ],
             {}
         );

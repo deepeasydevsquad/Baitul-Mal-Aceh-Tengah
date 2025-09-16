@@ -40,12 +40,16 @@
     </p>
 
     <!-- Info -->
-    <p class="text-xs text-gray-500 mt-2">
-      Ukuran maksimum: {{ maxSize }} KB. Tipe file: {{ accept }}
+    <p v-if="!hideInfo" class="text-xs text-gray-500 mt-2">
+      Ukuran maksimum: {{ maxSize }} KB. Tipe file: {{ accept }}.
+    </p>
+    <p v-if="!hideInfo" class="text-xs text-gray-500">
+      Dimensi maks: {{ dimensionsInfo }}
     </p>
 
     <!-- Preview (opsional) -->
     <div v-if="showPreview && previewUrl" class="mt-3">
+      <p class="text-sm text-gray-500 mb-2 font-bold">Preview:</p>
       <img
         :src="previewUrl"
         alt="Preview"
@@ -66,6 +70,8 @@ const props = defineProps({
   error: { type: String, default: "" },
   label_status: { type: Boolean, default: true },
   maxSize: { type: Number, default: 600 }, // KB
+  dimensionsInfo: { type: String, default: "-" },
+  hideInfo: { type: Boolean, default: false },
 
   // Support edit
   initialFileName: { type: String, default: "" },

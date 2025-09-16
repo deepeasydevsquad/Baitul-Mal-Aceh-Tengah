@@ -91,7 +91,6 @@ async function fetchData() {
 
 onMounted(async () => {
   await fetchData()
-
 })
 
 // Function: Delete Data

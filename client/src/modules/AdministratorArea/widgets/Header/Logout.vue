@@ -87,8 +87,7 @@ defineExpose({
       </svg>
       Log Out
     </button>
-
-    <Transition
+<Transition
       enter-active-class="transition ease-out duration-200"
       enter-from-class="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
       enter-to-class="opacity-100 translate-y-0 sm:scale-100"
@@ -96,18 +95,34 @@ defineExpose({
       leave-from-class="opacity-100 translate-y-0 sm:scale-100"
       leave-to-class="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
     >
-      <Teleport to="body">
-        <div
-          v-if="showConfirmation"
-          class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-          @click.self="hideLogoutConfirmation"
-        >
-          <div class="bg-white rounded-2xl shadow-lg max-w-md w-full mx-4">
-            <div class="flex items-center justify-between p-6 border-b border-gray-200">
-              <h3 class="text-lg font-semibold text-gray-900">Konfirmasi Logout</h3>
-              <button
-                @click="hideLogoutConfirmation"
-                class="text-gray-400 hover:text-gray-600 transition-colors"
+ <Teleport to="body">
+      <div
+        v-if="showConfirmation"
+        class="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50"
+        @click.self="hideLogoutConfirmation"
+      >
+        <div class="bg-white rounded-lg shadow-lg max-w-md w-full mx-4">
+          <div class="flex items-center justify-between p-6 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-900">Konfirmasi Logout</h3>
+            <button
+              @click="hideLogoutConfirmation"
+              class="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                ></path>
+              </svg>
+            </button>
+          </div>
+
+          <div class="p-6">
+            <div class="flex items-center mb-4">
+              <div
+                class="flex-shrink-0 w-10 h-10 mx-auto bg-red-100 rounded-full flex items-center justify-center"
               >
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
