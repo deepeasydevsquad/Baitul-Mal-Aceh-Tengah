@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import Notification from '@/components/Modal/Notification.vue'
 import Confirmation from '@/components/Modal/Confirmation.vue'
 import BaseButton from '@/components/Button/BaseButton.vue'
@@ -11,8 +11,8 @@ import DeleteIcon from '@/components/Icons/DeleteIcon.vue'
 import Pagination from '@/components/Pagination/Pagination.vue'
 import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue'
 import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
-import FormAdd from '@/modules/Bank/widgets/FormAdd.vue'
-import FormEdit from '@/modules/Bank/widgets/FormEdit.vue'
+import FormAdd from '@/modules/DaftarKeanggotaan/widgets/FormAdd.vue'
+import FormEdit from '@/modules/DaftarKeanggotaan/widgets/FormEdit.vue'
 
 // Composable
 import { usePagination } from '@/composables/usePagination'
@@ -20,7 +20,7 @@ import { useConfirmation } from '@/composables/useConfirmation'
 import { useNotification } from '@/composables/useNotification'
 
 // Service API
-// import { get_bank, delete_bank } from '@/service/bank'
+import { get_daftar_keanggotaan, delete_keanggotaan } from '@/service/daftar_keanggotaan'
 
 // State: Loading
 const isLoading = ref(false)
@@ -28,7 +28,7 @@ const isTableLoading = ref(false)
 
 // Composable: pagination
 const itemsPerPage = ref<number>(100)
-const totalColumns = ref<number>(3)
+const totalColumns = ref<number>(6)
 
 const { currentPage, perPage, totalRow, totalPages, nextPage, prevPage, pageNow, pages } =
 usePagination(fetchData, { perPage: itemsPerPage.value })
@@ -41,51 +41,58 @@ useNotification()
 const { showConfirmDialog, confirmTitle, confirmMessage, displayConfirmation, confirm, cancel } =
 useConfirmation()
 
-// State Data Bank
-const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL
 
 interface Data {
   id: number
-  field1: string
-  field2: string
-  field3: string
-  ...
+  kode: string
+  fullname: string
+  tipe: string
+  nomor_ktp: string
+  nomor_kk: string
+  whatsapp_number: string
+  birth_date: string
+  alamat: string
+  datetime: string
+  desa_name: string
+  kecamatan_name: string
 }
 
-const datas = ref<Data[]>([])
+const dataDaftarKeanggotaan = ref<Data[]>([])
 
 // Function: Modal
 const isModalAddOpen = ref(false)
 const isModalEditOpen = ref(false)
-const selectedBank = ref<any>(null)
+const selectedKeanggotaan = ref<any>(null)
 
 function openModalAdd() {
   isModalAddOpen.value = true
 }
 
-function openModalEdit(bank: any) {
-  selectedBank.value = bank
-  console.log("selectedBank Parent", selectedBank.value)
+function openModalEdit(daftar_keanggotaan: any) {
+  selectedKeanggotaan.value = daftar_keanggotaan
+  console.log("Keanggotaan Parent", selectedKeanggotaan.value)
   isModalEditOpen.value = true
 }
 
 // Function: Fetch Data
 const search = ref('')
+const type = ref('')
 
 async function fetchData() {
   isTableLoading.value = true
   try {
-    // const response = await get_bank({
-    //   search: search.value,
-    //   perpage: perPage.value,
-    //   pageNumber: currentPage.value,
-    // })
+    const response = await get_daftar_keanggotaan({
+      search: search.value,
+      perpage: perPage.value,
+      pageNumber: currentPage.value,
+      type: type.value,
+    })
 
-    datas.value = response.data
+    dataDaftarKeanggotaan.value = response.data
     totalRow.value = response.total
-    console.log(datas.value)
+    console.log(dataDaftarKeanggotaan.value)
   } catch (error) {
-    displayNotification('Gagal mengambil data bank', 'error')
+    displayNotification('Gagal mengambil data daftar keanggotaan', 'error')
   } finally {
     isTableLoading.value = false
   }
@@ -93,22 +100,21 @@ async function fetchData() {
 
 onMounted(async () => {
   await fetchData()
-
 })
 
 // Function: Delete Data
 async function deleteData(id: number) {
   displayConfirmation(
-    'Hapus Data Bank',
-    'Apakah Anda yakin ingin menghapus data bank ini?',
+    'Hapus Data Keanggotaan',
+    'Apakah Anda yakin ingin menghapus data keanggotaan ini?',
     async () => {
       try {
         isLoading.value = true
-        // await delete_bank(id)
-        displayNotification('Data bank berhasil dihapus', 'success')
+        await delete_keanggotaan(id)
+        displayNotification('Data keanggotaan berhasil dihapus', 'success')
         await fetchData()
       } catch (error) {
-        displayNotification('Gagal menghapus data bank', 'error')
+        displayNotification('Gagal menghapus data keanggotaan', 'error')
       } finally {
         isLoading.value = false
       }
@@ -130,21 +136,31 @@ async function deleteData(id: number) {
           type="button"
         >
           <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" />
-          Tambah Bank
+          Tambah Keanggotaan
         </BaseButton>
 
         <!-- Search -->
         <div class="flex items-center w-full sm:w-auto">
-          <label for="search" class="mr-2 text-sm font-medium text-gray-600">Cari</label>
+          <label for="search" class="mr-2 text-sm font-medium text-gray-600">Filter</label>
           <input
             id="search"
             type="text"
             v-model="search"
             @change="fetchData"
-            placeholder="Cari bank..."
-            class="w-full sm:w-64 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700
+            placeholder="Cari Nama / Kode / Nomor Whatsapp . . ."
+            class="w-full sm:w-96 rounded-s-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700
                    focus:border-green-900 focus:ring-2 focus:ring-green-900 transition"
           />
+          <select
+            id="type"
+            v-model="type"
+            @change="fetchData()"
+            class="block w-full sm:w-64 rounded-e-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:ring-2 focus:ring-green-900 focus:border-green-900 transition"
+          >
+            <option value="perorangan">Perorangan</option>
+            <option value="instansi">Instansi</option>
+            <option value="">Semua</option>
+          </select>
         </div>
       </div>
 
@@ -154,26 +170,62 @@ async function deleteData(id: number) {
         <table v-else class="w-full border-collapse bg-white text-sm">
           <thead class="bg-gray-50 text-gray-700 text-center border-b border-gray-300">
             <tr>
-              <th class="w-[30%] px-6 py-3 font-medium">Logo Bank</th>
-              <th class="w-[50%] px-6 py-3 font-medium">Nama Bank</th>
-              <th class="w-[20%] px-6 py-3 font-medium">Aksi</th>
+              <th class="w-[10%] px-6 py-3 font-medium">Kode</th>
+              <th class="w-[15%] px-6 py-3 font-medium">Tipe Member</th>
+              <th class="w-[15%] px-6 py-3 font-medium">Nama Member</th>
+              <th class="w-[35%] px-6 py-3 font-medium">Info Member</th>
+              <th class="w-[15%] px-6 py-3 font-medium">Datetimes</th>
+              <th class="w-[10%] px-6 py-3 font-medium">Aksi</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
-            <template v-if="datas">
+            <template v-if="dataDaftarKeanggotaan.length > 0">
               <tr
-                v-for="data in datas"
+                v-for="data in dataDaftarKeanggotaan"
                 :key="data.id"
-                class="hover:bg-gray-50 transition-colors"
+                class="hover:bg-gray-100 transition-colors"
               >
                 <td class="px-6 py-4 text-center font-medium text-gray-800">
-                  <!-- FIELD 1 -->
+                  {{ data.kode }}
                 </td>
                 <td class="px-6 py-4 text-center font-medium text-gray-800">
-                  <!-- FIELD 2 -->
+                  {{ data.tipe.toUpperCase() }}
                 </td>
                 <td class="px-6 py-4 text-center font-medium text-gray-800">
-                  <!-- FIELD 3 -->
+                  {{ data.fullname }}
+                </td>
+                <td class="px-6 py-4 text-center font-medium text-gray-800">
+                  <table class="border border-gray-300 w-full text-sm text-left">
+                    <tbody>
+                      <tr>
+                        <td class="w-[45%] bg-gray-200 px-4 py-2 font-semibold">DESA</td>
+                        <td class="px-4 py-2">{{ data.desa_name || '-' }}</td>
+                      </tr>
+                      <tr>
+                        <td class="w-[45%] bg-gray-200 px-4 py-2 font-semibold">KECAMATAN</td>
+                        <td class="px-4 py-2">{{ data.kecamatan_name || '-' }}</td>
+                      </tr>
+                      <tr>
+                        <td class="w-[45%] bg-gray-200 px-4 py-2 font-semibold">NOMOR WHATSAPP</td>
+                        <td class="px-4 py-2">{{ data.whatsapp_number || '-' }}</td>
+                      </tr>
+                      <tr>
+                        <td class="w-[45%] bg-gray-200 px-4 py-2 font-semibold">NOMOR KTP</td>
+                        <td class="px-4 py-2">{{ data.nomor_ktp || '-' }}</td>
+                      </tr>
+                      <tr>
+                        <td class="w-[45%] bg-gray-200 px-4 py-2 font-semibold">NOMOR KK</td>
+                        <td class="px-4 py-2">{{ data.nomor_kk || '-' }}</td>
+                      </tr>
+                      <tr>
+                        <td class="w-[45%] bg-gray-200 px-4 py-2 font-semibold">TANGGAL LAHIR</td>
+                        <td class="px-4 py-2">{{ data.birth_date || '-' }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+                <td class="px-6 py-4 text-center font-medium text-gray-800">
+                  {{ data.datetime }}
                 </td>
                 <td class="px-6 py-4">
                   <div class="flex justify-center gap-2">
@@ -191,9 +243,9 @@ async function deleteData(id: number) {
             <!-- Empty State -->
             <tr v-else>
               <td :colspan="totalColumns" class="px-6 py-8 text-center text-gray-500">
-                <font-awesome-icon icon="fa-solid fa-database" class="text-4xl mb-2 text-gray-400" />
+                <font-awesome-icon icon="fa-solid fa-users" class="text-4xl mb-2 text-gray-400" />
                 <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ada data</h3>
-                <p class="text-sm">Belum ada data field.</p>
+                <p class="text-sm">Belum ada data keanggotaan.</p>
               </td>
             </tr>
           </tbody>
@@ -219,15 +271,15 @@ async function deleteData(id: number) {
     <FormAdd
       :is-modal-open="isModalAddOpen"
       @close="isModalAddOpen = false; fetchData()"
-      @status="(payload: any) => displayNotification(payload.error_msg || 'Tambah/Update Bank gagal', payload.error ? 'error' : 'success')"
+      @status="(payload: any) => displayNotification(payload.error_msg || 'Tambah/Update Keanggotaan gagal', payload.error ? 'error' : 'success')"
     />
 
     <!-- Modal FormEdit -->
     <FormEdit
       :is-modal-open="isModalEditOpen"
-      :selected-bank="selectedBank"
+      :selected-keanggotaan="selectedKeanggotaan"
       @close="isModalEditOpen = false; fetchData()"
-      @status="(payload: any) => displayNotification(payload.error_msg || 'Tambah/Update Bank gagal', payload.error ? 'error' : 'success')"
+      @status="(payload: any) => displayNotification(payload.error_msg || 'Tambah/Update Keanggotaan gagal', payload.error ? 'error' : 'success')"
     />
 
     <!-- Confirmation -->

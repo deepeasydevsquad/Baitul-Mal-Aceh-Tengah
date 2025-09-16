@@ -130,10 +130,6 @@ const handleSubmit = async () => {
 
   isSubmitting.value = true
 
-  console
-  console.log(formData.get('name'))
-  console.log(formData.get('img'))
-
   try {
     const response = await edit_bank(formData)
     console.log(response)

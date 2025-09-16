@@ -1,6 +1,7 @@
 const express = require("express");
 const { body } = require("express-validator");
 const controllers = require("../modules/register/controllers/index");
+const validation = require("../validation/register");
 
 const router = express.Router();
 
@@ -23,7 +24,15 @@ router.post(
     controllers.register
 );
 
-router.post("/register/daftar_desa", controllers.list_desa);
+router.post("/register/daftar_desa",
+  [
+    body("kecamatan_id")
+      .notEmpty()
+      .withMessage("kecamatan_id tidak boleh kosong.")
+      .custom(validation.check_id_kecamatan),
+  ],
+  controllers.list_desa
+);
 
 router.get("/register/daftar_kecamatan", controllers.list_kecamatan);
 
