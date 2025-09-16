@@ -46,9 +46,10 @@ app.set("view engine", "ejs");
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Load router dinamis
-const arr_router = [
+const arr_router = [ 
   "auth",
   "administrator",
+  "syarat",
   "system_log_surveyor",
   "bank",
   "register",
@@ -57,6 +58,12 @@ const arr_router = [
   "running_text",
   "daftar_grup_acces",
   "daftar_pengguna",
+  "daftar_system_log",
+  "kecamatan",
+  "kegiatan_kesekretariatan",
+  "bank_pengumpulan",
+  "surveyor",
+  "pengaturan_umum"
 ];
 
 const arr = {};

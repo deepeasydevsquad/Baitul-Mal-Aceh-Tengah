@@ -8,6 +8,12 @@ module.exports = {
       [
         {
           name: "Administrator",
+          group_access: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          name: "Bendahara",
           group_access: JSON.stringify([
             {
               id: 1,
