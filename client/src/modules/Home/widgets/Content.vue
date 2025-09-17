@@ -84,6 +84,8 @@
   onMounted(() => {
     localStorage.removeItem('member_access_token');
     localStorage.removeItem('member_refresh_token');
+
+    console.log('Tokens cleared on mount------------------');
   });
 </script>
 <template>
