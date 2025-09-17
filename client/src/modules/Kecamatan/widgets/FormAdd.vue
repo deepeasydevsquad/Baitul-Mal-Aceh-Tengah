@@ -29,9 +29,11 @@ const emit = defineEmits<{
 
 // Function: Close modal
 const closeModal = () => {
+  if (isSubmitting.value) return
   resetForm()
   emit('close')
 }
+
 
 // Function: Reset form
 const resetForm = () => {
@@ -115,9 +117,9 @@ const handleSubmit = async () => {
 
     console.log("Response dari server:", response)
 
-    emit('status', { 
-      error_msg: response?.error_msg || '', 
-      error: response?.error || false 
+    emit('status', {
+      error_msg: response?.error_msg || '',
+      error: response?.error || false
     })
 
     closeModal()
@@ -140,6 +142,7 @@ const handleSubmit = async () => {
     }
   } finally {
     isSubmitting.value = false
+    closeModal()
   }
 }
 
@@ -177,8 +180,8 @@ onBeforeUnmount(async () => {
       >
         <!-- Header -->
         <div class="flex items-center justify-between">
-          <h2 id="modal-title" class="text-xl font-semibold text-gray-800">
-            Tambah Kecematan
+          <h2 id="modal-title" class="text-xl font-bold text-gray-800">
+            Tambah Kecamatan
           </h2>
           <button
             class="text-gray-400 text-lg hover:text-gray-600"
@@ -226,18 +229,28 @@ onBeforeUnmount(async () => {
         </div> -->
 
         <!-- Actions -->
-        <div class="pt-4">
-          <BaseButton
-            type="submit"
-            fullWidth
-            variant="primary"
-            :disabled="isSubmitting"
-            @click="handleSubmit"
-          >
-            <span v-if="isSubmitting">Menyimpan...</span>
-            <span v-else>Simpan</span>
-          </BaseButton>
-        </div>
+          <div class="flex justify-end gap-3 mt-4">
+            <BaseButton
+              @click="closeModal"
+              type="button"
+              :disabled="isSubmitting"
+              variant="secondary"
+            >
+              Batal
+            </BaseButton>
+            <BaseButton
+              type="submit"
+              variant="primary"
+              :disabled="!(
+                form.name.trim() &&
+                form.kode.trim()
+              ) || isSubmitting"
+              @click="handleSubmit"
+            >
+              <span v-if="isSubmitting">Menyimpan...</span>
+              <span v-else>Simpan</span>
+            </BaseButton>
+          </div>
       </div>
     </div>
   </Transition>

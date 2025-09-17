@@ -99,11 +99,13 @@ const handleSubmit = async () => {
     displayNotification(msg, 'error')
   } finally {
     isSubmitting.value = false
+    closeModal()
   }
 }
 
 // Close modal
 const closeModal = () => {
+  if (isSubmitting.value) return
   resetForm()
   emit('close')
 }
@@ -142,7 +144,7 @@ onBeforeUnmount(() => {
       <div v-else class="relative max-w-md w-full bg-white shadow-2xl rounded-2xl p-6 space-y-6">
         <!-- Header -->
         <div class="flex items-center justify-between">
-          <h2 class="text-xl font-semibold text-gray-800">TAMBAH PENGGUNA BARU</h2>
+          <h2 class="text-xl font-bold text-gray-800">TAMBAH PENGGUNA BARU</h2>
           <button
             class="text-gray-400 text-lg hover:text-gray-600"
             @click="closeModal"
@@ -207,9 +209,31 @@ onBeforeUnmount(() => {
         />
 
         <!-- Actions -->
-        <div class="pt-4">
-          <BaseButton fullWidth variant="primary" :disabled="isSubmitting" @click="handleSubmit">
-            Simpan
+        <div class="flex justify-end gap-3 mt-4">
+          <BaseButton
+            @click="closeModal"
+            type="button"
+            :disabled="isSubmitting"
+            variant="secondary"
+          >
+            Batal
+          </BaseButton>
+          <BaseButton
+            type="submit"
+            variant="primary"
+            :disabled="
+              !(
+                form.grup_id &&
+                form.name &&
+                form.username &&
+                form.password &&
+                form.password_confirmation
+              ) || isSubmitting
+            "
+            @click="handleSubmit"
+          >
+            <span v-if="isSubmitting">Menyimpan...</span>
+            <span v-else>Simpan Perubahan</span>
           </BaseButton>
         </div>
       </div>

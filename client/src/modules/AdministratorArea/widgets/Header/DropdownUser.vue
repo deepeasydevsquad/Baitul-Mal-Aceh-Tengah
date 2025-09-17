@@ -2,9 +2,8 @@
 import { onClickOutside } from '@vueuse/core'
 import { ref } from 'vue'
 import Notification from '@/components/Modal/Notification.vue'
-import Confirmation from '@/components/Modal/Confirmation.vue'
-import Logout from './Logout.vue'
-// import ModalEditProfile from '@/components/User/Modules/Profile/ModalEditProfile.vue'
+import Logout from '@/modules/AdministratorArea/widgets/Header/Logout.vue'
+import ModalEditProfile from '@/modules/AdministratorArea/widgets/Header/ModalEditProfile.vue'
 // import { CompanyCode, Name, Jabatan } from '@/stores/profile'
 import { SettingStore } from '@/stores/settings'
 
@@ -99,12 +98,13 @@ function showNotif(payload: { type: 'success' | 'error'; message: string }) {
     </div>
   </div>
 
-  <!-- <ModalEditProfile
+  <ModalEditProfile
     :formStatus="ModalEdit"
     @cancel="ModalEdit = false"
     @submitted="ModalEdit = false"
     @notify="showNotif"
-  /> -->
+  />
+
   <Notification
     :showNotification="showNotification"
     :notificationType="notificationType"

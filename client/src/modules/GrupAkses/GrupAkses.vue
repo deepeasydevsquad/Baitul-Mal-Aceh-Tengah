@@ -251,7 +251,7 @@ const handleStatus = (payload: any) => {
                   icon="fa-solid fa-database"
                   class="text-2xl mb-2 text-gray-400"
                 />
-                <p class="text-sm">Belum ada data bank.</p>
+                <p class="text-sm">Belum ada data grup akses.</p>
               </td>
             </tr>
           </tbody>

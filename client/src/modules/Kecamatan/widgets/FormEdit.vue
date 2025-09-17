@@ -17,7 +17,7 @@ import { edit_kecamatan, get_info_edit_kecamatan } from '@/service/kecamatan'
 
 // Composable: notification
 const { showNotification, notificationType, notificationMessage, displayNotification } =
-useNotification()
+  useNotification()
 
 interface Props {
   isModalOpen: boolean
@@ -33,6 +33,7 @@ const emit = defineEmits<{
 
 // Function: Close modal
 const closeModal = () => {
+  if (isSubmitting.value) return
   resetForm()
   emit('close')
 }
@@ -78,7 +79,7 @@ const isLoading = ref(true)
 const fetchData = async () => {
   if (!props.selectedKecamatan || !props.selectedKecamatan.id) return
   try {
-    const response =  await get_info_edit_kecamatan(props.selectedKecamatan.id)
+    const response = await get_info_edit_kecamatan(props.selectedKecamatan.id)
     form.value.name = response.data.name
     form.value.kode = response.data.kode
     console.log(response)
@@ -96,35 +97,6 @@ const form = ref<{ name: string; kode: string }>({
   kode: '',
 })
 
-// const handleSubmit = async () => {
-//   if (!validateForm()) return
-
-//   const kecamatan_id = props.selectedKecamatan.id
-//   const formData = new FormData()
-//   formData.append('id', kecamatan_id.toString())
-//   formData.append('name', form.value.name)
-//   if (form.value.img) formData.append('img', form.value.img)
-
-//   isSubmitting.value = true
-
-//   console
-//   console.log(formData.get('name'))
-//   console.log(formData.get('img'))
-
-//   try {
-//     const response = await edit_kecamatan(formData)
-//     console.log(response)
-//     emit('status', { error_msg: response.error_msg, error: response.error })
-//     closeModal()
-
-//   } catch (error: any) {
-//     console.error(error)
-//     displayNotification(error.response.data.error_msg || error.response.data.message, 'error')
-//   } finally {
-//     isSubmitting.value = false
-//   }
-// }
-
 const handleSubmit = async () => {
   if (!validateForm()) return
 
@@ -134,20 +106,17 @@ const handleSubmit = async () => {
 
   formData.id = kecamatan_id
 
-  isSubmitting.value = true
+  isSubmitting.value = true
   try {
-
-    console.log(formData)
     const response = await edit_kecamatan(formData)
     console.log(response)
     emit('status', { error_msg: response.error_msg, error: response.error })
-    closeModal()
-
   } catch (error: any) {
     console.error(error)
     displayNotification(error.response.data.error_msg || error.response.data.message, 'error')
   } finally {
     isSubmitting.value = false
+    closeModal()
   }
 }
 
@@ -165,9 +134,12 @@ onBeforeUnmount(async () => {
   document.removeEventListener('keydown', handleEscape)
 })
 
-watch(() => props.selectedKecamatan, (val) => {
-  if (props.isModalOpen && val?.id) fetchData()
-})
+watch(
+  () => props.selectedKecamatan,
+  (val) => {
+    if (props.isModalOpen && val?.id) fetchData()
+  },
+)
 </script>
 
 <template>
@@ -187,15 +159,10 @@ watch(() => props.selectedKecamatan, (val) => {
       aria-labelledby="modal-title"
     >
       <LoadingSpinner v-if="isLoading" label="Memuat halaman..." />
-      <div
-        v-else
-        class="relative max-w-md w-full bg-white shadow-2xl rounded-2xl p-6 space-y-6"
-      >
+      <div v-else class="relative max-w-md w-full bg-white shadow-2xl rounded-2xl p-6 space-y-6">
         <!-- Header -->
         <div class="flex items-center justify-between">
-          <h2 id="modal-title" class="text-xl font-semibold text-gray-800">
-            Edit kecamatan
-          </h2>
+          <h2 id="modal-title" class="text-xl font-bold text-gray-800">Edit kecamatan</h2>
           <button
             class="text-gray-400 text-lg hover:text-gray-600"
             @click="closeModal"
@@ -228,18 +195,24 @@ watch(() => props.selectedKecamatan, (val) => {
           />
         </div>
 
-
         <!-- Actions -->
-        <div class="pt-4">
+        <div class="flex justify-end gap-3 mt-4">
+          <BaseButton
+            @click="closeModal"
+            type="button"
+            :disabled="isSubmitting"
+            variant="secondary"
+          >
+            Batal
+          </BaseButton>
           <BaseButton
             type="submit"
-            fullWidth
             variant="primary"
-            :disabled="isSubmitting"
+            :disabled="!(form.name.trim() && form.kode.trim()) || isSubmitting"
             @click="handleSubmit"
           >
             <span v-if="isSubmitting">Menyimpan...</span>
-            <span v-else>Simpan</span>
+            <span v-else>Simpan Perubahan</span>
           </BaseButton>
         </div>
       </div>

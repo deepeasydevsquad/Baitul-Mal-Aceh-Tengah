@@ -22,7 +22,7 @@ useHead({
 
 <template>
   <header
-    class="sticky top-0 z-998 bg-left  flex w-full  drop-shadow-1 dark:bg-boxdark dark:drop-shadow-none"
+    class="sticky top-0 z-998 bg-left flex w-full  drop-shadow-1 dark:bg-boxdark dark:drop-shadow-none"
   >
     <!-- <title>AMRA :: Aplikasi Manajemen Travel Haji dan Umrah</title> -->
     <!-- <font-awesome-icon :icon="['fas', 'user']" /> -->

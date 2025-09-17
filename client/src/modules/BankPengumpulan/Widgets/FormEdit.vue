@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import BaseButton from '@/components/Button/BaseButton.vue'
-import { ref, watch, reactive } from 'vue'
+import { ref, watch, reactive, onMounted, onBeforeUnmount } from 'vue'
 import { getBank } from '@/service/bank_pengumpulan'
 import type { PropType } from 'vue'
 
@@ -180,6 +180,18 @@ const formatNomorRekening = (event: Event) => {
 defineExpose({
   parseServerErrors,
 })
+
+// Function: Handle escape & Fetch Data
+const handleEscape = (e: KeyboardEvent) => {
+  if (e.key === 'Escape' && props.showModal) closeModal()
+}
+onMounted(async () => {
+  document.addEventListener('keydown', handleEscape)
+})
+
+onBeforeUnmount(async () => {
+  document.removeEventListener('keydown', handleEscape)
+})
 </script>
 
 <template>
@@ -325,22 +337,29 @@ defineExpose({
             </p>
           </div>
 
-          <div class="flex justify-end gap-3 pt-4">
-            <BaseButton @click="closeModal" type="button" :disabled="isLoading" variant="secondary"
-              >Batal</BaseButton
+          <div class="flex justify-end gap-3 mt-4">
+            <BaseButton
+              @click="closeModal"
+              type="button"
+              :disabled="isLoading"
+              variant="secondary"
             >
+              Batal
+            </BaseButton>
             <BaseButton
               type="submit"
-              :loading="isLoading"
               variant="primary"
-              :disabled="
-                !formBank.bank_id ||
-                !formBank.tipe ||
-                !formBank.nama_akun_bank.trim() ||
-                !formBank.nomor_akun_bank.trim()
-              "
-              >Simpan Perubahan</BaseButton
+              :disabled="!(
+                formBank.bank_id &&
+                formBank.tipe &&
+                formBank.nama_akun_bank.trim() &&
+                formBank.nomor_akun_bank.trim()
+              ) || isLoading"
+              @click="handleSubmit"
             >
+              <span v-if="isLoading">Menyimpan...</span>
+              <span v-else>Simpan Perubahan</span>
+            </BaseButton>
           </div>
         </form>
       </div>
