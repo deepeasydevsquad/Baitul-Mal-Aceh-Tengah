@@ -3,6 +3,7 @@ import { ref, defineEmits, watch } from 'vue'
 import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
 import InputText from '@/components/Form/InputText.vue'
 
+import { SettingStore } from '@/stores/settings'
 import { edit_profile, get_info_edit_profile } from '@/service/auth'
 
 // State: Loading
@@ -17,6 +18,8 @@ const emit = defineEmits<{
   (e: 'submitted'): void
   (e: 'notify', payload: { type: string; message: string }): void
 }>()
+
+const SettingGlob = SettingStore()
 
 // Function: Reset form
 const resetForm = () => {
@@ -110,6 +113,8 @@ const handleSubmit = async () => {
   try {
     console.log(form.value)
     await edit_profile(form.value)
+
+    SettingGlob.addItem("name", form.value.name);
     emit('notify', { type: 'success', message: 'Berhasil mengubah profile' })
   } catch (error: any) {
     emit('notify', { type: 'error', message: error.response?.data?.message || 'Gagal mengubah profile' })

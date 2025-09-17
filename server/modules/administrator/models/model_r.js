@@ -71,6 +71,7 @@ class Model_r {
             if (e) {
                 user_info['name'] = e.name;
                 user_info['grup_id'] = e.grup_id;
+                user_info['grup'] = e.Grup.name;
                 if(e.grup_id == 1 ) {
                     user_info['group_access'] = {};
                 }else{

@@ -57,8 +57,8 @@ function showNotif(payload: { type: 'success' | 'error'; message: string }) {
   <div class="relative" ref="target">
     <router-link class="flex items-center gap-4" to="#" @click.prevent="dropdownOpen = !dropdownOpen" >
       <span class="hidden text-right lg:block">
-        <span class="block text-sm font-medium text-green-900 dark:text-white">Muammar Kadafi</span>
-        <span class="block text-xs font-bold text-green-900 dark:text-white">As Administrator</span>
+        <span class="block text-sm font-medium text-green-900 dark:text-white">{{ SettingGlob.sharedObject.name  }}</span>
+        <span class="block text-xs font-bold text-green-900 dark:text-white">As {{ SettingGlob.sharedObject.grup }}</span>
       </span>
       <span class="h-12 w-12 rounded-full">
         <img src="@/assets/images/user/avatar.png" alt="User" />
