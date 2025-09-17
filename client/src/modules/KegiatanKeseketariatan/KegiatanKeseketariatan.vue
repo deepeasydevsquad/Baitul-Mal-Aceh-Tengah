@@ -88,7 +88,6 @@ async function fetchData() {
 
 onMounted(async () => {
   await fetchData()
-  totalColumns.value = document.querySelectorAll('thead th').length
 })
 
 const handleClose = () => {
@@ -113,7 +112,7 @@ const handleStatus = (payload: any) => {
         <BaseButton
           @click="openModalAdd()"
           variant="primary"
-          :loading="isModalAddOpen"
+          :loading="isModalAddOpen || isModalEditOpen"
           type="button"
         >
           <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" />

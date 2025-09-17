@@ -100,7 +100,7 @@ async function fetchData() {
 
 onMounted(async () => {
   await fetchData()
-  totalColumns.value = document.querySelectorAll('thead th').length
+
 })
 
 // Function: handler untuk menambahkan teks
@@ -252,16 +252,16 @@ const handleEdit = (runningText: RunningText) => {
 <template>
   <div class="mx-auto px-4">
     <div class="flex justify-between items-center mb-6">
-      <BaseButton @click="openModalAdd()" variant="primary" :loading="isModalAddOpen" type="button">
+      <BaseButton @click="openModalAdd()" variant="primary" :loading="isModalAddOpen || isModalEditOpen" type="button">
         <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" />
         Tambahkan Teks</BaseButton
       >
       <div class="flex items-center">
-        <label for="search" class="sr-only">Search</label>
+        <label for="search" class="mr-2 text-sm font-medium text-gray-600">Cari</label>
         <input
           type="text"
           id="search"
-          class="block w-64 px-3 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          class="block w-64 px-3 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-900 focus:border-green-900"
           v-model="search"
           @input="fetchData()"
           @keyup.enter="fetchData()"

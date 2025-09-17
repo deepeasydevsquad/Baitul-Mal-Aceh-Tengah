@@ -39,7 +39,6 @@ const closeModal = () => {
 const resetForm = () => {
   form.value.name = ''
   form.value.img = null
-  preview.value = null
 
   // Reset errors
   errors.value = {}
@@ -73,12 +72,9 @@ const validateForm = () => {
 }
 
 // Function: Handle file
-const preview = ref<string | null>(null)
-
 const handleFile = (file: File | null) => {
   if (!file) {
     form.value.img = null
-    preview.value = null
     return
   }
 
@@ -90,7 +86,6 @@ const handleFile = (file: File | null) => {
   }
 
   form.value.img = file
-  preview.value = URL.createObjectURL(file)
 }
 
 // Function: Handle submit

@@ -84,6 +84,8 @@
   onMounted(() => {
     localStorage.removeItem('member_access_token');
     localStorage.removeItem('member_refresh_token');
+
+    console.log('Tokens cleared on mount------------------');
   });
 </script>
 <template>
@@ -130,7 +132,7 @@
                 id="password" type="password" placeholder="Masukkan password anda" />
             </div>
             <!-- <div class="flex mb-4">
-              <input type="checkbox" class="shrink-0 mt-0.5 border-gray-200 rounded-sm text-blue-600 focus:ring-blue-500 checked:border-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+              <input type="checkbox" class="shrink-0 mt-0.5 border-gray-200 rounded-sm text-blue-600 focus:ring-green-900 checked:border-green-900 disabled:opacity-50 disabled:pointer-events-none"
                 id="hs-default-checkbox"/>
               <label for="hs-default-checkbox" class="text-sm text-gray-500 ms-3">Ingat Saya</label>
             </div> -->

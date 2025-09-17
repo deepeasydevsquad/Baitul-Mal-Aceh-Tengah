@@ -18,6 +18,7 @@ import PengaturanUmum from '@/modules/PengaturanUmum/PengaturanUmum.vue'
 import GrupAkses from '@/modules/GrupAkses/GrupAkses.vue'
 import DaftarPengguna from '@/modules/DaftarPengguna/DaftarPengguna.vue'
 import KegiatanKeseketariatan from '@/modules/KegiatanKeseketariatan/KegiatanKeseketariatan.vue'
+import DaftarKeanggotaan from '@/modules/DaftarKeanggotaan/DaftarKeanggotaan.vue'
 import kecamatan from '@/modules/Kecamatan/Kecamatan.vue'
 import SystemLog from '@/modules/SystemLog/SystemLog.vue'
 
@@ -33,6 +34,7 @@ const tabComponents = {
   system_log: SystemLog,
   program_kegiatan_kesekretariatan: KegiatanKeseketariatan,
   daftar_bank_pengumpulan: BankPengumpulan,
+  daftar_keanggotaan: DaftarKeanggotaan,
   daftar_surveyor: Surveyor,
   pengaturan_umum: PengaturanUmum,
 }
