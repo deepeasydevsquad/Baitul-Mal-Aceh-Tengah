@@ -8,10 +8,42 @@ class Model_r {
     this.req = req;
   }
 
+  async info_user() {
+    const authHeader = this.req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    const decoded = jwt.decode(token);
+    try {
+      var q = await User.findOne({
+        where : {
+          id: decoded.id
+        }
+      })
+      return { id: q.id, username: q.username, name: q.name, password: q.password };
+    } catch (error) {
+      return {}
+    }
+  }
+
+  async get_info_edit_profile() {
+    const authHeader = this.req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    const decoded = jwt.decode(token);
+    try {
+      var q = await User.findOne({
+        where : {
+          id: decoded.id
+        }
+      })
+      return { id: q.id, username: q.username, name: q.name };
+    } catch (error) {
+      return {}
+    }
+  }
+
   async getInfoUser() {
     try {
         var q = await User.findOne({
-            where: { username : this.req.body.username }, 
+            where: { username : this.req.body.username },
         });
         return { id: q.id, username: q.username, name: q.name };
     } catch (error) {
@@ -26,19 +58,20 @@ class Model_r {
         const decoded = jwt.decode(token);
         var user_info = {};
         await User.findOne({
-            where : { 
+            where : {
                 id: decoded.id
             },
             include : [
                 {
-                    required: true, 
+                    required: true,
                     model: Grup,
-                }, 
+                },
             ]
         }).then(async (e) => {
             if (e) {
                 user_info['name'] = e.name;
                 user_info['grup_id'] = e.grup_id;
+                user_info['grup'] = e.Grup.name;
                 if(e.grup_id == 1 ) {
                     user_info['group_access'] = {};
                 }else{
@@ -67,11 +100,11 @@ class Model_r {
                     }
                 }else{
                     menu[e.id] = { id : e.id, name : e.name, path : e.path, icon : e.icon, tab : e.path === '#' ? '' : JSON.parse(e.tab)};
-                }   
+                }
             })
           );
         });
-  
+
         var submenu = {};
         await Submenu.findAll().then(async (value) => {
           await Promise.all(
@@ -109,7 +142,7 @@ class Model_r {
 
         return { menu_info : { menu , submenu, tab }, user_info : user_info };
     } catch (error) {
-        return {}    
+        return {}
     }
   }
 }

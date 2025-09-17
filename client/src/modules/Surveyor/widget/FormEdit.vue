@@ -122,12 +122,14 @@ const handleSubmit = async () => {
     displayNotification(msg, "error")
   } finally {
     isSubmitting.value = false
+    closeModal()
   }
 }
 
 
 // Close modal
 const closeModal = () => {
+  if (isSubmitting.value) return
   resetForm()
   emit("close")
 }
@@ -174,7 +176,7 @@ watch(
       >
         <!-- Header -->
         <div class="flex items-center justify-between">
-          <h2 class="text-xl font-semibold text-gray-800">EDIT SURVEYOR</h2>
+          <h2 class="text-xl font-bold text-gray-800">EDIT SURVEYOR</h2>
           <button
             class="text-gray-400 text-lg hover:text-gray-600"
             @click="closeModal"
@@ -212,14 +214,23 @@ watch(
         />
 
         <!-- Actions -->
-        <div class="pt-4">
+        <div class="flex justify-end gap-3 mt-4">
           <BaseButton
-            fullWidth
-            variant="primary"
+            @click="closeModal"
+            type="button"
             :disabled="isSubmitting"
+            variant="secondary"
+          >
+            Batal
+          </BaseButton>
+          <BaseButton
+            type="submit"
+            variant="primary"
+            :disabled="!(form.name && form.nik && form.whatsapp_number) || isSubmitting"
             @click="handleSubmit"
           >
-            Simpan
+            <span v-if="isSubmitting">Menyimpan...</span>
+            <span v-else>Simpan Perubahan</span>
           </BaseButton>
         </div>
       </div>

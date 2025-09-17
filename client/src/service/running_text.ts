@@ -1,4 +1,12 @@
 import api_administrator from './api_administrator'
+import axios from 'axios'
+
+const api_public = axios.create({
+  baseURL: import.meta.env.VITE_APP_API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json'
+  }
+})
 
 export const getRunningText = async (param: any) => {
   try {
@@ -56,6 +64,16 @@ export const updateRunningTextOrder = async (order: number[]) => {
     return response.data
   } catch (error) {
     console.error('Gagal memperbarui urutan', error)
+    throw error
+  }
+}
+
+export const getActiveRunningText = async () => {
+  try {
+    const response = await api_public.get('/running_text/active')
+    return response.data
+  } catch (error) {
+    console.error('Gagal mengambil Running Text aktif:', error)
     throw error
   }
 }
