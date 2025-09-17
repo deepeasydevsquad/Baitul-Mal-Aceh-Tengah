@@ -100,4 +100,7 @@ router.post(
   controllers.update_order_running_text
 );
 
+
+router.get("/running_text/active", controllers.getActiveRunningText);
+
 module.exports = router;
