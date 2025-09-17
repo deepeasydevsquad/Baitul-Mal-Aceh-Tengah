@@ -127,12 +127,12 @@ async function deleteData(id: number) {
     <div class="flex justify-end items-center mb-6">
       <div class="flex items-center justify-between w-full mb-4">
   <!-- Button di kiri -->
-  <BaseButton 
-    @click="openAddModal()" 
-    variant="primary" 
+  <BaseButton
+    @click="openAddModal()"
+    variant="primary"
     type="button"
   >
-    <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" /> 
+    <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" />
     Tambah Surveyor
   </BaseButton>
 
@@ -182,7 +182,14 @@ async function deleteData(id: number) {
           </tr>
 
           <tr v-if="data.length === 0">
-            <td :colspan="totalColumns" class="text-center py-6 text-gray-500">Data tidak ada</td>
+            <td :colspan="totalColumns" class="px-6 py-8 text-center text-gray-500">
+              <font-awesome-icon
+                icon="fa-solid fa-user-tie"
+                class="text-4xl mb-2 text-gray-400"
+              />
+              <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ada data</h3>
+              <p class="text-sm">Belum ada data surveyor.</p>
+            </td>
           </tr>
         </tbody>
 
@@ -223,19 +230,10 @@ async function deleteData(id: number) {
     :confirmTitle="confirmTitle"
     :confirmMessage="confirmMessage"
   >
-    <button
-      @click="confirm()"
-      class="inline-flex w-full justify-center rounded-md border border-transparent bg-yellow-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm"
-    >
-      Ya
-    </button>
-    <button
-      @click="cancel()"
-      class="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-    >
-      Tidak
-    </button>
+    <BaseButton variant="secondary" @click="cancel">Tidak</BaseButton>
+    <BaseButton variant="warning" @click="confirm">Ya</BaseButton>
   </Confirmation>
+
   <Notification
     :showNotification="showNotification"
     :notificationType="notificationType"

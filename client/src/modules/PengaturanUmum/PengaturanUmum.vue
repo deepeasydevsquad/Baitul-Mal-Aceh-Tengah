@@ -313,6 +313,7 @@ const handleSubmit = async () => {
     )
   } finally {
     isSubmitting.value = false
+    closeModal()
     isSaving.value = false
   }
 }

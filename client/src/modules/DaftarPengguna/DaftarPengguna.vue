@@ -188,7 +188,7 @@ async function deleteData(id: number) {
 
             <!-- Empty State -->
             <tr v-else>
-              <td :colspan="5" class="px-6 py-8 text-center text-gray-500">
+              <td :colspan="totalColumns" class="px-6 py-8 text-center text-gray-500">
                 <font-awesome-icon
                   icon="fa-solid fa-database"
                   class="text-2xl mb-2 text-gray-400"
