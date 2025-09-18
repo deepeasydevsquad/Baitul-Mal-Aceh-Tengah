@@ -17,7 +17,7 @@ import { edit_bank, get_info_edit_bank } from '@/service/bank'
 
 // Composable: notification
 const { showNotification, notificationType, notificationMessage, displayNotification } =
-useNotification()
+  useNotification()
 
 interface Props {
   isModalOpen: boolean
@@ -33,9 +33,11 @@ const emit = defineEmits<{
 
 // Function: Close modal
 const closeModal = () => {
+  if (isSubmitting.value) return
   resetForm()
   emit('close')
 }
+
 
 // Function: Reset form
 const resetForm = () => {
@@ -100,7 +102,7 @@ const isLoading = ref(true)
 const fetchData = async () => {
   if (!props.selectedBank || !props.selectedBank.id) return
   try {
-    const response =  await get_info_edit_bank(props.selectedBank.id)
+    const response = await get_info_edit_bank(props.selectedBank.id)
     form.value.name = response.data.name
     form.value.img = response.data.img
     preview.value = response.data.img
@@ -130,21 +132,17 @@ const handleSubmit = async () => {
 
   isSubmitting.value = true
 
-  console
-  console.log(formData.get('name'))
-  console.log(formData.get('img'))
-
   try {
     const response = await edit_bank(formData)
     console.log(response)
     emit('status', { error_msg: response.error_msg, error: response.error })
     closeModal()
-
   } catch (error: any) {
     console.error(error)
     displayNotification(error.response.data.error_msg || error.response.data.message, 'error')
   } finally {
     isSubmitting.value = false
+    closeModal()
   }
 }
 
@@ -162,9 +160,12 @@ onBeforeUnmount(async () => {
   document.removeEventListener('keydown', handleEscape)
 })
 
-watch(() => props.selectedBank, (val) => {
-  if (props.isModalOpen && val?.id) fetchData()
-})
+watch(
+  () => props.selectedBank,
+  (val) => {
+    if (props.isModalOpen && val?.id) fetchData()
+  },
+)
 </script>
 
 <template>
@@ -184,15 +185,10 @@ watch(() => props.selectedBank, (val) => {
       aria-labelledby="modal-title"
     >
       <LoadingSpinner v-if="isLoading" label="Memuat halaman..." />
-      <div
-        v-else
-        class="relative max-w-md w-full bg-white shadow-2xl rounded-2xl p-6 space-y-6"
-      >
+      <div v-else class="relative max-w-md w-full bg-white shadow-2xl rounded-2xl p-6 space-y-6">
         <!-- Header -->
         <div class="flex items-center justify-between">
-          <h2 id="modal-title" class="text-xl font-semibold text-gray-800">
-            Edit Bank
-          </h2>
+          <h2 id="modal-title" class="text-xl font-bold text-gray-800">Edit Bank</h2>
           <button
             class="text-gray-400 text-lg hover:text-gray-600"
             @click="closeModal"
@@ -224,22 +220,30 @@ watch(() => props.selectedBank, (val) => {
             :initialPreview="BASE_URL + '/uploads/img/bank/' + props.selectedBank?.img"
             :initialFileName="props.selectedBank?.img?.split('/').pop() || ''"
             :error="errors.img"
+            dimensionsInfo="100x33 px"
             :maxSize="1000"
             @file-selected="handleFile"
           />
         </div>
 
         <!-- Actions -->
-        <div class="pt-4">
+        <div class="flex justify-end gap-3">
+          <BaseButton
+            @click="closeModal"
+            type="button"
+            :disabled="isSubmitting"
+            variant="secondary"
+          >
+            Batal
+          </BaseButton>
           <BaseButton
             type="submit"
-            fullWidth
             variant="primary"
-            :disabled="isSubmitting"
+            :disabled="!(form.name.trim() || form.img && !isSubmitting)"
             @click="handleSubmit"
           >
             <span v-if="isSubmitting">Menyimpan...</span>
-            <span v-else>Simpan</span>
+            <span v-else>Simpan Perubahan</span>
           </BaseButton>
         </div>
       </div>

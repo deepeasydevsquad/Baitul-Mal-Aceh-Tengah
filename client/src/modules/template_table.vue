@@ -93,7 +93,7 @@ async function fetchData() {
 
 onMounted(async () => {
   await fetchData()
-  totalColumns.value = document.querySelectorAll('thead th').length
+
 })
 
 // Function: Delete Data
@@ -126,7 +126,7 @@ async function deleteData(id: number) {
         <BaseButton
           @click="openModalAdd()"
           variant="primary"
-          :loading="isModalAddOpen"
+          :loading="isModalAddOpen || isModalEditOpen"
           type="button"
         >
           <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" />
@@ -191,14 +191,15 @@ async function deleteData(id: number) {
             <!-- Empty State -->
             <tr v-else>
               <td :colspan="totalColumns" class="px-6 py-8 text-center text-gray-500">
-                <font-awesome-icon icon="fa-solid fa-database" class="text-2xl mb-2 text-gray-400" />
-                <p class="text-sm">Belum ada data bank.</p>
+                <font-awesome-icon icon="fa-solid fa-database" class="text-4xl mb-2 text-gray-400" />
+                <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ada data</h3>
+                <p class="text-sm">Belum ada data field.</p>
               </td>
             </tr>
           </tbody>
 
           <!-- Pagination -->
-          <tfoot>
+          <tfoot class="bg-gray-100 font-bold">
             <Pagination
               :current-page="currentPage"
               :total-pages="totalPages"

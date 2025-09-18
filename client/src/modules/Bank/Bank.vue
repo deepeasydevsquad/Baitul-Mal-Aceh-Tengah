@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import Notification from '@/components/Modal/Notification.vue'
 import Confirmation from '@/components/Modal/Confirmation.vue'
 import BaseButton from '@/components/Button/BaseButton.vue'
@@ -91,7 +91,6 @@ async function fetchData() {
 
 onMounted(async () => {
   await fetchData()
-  totalColumns.value = document.querySelectorAll('thead th').length
 })
 
 // Function: Delete Data
@@ -121,17 +120,19 @@ async function deleteData(id: number) {
     <LoadingSpinner v-if="isLoading" label="Memuat halaman..." />
     <div v-else class="space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <BaseButton @click="openModalAdd()" variant="primary" :loading="isModalAddOpen" type="button" >
+        <BaseButton @click="openModalAdd()" variant="primary" :loading="isModalAddOpen || isModalEditOpen" type="button" >
           <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" /> Tambah Bank
         </BaseButton>
+
         <!-- Search -->
         <div class="flex items-center w-full sm:w-auto">
           <label for="search" class="mr-2 text-sm font-medium text-gray-600">Cari</label>
           <input id="search" type="text" v-model="search" @change="fetchData" placeholder="Cari bank..." class="w-full sm:w-64 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:border-green-900 focus:ring-2 focus:ring-green-900 transition" />
         </div>
       </div>
+
       <!-- Table -->
-      <div class="overflow-hidden rounded-xl border border-gray-200 shadow">
+      <div class="overflow-hidden rounded-xl border border-gray-200 shadow-md">
         <SkeletonTable v-if="isTableLoading" :columns="totalColumns" :rows="itemsPerPage" />
         <table v-else class="w-full border-collapse bg-white text-sm">
           <thead class="bg-gray-50 text-gray-700 text-center border-b border-gray-300">
@@ -150,7 +151,7 @@ async function deleteData(id: number) {
                       <img :src="BASE_URL + '/uploads/img/bank/' + bank.img" :alt="`Foto Bank ${bank.name}`" class="object-contain max-w-full max-h-full mx-auto" @error="bank.img = '-'" />
                     </div>
                     <div v-else class="bg-gray-200 text-gray-500 text-center px-4 relative aspect-video max-w-sm rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden">
-                      <p class="font-medium">Gambar tidak tersedia</p>
+                      <p class="text-sm font-medium">Gambar tidak tersedia</p>
                     </div>
                   </center>
                 </td>
@@ -168,7 +169,8 @@ async function deleteData(id: number) {
             <!-- Empty State -->
             <tr v-else>
               <td :colspan="totalColumns" class="px-6 py-8 text-center text-gray-500">
-                <font-awesome-icon icon="fa-solid fa-database" class="text-2xl mb-2 text-gray-400" />
+                <font-awesome-icon icon="fa-solid fa-bank" class="text-4xl mb-2 text-gray-400" />
+                <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ada data</h3>
                 <p class="text-sm">Belum ada data bank.</p>
               </td>
             </tr>

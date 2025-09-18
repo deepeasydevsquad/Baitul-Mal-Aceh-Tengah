@@ -5,7 +5,7 @@
       :id="id"
       v-model="model"
       @change="$emit('update:modelValue', $event.target.value)"
-      :class="['w-full text-gray-700 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500', error ? 'border-red-500' : 'border-gray-300']" >
+      :class="['w-full text-gray-700 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-900 focus:border-green-900', error ? 'border-red-500' : 'border-gray-300']" >
       <option v-for="option in options" :key="option.id" :value="option.id" class="text-gray-700">
         {{ option.name }}
       </option>

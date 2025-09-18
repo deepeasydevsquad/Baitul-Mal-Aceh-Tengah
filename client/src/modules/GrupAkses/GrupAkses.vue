@@ -111,7 +111,6 @@ async function fetchData() {
 
 onMounted(async () => {
   await fetchData()
-  totalColumns.value = document.querySelectorAll('thead th').length
 })
 
 // Function: Delete Data
@@ -161,7 +160,7 @@ const handleStatus = (payload: any) => {
         <BaseButton
           @click="openModalAdd()"
           variant="primary"
-          :loading="isModalAddOpen"
+          :loading="isModalAddOpen || isModalEditOpen"
           type="button"
         >
           <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" />
@@ -251,7 +250,7 @@ const handleStatus = (payload: any) => {
                   icon="fa-solid fa-database"
                   class="text-2xl mb-2 text-gray-400"
                 />
-                <p class="text-sm">Belum ada data bank.</p>
+                <p class="text-sm">Belum ada data grup akses.</p>
               </td>
             </tr>
           </tbody>
