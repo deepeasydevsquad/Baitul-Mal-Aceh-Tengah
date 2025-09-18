@@ -1,164 +1,171 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
-import Notification from '@/components/Modal/Notification.vue'
-import BaseButton from '@/components/Button/BaseButton.vue'
-import InputFile from '@/components/Form/InputFile.vue'
-import SelectField from '@/components/Form/SelectField.vue'
-import InputText from '@/components/Form/InputText.vue'
-import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
+import { ref, onMounted, onBeforeUnmount, watch } from "vue";
+import Notification from "@/components/Modal/Notification.vue";
+import BaseButton from "@/components/Button/BaseButton.vue";
+import InputFile from "@/components/Form/InputFile.vue";
+import SelectField from "@/components/Form/SelectField.vue";
+import InputText from "@/components/Form/InputText.vue";
+import LoadingSpinner from "@/components/Loading/LoadingSpinner.vue";
 
 // Composable
-import { useNotification } from '@/composables/useNotification'
+import { useNotification } from "@/composables/useNotification";
 
 // Service
-import { edit_desa, get_kecamatan, get_info_edit_desa } from '@/service/desa'
+import { edit_desa, get_kecamatan, get_info_edit_desa } from "@/service/desa";
 
 // Composable: notification
-const { showNotification, notificationType, notificationMessage, displayNotification } =
-useNotification()
+const {
+  showNotification,
+  notificationType,
+  notificationMessage,
+  displayNotification,
+} = useNotification();
 
 interface Props {
-  isModalOpen: boolean
-  selectedDesa: any
+  isModalOpen: boolean;
+  selectedDesa: any;
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 
 const emit = defineEmits<{
-  (e: 'close'): void
-  (e: 'status', payload: { error_msg?: string; error?: boolean }): void
-}>()
+  (e: "close"): void;
+  (e: "status", payload: { error_msg?: string; error?: boolean }): void;
+}>();
 
 // Function: Close modal
 const closeModal = () => {
-  resetForm()
-  emit('close')
-}
+  resetForm();
+  emit("close");
+};
 
 // Function: Reset form
 const resetForm = () => {
-  form.value.name = ''
-  form.value.kecamatan_id = ''
-}
+  form.value.name = "";
+  form.value.kecamatan_id = "";
+};
 
 // Function: Validate form
 const errors = ref<Record<string, string>>({
-  name: '',
-  kecamatan_id: '',
-})
+  name: "",
+  kecamatan_id: "",
+});
 
 const validateForm = () => {
-  let isValid = true
+  let isValid = true;
 
   // Reset errors
-  errors.value = {}
+  errors.value = {};
 
-  if (form.value.name === '') {
-    errors.value.name = 'Nama desa tidak boleh kosong.'
-    isValid = false
+  if (form.value.name === "") {
+    errors.value.name = "Nama desa tidak boleh kosong.";
+    isValid = false;
   }
 
   if (!form.value.kecamatan_id) {
-    errors.value.kecamatan_id = 'Kecamatan dari desa wajib diisi.'
-    isValid = false
+    errors.value.kecamatan_id = "Kecamatan dari desa wajib diisi.";
+    isValid = false;
   }
 
-  console.log(errors.value)
+  console.log(errors.value);
 
-  return isValid
-}
+  return isValid;
+};
 
 // State: Loading
-const isLoading = ref(true)
+const isLoading = ref(true);
 
 // Function: Fetch Data
 async function fetchData() {
-  if (!props.selectedDesa || !props.selectedDesa.id) return
+  if (!props.selectedDesa || !props.selectedDesa.id) return;
   try {
-    const response = await get_info_edit_desa(props.selectedDesa.id)
-    form.value.name = response.data.name
-    form.value.kecamatan_id = response.data.kecamatan_id
+    const response = await get_info_edit_desa(props.selectedDesa.id);
+    form.value.name = response.data.name;
+    form.value.kecamatan_id = response.data.kecamatan_id;
 
-    const respondseKecamatan = await get_kecamatan()
-    kecamatanOption.value = [{ id: '', name: 'Pilih kecamatan' }, ...respondseKecamatan.data] || []
+    const responseKecamatan = await get_kecamatan();
+    kecamatanOption.value =
+      [{ id: "", name: "Pilih kecamatan" }, ...responseKecamatan.data] || [];
 
-    console.log(response)
+    console.log(response);
   } catch (error) {
-    displayNotification('Gagal mengambil data desa', 'error')
+    displayNotification("Gagal mengambil data desa", "error");
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
 }
 
-
-const search = ref('')
+const search = ref("");
 
 // Function: Fetch kecamatan list
-const kecamatanOption = ref<Array<{ id: number; name: string }>>([])
+const kecamatanOption = ref<Array<{ id: number; name: string }>>([]);
 
 async function fetchKecamatan() {
   try {
-    const response = await get_kecamatan()
-    kecamatanOption.value = [{ id: '', name: 'Pilih kecamatan' }, ...response.data] || []
-    console.log("Data kecamatan berhasil diambil:", kecamatanOption.value)
+    const response = await get_kecamatan();
+    kecamatanOption.value = [{ id: "", name: "Pilih kecamatan" }, ...response.data] || [];
+    console.log("Data kecamatan berhasil diambil:", kecamatanOption.value);
   } catch (error) {
-    console.error("Gagal mengambil data kecamatan:", error)
-    displayNotification("Gagal mengambil data kecamatan", "error")
+    console.error("Gagal mengambil data kecamatan:", error);
+    displayNotification("Gagal mengambil data kecamatan", "error");
   }
 }
-
 
 // Function: Handle submit
-const isSubmitting = ref(false)
-const form = ref<{ name: string; kecamatan_id: string; }>({
-  name: '',
-  kecamatan_id: '',
-})
+const isSubmitting = ref(false);
+const form = ref<{ name: string; kecamatan_id: string }>({
+  name: "",
+  kecamatan_id: "",
+});
 
 const handleSubmit = async () => {
-  if (!validateForm()) return
+  if (!validateForm()) return;
 
-  const desa_id = props.selectedDesa.id
-  const formData = JSON.parse(JSON.stringify(form.value))
-  console.log(formData)
+  const desa_id = props.selectedDesa.id;
+  const formData = JSON.parse(JSON.stringify(form.value));
+  console.log(formData);
 
-  formData.id = desa_id
+  formData.id = desa_id;
 
-  isSubmitting.value = true
+  isSubmitting.value = true;
   try {
-
-    console.log(formData)
-    const response = await edit_desa(formData)
-    console.log(response)
-    emit('status', { error_msg: response.error_msg, error: response.error })
-    closeModal()
-
+    console.log(formData);
+    const response = await edit_desa(formData);
+    console.log(response);
+    emit("status", { error_msg: response.error_msg, error: response.error });
+    closeModal();
   } catch (error: any) {
-    console.error(error)
-    displayNotification(error.response.data.error_msg || error.response.data.message, 'error')
+    console.error(error);
+    displayNotification(
+      error.response.data.error_msg || error.response.data.message,
+      "error"
+    );
   } finally {
-    isSubmitting.value = false
+    isSubmitting.value = false;
   }
-}
+};
 
 // Function: Handle escape & Fetch Data
 const handleEscape = (e: KeyboardEvent) => {
-  if (e.key === 'Escape' && props.isModalOpen) closeModal()
-}
+  if (e.key === "Escape" && props.isModalOpen) closeModal();
+};
 onMounted(async () => {
-  await fetchData()
-  document.addEventListener('keydown', handleEscape)
-})
+  await fetchData();
+  document.addEventListener("keydown", handleEscape);
+});
 
 onBeforeUnmount(async () => {
-  await fetchData()
-  document.removeEventListener('keydown', handleEscape)
-})
+  await fetchData();
+  document.removeEventListener("keydown", handleEscape);
+});
 
-watch(() => props.selectedDesa, (val) => {
-  if (props.isModalOpen && val?.id) fetchData()
-})
+watch(
+  () => props.selectedDesa,
+  (val) => {
+    if (props.isModalOpen && val?.id) fetchData();
+  }
+);
 </script>
 
 <template>
@@ -184,9 +191,7 @@ watch(() => props.selectedDesa, (val) => {
       >
         <!-- Header -->
         <div class="flex items-center justify-between">
-          <h2 id="modal-title" class="text-xl font-semibold text-gray-800">
-            Edit desa
-          </h2>
+          <h2 id="modal-title" class="text-xl font-semibold text-gray-800">Edit desa</h2>
           <button
             class="text-gray-400 text-lg hover:text-gray-600"
             @click="closeModal"

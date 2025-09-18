@@ -63,7 +63,7 @@ router.post(
     body("kecamatan_id")
       .notEmpty()
       .withMessage("Kecamatan Tidak Boleh Kosong")
-      .isString()
+      .isInt()
       .withMessage("Kecamatan Harus String"),
   ],
   controllers.edit
