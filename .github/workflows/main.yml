@@ -35,7 +35,7 @@ jobs:
     - name: Deploy to Ubuntu server via SSH
       uses: appleboy/ssh-action@v1
       with:
-        host: ${{ secrets.SERVER_IP }}
+        host: ${{ secrets.IP_SERVER_DATABASE_MACHINE }}
         username: ${{ secrets.SSH_USER_DATABASE_MACHINE }}
         key: ${{ secrets.SSH_PRIVATE_KEY_DATABASE_MACHINE }}
         script: |
