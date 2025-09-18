@@ -1,0 +1,62 @@
+name: CI/CD Deploy Aplikasi Baitulmal Aceh Tengah
+
+on:
+  push:
+    branches: [ staging ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      FRONT_IMAGE: muammar88/baitulmal_client:1.0.0
+      BACK_IMAGE: muammar88/baitulmal_server:1.0
+      SERVER_IP: ${{ secrets.SERVER_IP }}
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      DOCKER_HUB_USER: ${{ secrets.DOCKER_HUB_USER }}
+      DOCKER_HUB_PASS: ${{ secrets.DOCKER_HUB_PASS }}
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Login to DockerHub
+      run: echo "$DOCKER_HUB_PASS" | docker login -u "$DOCKER_HUB_USER" --password-stdin
+
+    - name: Build and push client image
+      run: |
+        docker build -t muammar88/baitulmal_client:1.0.0 ./client
+        docker push muammar88/baitulmal_client:1.0.0
+
+    - name: Build and push backend image
+      run: |
+        docker build -t muammar88/baitulmal_server:1.0.0 ./server
+        docker push muammar88/baitulmal_server:1.0.0
+
+    - name: Deploy to Ubuntu server via SSH
+      uses: appleboy/ssh-action@v1
+      with:
+        host: ${{ env.SERVER_IP }}
+        username: ${{ env.SSH_USER }}
+        key: ${{ env.SSH_PRIVATE_KEY }}
+        script: |
+        
+          cd /home/dbmachine/baitulmal
+          
+          # Pull latest images
+          docker pull muammar88/baitulmal_client:1.0.0
+          docker pull muammar88/baitulmal_server:1.0.0
+
+          # Stop and remove containers if exist
+          docker-compose down || true
+
+          # Start services using docker-compose
+          docker-compose up -d
+
+          # Run Sequelize migration and seed scripts
+          docker exec -i Container_server_baitulmal npx sequelize-cli db:migrate:undo:all
+          docker exec -i Container_server_baitulmal npx sequelize-cli db:migrate
+          docker exec -i Container_server_baitulmal npx sequelize-cli db:seed:all
+
+          
