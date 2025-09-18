@@ -8,10 +8,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    env:
-      FRONT_IMAGE: muammar88/baitulmal_client:1.0.0
-      BACK_IMAGE: muammar88/baitulmal_server:1.0.0
-
     steps:
     - name: Checkout repo
       uses: actions/checkout@v4
@@ -24,13 +20,13 @@ jobs:
 
     - name: Build and push client image
       run: |
-        docker build -t $FRONT_IMAGE ./client
-        docker push $FRONT_IMAGE
+        docker build -t muammar88/baitulmal_client:1.0.0 ./client
+        docker push muammar88/baitulmal_client:1.0.0
 
     - name: Build and push backend image
       run: |
-        docker build -t $BACK_IMAGE ./server
-        docker push $BACK_IMAGE
+        docker build -t muammar88/baitulmal_server:1.0.0 ./server
+        docker push muammar88/baitulmal_server:1.0.0
 
     - name: Deploy to Ubuntu server via SSH
       uses: appleboy/ssh-action@v1
@@ -42,8 +38,8 @@ jobs:
           cd /home/dbmachine/baitulmal
 
           # Pull latest images
-          docker pull $FRONT_IMAGE
-          docker pull $BACK_IMAGE
+          docker pull muammar88/baitulmal_client:1.0.0
+          docker pull muammar88/baitulmal_server:1.0.0
 
           # Restart services
           docker-compose down
