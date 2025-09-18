@@ -29,12 +29,6 @@ services:
       - mysql
     networks:
       - app-network-baitulmal
-    command: >
-      sh -c "until nc -z mysql 3306; do
-              echo 'Waiting for MySQL...';
-              sleep 3;
-            done &&
-            npm start"
 
   client:
     image: muammar88/baitulmal_client:1.0.0
