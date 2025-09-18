@@ -12,8 +12,10 @@ services:
     ports:
       - "3003:3003"             # port unik untuk Baitulmal
     environment:
-      SECRET_KEY: "9813kbk31023khvviuytyuwqkiwvj9mnb757uytr34nm123o"
-      REFRESH_SECRET_KEY: "y87238giehgaiuwgd82o123455gskiassmnxzxclaoihdsobk"
+      ADMINISTRATOR_SECRET_KEY: "9813kbk31023khvviuytyuwqkiwvj9mnb757uytr34nm123o"
+      ADMINISTRATOR_REFRESH_SECRET_KEY: "y87238giehgaiuwgd82o123455gskiassmnxzxclaoihdsobk"
+      MEMBERSHIP_SECRET_KEY: "9813kbk31023khvviuytyuwqkiwvj9mnb757uytr34nm123o"
+      MEMBERSHIP_REFRESH_SECRET_KEY: "y87238giehgaiuwgd82o123455gskiassmnxzxclaoihdsobk"
       NODE_ENV: "development"
       PORT: 3003
       MIDTRANS_SERVER_KEY: SB-Mid-server-zw-LJ6-UHTMlabcfbM06qqvz
