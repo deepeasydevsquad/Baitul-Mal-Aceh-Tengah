@@ -1,11 +1,16 @@
+version: "3.9"
+
 services:
   server:
     image: muammar88/baitulmal_server:1.0.0
     container_name: Container_server_baitulmal
+    build:
+      context: ./server  # pastikan Dockerfile di folder server
+      dockerfile: Dockerfile
     volumes:
-      - ./server:/app
+      - ./server:/app           # bind mount source code
     ports:
-      - "3003:3003"
+      - "3003:3003"             # port unik untuk Baitulmal
     environment:
       SECRET_KEY: "9813kbk31023khvviuytyuwqkiwvj9mnb757uytr34nm123o"
       REFRESH_SECRET_KEY: "y87238giehgaiuwgd82o123455gskiassmnxzxclaoihdsobk"
@@ -54,8 +59,8 @@ services:
       MYSQL_PASSWORD: baitulmalacehtengah_password
       MYSQL_ROOT_PASSWORD: root_password
     volumes:
-      - mysql-data-baitulmal:/var/lib/mysql
-      - ./mysql_config/my.cnf:/etc/mysql/my.cnf  # Mount file my.cnf ke dalam container
+      - mysql-data-baitulmal:/var/lib/mysql     # named volume unik untuk Baitulmal
+      - ./mysql_config/my.cnf:/etc/mysql/my.cnf
     networks:
       - app-network-baitulmal
 
