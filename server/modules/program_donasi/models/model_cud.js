@@ -18,6 +18,14 @@ class Model_cud {
     this.state = true;
   }
 
+  async generateSlug(name) {
+    return name
+      .replace(/\s+/g, "-")
+      .replace(/[^a-zA-Z0-9-]/g, "")
+      .replace(/-+/g, "-")
+      .toLowerCase();
+  }
+
   async add() {
     await this.initialize();
     const myDate = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
@@ -26,7 +34,7 @@ class Model_cud {
       const insert = await Program_donasi.create(
         {
           name: body.name,
-          slug: body.slug,
+          slug: await this.generateSlug(body.name),
           banner: body.photoPath,
           tahun: body.tahun,
           deskripsi: body.deskripsi,
@@ -100,7 +108,7 @@ class Model_cud {
       await program.update(
         {
           name: body.name,
-          slug: body.slug,
+          slug: await this.generateSlug(body.name),
           banner: newBanner,
           tahun: body.tahun,
           deskripsi: body.deskripsi,

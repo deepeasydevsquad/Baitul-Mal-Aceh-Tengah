@@ -32,7 +32,6 @@ const emit = defineEmits<{
 // Form state
 const form = ref({
   name: '',
-  slug: '',
   banner: '',
   tahun: '',
   deskripsi: '',
@@ -75,10 +74,6 @@ const validateForm = () => {
 
   if (!form.value.name) {
     errors.value.name = 'Nama program wajib diisi'
-    isValid = false
-  }
-  if (!form.value.slug) {
-    errors.value.slug = 'slug kegiatan wajib diisi'
     isValid = false
   }
   if (!form.value.tahun) {
@@ -140,7 +135,6 @@ const handleSubmit = async () => {
   const formData = new FormData()
   formData.append('id', props.id_donasi)
   formData.append('name', form.value.name)
-  formData.append('slug', form.value.slug)
   formData.append('banner', form.value.banner)
   formData.append('tahun', form.value.tahun)
   formData.append('deskripsi', form.value.deskripsi)
@@ -239,12 +233,6 @@ const nominalFormatted = computed({
             placeholder="Masukkan name program"
           />
           <InputText
-            v-model="form.slug"
-            label="Slug Program Kegiatan"
-            :error="errors.slug"
-            placeholder="Masukkan nama program kegiatan"
-          />
-          <InputText
             v-model="form.tahun"
             label="Tahun Donasi"
             :error="errors.tahun"
@@ -285,14 +273,8 @@ const nominalFormatted = computed({
             type="submit"
             variant="primary"
             :disabled="
-              !(
-                form.name &&
-                form.slug &&
-                form.tahun &&
-                form.deskripsi &&
-                nominalRaw &&
-                form.waktu_donasi
-              ) || isSubmitting
+              !(form.name && form.tahun && form.deskripsi && nominalRaw && form.waktu_donasi) ||
+              isSubmitting
             "
             @click="handleSubmit"
           >

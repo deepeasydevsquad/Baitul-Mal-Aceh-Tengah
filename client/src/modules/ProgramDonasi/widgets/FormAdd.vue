@@ -31,7 +31,6 @@ const emit = defineEmits<{
 // Form state
 const form = ref({
   name: '',
-  slug: '',
   banner: '',
   tahun: '',
   deskripsi: '',
@@ -50,7 +49,6 @@ const errors = ref<Record<string, string>>({})
 const resetForm = () => {
   form.value = {
     name: '',
-    slug: '',
     banner: '',
     tahun: '',
     deskripsi: '',
@@ -74,10 +72,6 @@ const validateForm = () => {
 
   if (!form.value.name) {
     errors.value.name = 'Nama program wajib diisi'
-    isValid = false
-  }
-  if (!form.value.slug) {
-    errors.value.slug = 'slug kegiatan wajib diisi'
     isValid = false
   }
   if (!form.value.banner) {
@@ -108,7 +102,6 @@ const handleSubmit = async () => {
 
   const formData = new FormData()
   formData.append('name', form.value.name)
-  formData.append('slug', form.value.slug)
   formData.append('banner', form.value.banner)
   formData.append('tahun', form.value.tahun)
   formData.append('deskripsi', form.value.deskripsi)
@@ -207,12 +200,6 @@ const nominalFormatted = computed({
             placeholder="Masukkan name program"
           />
           <InputText
-            v-model="form.slug"
-            label="Slug Program Kegiatan"
-            :error="errors.slug"
-            placeholder="Masukkan nama program kegiatan"
-          />
-          <InputText
             v-model="form.tahun"
             label="Tahun Donasi"
             :error="errors.tahun"
@@ -255,7 +242,6 @@ const nominalFormatted = computed({
             :disabled="
               !(
                 form.name &&
-                form.slug &&
                 form.banner &&
                 form.tahun &&
                 form.deskripsi &&

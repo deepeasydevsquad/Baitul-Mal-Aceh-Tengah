@@ -18,11 +18,6 @@ router.post(
       .withMessage("Name Tidak Boleh Kosong")
       .isString()
       .withMessage("Name Harus String"),
-    body("slug")
-      .notEmpty()
-      .withMessage("Slug Tidak Boleh Kosong")
-      .isString()
-      .withMessage("Slug Harus String"),
     body("tahun")
       .notEmpty()
       .withMessage("Tahun Tidak Boleh Kosong")
@@ -54,7 +49,7 @@ router.post(
       .isInt()
       .withMessage("ID Harus Angka"),
     body("name").notEmpty().withMessage("Name Tidak Boleh Kosong"),
-    body("slug").notEmpty().withMessage("Slug Tidak Boleh Kosong"),
+
     body("tahun").notEmpty().withMessage("Tahun Tidak Boleh Kosong"),
     body("deskripsi").notEmpty().withMessage("Deskripsi Tidak Boleh Kosong"),
     body("target_donasi_terkumpul")
