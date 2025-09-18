@@ -46,6 +46,6 @@ jobs:
           docker-compose up -d --force-recreate
 
           # Run Sequelize migration and seed scripts
-          docker-compose exec -T server npx sequelize-cli db:migrate:undo:all
-          docker-compose exec -T server npx sequelize-cli db:migrate
-          docker-compose exec -T server npx sequelize-cli db:seed:all
+          docker-compose exec -T Container_server_baitulmal npx sequelize-cli db:migrate:undo:all
+          docker-compose exec -T Container_server_baitulmal npx sequelize-cli db:migrate
+          docker-compose exec -T Container_server_baitulmal npx sequelize-cli db:seed:all
