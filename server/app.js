@@ -66,6 +66,7 @@ const arr_router = [
   "surveyor",
   "pengaturan_umum",
   "program_donasi",
+  "tab",
 ];
 
 const arr = {};
