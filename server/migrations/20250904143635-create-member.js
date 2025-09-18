@@ -25,11 +25,6 @@ module.exports = {
         values: ['perorangan', 'instansi'],
         defaultValue : "perorangan"
       },
-      status: {
-        type: Sequelize.ENUM,
-        values: ["unverified", "verified"],
-        defaultValue : "unverified"
-      },
       fullname: {
         type: Sequelize.STRING
       },

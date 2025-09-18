@@ -14,13 +14,21 @@ module.exports = (sequelize, DataTypes) => {
       Member.belongsTo(models.Desa, {
         foreignKey: "desa_id",
       });
+      Member.hasMany(models.Riwayat_donasi, {
+        foreignKey: "member_id",
+      });
+      Member.hasMany(models.Riwayat_pengumpulan, {
+        foreignKey: "member_id",
+      });
+      Member.hasMany(models.Permohonan, {
+        foreignKey: "member_id",
+      });
     }
   }
   Member.init({
     kode: DataTypes.STRING,
     desa_id: DataTypes.INTEGER,
     tipe: DataTypes.ENUM(["perorangan", "instansi"]),
-    status: DataTypes.ENUM(["unverified", "verified"]),
     fullname: DataTypes.STRING,
     nomor_ktp: DataTypes.STRING,
     nomor_kk: DataTypes.STRING,

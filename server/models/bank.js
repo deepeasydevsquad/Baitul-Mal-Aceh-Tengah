@@ -15,6 +15,9 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "bank_id",
         onDelete: "CASCADE",
       });
+      Bank.hasMany(models.Permohonan, {
+        foreignKey: "bank_id",
+      });
     }
   }
   Bank.init({

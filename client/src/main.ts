@@ -41,7 +41,31 @@ import {
   faMoneyBillAlt, faUndoAlt, faListAlt, faImage, faTicket, faCircleArrowRight, faQrcode, faCalendar, faArrowLeft,
   faHandHoldingDollar, faMoneyCheckAlt, faCity, faCar, faHotel, faPassport, faSubway, faClipboardList,
   faPiggyBank, faUserCog, faUserTie, faCalculator, faList, faBalanceScale, faBalanceScaleLeft, faCommentDollar,
-  faShieldAlt, faEnvelope, faClipboardCheck, faLayerGroup, faPeopleCarry, faEyeSlash, faCloudArrowUp, faCodeBranch, faLock, faLockOpen, faPlaneCircleCheck
+  faShieldAlt, faEnvelope, faClipboardCheck, faLayerGroup, faPeopleCarry, faEyeSlash, faCloudArrowUp, faCodeBranch, faLock, faLockOpen, faPlaneCircleCheck, faHandshake, faGear, faRightFromBracket, faPeopleGroup,
+  faHandHoldingHeart, faClockRotateLeft, faCoins, faChartLine,
+  faQuestionCircle,
+  faListOl,
+  faFileSignature,
+  faFileContract,
+  faListCheck,
+  faBriefcase,
+  faMap,
+  faMapLocationDot,
+  faBuildingColumns,
+  faFileLines,
+  faHandHoldingMedical,
+  faHandHoldingHand,
+  faHandsHoldingCircle,
+  faRoute,
+  faHandHoldingDroplet,
+  faHandshakeAngle,
+  faUserShield,
+  faScroll,
+  faMessage,
+  faClipboardUser,
+  faUserPlus,
+  faUserClock,
+  faClipboardQuestion
 } from '@fortawesome/free-solid-svg-icons'
 
 // FontAwesome Icons - Regular
@@ -60,7 +84,8 @@ library.add(
   faPiggyBank, faUserCog, faUserTie, faCalculator, faList, faBalanceScale, faBalanceScaleLeft, faCommentDollar,
   faShieldAlt, faEnvelope, faClipboardCheck, faLayerGroup, faPeopleCarry, faTicketSimple, faMoneyBillWave, faPlane,
   faBuilding, faPlaneArrival, faCircle, faClock, farUser, faCcVisa, faWhatsapp, faEye, faEyeSlash, faCloudArrowUp, faCodeBranch,
-  faLock, faLockOpen, faPlaneCircleCheck
+  faLock, faLockOpen, faPlaneCircleCheck, faHandshake, faGear, faRightFromBracket, faPeopleGroup, faHandHoldingHeart, faClockRotateLeft, faCoins, faChartLine, faQuestionCircle, faListOl, faFileSignature, faClipboardCheck, faFileContract, faListCheck, faBriefcase, faMap, faMapLocationDot, faBuildingColumns, faFileLines, faHandHoldingMedical, faHandHoldingHand, faHandsHoldingCircle, faRoute, faHandHoldingDroplet, faHandshakeAngle, faUserShield, faScroll, faMessage, faClipboardUser, faUserPlus,
+  faUserClock, faClipboardQuestion
 )
 
 // Buat App Vue

@@ -18,7 +18,15 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "desa_id",
         onDelete: "CASCADE",
       });
+      Desa.hasMany(models.Request_member, {
+        foreignKey: "desa_id",
+        onDelete: "CASCADE",
+      });
       Desa.hasMany(models.Desa_area_kegiatan, {
+        foreignKey: "desa_id",
+        onDelete: "CASCADE",
+      });
+      Desa.hasMany(models.Kegiatan_keseketariatan, {
         foreignKey: "desa_id",
         onDelete: "CASCADE",
       });

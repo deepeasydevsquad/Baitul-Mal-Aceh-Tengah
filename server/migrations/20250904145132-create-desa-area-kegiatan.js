@@ -10,10 +10,20 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       kegiatan_id: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        references: {
+          model: "Kegiatans",
+          key: "id",
+        },
+        onDelete: 'CASCADE',
       },
       desa_id: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        references: {
+          model: "Desas",
+          key: "id",
+        },
+        onDelete: 'CASCADE',
       },
       kuota: {
         type: Sequelize.INTEGER
