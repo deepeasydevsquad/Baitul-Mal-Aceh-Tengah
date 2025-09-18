@@ -45,7 +45,28 @@ jobs:
           docker-compose down
           docker-compose up -d --force-recreate
 
-          # Run Sequelize migration and seed scripts
-          docker-compose exec -T Container_server_baitulmal npx sequelize-cli db:migrate:undo:all
-          docker-compose exec -T Container_server_baitulmal npx sequelize-cli db:migrate
-          docker-compose exec -T Container_server_baitulmal npx sequelize-cli db:seed:all
+          echo "⏳ Waiting for MySQL to be ready..."
+          until docker exec mysql_container_baitulmal mysqladmin ping -uroot -p"root_password" --silent; do
+            echo "   ... still waiting for MySQL"
+            sleep 5
+          done
+
+          echo "⏳ Waiting for Container_server to be running..."
+          until [ "$(docker inspect -f '{{.State.Running}}' Container_server)" == "true" ]; do
+            echo "   ... still waiting for Container_server"
+            sleep 5
+          done
+
+          echo "🗑 Dropping and creating database..."
+          docker exec -i mysql_container_baitulmal mysql -uroot -p"root_password" -e "DROP DATABASE IF EXISTS baitulmalacehtengah_db; CREATE DATABASE baitulmalacehtengah_db;"
+
+          echo "📜 Running Sequelize migrations..."
+          if docker exec -i Container_server_baitulmal npx sequelize-cli db:migrate; then
+            echo "🌱 Seeding database..."
+            docker exec -i Container_server_baitulmal npx sequelize-cli db:seed:all --debug
+            echo "🔄 Restarting Container_server..."
+            docker restart Container_server_baitulmal
+          else
+            echo "⚠️ Migration failed. Skipping seed."
+          fi
+          
