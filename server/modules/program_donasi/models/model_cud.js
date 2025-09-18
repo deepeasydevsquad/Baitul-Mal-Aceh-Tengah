@@ -1,0 +1,250 @@
+const {
+  sequelize,
+  Program_donasi,
+  Riwayat_donasi,
+} = require("../../../models");
+const { writeLog } = require("../../../helper/writeLogHelper");
+const path = require("path");
+const fs = require("fs");
+const moment = require("moment");
+
+class Model_cud {
+  constructor(req) {
+    this.req = req;
+  }
+
+  async initialize() {
+    this.t = await sequelize.transaction();
+    this.state = true;
+  }
+
+  async add() {
+    await this.initialize();
+    const myDate = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+    const body = this.req.body;
+    try {
+      const insert = await Program_donasi.create(
+        {
+          name: body.name,
+          slug: body.slug,
+          banner: body.photoPath,
+          tahun: body.tahun,
+          deskripsi: body.deskripsi,
+          target_donasi_terkumpul: body.target_donasi_terkumpul,
+          status: "sedang_berlangsung",
+          waktu_donasi: body.waktu_donasi,
+          createdAt: myDate,
+          updatedAt: myDate,
+        },
+        {
+          transaction: this.t,
+        }
+      );
+      this.message = `Menambahkan Program Donasi Baru dengan Nama Program Donasi: ${body.name} dan ID Program Donasi: ${insert.id}`;
+    } catch (error) {
+      this.state = false;
+      console.log(error);
+    }
+  }
+
+  async edit() {
+    await this.initialize();
+    const myDate = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+    const body = this.req.body;
+
+    try {
+      // Ambil data lama
+      const program = await Program_donasi.findByPk(body.id, {
+        transaction: this.t,
+      });
+
+      if (!program) throw new Error("Data Program Donasi tidak ditemukan");
+
+      let newBanner = program.banner;
+
+      // CASE 1: Upload banner baru
+      if (body.photoPath) {
+        if (program.banner) {
+          const oldFile = path.join(
+            __dirname,
+            "../../../uploads/img/program_donasi/",
+            program.banner
+          );
+          if (fs.existsSync(oldFile)) fs.unlinkSync(oldFile);
+        }
+        newBanner = body.photoPath;
+      }
+      // CASE 2: Hanya ganti nama program
+      else if (body.name && body.name !== program.name && program.banner) {
+        const oldPath = path.join(
+          __dirname,
+          "../../../uploads/img/program_donasi/",
+          program.banner
+        );
+        const ext = path.extname(program.banner);
+        const safeName = body.name.toLowerCase().replace(/\s+/g, "_");
+        const newFilename = `${safeName}${ext}`;
+        const newPath = path.join(
+          __dirname,
+          "../../../uploads/img/program_donasi/",
+          newFilename
+        );
+
+        if (fs.existsSync(oldPath)) {
+          fs.renameSync(oldPath, newPath);
+          newBanner = newFilename;
+        }
+      }
+
+      // Update ke DB
+      await program.update(
+        {
+          name: body.name,
+          slug: body.slug,
+          banner: newBanner,
+          tahun: body.tahun,
+          deskripsi: body.deskripsi,
+          target_donasi_terkumpul: body.target_donasi_terkumpul,
+          status: body.status ?? program.status,
+          waktu_donasi: body.waktu_donasi,
+          updatedAt: myDate,
+        },
+        { transaction: this.t }
+      );
+
+      this.message = `Memperbaharui Program Donasi dengan ID: ${body.id}, Nama Lama: ${program.name}, menjadi Nama Baru: ${body.name}`;
+    } catch (error) {
+      this.state = false;
+      this.message = error.message;
+      console.log(error);
+    }
+  }
+
+  async kode() {
+    const digits = "0123456789";
+    let result = "";
+    for (let i = 0; i < 6; i++) {
+      result += digits.charAt(Math.floor(Math.random() * digits.length));
+    }
+    return Promise.resolve(result);
+  }
+
+  // 6 angka + huruf kapital
+  async invoice() {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let result = "";
+    for (let i = 0; i < 6; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return Promise.resolve(result);
+  }
+
+  async add_donasi() {
+    await this.initialize();
+    const myDate = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+    const body = this.req.body;
+
+    try {
+      const insert = await Riwayat_donasi.create(
+        {
+          program_donasi_id: body.program_donasi_id,
+          member_id: body.member_id,
+          invoice: await this.invoice(),
+          nominal: body.nominal,
+          kode: await this.kode(),
+          status: body.status,
+          konfirmasi_pembayaran:
+            body.status === "success" ? "sudah_dikirim" : "belum_dikirim",
+
+          createdAt: myDate,
+          updatedAt: myDate,
+        },
+        {
+          transaction: this.t,
+        }
+      );
+
+      this.message = `Menambahkan Riwayat Donasi Baru dengan Nominal Donasi: ${body.nominal} `;
+    } catch (error) {
+      this.state = false;
+      console.log(error);
+    }
+  }
+
+  async close() {
+    await this.initialize();
+    const myDate = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+    const body = this.req.body;
+
+    try {
+      const program = await Program_donasi.findByPk(body.id, {
+        transaction: this.t,
+      });
+
+      if (!program) throw new Error("Data Program Donasi tidak ditemukan");
+
+      await program.update(
+        {
+          status: "ditutup",
+          updatedAt: myDate,
+        },
+        { transaction: this.t }
+      );
+
+      this.message = `Program Donasi dengan ID: ${body.id} berhasil ditutup`;
+    } catch (error) {
+      this.state = false;
+      this.message = error.message;
+      console.log(error);
+    }
+  }
+
+  async delete() {
+    await this.initialize();
+    const body = this.req.body;
+
+    try {
+      const program = await Program_donasi.findByPk(body.id, {
+        transaction: this.t,
+      });
+
+      if (!program) throw new Error("Data Program Donasi tidak ditemukan");
+
+      // Hapus file banner jika ada
+      if (program.banner) {
+        const filePath = path.join(
+          __dirname,
+          "../../../uploads/img/program_donasi/",
+          program.banner
+        );
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      }
+
+      await program.destroy({ transaction: this.t });
+
+      this.message = `Program Donasi dengan ID: ${body.id} berhasil dihapus`;
+    } catch (error) {
+      this.state = false;
+      this.message = error.message;
+      console.log(error);
+    }
+  }
+
+  // response
+  async response() {
+    if (this.state) {
+      await writeLog(this.req, this.t, {
+        msg: this.message,
+      });
+      await this.t.commit();
+      return true;
+    } else {
+      await this.t.rollback();
+      return false;
+    }
+  }
+}
+
+module.exports = Model_cud;

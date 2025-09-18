@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Program_donasi extends Model {
     /**
@@ -16,18 +14,21 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
   }
-  Program_donasi.init({
-    name: DataTypes.TEXT,
-    slug: DataTypes.TEXT,
-    banner: DataTypes.STRING,
-    tahun: DataTypes.INTEGER,
-    deskripsi: DataTypes.TEXT,
-    target_donasi_terkumpul: DataTypes.INTEGER,
-    status: DataTypes.ENUM(['sedang_berlangsung', 'ditutup']),
-    waktu_donasi: DataTypes.INTEGER
-  }, {
-    sequelize,
-    modelName: 'Program_donasi',
-  });
+  Program_donasi.init(
+    {
+      name: DataTypes.TEXT,
+      slug: DataTypes.TEXT,
+      banner: DataTypes.STRING,
+      tahun: DataTypes.INTEGER,
+      deskripsi: DataTypes.TEXT,
+      target_donasi_terkumpul: DataTypes.INTEGER,
+      status: DataTypes.ENUM(["sedang_berlangsung", "ditutup"]),
+      waktu_donasi: DataTypes.INTEGER,
+    },
+    {
+      sequelize,
+      modelName: "Program_donasi",
+    }
+  );
   return Program_donasi;
 };
