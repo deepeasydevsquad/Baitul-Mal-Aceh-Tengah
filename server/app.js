@@ -59,6 +59,7 @@ const arr_router = [
   "daftar_grup_acces",
   "kegiatan_kesekretariatan",
   "bank_pengumpulan",
+  "desa",
 ];
 
 const arr = {};

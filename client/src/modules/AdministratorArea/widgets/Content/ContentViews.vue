@@ -15,6 +15,8 @@ import RunningText from '@/modules/RunningText/RunningText.vue'
 import BankPengumpulan from '@/modules/BankPengumpulan/BankPengumpulan.vue'
 import GrupAkses from '@/modules/GrupAkses/GrupAkses.vue'
 import KegiatanKeseketariatan from '@/modules/KegiatanKeseketariatan/KegiatanKeseketariatan.vue'
+import desa from '../../../Desa/Desa.vue'
+
 
 const tabComponents = {
   syarat: syarat,
@@ -25,6 +27,7 @@ const tabComponents = {
   system_log_surveyor: SystemLogSurveyor,
   program_kegiatan_kesekretariatan: KegiatanKeseketariatan,
   daftar_bank_pengumpulan: BankPengumpulan,
+  daftar_desa: desa,
 }
 
 const selectedTab = useSelectedTab() // untuk menampung daftar tab yang menu / submenunya di click
