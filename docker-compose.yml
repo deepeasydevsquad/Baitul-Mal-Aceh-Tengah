@@ -24,12 +24,18 @@ services:
       - mysql
     networks:
       - app-network-baitulmal
+    command: >
+      sh -c "until nc -z mysql 3306; do
+              echo 'Waiting for MySQL...';
+              sleep 3;
+            done &&
+            npm start"
 
   client:
     image: muammar88/baitulmal_client:1.0.0
     container_name: Container_client_baitulmal
     ports:
-      - "8083:80"
+      - "8089:80"
     environment:
       VITE_APP_API_BASE_URL: "http://server:3003"
       NODE_ENV: "development"
