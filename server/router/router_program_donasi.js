@@ -2,9 +2,7 @@ const express = require("express");
 const { body } = require("express-validator");
 const controllers = require("../modules/program_donasi/controllers/index");
 const validation = require("../validation/program_donasi");
-const {
-  authenticateTokenAdministrator,
-} = require("../middleware/authenticateToken");
+const { authenticateTokenAdministrator } = require("../middleware/authenticateToken");
 
 const router = express.Router();
 

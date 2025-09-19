@@ -11,25 +11,16 @@ router.post(
         body("desa_id").notEmpty().withMessage("desa_id tidak boleh kosong."),
         body("tipe").notEmpty().withMessage("tipe tidak boleh kosong."),
         body("fullname").notEmpty().withMessage("fullname tidak boleh kosong."),
-        body("whatsapp_number")
-            .notEmpty()
-            .withMessage("whatsapp_number tidak boleh kosong."),
+        body("whatsapp_number").notEmpty().withMessage("whatsapp_number tidak boleh kosong."),
         body("username").notEmpty().withMessage("username tidak boleh kosong."),
-        body("password")
-            .notEmpty()
-            .withMessage("password tidak boleh kosong.")
-            .isLength({ min: 6 })
-            .withMessage("password minimal 6 karakter."),
+        body("password").notEmpty().withMessage("password tidak boleh kosong.").isLength({ min: 6 }).withMessage("password minimal 6 karakter."),
     ],
     controllers.register
 );
 
 router.post("/register/daftar_desa",
   [
-    body("kecamatan_id")
-      .notEmpty()
-      .withMessage("kecamatan_id tidak boleh kosong.")
-      .custom(validation.check_id_kecamatan),
+    body("kecamatan_id").notEmpty().withMessage("kecamatan_id tidak boleh kosong.").custom(validation.check_id_kecamatan),
   ],
   controllers.list_desa
 );
