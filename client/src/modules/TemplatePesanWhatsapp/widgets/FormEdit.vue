@@ -1,18 +1,18 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted, onBeforeUnmount, watch } from "vue"
-import Notification from "@/components/Modal/Notification.vue"
-import BaseButton from "@/components/Button/BaseButton.vue"
-import InputText from "@/components/Form/InputText.vue"
-import LoadingSpinner from "@/components/Loading/LoadingSpinner.vue"
-import SelectField from "@/components/Form/SelectField.vue"
-import InputReadonly from "@/components/Form/InputReadonly.vue"
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
+import Notification from '@/components/Modal/Notification.vue'
+import BaseButton from '@/components/Button/BaseButton.vue'
+import InputText from '@/components/Form/InputText.vue'
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
+import SelectField from '@/components/Form/SelectField.vue'
+import InputReadonly from '@/components/Form/InputReadonly.vue'
 
 // Composable
-import { useNotification } from "@/composables/useNotification"
+import { useNotification } from '@/composables/useNotification'
 
 // Service
-import { edit_template_pesan_whatsapp } from "@/service/template_pesan_whatsapp"
+import { edit_template_pesan_whatsapp } from '@/service/template_pesan_whatsapp'
 
 // Notification
 const { showNotification, notificationType, notificationMessage, displayNotification } =
@@ -21,67 +21,98 @@ const { showNotification, notificationType, notificationMessage, displayNotifica
 // Props
 interface Props {
   isModalOpen: boolean
-  selectedTemplatePesanWhatsapp: { id: number; name: string; type: string; message: string; variable: string[] } | null
+  selectedTemplatePesanWhatsapp: {
+    id: number
+    name: string
+    type: string
+    message: string
+    variable: string[]
+  } | null
 }
 const props = defineProps<Props>()
 
 // Emit
 const emit = defineEmits<{
-  (e: "close"): void
-  (e: "status", payload: { error_msg?: string; error?: boolean }): void
+  (e: 'close'): void
+  (e: 'status', payload: { error_msg?: string; error?: boolean }): void
 }>()
 
 // State
 const isSubmitting = ref(false)
-const form = ref({ id: null, name: "", type: "", message: "", variable: [] as string[] })
+const form = ref({ id: null, name: '', type: '', message: '', variable: [] as string[] })
 const errors = ref<Record<string, string>>({})
 
 // Reset form
 const resetForm = () => {
-  form.value = { id: null, name: "", type: "", message: "", variable: [] }
+  form.value = { id: null, name: '', type: '', message: '', variable: [] }
   errors.value = {}
 }
 
 // Variabel otomatis berdasarkan type
-const getVariableByType = (type: string) => {
+const getVariableByType = (type: string): string[] => {
   switch (type) {
-    case "semua_member": return ["{{nama_member}}", "{{nomor_identitas}}", "{{sisa_tenor}}"]
-    case "semua_surveyor": return ["{{nama_surveyor}}", "{{level}}", "{{nomor_hp}}"]
-    case "semua_user": return ["{{nama_user}}", "{{nomor_identitas}}", "{{total_pembayaran}}"]
-    default: return []
+    case 'semua_member':
+      return ['{{nama_member}}', '{{nomor_identitas}}']
+
+    case 'semua_surveyor':
+      return ['{{nama_surveyor}}']
+
+    case 'semua_user':
+      return ['{{nama_user}}']
+
+    case 'pesan_biasa':
+    default:
+      return []
   }
 }
 
-const getMessageByType = (type: string) => {
+const getMessageByType = (type: string): string => {
   switch (type) {
-    case "semua_member": return "Halo {{nama_member}}, nomor identitas kamu {{nomor_identitas}} dan sisa tenor {{sisa_tenor}} bulan."
-    case "semua_surveyor": return "Halo {{nama_surveyor}}, level kamu {{level}} dan nomor HP {{nomor_hp}}."
-    case "semua_user": return "Halo {{nama_user}}, nomor identitas kamu {{nomor_identitas}} dan total pembayaran {{total_pembayaran}}."
-    default: return "Ini pesan biasa tanpa variabel."
+    case 'semua_member':
+      return 'Halo {{nama_member}} '
+    case 'semua_surveyor':
+      return 'Halo {{nama_surveyor}}'
+    case 'semua_user':
+      return 'Halo {{nama_user}}'
+    case 'pesan_biasa':
+    default:
+      return ''
   }
 }
 
 // Watch type untuk update variable dan message
-watch(() => form.value.type, (type) => {
-  form.value.variable = getVariableByType(type)
-  form.value.message = getMessageByType(type)
-})
+watch(
+  () => form.value.type,
+  (type) => {
+    form.value.variable = getVariableByType(type)
+    form.value.message = getMessageByType(type)
+  },
+)
 
 // Watch modal open untuk sync data
-watch(() => props.isModalOpen, (open) => {
-  if (open && props.selectedTemplatePesanWhatsapp) {
-    form.value = { ...props.selectedTemplatePesanWhatsapp }
-  } else {
-    resetForm()
-  }
-})
+watch(
+  () => props.isModalOpen,
+  (open) => {
+    if (open && props.selectedTemplatePesanWhatsapp) {
+      form.value = { ...props.selectedTemplatePesanWhatsapp }
+    } else {
+      resetForm()
+    }
+  },
+)
 
 // Validasi
 const validateForm = () => {
   errors.value = {}
   let valid = true
-  if (!form.value.name) { errors.value.name = "Nama template pesan tidak boleh kosong."; valid = false }
-  if (!form.value.type) { errors.value.type = "Jenis template pesan tidak boleh kosong."; valid = false }
+  if (!form.value.name) {
+    errors.value.name = 'Nama template pesan tidak boleh kosong.'
+    valid = false
+  }
+  if (!form.value.type) {
+    errors.value.type = 'Jenis template pesan tidak boleh kosong.'
+    valid = false
+  }
   return valid
 }
 
@@ -92,11 +123,11 @@ const handleSubmit = async () => {
   try {
     const payload = { ...form.value }
     const response = await edit_template_pesan_whatsapp(payload)
-    emit("status", { error_msg: response.error_msg, error: response.error })
-
+    emit('status', { error_msg: response.error_msg, error: response.error })
   } catch (error: any) {
-    const msg = error.response?.data?.error_msg || error.response?.data?.message || "Terjadi kesalahan"
-    displayNotification(msg, "error")
+    const msg =
+      error.response?.data?.error_msg || error.response?.data?.message || 'Terjadi kesalahan'
+    displayNotification(msg, 'error')
   } finally {
     isSubmitting.value = false
     closeModal()
@@ -106,15 +137,15 @@ const handleSubmit = async () => {
 // Close modal
 const closeModal = () => {
   resetForm()
-  emit("close")
+  emit('close')
 }
 
 // Escape key
 const handleEscape = (e: KeyboardEvent) => {
-  if (e.key === "Escape" && props.isModalOpen) closeModal()
+  if (e.key === 'Escape' && props.isModalOpen) closeModal()
 }
-onMounted(() => document.addEventListener("keydown", handleEscape))
-onBeforeUnmount(() => document.removeEventListener("keydown", handleEscape))
+onMounted(() => document.addEventListener('keydown', handleEscape))
+onBeforeUnmount(() => document.removeEventListener('keydown', handleEscape))
 </script>
 
 <template>
@@ -137,7 +168,11 @@ onBeforeUnmount(() => document.removeEventListener("keydown", handleEscape))
         <!-- Header -->
         <div class="flex items-center justify-between">
           <h2 class="text-xl font-semibold text-gray-800">EDIT TEMPLATE PESAN</h2>
-          <button class="text-gray-400 text-lg hover:text-gray-600" @click="closeModal" aria-label="Tutup modal">
+          <button
+            class="text-gray-400 text-lg hover:text-gray-600"
+            @click="closeModal"
+            aria-label="Tutup modal"
+          >
             <font-awesome-icon icon="fa-solid fa-xmark" />
           </button>
         </div>

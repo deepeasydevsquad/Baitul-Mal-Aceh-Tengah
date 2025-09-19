@@ -1,18 +1,18 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted, onBeforeUnmount, watch } from "vue"
-import Notification from "@/components/Modal/Notification.vue"
-import BaseButton from "@/components/Button/BaseButton.vue"
-import InputText from "@/components/Form/InputText.vue"
-import LoadingSpinner from "@/components/Loading/LoadingSpinner.vue"
-import SelectField from "@/components/Form/SelectField.vue"
-import InputReadonly from "@/components/Form/InputReadonly.vue"
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
+import Notification from '@/components/Modal/Notification.vue'
+import BaseButton from '@/components/Button/BaseButton.vue'
+import InputText from '@/components/Form/InputText.vue'
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
+import SelectField from '@/components/Form/SelectField.vue'
+import InputReadonly from '@/components/Form/InputReadonly.vue'
 
 // Composable
-import { useNotification } from "@/composables/useNotification"
+import { useNotification } from '@/composables/useNotification'
 
 // Service
-import { add_template_pesan_whatsapp } from "@/service/template_pesan_whatsapp"
+import { add_template_pesan_whatsapp } from '@/service/template_pesan_whatsapp'
 
 // Notification
 const { showNotification, notificationType, notificationMessage, displayNotification } =
@@ -26,39 +26,39 @@ const props = defineProps<Props>()
 
 // Emit
 const emit = defineEmits<{
-  (e: "close"): void
-  (e: "status", payload: { error_msg?: string; error?: boolean }): void
+  (e: 'close'): void
+  (e: 'status', payload: { error_msg?: string; error?: boolean }): void
 }>()
 
 // State
 const isSubmitting = ref(false)
 const form = ref<{ name: string; type: string; message: string; variable: string[] }>({
-  name: "",
-  type: "",
-  message: "",
-  variable: []
+  name: '',
+  type: '',
+  message: '',
+  variable: [],
 })
 const errors = ref<Record<string, string>>({})
 
 // Reset form
 const resetForm = () => {
-  form.value = { name: "", type: "", message: "", variable: [] }
+  form.value = { name: '', type: '', message: '', variable: [] }
   errors.value = {}
 }
 
 // Variabel otomatis berdasarkan type
 const getVariableByType = (type: string): string[] => {
   switch (type) {
-    case "semua_member":
-      return ["{{nama_member}}", "{{nomor_identitas}}", "{{sisa_tenor}}"]
+    case 'semua_member':
+      return ['{{nama_member}}', '{{nomor_identitas}}']
 
-    case "semua_surveyor":
-      return ["{{nama_surveyor}}", "{{level}}", "{{nomor_hp}}"]
+    case 'semua_surveyor':
+      return ['{{nama_surveyor}}']
 
-    case "semua_user":
-      return ["{{nama_user}}", "{{nomor_identitas}}", "{{total_pembayaran}}"]
+    case 'semua_user':
+      return ['{{nama_user}}']
 
-    case "pesan_biasa":
+    case 'pesan_biasa':
     default:
       return []
   }
@@ -66,15 +66,15 @@ const getVariableByType = (type: string): string[] => {
 
 const getMessageByType = (type: string): string => {
   switch (type) {
-    case "semua_member":
-      return "Halo {{nama_member}}, nomor identitas kamu {{nomor_identitas}} dan sisa tenor {{sisa_tenor}} bulan."
-    case "semua_surveyor":
-      return "Halo {{nama_surveyor}}, level kamu {{level}} dan nomor HP {{nomor_hp}}."
-    case "semua_user":
-      return "Halo {{nama_user}}, nomor identitas kamu {{nomor_identitas}} dan total pembayaran {{total_pembayaran}}."
-    case "pesan_biasa":
+    case 'semua_member':
+      return 'Halo {{nama_member}} '
+    case 'semua_surveyor':
+      return 'Halo {{nama_surveyor}}'
+    case 'semua_user':
+      return 'Halo {{nama_user}}'
+    case 'pesan_biasa':
     default:
-      return "Ini pesan biasa tanpa variabel."
+      return ''
   }
 }
 
@@ -84,7 +84,7 @@ watch(
   (type) => {
     form.value.variable = getVariableByType(type)
     form.value.message = getMessageByType(type)
-  }
+  },
 )
 
 // Validasi
@@ -93,12 +93,12 @@ const validateForm = () => {
   errors.value = {}
 
   if (!form.value.name) {
-    errors.value.name = "Nama template pesan tidak boleh kosong."
+    errors.value.name = 'Nama template pesan tidak boleh kosong.'
     isValid = false
   }
 
   if (!form.value.type) {
-    errors.value.type = "Jenis template pesan tidak boleh kosong."
+    errors.value.type = 'Jenis template pesan tidak boleh kosong.'
     isValid = false
   }
 
@@ -119,43 +119,37 @@ const handleSubmit = async () => {
     }
 
     const response = await add_template_pesan_whatsapp(payload)
-    
-    if (response && !response.error) {
-      displayNotification("Berhasil menambahkan template pesan whatsapp.", "success")
-      emit("status", { error: false })
 
+    if (response && !response.error) {
+      emit('status', { error: false })
     } else {
-      const msg = response.error_msg || "Tambah Template Pesan Whatsapp gagal"
-      displayNotification(msg, "error")
-      emit("status", { error: true, error_msg: msg })
+      const msg = response.error_msg || 'Tambah Template Pesan Whatsapp gagal'
+      displayNotification(msg, 'error')
+      emit('status', { error: true, error_msg: msg })
     }
-    
   } catch (error: any) {
     const msg =
-      error.response?.data?.error_msg ||
-      error.response?.data?.message ||
-      "Terjadi kesalahan"
-    displayNotification(msg, "error")
-    emit("status", { error: true, error_msg: msg })
+      error.response?.data?.error_msg || error.response?.data?.message || 'Terjadi kesalahan'
+    displayNotification(msg, 'error')
+    emit('status', { error: true, error_msg: msg })
   } finally {
     isSubmitting.value = false
     closeModal()
   }
 }
 
-
 // Close modal
 const closeModal = () => {
   resetForm()
-  emit("close")
+  emit('close')
 }
 
 // Escape key
 const handleEscape = (e: KeyboardEvent) => {
-  if (e.key === "Escape" && props.isModalOpen) closeModal()
+  if (e.key === 'Escape' && props.isModalOpen) closeModal()
 }
-onMounted(() => document.addEventListener("keydown", handleEscape))
-onBeforeUnmount(() => document.removeEventListener("keydown", handleEscape))
+onMounted(() => document.addEventListener('keydown', handleEscape))
+onBeforeUnmount(() => document.removeEventListener('keydown', handleEscape))
 </script>
 
 <template>
@@ -174,10 +168,7 @@ onBeforeUnmount(() => document.removeEventListener("keydown", handleEscape))
       aria-modal="true"
     >
       <LoadingSpinner v-if="isSubmitting" label="Menyimpan..." />
-      <div
-        v-else
-        class="relative max-w-md w-full bg-white shadow-2xl rounded-2xl p-6 space-y-6"
-      >
+      <div v-else class="relative max-w-md w-full bg-white shadow-2xl rounded-2xl p-6 space-y-6">
         <!-- Header -->
         <div class="flex items-center justify-between">
           <h2 class="text-xl font-semibold text-gray-800">TAMBAH TEMPLATE PESAN BARU</h2>
@@ -215,28 +206,16 @@ onBeforeUnmount(() => document.removeEventListener("keydown", handleEscape))
 
         <!-- Muncul setelah pilih type -->
         <div v-if="form.type">
-          <InputReadonly
-            label="Variable Otomatis"
-            :value="form.variable.join(', ') || '-'"
-          />
+          <InputReadonly label="Variable Otomatis" :value="form.variable.join(', ') || '-'" />
           <div class="mt-3">
             <label class="block text-sm font-medium text-gray-700 mb-1">Isi Pesan</label>
-            <textarea
-              v-model="form.message"
-              rows="4"
-              class="w-full border rounded-lg p-2"
-            />
+            <textarea v-model="form.message" rows="4" class="w-full border rounded-lg p-2" />
           </div>
         </div>
 
         <!-- Actions -->
         <div class="pt-4">
-          <BaseButton
-            fullWidth
-            variant="primary"
-            :disabled="isSubmitting"
-            @click="handleSubmit"
-          >
+          <BaseButton fullWidth variant="primary" :disabled="isSubmitting" @click="handleSubmit">
             Simpan
           </BaseButton>
         </div>

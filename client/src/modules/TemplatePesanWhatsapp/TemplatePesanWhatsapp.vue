@@ -20,7 +20,10 @@ import { useConfirmation } from '@/composables/useConfirmation'
 import { useNotification } from '@/composables/useNotification'
 
 // Service API
-import { get_template_pesan_whatsapp, delete_template_pesan_whatsapp } from '@/service/template_pesan_whatsapp'
+import {
+  get_template_pesan_whatsapp,
+  delete_template_pesan_whatsapp,
+} from '@/service/template_pesan_whatsapp'
 
 // State: Loading
 const isLoading = ref(false)
@@ -31,15 +34,15 @@ const itemsPerPage = ref<number>(100)
 const totalColumns = ref<number>(5)
 
 const { currentPage, perPage, totalRow, totalPages, nextPage, prevPage, pageNow, pages } =
-usePagination(fetchData, { perPage: itemsPerPage.value })
+  usePagination(fetchData, { perPage: itemsPerPage.value })
 
 // Composable: notification
 const { showNotification, notificationType, notificationMessage, displayNotification } =
-useNotification()
+  useNotification()
 
 // Composable: confirmation
 const { showConfirmDialog, confirmTitle, confirmMessage, displayConfirmation, confirm, cancel } =
-useConfirmation()
+  useConfirmation()
 
 // State Data
 interface Data {
@@ -77,8 +80,6 @@ async function fetchData() {
       perpage: perPage.value,
       pageNumber: currentPage.value,
     })
-
-    console.log("response dari API:", response) // debug
 
     dataTemplates_pesan_whatsapp.value = response.data
     totalRow.value = response.total
@@ -140,8 +141,7 @@ async function deleteData(id: number) {
             v-model="search"
             @change="fetchData"
             placeholder="Cari template pesan..."
-            class="w-full sm:w-64 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700
-                   focus:border-green-900 focus:ring-2 focus:ring-green-900 transition"
+            class="w-full sm:w-64 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:border-green-900 focus:ring-2 focus:ring-green-900 transition"
           />
         </div>
       </div>
@@ -194,7 +194,10 @@ async function deleteData(id: number) {
             <!-- Empty State -->
             <tr v-else>
               <td :colspan="totalColumns" class="px-6 py-8 text-center text-gray-500">
-                <font-awesome-icon icon="fa-solid fa-database" class="text-4xl mb-2 text-gray-400" />
+                <font-awesome-icon
+                  icon="fa-solid fa-database"
+                  class="text-4xl mb-2 text-gray-400"
+                />
                 <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ada data</h3>
                 <p class="text-sm">Belum ada template pesan.</p>
               </td>
@@ -221,16 +224,28 @@ async function deleteData(id: number) {
     <!-- Modal FormAdd -->
     <FormAdd
       :is-modal-open="isModalAddOpen"
-      @close="isModalAddOpen = false; fetchData()"
-      @status="(payload: any) => displayNotification(payload.error_msg || 'Tambah Template Pesan Whatsapp berhasil', payload.error ? 'error' : 'success')"
+      @close="((isModalAddOpen = false), fetchData())"
+      @status="
+        (payload: any) =>
+          displayNotification(
+            payload.error_msg || 'Tambah Template Pesan Whatsapp berhasil',
+            payload.error ? 'error' : 'success',
+          )
+      "
     />
 
     <!-- Modal FormEdit -->
     <FormEdit
       :is-modal-open="isModalEditOpen"
       :selected-template-pesan-whatsapp="selectedTemplatePesanWhatsapp"
-      @close="isModalEditOpen = false; fetchData()"
-      @status="(payload: any) => displayNotification(payload.error_msg || 'Update Template Pesan Whatsapp berhasil', payload.error ? 'error' : 'success')"
+      @close="((isModalEditOpen = false), fetchData())"
+      @status="
+        (payload: any) =>
+          displayNotification(
+            payload.error_msg || 'Update Template Pesan Whatsapp berhasil',
+            payload.error ? 'error' : 'success',
+          )
+      "
     />
 
     <!-- Confirmation -->
