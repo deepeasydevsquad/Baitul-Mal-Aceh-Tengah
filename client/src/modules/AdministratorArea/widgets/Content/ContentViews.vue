@@ -15,6 +15,7 @@ import RunningText from '@/modules/RunningText/RunningText.vue'
 import BankPengumpulan from '@/modules/BankPengumpulan/BankPengumpulan.vue'
 import GrupAkses from '@/modules/GrupAkses/GrupAkses.vue'
 import KegiatanKeseketariatan from '@/modules/KegiatanKeseketariatan/KegiatanKeseketariatan.vue'
+import TemplatePesanWhatsapp from '@/modules/TemplatePesanWhatsapp/TemplatePesanWhatsapp.vue'
 
 const tabComponents = {
   syarat: syarat,
@@ -25,6 +26,7 @@ const tabComponents = {
   system_log_surveyor: SystemLogSurveyor,
   program_kegiatan_kesekretariatan: KegiatanKeseketariatan,
   daftar_bank_pengumpulan: BankPengumpulan,
+  template_pesan_whatsapp: TemplatePesanWhatsapp,
 }
 
 const selectedTab = useSelectedTab() // untuk menampung daftar tab yang menu / submenunya di click
