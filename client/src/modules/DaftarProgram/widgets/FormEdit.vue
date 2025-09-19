@@ -4,6 +4,7 @@ import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import Notification from '@/components/Modal/Notification.vue'
 import BaseButton from '@/components/Button/BaseButton.vue'
 import InputText from '@/components/Form/InputText.vue'
+import TextArea from '@/components/Form/TextArea.vue'
 
 // Composable
 import { useNotification } from '@/composables/useNotification'
@@ -86,7 +87,7 @@ const handleSubmit = async () => {
     const payload = {
       id: Number(props.selectedProgram.id),
       name: String(form.value.name).trim(),
-      desc: String(form.value.desc).trim().replace(/\s+/g, '_'),
+      desc: String(form.value.desc).trim(),
     }
 
     console.log('Payload dikirim ke backend:', payload)
@@ -182,11 +183,10 @@ watch(
           />
         </div>
         <div>
-          <InputText
+          <TextArea
             id="Deskripsi"
             v-model="form.desc"
             label="Deskripsi"
-            type="text"
             placeholder="Masukkan Deskripsi "
             :error="errors.desc"
           />

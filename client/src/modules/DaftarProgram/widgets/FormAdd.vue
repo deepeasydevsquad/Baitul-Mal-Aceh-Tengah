@@ -5,6 +5,7 @@ import Notification from '@/components/Modal/Notification.vue'
 import BaseButton from '@/components/Button/BaseButton.vue'
 import InputText from '@/components/Form/InputText.vue'
 import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
+import TextArea from '@/components/Form/TextArea.vue'
 
 // Composable
 import { useNotification } from '@/composables/useNotification'
@@ -52,10 +53,7 @@ const validateForm = () => {
   if (!form.value.desc) {
     errors.value.desc = 'Deskripsi tidak boleh kosong.'
     isValid = false
-  } else if (/\s/.test(form.value.desc)) {
-    errors.value.desc = 'Deskripsi tidak boleh mengandung spasi, gunakan "_" sebagai pengganti.'
-    isValid = false
-  }
+  } 
 
   return isValid
 }
@@ -63,9 +61,6 @@ const validateForm = () => {
 // Submit
 const handleSubmit = async () => {
   if (!validateForm()) return
-
-  // Ganti spasi menjadi _
-  form.value.desc = form.value.desc.replace(/\s+/g, '_')
 
   isSubmitting.value = true
   try {
@@ -136,10 +131,9 @@ onBeforeUnmount(() => document.removeEventListener('keydown', handleEscape))
         />
 
         <!-- Deskripsi program -->
-        <InputText
+        <TextArea
           v-model="form.desc"
           label="Deskripsi"
-          type="text"
           placeholder="Masukkan Deskripsi "
           :error="errors.desc"
         />
