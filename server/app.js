@@ -64,7 +64,8 @@ const arr_router = [
   "bank_pengumpulan",
   "daftar_keanggotaan",
   "surveyor",
-  "pengaturan_umum"
+  "pengaturan_umum",
+  "laporan_asnaf"
 ];
 
 const arr = {};
