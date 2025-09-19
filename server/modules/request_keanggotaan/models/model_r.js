@@ -29,8 +29,6 @@ class Model_r {
         // filter search kalau dikirim
         if (body.search && body.search !== "") {
             where.fullname = { [Op.like]: `%${body.search}%` };
-            // NOTE: lu tadi pake `where.name`, padahal di attributes ga ada field `name`
-            // harusnya `fullname` atau field lain yg sesuai model lu
         }
 
         const include = [

@@ -62,10 +62,13 @@ const arr_router = [
   "kecamatan",
   "kegiatan_kesekretariatan",
   "bank_pengumpulan",
+  "desa",
   "daftar_keanggotaan",
   "surveyor",
   "pengaturan_umum",
-  "laporan_asnaf"
+  "laporan_asnaf",
+  "program_donasi",
+  "tab",
 ];
 
 const arr = {};
