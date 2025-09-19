@@ -76,7 +76,7 @@ const handleSubmit = async () => {
 
   // Pastikan data sudah di-fetch
   if (!props.selectedSyarat?.id) {
-    displayNotification("ID syarat tidak valid", "error")
+    displayNotification('ID syarat tidak valid', 'error')
     return
   }
 
@@ -86,33 +86,31 @@ const handleSubmit = async () => {
     const payload = {
       id: Number(props.selectedSyarat.id),
       name: String(form.value.name).trim(),
-      path: String(form.value.path).trim().replace(/\s+/g, "_"),
+      path: String(form.value.path).trim().replace(/\s+/g, '_'),
     }
 
-    console.log("Payload dikirim ke backend:", payload)
+    console.log('Payload dikirim ke backend:', payload)
 
     const response = await edit_syarat(payload)
 
-    const msg = response.message || response.error_msg || "Berhasil"
+    const msg = response.message || response.error_msg || 'Berhasil'
     const isError = response.error || false
 
-    emit("status", { error_msg: msg, error: isError })
+    emit('status', { error_msg: msg, error: isError })
     closeModal()
   } catch (error: any) {
     const msg =
-      error.response?.data?.error_msg ||
-      error.response?.data?.message ||
-      "Terjadi kesalahan"
-    displayNotification(msg, "error")
+      error.response?.data?.error_msg || error.response?.data?.message || 'Terjadi kesalahan'
+    displayNotification(msg, 'error')
   } finally {
     isSubmitting.value = false
+    closeModal()
   }
 }
 
-
-
 // Tutup modal
 const closeModal = () => {
+  if (isSubmitting.value) return
   resetForm()
   emit('close')
 }
@@ -139,7 +137,7 @@ watch(
     } else if (!val) {
       resetForm()
     }
-  }
+  },
 )
 </script>
 
@@ -162,7 +160,7 @@ watch(
       <div class="relative max-w-md w-full bg-white shadow-2xl rounded-2xl p-6 space-y-6">
         <!-- Header -->
         <div class="flex items-center justify-between">
-          <h2 id="modal-title" class="text-xl font-semibold text-gray-800">EDIT SYARAT</h2>
+          <h2 id="modal-title" class="text-xl font-bold text-gray-800">EDIT SYARAT</h2>
           <button
             class="text-gray-400 text-lg hover:text-gray-600"
             @click="closeModal"
@@ -195,16 +193,23 @@ watch(
         </div>
 
         <!-- Actions -->
-        <div class="pt-4">
+        <div class="flex justify-end gap-3 mt-4">
+          <BaseButton
+            @click="closeModal"
+            type="button"
+            :disabled="isSubmitting"
+            variant="secondary"
+          >
+            Batal
+          </BaseButton>
           <BaseButton
             type="submit"
-            fullWidth
             variant="primary"
-            :disabled="isSubmitting"
+            :disabled="!(form.name.trim() && form.path) || isSubmitting"
             @click="handleSubmit"
           >
             <span v-if="isSubmitting">Menyimpan...</span>
-            <span v-else>Simpan</span>
+            <span v-else>Simpan Perubahan</span>
           </BaseButton>
         </div>
       </div>

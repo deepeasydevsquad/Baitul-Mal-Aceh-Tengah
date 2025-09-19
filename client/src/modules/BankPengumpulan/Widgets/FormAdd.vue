@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import BaseButton from '@/components/Button/BaseButton.vue'
-import { ref, watch, reactive } from 'vue'
+import { ref, watch, reactive, onMounted, onBeforeUnmount } from 'vue'
 import { getBank } from '@/service/bank_pengumpulan'
 
 const props = defineProps<{
@@ -178,8 +178,20 @@ const formatNomorRekening = (event: Event) => {
 defineExpose({
   parseServerErrors,
 })
-</script>
 
+// Function: Handle escape & Fetch Data
+const handleEscape = (e: KeyboardEvent) => {
+  if (e.key === 'Escape' && props.showModal) closeModal()
+}
+onMounted(async () => {
+  document.addEventListener('keydown', handleEscape)
+})
+
+onBeforeUnmount(async () => {
+  document.removeEventListener('keydown', handleEscape)
+})
+
+</script>
 
 <template>
   <Transition
@@ -193,12 +205,11 @@ defineExpose({
     <div
       v-if="showModal"
       class="fixed inset-0 z-50 flex items-center justify-center bg-gray-700 bg-opacity-75 backdrop-blur-sm"
-      @click.self="closeModal"
       role="dialog"
     >
       <div class="w-full max-w-lg mx-4 p-6 bg-white rounded-lg shadow-xl">
         <div class="flex justify-between items-center mb-6">
-          <h2 class="text-xl font-bold text-gray-800">Tambah Bank Pemasukan Baru</h2>
+          <h2 class="text-xl font-bold text-gray-800">Tambah Bank Pemasukan</h2>
           <button
             @click="closeModal"
             class="text-gray-400 hover:text-gray-600"
@@ -322,26 +333,29 @@ defineExpose({
             </p>
           </div>
 
-          <div class="flex justify-end gap-3 pt-4">
+          <div class="flex justify-end gap-3 mt-4">
             <BaseButton
               @click="closeModal"
               type="button"
               :disabled="isSubmitting"
               variant="secondary"
-              >Tutup</BaseButton
             >
+              Batal
+            </BaseButton>
             <BaseButton
               type="submit"
-              :loading="isSubmitting"
               variant="primary"
-              :disabled="
-                !formBank.bank_id ||
-                !formBank.jenisPemasukan ||
-                !formBank.namaAkunBank.trim() ||
-                !formBank.nomorAkunBank.trim()
-              "
-              >Tambah Bank Pemasukan Baru</BaseButton
+              :disabled="!(
+                formBank.bank_id &&
+                formBank.jenisPemasukan &&
+                formBank.namaAkunBank.trim() &&
+                formBank.nomorAkunBank.trim()
+              ) || isSubmitting"
+              @click="handleSubmit"
             >
+              <span v-if="isSubmitting">Menyimpan...</span>
+              <span v-else>Simpan</span>
+            </BaseButton>
           </div>
         </form>
       </div>

@@ -14,7 +14,7 @@ import { add_bank } from '@/service/bank'
 
 // Composable: notification
 const { showNotification, notificationType, notificationMessage, displayNotification } =
-useNotification()
+  useNotification()
 
 interface Props {
   isModalOpen: boolean
@@ -29,15 +29,16 @@ const emit = defineEmits<{
 
 // Function: Close modal
 const closeModal = () => {
+  if (isSubmitting.value) return
   resetForm()
   emit('close')
 }
+
 
 // Function: Reset form
 const resetForm = () => {
   form.value.name = ''
   form.value.img = null
-  preview.value = null
 
   // Reset errors
   errors.value = {}
@@ -71,12 +72,9 @@ const validateForm = () => {
 }
 
 // Function: Handle file
-const preview = ref<string | null>(null)
-
 const handleFile = (file: File | null) => {
   if (!file) {
     form.value.img = null
-    preview.value = null
     return
   }
 
@@ -88,7 +86,6 @@ const handleFile = (file: File | null) => {
   }
 
   form.value.img = file
-  preview.value = URL.createObjectURL(file)
 }
 
 // Function: Handle submit
@@ -115,12 +112,12 @@ const handleSubmit = async () => {
     console.log(response)
     emit('status', { error_msg: response.error_msg || response, error: response.error })
     closeModal()
-
   } catch (error: any) {
     console.error(error)
     displayNotification(error.response.data.error_msg || error.response.data.message, 'error')
   } finally {
     isSubmitting.value = false
+    closeModal()
   }
 }
 
@@ -153,14 +150,10 @@ onBeforeUnmount(async () => {
       aria-modal="true"
       aria-labelledby="modal-title"
     >
-      <div
-        class="relative max-w-md w-full bg-white shadow-2xl rounded-2xl p-6 space-y-6"
-      >
+      <div class="relative max-w-md w-full bg-white shadow-2xl rounded-2xl p-6 space-y-6">
         <!-- Header -->
         <div class="flex items-center justify-between">
-          <h2 id="modal-title" class="text-xl font-semibold text-gray-800">
-            Tambah Bank
-          </h2>
+          <h2 id="modal-title" class="text-xl font-bold text-gray-800">Tambah Bank</h2>
           <button
             class="text-gray-400 text-lg hover:text-gray-600"
             @click="closeModal"
@@ -189,20 +182,27 @@ onBeforeUnmount(async () => {
             label="Upload Logo"
             buttonText="Pilih File"
             accept=".jpg,.jpeg,.png"
-
             :error="errors.img"
             :maxSize="1000"
+            dimensionsInfo="100x33 px"
             @file-selected="handleFile"
           />
         </div>
 
         <!-- Actions -->
-        <div class="pt-4">
+        <div class="flex justify-end gap-3">
+          <BaseButton
+            @click="closeModal"
+            type="button"
+            :disabled="isSubmitting"
+            variant="secondary"
+          >
+            Batal
+          </BaseButton>
           <BaseButton
             type="submit"
-            fullWidth
             variant="primary"
-            :disabled="isSubmitting"
+            :disabled="!(form.name.trim() || form.img && !isSubmitting)"
             @click="handleSubmit"
           >
             <span v-if="isSubmitting">Menyimpan...</span>

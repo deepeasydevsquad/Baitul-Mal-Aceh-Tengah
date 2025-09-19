@@ -93,7 +93,7 @@ async function fetchData() {
 
 onMounted(async () => {
   await fetchData()
-  totalColumns.value = document.querySelectorAll('thead th').length
+
 })
 
 // Function: Delete Data
@@ -126,7 +126,7 @@ async function deleteData(id: number) {
         <BaseButton
           @click="openModalAdd()"
           variant="primary"
-          :loading="isModalAddOpen"
+          :loading="isModalAddOpen || isModalEditOpen"
           type="button"
         >
           <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" />
@@ -199,7 +199,7 @@ async function deleteData(id: number) {
           </tbody>
 
           <!-- Pagination -->
-          <tfoot>
+          <tfoot class="bg-gray-100 font-bold">
             <Pagination
               :current-page="currentPage"
               :total-pages="totalPages"

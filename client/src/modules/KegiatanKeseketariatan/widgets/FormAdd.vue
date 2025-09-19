@@ -93,6 +93,7 @@ const resetForm = () => {
 
 // Close modal
 const closeModal = () => {
+  if (isSubmitting.value) return
   resetForm()
   emit('close')
 }
@@ -157,6 +158,7 @@ const handleSubmit = async () => {
     displayNotification(err.response?.data?.message || 'Gagal simpan', 'error')
   } finally {
     isSubmitting.value = false
+    closeModal()
   }
 }
 
@@ -208,7 +210,7 @@ watch(nominalRaw, (val) => {
       >
         <!-- Header -->
         <div class="flex items-center justify-between">
-          <h2 class="text-xl font-semibold text-gray-800">Tambah Program</h2>
+          <h2 class="text-xl font-bold text-gray-800">Tambah Program</h2>
           <button class="text-gray-400 text-lg hover:text-gray-600" @click="closeModal">
             <font-awesome-icon icon="fa-solid fa-xmark" />
           </button>
@@ -292,12 +294,31 @@ watch(nominalRaw, (val) => {
         </div>
 
         <!-- Actions -->
-        <div class="pt-4">
+        <div class="flex justify-end gap-3 mt-4">
+          <BaseButton
+            @click="closeModal"
+            type="button"
+            :disabled="isSubmitting"
+            variant="secondary"
+          >
+            Batal
+          </BaseButton>
           <BaseButton
             type="submit"
-            fullWidth
             variant="primary"
-            :disabled="isSubmitting"
+            :disabled="
+              !(
+                form.kode &&
+                form.nama_kegiatan &&
+                form.penerima &&
+                form.jenis_penerima &&
+                form.area_penyaluran &&
+                form.kecamatan_id &&
+                form.desa_id &&
+                form.nominal_kegiatan &&
+                form.tanggal_penyaluran
+              ) || isSubmitting
+            "
             @click="handleSubmit"
           >
             <span v-if="isSubmitting">Menyimpan...</span>

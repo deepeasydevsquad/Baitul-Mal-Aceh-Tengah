@@ -7,7 +7,34 @@ import { computed, onMounted, ref } from 'vue'
 import ButtonReject from '@/components/Button/ButtonReject.vue'
 import Notification from '@/components/Modal/Notification.vue'
 import Confirmation from '@/components/Modal/Confirmation.vue'
+import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue'
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
 
+// Composable
+import { usePagination } from '@/composables/usePagination'
+import { useNotification } from '@/composables/useNotification'
+import { useConfirmation } from '@/composables/useConfirmation'
+
+// State: Loading
+const isLoading = ref(false)
+const isTableLoading = ref(false)
+
+// Composable: pagination
+const itemsPerPage = ref<number>(100)
+const totalColumns = ref<number>(7)
+
+const { currentPage, perPage, totalRow, totalPages, nextPage, prevPage, pageNow, pages } =
+  usePagination(fetchData, { perPage: itemsPerPage.value })
+
+// Composable: notification
+const { showNotification, notificationType, notificationMessage, displayNotification } =
+  useNotification()
+
+// Composable: confirmation
+const { showConfirmDialog, confirmTitle, confirmMessage, displayConfirmation, confirm, cancel } =
+  useConfirmation()
+
+// Interface
 interface RequestKeanggotaan {
   id: number
   status: 'verified' | 'unverified' | string
@@ -24,62 +51,26 @@ interface RequestKeanggotaan {
   updatedAt: string
 }
 
-const searchQuery = ref('')
+// Function: Fetch data
+const search = ref('')
 const data = ref<RequestKeanggotaan[]>([])
-const totalItems = ref(0)
-const itemsPerPage = 10
-const currentPage = ref(1)
-const totalPages = ref(1)
 
-const fetchData = async () => {
+async function fetchData() {
+  isTableLoading.value = true
   try {
     const response = await requestKeanggotaanService.list({
-      search: searchQuery.value,
-      perpage: itemsPerPage,
+      search: search.value,
+      perpage: itemsPerPage.value,
       pageNumber: currentPage.value,
       status: filterStatus.value,
     })
     data.value = response.data
-    totalItems.value = response.total || response.data.length || 0
-    totalPages.value = Math.ceil(response.total / itemsPerPage)
+    totalRow.value = response.total || response.data.length || 0
   } catch (error) {
     console.error('Error fetching data:', error)
+  } finally {
+    isTableLoading.value = false
   }
-}
-
-const timeoutId = ref<number | null>(null)
-
-const resetNotificationTimeout = () => {
-  if (timeoutId.value) clearTimeout(timeoutId.value)
-  timeoutId.value = window.setTimeout(() => {
-    showNotification.value = false
-  }, 3000)
-}
-
-const showNotification = ref(false)
-const notificationMessage = ref('')
-const notificationType = ref('')
-
-const displayNotification = (message: string, type: 'success' | 'error' = 'success') => {
-  notificationMessage.value = message
-  notificationType.value = type
-  showNotification.value = true
-  resetNotificationTimeout()
-}
-
-const pages = computed<number[]>(() => {
-  return Array.from({ length: totalPages.value }, (_, i) => i + 1)
-})
-const totalColumns = 7 // karena table punya 5 kolom
-
-const handlePrev = () => {
-  if (currentPage.value > 1) currentPage.value--
-}
-const handleNext = () => {
-  if (currentPage.value < totalPages.value) currentPage.value++
-}
-const handlePageNow = (page: number) => {
-  currentPage.value = page
 }
 
 onMounted(() => {
@@ -93,51 +84,44 @@ const OptionFilter = [
   { id: '', name: 'Semua' },
 ]
 
-const showConfirmDialog = ref(false)
-const confirmMessage = ref('')
-const confirmTitle = ref('')
-const confirmAction = ref<(() => void) | null>(null)
-
-const showConfirmation = (title: string, message: string, action: () => void) => {
-  confirmTitle.value = title
-  confirmMessage.value = message
-  confirmAction.value = action
-  showConfirmDialog.value = true
-}
-
 const handleApprove = async (id: number) => {
-  showConfirmDialog.value = false
+  isLoading.value = true
   try {
     await requestKeanggotaanService.verifikasi({ id, action: 'approve' })
     displayNotification('Berhasil approve data!', 'success')
     fetchData()
   } catch (e) {
     displayNotification('Gagal approve data!', 'error')
+  } finally {
+    isLoading.value = false
   }
 }
 
 const handleReject = async (id: number) => {
-  showConfirmDialog.value = false
+  isLoading.value = true
   try {
     await requestKeanggotaanService.verifikasi({ id, action: 'reject' })
     displayNotification('Berhasil reject data!', 'success')
     fetchData()
   } catch (e) {
     displayNotification('Gagal reject data!', 'error')
+  } finally {
+    isLoading.value = false
   }
 }
 </script>
 
 <template>
   <div class="container mx-auto px-4 mt-10">
+    <LoadingSpinner v-if="isLoading" label="Memuat halaman..." />
     <div class="flex justify-end items-center mb-6">
       <div class="inline-flex rounded-md shadow-xs" role="group">
         <label for="search" class="block text-sm font-medium text-gray-700 mr-2 mt-3">Filter</label>
         <input
           type="text"
           id="search"
-          class="block w-64 px-3 py-2 text-gray-700 bg-white border border-gray-300 rounded-s-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-          v-model="searchQuery"
+          class="block w-64 px-3 py-2 text-gray-700 bg-white border border-gray-300 rounded-s-lg shadow-sm focus:ring-2 focus:ring-green-900 focus:border-green-900 transition-all duration-200"
+          v-model="search"
           @change="fetchData()"
           placeholder="Cari nama / nomor KTP..."
         />
@@ -145,7 +129,7 @@ const handleReject = async (id: number) => {
           v-model="filterStatus"
           style="width: 200px"
           @change="fetchData()"
-          class="border-t border-b border-e bg-gray-50 border-gray-300 text-gray-900 text-sm rounded-e-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+          class="border-t border-b border-e bg-gray-50 border-gray-300 text-gray-900 text-sm rounded-e-lg focus:ring-green-900 focus:border-green-900 block w-full p-2.5"
         >
           <option v-for="optionC in OptionFilter" :key="optionC.id" :value="optionC.id">
             {{ optionC.name }}
@@ -155,11 +139,12 @@ const handleReject = async (id: number) => {
     </div>
 
     <div class="overflow-hidden rounded-lg border border-gray-200 shadow-md">
-      <table class="w-full border-collapse bg-white text-left text-sm text-gray-500">
+      <SkeletonTable v-if="isTableLoading" :columns="totalColumns" :rows="itemsPerPage" />
+      <table v-else class="w-full border-collapse bg-white text-left text-sm text-gray-500">
         <!-- Header dengan grouping -->
-        <thead class="bg-gray-50">
+        <thead class="bg-gray-50 text-gray-700 text-center border-b border-gray-300">
           <tr>
-           <th class="w-[20%] text-center px-6 py-4 font-medium font-bold text-gray-900">Nama</th>
+            <th class="w-[20%] text-center px-6 py-4 font-medium font-bold text-gray-900">Nama</th>
             <th class="w-[15%] text-center px-6 py-4 font-medium font-bold text-gray-900">
               Tgl Lahir
             </th>
@@ -216,7 +201,7 @@ const handleReject = async (id: number) => {
                     v-if="item.status == 'process'"
                     class="w-full flex justify-center"
                     @click="
-                      showConfirmation(
+                      displayConfirmation(
                         'Konfirmasi Approve',
                         `Yakin mau approve ${item.fullname}?`,
                         () => handleApprove(item.id),
@@ -244,7 +229,7 @@ const handleReject = async (id: number) => {
                     v-if="item.status == 'process'"
                     class="w-full flex justify-center"
                     @click="
-                      showConfirmation(
+                      displayConfirmation(
                         'Konfirmasi Reject',
                         `Yakin mau reject ${item.fullname}?`,
                         () => handleReject(item.id),
@@ -273,45 +258,41 @@ const handleReject = async (id: number) => {
 
           <!-- Kalau data kosong -->
           <tr v-if="data.length === 0">
-            <td :colspan="totalColumns" class="text-center py-6 text-gray-500">Data tidak ada</td>
+            <td :colspan="totalColumns" class="px-6 py-8 text-center text-gray-500">
+              <font-awesome-icon icon="fa-solid fa-user-plus" class="text-4xl mb-2 text-gray-400" />
+              <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ada data</h3>
+              <p class="text-sm">Belum ada data request keanggotaan.</p>
+            </td>
           </tr>
         </tbody>
 
         <!-- Footer -->
         <tfoot class="bg-gray-50 font-bold">
           <Pagination
-            :total-row="totalItems"
+            :total-row="totalRow"
             :currentPage="currentPage"
             :totalPages="totalPages"
             :pages="pages"
             :totalColumns="totalColumns"
-            @prev-page="handlePrev"
-            @next-page="handleNext"
-            @page-now="handlePageNow"
+            @prev-page="prevPage"
+            @next-page="nextPage"
+            @page-now="pageNow"
           />
         </tfoot>
       </table>
     </div>
   </div>
 
+  <!-- Confirmation -->
   <Confirmation
     :showConfirmDialog="showConfirmDialog"
     :confirmTitle="confirmTitle"
     :confirmMessage="confirmMessage"
   >
-    <button
-      @click="confirmAction && confirmAction()"
-      class="inline-flex w-full justify-center rounded-md border border-transparent bg-yellow-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm"
-    >
-      Ya
-    </button>
-    <button
-      @click="showConfirmDialog = false"
-      class="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-    >
-      Tidak
-    </button>
+    <BaseButton variant="secondary" @click="cancel">Tidak</BaseButton>
+    <BaseButton variant="warning" @click="confirm">Ya</BaseButton>
   </Confirmation>
+  <!-- Notification -->
   <Notification
     :showNotification="showNotification"
     :notificationType="notificationType"

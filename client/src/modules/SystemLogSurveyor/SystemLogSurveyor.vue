@@ -61,7 +61,6 @@ async function fetchData() {
 
 onMounted(async () => {
   await fetchData()
-  totalColumns.value = document.querySelectorAll('thead th').length
 })
 </script>
 
@@ -121,12 +120,7 @@ onMounted(async () => {
             <!-- Empty State -->
             <tr v-else>
               <td :colspan="totalColumns" class="px-6 py-8 text-center text-gray-500">
-                <font-awesome-icon
-                  icon="fa-solid fa-database"
-                  class="text-4xl mb-2 text-gray-400"
-                />
-                <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ada data</h3>
-                <p class="text-sm">Belum ada data surveyor.</p>
+                <p class="text-sm">Belum ada data.</p>
               </td>
             </tr>
           </tbody>
