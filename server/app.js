@@ -67,6 +67,7 @@ const arr_router = [
   "daftar_keanggotaan",
   "surveyor",
   "pengaturan_umum",
+  "daftar_program",
   "laporan_asnaf",
   "program_donasi",
   "tab",
