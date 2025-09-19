@@ -62,6 +62,7 @@ const arr_router = [
   "kecamatan",
   "kegiatan_kesekretariatan",
   "bank_pengumpulan",
+  "desa",
   "daftar_keanggotaan",
   "surveyor",
   "pengaturan_umum",
