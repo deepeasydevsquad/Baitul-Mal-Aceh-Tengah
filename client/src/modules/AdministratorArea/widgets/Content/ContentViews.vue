@@ -1,11 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import {
-  useSelectedTab,
-  useGlobalTab,
-  useGlobalActiveTab,
-  useTabTerpilih,
-} from '../../../../stores/sidebar'
+import { useSelectedTab, useGlobalTab, useGlobalActiveTab, useTabTerpilih } from '../../../../stores/sidebar'
 import 'flowbite'
 import Surveyor from '@/modules/Surveyor/Surveyor.vue'
 import syarat from '@/modules/Syarat/syarat.vue'
@@ -18,9 +13,11 @@ import PengaturanUmum from '@/modules/PengaturanUmum/PengaturanUmum.vue'
 import GrupAkses from '@/modules/GrupAkses/GrupAkses.vue'
 import DaftarPengguna from '@/modules/DaftarPengguna/DaftarPengguna.vue'
 import KegiatanKeseketariatan from '@/modules/KegiatanKeseketariatan/KegiatanKeseketariatan.vue'
+import TemplatePesanWhatsapp from '@/modules/TemplatePesanWhatsapp/TemplatePesanWhatsapp.vue'
 import DaftarKeanggotaan from '@/modules/DaftarKeanggotaan/DaftarKeanggotaan.vue'
 import kecamatan from '@/modules/Kecamatan/Kecamatan.vue'
 import SystemLog from '@/modules/SystemLog/SystemLog.vue'
+import LaporanAsnafFakir from '@/modules/LaporanAsnaf/LaporanAsnafFakir.vue'
 import ProgramDonasi from '@/modules/ProgramDonasi/ProgramDonasi.vue'
 import DaftarTab from '@/modules/DaftarTab/DaftarTab.vue'
 import desa from '../../../Desa/Desa.vue'
@@ -37,10 +34,12 @@ const tabComponents = {
   system_log: SystemLog,
   program_kegiatan_kesekretariatan: KegiatanKeseketariatan,
   daftar_bank_pengumpulan: BankPengumpulan,
+  template_pesan_whatsapp: TemplatePesanWhatsapp,
   daftar_desa: desa,
   daftar_keanggotaan: DaftarKeanggotaan,
   daftar_surveyor: Surveyor,
   pengaturan_umum: PengaturanUmum,
+  laporan_asnaf_fakir: LaporanAsnafFakir,
   program_donasi: ProgramDonasi,
   daftar_tab:DaftarTab,
 }
