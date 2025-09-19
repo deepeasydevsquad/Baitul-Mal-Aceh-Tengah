@@ -21,6 +21,7 @@ import KegiatanKeseketariatan from '@/modules/KegiatanKeseketariatan/KegiatanKes
 import DaftarKeanggotaan from '@/modules/DaftarKeanggotaan/DaftarKeanggotaan.vue'
 import kecamatan from '@/modules/Kecamatan/Kecamatan.vue'
 import SystemLog from '@/modules/SystemLog/SystemLog.vue'
+import DaftarProgram from '@/modules/DaftarProgram/DaftarProgram.vue'
 
 const tabComponents = {
   daftar_kecamatan: kecamatan,
@@ -37,6 +38,7 @@ const tabComponents = {
   daftar_keanggotaan: DaftarKeanggotaan,
   daftar_surveyor: Surveyor,
   pengaturan_umum: PengaturanUmum,
+  daftar_program: DaftarProgram,
 }
 
 const selectedTab = useSelectedTab() // untuk menampung daftar tab yang menu / submenunya di click
