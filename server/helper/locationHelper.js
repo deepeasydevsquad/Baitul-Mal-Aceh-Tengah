@@ -25,3 +25,9 @@ helper.get_info_lokasi = async (id) => {
     kecamatan_name: desa.kecamatan.name,
   };
 };
+
+helper.kabupatenKota = () => {
+  return "Kabupaten Aceh Tengah";
+};
+
+module.exports = helper;
