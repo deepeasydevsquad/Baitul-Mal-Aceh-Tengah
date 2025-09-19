@@ -46,6 +46,7 @@ controllers.add_running_text = async (req, res) => {
       });
     }
   } catch (error) {
+
     handleServerError(res, error);
   }
 };
@@ -139,6 +140,35 @@ controllers.update_order_running_text = async (req, res) => {
     }
   } catch (error) {
     handleServerError(res, error);
+  }
+};
+
+controllers.getActiveRunningText = async (req, res) => {
+  try {
+    const model_r = new Model_r(req);
+    
+    req.body = {
+      search: null,
+      perpage: 1000,
+      pageNumber: 1,
+      activeOnly: true
+    };
+
+    const { data } = await model_r.content_text();
+
+    res.status(200).json({
+      error: false,
+      message: "Data running text aktif berhasil diambil.",
+      data: data
+    });
+
+  } catch (error) {
+    console.error('Error in getActiveRunningText:', error);
+    res.status(500).json({
+      error: true,
+      message: "Terjadi kesalahan saat mengambil running text aktif.",
+      details: error.message
+    });
   }
 };
 

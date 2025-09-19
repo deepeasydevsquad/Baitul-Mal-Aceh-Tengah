@@ -102,6 +102,7 @@ const handleSubmit = async () => {
     )
   } finally {
     isSubmitting.value = false
+    closeModal()
   }
 }
 
@@ -147,7 +148,14 @@ watch(
 </script>
 
 <template>
-  <Transition>
+  <Transition
+    enter-active-class="transition ease-out duration-200"
+    enter-from-class="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+    enter-to-class="opacity-100 translate-y-0 sm:scale-100"
+    leave-active-class="transition ease-in duration-150"
+    leave-from-class="opacity-100 translate-y-0 sm:scale-100"
+    leave-to-class="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+  >
     <div
       v-if="isModalOpen"
       class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
@@ -157,8 +165,12 @@ watch(
       >
         <!-- Header -->
         <div class="flex items-center justify-between bg-white pb-2">
-          <h2 id="modal-title" class="text-xl font-semibold text-gray-800">Edit Grup Akses</h2>
-          <button @click="closeModal">
+          <h2 id="modal-title" class="text-xl font-bold text-gray-800">Edit Grup Akses</h2>
+          <button
+            class="text-gray-400 text-lg hover:text-gray-600"
+            @click="closeModal"
+            aria-label="Tutup modal"
+          >
             <font-awesome-icon icon="fa-solid fa-xmark" />
           </button>
         </div>
@@ -214,17 +226,28 @@ watch(
         </div>
 
         <!-- Debug -->
-
-        <div class="pt-4">
+        <div class="flex justify-end gap-3 mt-4">
+          <BaseButton
+            @click="closeModal"
+            type="button"
+            :disabled="isSubmitting"
+            variant="secondary"
+          >
+            Batal
+          </BaseButton>
           <BaseButton
             type="submit"
-            fullWidth
             variant="primary"
-            :disabled="isSubmitting"
+            :disabled="
+              !(
+                formName.trim() &&
+                selectedMenus.length
+              ) || isSubmitting
+            "
             @click="handleSubmit"
           >
             <span v-if="isSubmitting">Menyimpan...</span>
-            <span v-else>Simpan</span>
+            <span v-else>Simpan Perubahan</span>
           </BaseButton>
         </div>
       </div>

@@ -1,6 +1,8 @@
 FROM node:20.18
+#FROM node:20.18-alpine
 
-WORKDIR /app
+
+WORKDIR /apps
 
 # Salin file package.json dan package-lock.json
 COPY package*.json ./
