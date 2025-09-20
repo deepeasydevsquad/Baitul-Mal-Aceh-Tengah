@@ -1,5 +1,5 @@
 // src/plugins/rupiahPlugin.js
-import { formatToRupiah } from '@/libs/rupiahFormatter'
+import { formatToRupiah } from '../libs/rupiahFormatter'
 
 export default {
   install(app) {

@@ -185,7 +185,7 @@ const handleBackdropClick = (event: MouseEvent) => {
             </BaseButton>
             <BaseButton
               type="submit"
-              :disabled="!formAdd.content.trim()"
+              :disabled="!formAdd.content.trim() || isSubmitting"
               variant="primary"
             >
               <span v-if="isSubmitting">Menyimpan...</span>

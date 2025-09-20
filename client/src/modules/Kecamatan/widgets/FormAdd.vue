@@ -192,7 +192,7 @@ onBeforeUnmount(async () => {
           </button>
         </div>
 
-        <!-- Nama Bank -->
+        <!-- Nama kecamatan -->
         <div>
           <InputText
             id="name"
@@ -214,19 +214,6 @@ onBeforeUnmount(async () => {
             :error="errors.kode"
           />
         </div>
-        <!-- Upload Logo -->
-        <!-- <div>
-          <InputFile
-            id="photo-upload"
-            label="Upload Logo"
-            buttonText="Pilih File"
-            accept=".jpg,.jpeg,.png"
-
-            :error="errors.img"
-            :maxSize="1000"
-            @file-selected="handleFile"
-          />
-        </div> -->
 
         <!-- Actions -->
           <div class="flex justify-end gap-3 mt-4">

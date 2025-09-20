@@ -41,9 +41,6 @@ const { showNotification, notificationType, notificationMessage, displayNotifica
 const { showConfirmDialog, confirmTitle, confirmMessage, displayConfirmation, confirm, cancel } =
   useConfirmation()
 
-// State Data Bank
-const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL
-
 interface Submenu {
   id: number
   menu_id?: number
@@ -103,7 +100,7 @@ async function fetchData() {
     totalRow.value = response.total
     console.log(datas.value)
   } catch (error) {
-    displayNotification('Gagal mengambil data bank', 'error')
+    displayNotification('Gagal mengambil data Grup', 'error')
   } finally {
     isTableLoading.value = false
   }
@@ -145,7 +142,7 @@ const handleClose = () => {
 
 const handleStatus = (payload: any) => {
   displayNotification(
-    payload.error_msg || 'Tambah/Update Bank gagal',
+    payload.error_msg || 'Tambah/Update Grup gagal',
     payload.error ? 'error' : 'success',
   )
 }
