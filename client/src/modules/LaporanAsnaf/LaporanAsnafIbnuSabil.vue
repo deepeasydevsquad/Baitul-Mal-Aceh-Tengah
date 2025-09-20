@@ -25,7 +25,7 @@ const selectedTahun = ref('0') // '0' untuk "Semua Tahun"
 const tahunOptions = ref<{ value: string; text: string }[]>([
   { value: '0', text: 'Pilih Semua Tahun' },
 ])
-const asnafId = 1 // ID untuk Asnaf Fakir
+const asnafId = 6 // ID untuk Asnaf Ibnu Sabil
 
 // Composable: notification
 const { showNotification, notificationType, notificationMessage, displayNotification } =
@@ -93,18 +93,17 @@ async function fetchData() {
   }
 }
 
-
 // Function: Download Excel
 async function downloadExcel() {
   try {
-    const response = await download_excel_asnaf(selectedTahun.value)
+    const response = await download_excel_asnaf(selectedTahun.value, 'Ibnu_Sabil')
 
     const blob = new Blob([response.data])
     const url = window.URL.createObjectURL(blob)
 
     const link = document.createElement('a')
     link.href = url
-    link.download = `Laporan_Asnaf_Fakir_${selectedTahun.value}.xlsx`
+    link.download = `Laporan_Asnaf_Ibnu_Sabil_${selectedTahun.value}.xlsx`
 
     document.body.appendChild(link)
     link.click()
@@ -138,7 +137,7 @@ watch(selectedTahun, fetchData)
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <BaseButton @click="downloadExcel" variant="primary" type="button">
           <font-awesome-icon icon="fa-solid fa-download" class="mr-2" />
-          Download Excel Asnaf Fakir
+          Download Excel Asnaf Ibnu Sabil
         </BaseButton>
         <select
           v-model="selectedTahun"
@@ -190,7 +189,7 @@ watch(selectedTahun, fetchData)
                   class="text-4xl mb-3 text-gray-400"
                 />
                 <h3 class="text-lg font-medium text-gray-800">
-                  Laporan Penyaluran Asnaf Fakir Tidak Ditemukan
+                  Laporan Penyaluran Asnaf Ibnu Sabil Tidak Ditemukan
                 </h3>
                 <p class="mt-1 text-sm">Silakan pilih tahun yang lain atau data belum tersedia.</p>
               </td>
