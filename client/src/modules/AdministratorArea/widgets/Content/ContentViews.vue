@@ -22,6 +22,7 @@ import LaporanAsnafFakir from '@/modules/LaporanAsnaf/LaporanAsnafFakir.vue'
 import ProgramDonasi from '@/modules/ProgramDonasi/ProgramDonasi.vue'
 import DaftarTab from '@/modules/DaftarTab/DaftarTab.vue'
 import desa from '../../../Desa/Desa.vue'
+import RiwayatDonasi from '@/modules/RiwayatDonasi/RiwayatDonasi.vue'
 
 const tabComponents = {
   daftar_kecamatan: kecamatan,
@@ -44,6 +45,7 @@ const tabComponents = {
   laporan_asnaf_fakir: LaporanAsnafFakir,
   program_donasi: ProgramDonasi,
   daftar_tab:DaftarTab,
+  riwayat_donasi: RiwayatDonasi,
 }
 
 const selectedTab = useSelectedTab() // untuk menampung daftar tab yang menu / submenunya di click

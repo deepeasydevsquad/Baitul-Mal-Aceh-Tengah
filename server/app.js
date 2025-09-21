@@ -10,7 +10,7 @@ const cookieParser = require("cookie-parser");
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 3003;
 
 // CORS dinamis, izinkan semua origin yang datang
 app.use(
@@ -71,6 +71,7 @@ const arr_router = [
   "laporan_asnaf",
   "program_donasi",
   "tab",
+  "riwayat_donasi",
 ];
 
 const arr = {};
