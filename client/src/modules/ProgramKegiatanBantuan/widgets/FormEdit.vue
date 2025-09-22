@@ -105,8 +105,8 @@ const resetForm = () => {
     jumlah_target_penerima: 0,
     sumber_dana: '',
     area_penyaluran: '',
-    desa_penyaluran: [],
-    kecamatan_penyaluran: [],
+    desa_penyaluran: [{ desa_id: '', kuota: 0 }],
+    kecamatan_penyaluran: [{ kecamatan_id: '', kuota: 0 }],
     jenis_penyaluran: '',
     tahun: 0,
     banner: null,
@@ -197,7 +197,7 @@ const validateForm = () => {
     isValid = false
   }
 
-  if (form.value.area_penyaluran === 'kecamatan') {
+  if (form.value.area_penyaluran === 'kecamatan' && form.value.jenis_penyaluran === 'volume') {
     if (!form.value.kecamatan_penyaluran || form.value.kecamatan_penyaluran.length === 0) {
       errors.value.kecamatan_penyaluran = 'Kecamatan penyaluran wajib diisi.'
       isValid = false
@@ -209,14 +209,13 @@ const validateForm = () => {
       )
 
       if (form.value.jumlah_target_penerima && totalKuota > form.value.jumlah_target_penerima) {
-        errors.value.area_penyaluran =
-          'Jumlah kuota kecamatan melebihi jumlah target penerima.'
+        errors.value.area_penyaluran = 'Jumlah kuota kecamatan melebihi jumlah target penerima.'
         isValid = false
       }
     }
   }
 
-  if (form.value.area_penyaluran === 'desa') {
+  if (form.value.area_penyaluran === 'desa' && form.value.jenis_penyaluran === 'volume') {
     if (!form.value.desa_penyaluran || form.value.desa_penyaluran.length === 0) {
       errors.value.desa_penyaluran = 'Desa penyaluran wajib diisi.'
       isValid = false
@@ -314,14 +313,29 @@ const handleSubmit = async () => {
 
   const formData = new FormData()
   formData.append('id', form.value.id || Number(props.selectedProgram.id))
-  Object.keys(form.value).forEach((key) => {
-    if (key === 'banner' && !form.value.banner) return
+  Object.entries(form.value).forEach(([key, value]) => {
+    if (key === 'banner' && !value) return
+
     if (key === 'desa_penyaluran') {
-      formData.append('desa_penyaluran', JSON.stringify(form.value.desa_penyaluran))
+      if (form.value.area_penyaluran === 'desa') {
+        formData.append('desa_penyaluran', JSON.stringify(value))
+      } else {
+        formData.append('desa_penyaluran', JSON.stringify([]))
+      }
     } else if (key === 'kecamatan_penyaluran') {
-      formData.append('kecamatan_penyaluran', JSON.stringify(form.value.kecamatan_penyaluran))
+      if (form.value.area_penyaluran === 'kecamatan') {
+        formData.append('kecamatan_penyaluran', JSON.stringify(value))
+      } else {
+        formData.append('kecamatan_penyaluran', JSON.stringify([]))
+      }
+    } else if (key === 'jumlah_target_penerima') {
+      if (form.value.jenis_penyaluran === 'volume') {
+        formData.append('jumlah_target_penerima', value)
+      } else {
+        formData.append('jumlah_target_penerima', 0)
+      }
     } else {
-      formData.append(key, form.value[key])
+      formData.append(key, value)
     }
   })
 
@@ -359,6 +373,25 @@ watch(
       if (selectedProgram?.banner) {
         previewUrl.value = `${BASE_URL}/uploads/img/program_kegiatan_bantuan/${selectedProgram.banner}`
       }
+    }
+  },
+)
+
+watch(
+  () => form.value.area_penyaluran,
+  (val) => {
+    if (val === 'desa') {
+      // hanya inisialisasi kalau belum ada data
+      if (!form.value.desa_penyaluran?.length) {
+        form.value.desa_penyaluran = [{ desa_id: '', kuota: 0 }]
+      }
+    } else if (val === 'kecamatan') {
+      if (!form.value.kecamatan_penyaluran?.length) {
+        form.value.kecamatan_penyaluran = [{ kecamatan_id: '', kuota: 0 }]
+      }
+    } else {
+      form.value.desa_penyaluran = []
+      form.value.kecamatan_penyaluran = []
     }
   },
 )
@@ -478,8 +511,8 @@ function openImageInNewTab() {
               <SelectField
                 id="asnaf_id"
                 v-model="form.asnaf_id"
-                label="Kategori Kegiatan"
-                :options="[{ id: '', name: '-- Pilih Kategori Kegiatan --' }, ...asnafOption]"
+                label="Kategori Asnaf"
+                :options="[{ id: '', name: '-- Pilih Kategori Asnaf --' }, ...asnafOption]"
                 required
                 :error="errors.asnaf_id"
               />
@@ -603,23 +636,27 @@ function openImageInNewTab() {
                 class="flex gap-2 mb-2"
               >
                 <!-- Select Kecamatan -->
-                <SelectField
-                  :id="'kecamatan-' + index"
-                  v-model="item.kecamatan_id"
-                  label="Pilih Kecamatan"
-                  :options="[{ id: '', name: '-- Pilih Kecamatan --' }, ...dataKecamatan]"
-                  required
-                />
+                <div class="w-full">
+                  <SelectField
+                    :id="'kecamatan-' + index"
+                    v-model="item.kecamatan_id"
+                    label="Pilih Kecamatan"
+                    :options="[{ id: '', name: '-- Pilih Kecamatan --' }, ...dataKecamatan]"
+                    required
+                  />
+                </div>
 
-                <!-- Input Kuota -->
-                <InputText
-                  :id="'kuota-kecamatan-' + index"
-                  v-model="item.kuota"
-                  label="Kuota"
-                  placeholder="Masukkan Kuota"
-                  type="number"
-                  required
-                />
+                <div class="max-w-[100px]">
+                  <!-- Input Kuota -->
+                  <InputText
+                    :id="'kuota-kecamatan-' + index"
+                    v-model="item.kuota"
+                    label="Kuota"
+                    placeholder=""
+                    type="number"
+                    required
+                  />
+                </div>
 
                 <!-- Hapus -->
                 <div class="flex justify-center gap-2 items-center">
@@ -650,54 +687,59 @@ function openImageInNewTab() {
             </div>
 
             <!-- Jika pilih Desa -->
-            <div v-if="form.area_penyaluran === 'desa'" class="col-span-3">
+            <div v-if="form.area_penyaluran === 'desa'" class="col-span-4">
               <div
                 v-for="(item, index) in form.desa_penyaluran"
-                :key="'desa-' + index"
+                :key="'kec-' + index"
                 class="flex gap-2 mb-2"
               >
                 <!-- Select Desa -->
-                <SelectField
-                  :id="'desa-' + index"
-                  v-model="item.desa_id"
-                  label="Pilih Desa"
-                  :options="[{ id: '', name: '-- Pilih Desa --' }, ...dataDesa]"
-                  required
-                />
+                <div class="w-full">
+                  <SelectField
+                    :id="'desa-' + index"
+                    v-model="item.desa_id"
+                    label="Pilih Desa"
+                    :options="[{ id: '', name: '-- Pilih Desa --' }, ...dataDesa]"
+                    required
+                  />
+                </div>
 
-                <!-- Input Kuota -->
-                <InputText
-                  :id="'kuota-desa-' + index"
-                  v-model="item.kuota"
-                  label="Kuota"
-                  placeholder="Masukkan Kuota"
-                  type="number"
-                  required
-                />
+                <div class="max-w-[100px]">
+                  <!-- Input Kuota -->
+                  <InputText
+                    :id="'kuota-desa-' + index"
+                    v-model="item.kuota"
+                    label="Kuota"
+                    placeholder=""
+                    type="number"
+                    required
+                  />
+                </div>
 
                 <!-- Hapus -->
-                <BaseButton
-                  type="button"
-                  variant="danger"
-                  size="sm"
-                  :disabled="
-                    isSubmitting ||
-                    !form.desa_penyaluran.some((item, idx) => idx === index && !item.desa_id)
-                  "
-                  @click="form.desa_penyaluran.splice(index, 1)"
-                >
-                  <DeleteIcon />
-                </BaseButton>
+                <div class="flex justify-center gap-2 items-center">
+                  <DangerButton
+                    class="mt-7"
+                    :disabled="
+                      isSubmitting ||
+                      !form.desa_penyaluran.some((item, idx) => idx === index && !item.desa_id)
+                    "
+                    @click="form.desa_penyaluran.splice(index, 1)"
+                  >
+                    <DeleteIcon />
+                  </DangerButton>
+                </div>
               </div>
 
               <!-- Tambah Row -->
-              <button
+              <BaseButton
                 type="button"
-                class="px-3 py-1 bg-blue-500 text-white rounded"
+                variant="warning"
+                size="sm"
                 @click="form.desa_penyaluran.push({ desa_id: '', kuota: 0 })"
               >
                 + Tambah Desa
-              </button>
+              </BaseButton>
             </div>
           </div>
         </div>
@@ -722,10 +764,8 @@ function openImageInNewTab() {
                 form.nama_kegiatan.trim() &&
                 form.jumlah_dana &&
                 form.jumlah_maksimal_nominal_bantuan &&
-                // form.jumlah_target_penerima &&
                 form.sumber_dana.trim() &&
                 form.area_penyaluran.trim() &&
-                // (form.desa_penyaluran.length > 0 || form.kecamatan_penyaluran.length > 0) &&
                 form.jenis_penyaluran.trim() &&
                 form.tahun &&
                 (form.banner || form.desc.trim())
@@ -734,7 +774,7 @@ function openImageInNewTab() {
             @click="handleSubmit"
           >
             <span v-if="isSubmitting">Menyimpan...</span>
-            <span v-else>Simpan</span>
+            <span v-else>Simpan Perubahan</span>
           </BaseButton>
         </div>
       </div>

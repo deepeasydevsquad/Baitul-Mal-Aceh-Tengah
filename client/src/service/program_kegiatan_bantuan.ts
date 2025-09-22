@@ -29,15 +29,6 @@ export const get_daftar_desa = async () => {
     throw error
   }
 }
-// export const get_daftar_desa = async (id: number) => {
-//   try {
-//     const response = await api.post("/program_kegiatan_bantuan/daftar_desa", { kecamatan_id: id })
-//     return response.data
-//   } catch (error) {
-//     console.error("Gagal mengambil request keanggotaan:", error)
-//     throw error
-//   }
-// }
 
 export const get_program_bantuan = async (param: any) => {
   try {
@@ -83,6 +74,26 @@ export const edit_program_bantuan = async (param: any) => {
     return response.data
   } catch (error) {
     console.error('Gagal mengedit program kegiatan bantuan:', error)
+    throw error
+  }
+}
+
+export const get_info_edit_status_program_bantuan = async (id: number) => {
+  try {
+    const response = await api.post('/program_kegiatan_bantuan/get_info_edit_status_program_bantuan', { id: id })
+    return response.data
+  } catch (error) {
+    console.error('Gagal mengedit status program kegiatan bantuan:', error)
+    throw error
+  }
+}
+
+export const edit_status_program_bantuan = async (id: number) => {
+  try {
+    const response = await api.post('/program_kegiatan_bantuan/edit_status_program_bantuan', { id: id })
+    return response.data
+  } catch (error) {
+    console.error('Gagal mengedit status program kegiatan bantuan:', error)
     throw error
   }
 }

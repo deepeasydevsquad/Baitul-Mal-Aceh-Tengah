@@ -27,17 +27,6 @@ router.get(
   authenticateTokenAdministrator,
   controllers.daftar_desa
 );
-// router.post(
-//   "/daftar_keanggotaan/daftar_desa",
-//   authenticateTokenAdministrator,
-//   [
-//     body("kecamatan_id")
-//       .notEmpty()
-//       .withMessage("kecamatan_id tidak boleh kosong.")
-//       .custom(validation.check_id_kecamatan),
-//   ],
-//   controllers.daftar_desa
-// );
 
 router.post(
   "/program_kegiatan_bantuan/list",
@@ -119,6 +108,30 @@ router.post(
   validationHelper.handleFileErrors,
   controllers.add
 );
+
+router.post(
+  "/program_kegiatan_bantuan/get_info_edit_status_program_bantuan",
+  authenticateTokenAdministrator,
+  [
+    body("id")
+      .notEmpty().withMessage("ID Tidak Boleh Kosong")
+      .isInt().withMessage("ID Harus Angka")
+      .custom(validation.check_id_program_kegiatan_bantuan),
+  ],
+  controllers.get_edit_status_program_bantuan
+)
+
+router.post(
+  "/program_kegiatan_bantuan/edit_status_program_bantuan",
+  authenticateTokenAdministrator,
+  [
+    body("id")
+      .notEmpty().withMessage("ID Tidak Boleh Kosong")
+      .isInt().withMessage("ID Harus Angka")
+      .custom(validation.check_id_program_kegiatan_bantuan),
+  ],
+  controllers.edit_status_program_bantuan
+)
 
 router.post(
   "/program_kegiatan_bantuan/get_info_edit_program_bantuan",

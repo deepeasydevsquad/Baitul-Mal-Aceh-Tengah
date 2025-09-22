@@ -5,6 +5,7 @@ import Notification from '@/components/Modal/Notification.vue'
 import Confirmation from '@/components/Modal/Confirmation.vue'
 import BaseButton from '@/components/Button/BaseButton.vue'
 import LightButton from '@/components/Button/LightButton.vue'
+import BaseSelect from '@/components/Form/BaseSelect.vue'
 import EditIcon from '@/components/Icons/EditIcon.vue'
 import DangerButton from '@/components/Button/DangerButton.vue'
 import DeleteIcon from '@/components/Icons/DeleteIcon.vue'
@@ -13,7 +14,7 @@ import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue'
 import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
 import FormAdd from '@/modules/ProgramKegiatanBantuan/widgets/FormAdd.vue'
 import FormEdit from '@/modules/ProgramKegiatanBantuan/widgets/FormEdit.vue'
-import BaseSelect from '@/components/Form/BaseSelect.vue'
+import FormStatusKegiatan from '@/modules/ProgramKegiatanBantuan/widgets/FormStatusKegiatan.vue'
 
 // Composable
 import { usePagination } from '@/composables/usePagination'
@@ -65,12 +66,7 @@ interface ProgramKegiatanBantuan {
   sumber_dana: string
   area_penyaluran: string
   jenis_penyaluran: string
-  status_kegiatan: string
-  total_permohonan: number
-  total_permohonan_approve: number
-  total_permohonan_reject: number
-  total_permohonan_tunda: number
-  sk_surveyor: string
+  status_kegiatan: boolean,
   tahun: string
   banner: string
   desc: string
@@ -82,10 +78,16 @@ const dataProgramBantuan = ref<ProgramKegiatanBantuan[]>([])
 // Function: Modal
 const isModalAddOpen = ref(false)
 const isModalEditOpen = ref(false)
+const isModalStatusOpen = ref(false)
 const selectedProgramKegiatanBantuan = ref<any>(null)
 
 function openModalAdd() {
   isModalAddOpen.value = true
+}
+
+function openModalStatus(programKegiatanBantuan: any) {
+  selectedProgramKegiatanBantuan.value = programKegiatanBantuan
+  isModalStatusOpen.value = true
 }
 
 function openModalEdit(programKegiatanBantuan: any) {
@@ -197,7 +199,7 @@ async function deleteData(id: number) {
           <BaseSelect
             v-model="selectedAsnaf"
             :options="asnafOption"
-            placeholder="Semua Kategori"
+            placeholder="Semua Asnaf"
             @change="fetchData"
           />
 
@@ -345,12 +347,12 @@ async function deleteData(id: number) {
                         <td class="px-4 py-1 font-bold">
                           <span
                             :class="
-                              data.status_kegiatan === 'sedang_berlangsung'
+                              data.status_kegiatan === false
                                 ? 'text-yellow-500'
                                 : 'text-green-500'
                             "
                             >{{
-                              data.status_kegiatan === 'sedang_berlangsung'
+                              data.status_kegiatan === false
                                 ? 'SEDANG BERLANGSUNG'
                                 : 'SELESAI'
                             }}</span
@@ -375,34 +377,6 @@ async function deleteData(id: number) {
                           }}
                         </td>
                       </tr>
-                      <tr class="border-b border-gray-300">
-                        <td class="w-[45%] bg-gray-200 px-4 py-1 font-semibold">JUMLAH PEMOHON</td>
-                        <td class="px-4 py-1">{{ data.total_permohonan }} Pemohon</td>
-                      </tr>
-                      <tr class="border-b border-gray-300">
-                        <td class="w-[45%] bg-gray-200 px-4 py-1 font-semibold">
-                          JUMLAH PEMOHON DITOLAK
-                        </td>
-                        <td class="px-4 py-1">{{ data.total_permohonan_reject }} Pemohon</td>
-                      </tr>
-                      <tr class="border-b border-gray-300">
-                        <td class="w-[45%] bg-gray-200 px-4 py-1 font-semibold">
-                          JUMLAH PEMOHON DIREALISASI
-                        </td>
-                        <td class="px-4 py-1">{{ data.total_permohonan_approve }} Pemohon</td>
-                      </tr>
-                      <tr class="border-b border-gray-300">
-                        <td class="w-[45%] bg-gray-200 px-4 py-1 font-semibold">
-                          JUMLAH PEMOHON DITUNDA
-                        </td>
-                        <td class="px-4 py-1">{{ data.total_permohonan_tunda }} Pemohon</td>
-                      </tr>
-                      <tr class="border-b border-gray-300">
-                        <td class="w-[45%] bg-gray-200 px-4 py-1 font-semibold">SK SURVEYOR</td>
-                        <td class="px-4 py-1 text-red-500 font-semibold">
-                          {{ data.sk_surveyor || 'SK Surveyor Tidak Ditemukan' }}
-                        </td>
-                      </tr>
                     </tbody>
                   </table>
                 </td>
@@ -410,6 +384,13 @@ async function deleteData(id: number) {
                   {{ data.datetimes }}
                 </td>
                 <td class="flex px-6 py-4 gap-2 align-top justify-center">
+                  <LightButton @click="openModalStatus(data)">
+                    <font-awesome-icon
+                      :icon="
+                        data.status_kegiatan ? 'fa-solid fa-toggle-on' : 'fa-solid fa-toggle-off'
+                      "
+                    />
+                  </LightButton>
                   <LightButton @click="openModalEdit(data)">
                     <EditIcon />
                   </LightButton>
@@ -453,10 +434,7 @@ async function deleteData(id: number) {
     <!-- Modal FormAdd -->
     <FormAdd
       :is-modal-open="isModalAddOpen"
-      @close="
-        isModalAddOpen = false,
-        fetchData()
-      "
+      @close="((isModalAddOpen = false), fetchData())"
       @status="
         (payload: any) =>
           displayNotification(
@@ -470,10 +448,21 @@ async function deleteData(id: number) {
     <FormEdit
       :is-modal-open="isModalEditOpen"
       :selected-program="selectedProgramKegiatanBantuan"
-      @close="
-        isModalEditOpen = false,
-        fetchData()
+      @close="((isModalEditOpen = false), fetchData())"
+      @status="
+        (payload: any) =>
+          displayNotification(
+            payload.error_msg || 'Tambah/Update program kegiatan bantuan gagal',
+            payload.error ? 'error' : 'success',
+          )
       "
+    />
+
+    <!-- Modal FormStatus -->
+    <FormStatusKegiatan
+      :is-modal-open="isModalStatusOpen"
+      :selected-program="selectedProgramKegiatanBantuan"
+      @close="((isModalStatusOpen = false), fetchData())"
       @status="
         (payload: any) =>
           displayNotification(

@@ -136,6 +136,46 @@ controllers.edit = async (req, res) => {
   }
 };
 
+controllers.get_edit_status_program_bantuan = async (req, res) => {
+  if (!(await handleValidationErrors(req, res))) return;
+
+  try {
+    const model_r = new Model_r(req);
+    const feedBack = await model_r.get_edit_status_program_bantuan();
+
+    res.status(200).json({
+      error: false,
+      data: feedBack,
+      total: 1
+    });
+  } catch (error) {
+    handleServerError(res, error);
+  }
+}
+
+controllers.edit_status_program_bantuan = async (req, res) => {
+  if (!(await handleValidationErrors(req, res))) return;
+
+  try {
+    const model_cud = new Model_cud(req);
+    await model_cud.edit_status_program_bantuan();
+
+    if (await model_cud.response()) {
+      res.status(200).json({
+        error: false,
+        error_msg: 'Status Program kegiatan bantuan berhasil diperbaharui.',
+      });
+    } else {
+      res.status(400).json({
+        error: true,
+        error_msg: 'Status Program kegiatan bantuan gagal diperbaharui.',
+      });
+    }
+  } catch (error) {
+    handleServerError(res, error);
+  }
+};
+
 controllers.delete = async (req, res) => {
   if (!(await handleValidationErrors(req, res))) return;
 
