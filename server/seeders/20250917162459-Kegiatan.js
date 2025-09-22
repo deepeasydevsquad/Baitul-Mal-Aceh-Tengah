@@ -19,7 +19,6 @@ module.exports = {
         jenis_penyaluran: 'langsung',
         status_kegiatan: 'sedang_berlangsung',
         tahun: 2025,
-        name: 'Bantuan Pendidikan 2025',
         banner: 'korban.png',
         desc: 'Program bantuan biaya pendidikan untuk siswa/siswi yatim dan dhuafa di seluruh kabupaten.',
         createdAt: new Date(),

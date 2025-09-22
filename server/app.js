@@ -73,6 +73,7 @@ const arr_router = [
   "program_donasi",
   "tab",
   "daftar_asnaf",
+  "urutan_bagian_monev",
 ];
 
 const arr = {};

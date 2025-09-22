@@ -29,7 +29,8 @@ import LaporanAsnafFisabilillah from '@/modules/LaporanAsnaf/LaporanAsnafFisabil
 import LaporanAsnafGharim from '@/modules/LaporanAsnaf/LaporanAsnafGharim.vue'
 import LaporanAsnafMuallaf from '@/modules/LaporanAsnaf/LaporanAsnafMuallaf.vue'
 import LaporanAsnafIbnuSabil from '@/modules/LaporanAsnaf/LaporanAsnafIbnuSabil.vue'
-
+import UrutanBagianMonev from '@/modules/UrutanBagianMonev/UrutanBagianMonev.vue'
+import { url } from 'inspector'
 const tabComponents = {
   daftar_kecamatan: kecamatan,
   syarat: syarat,
@@ -58,6 +59,7 @@ const tabComponents = {
   laporan_asnaf_muallaf: LaporanAsnafMuallaf,
   laporan_asnaf_ibnu_sabil: LaporanAsnafIbnuSabil,
   daftar_asnaf:DaftarAsnaf,
+  urutan_bagian_monev: UrutanBagianMonev
 }
 
 const selectedTab = useSelectedTab() // untuk menampung daftar tab yang menu / submenunya di click
