@@ -3,12 +3,12 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-   
     await queryInterface.bulkInsert('Permohonans', [
       {
         member_id: 1, 
         kegiatan_id: 1, 
         bank_id: 1, 
+
         nomor_akun_bank: '1234567890',
         nama_akun_bank: 'BUDI SANTOSO',
         status: 'sedang_berlangsung',
@@ -20,7 +20,6 @@ module.exports = {
   },
 
   async down (queryInterface, Sequelize) {
-
     await queryInterface.bulkDelete('Permohonans', null, {});
   }
 };

@@ -13,7 +13,6 @@ import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue'
 import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
 import FormAdd from '@/modules/DaftarPengguna/widgets/FormAdd.vue'
 import FormEdit from '@/modules/DaftarPengguna/widgets/FormEdit.vue'
-import SelectField from '@/components/Form/SelectField.vue'
 
 // Composable
 import { usePagination } from '@/composables/usePagination'
