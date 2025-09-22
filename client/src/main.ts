@@ -17,6 +17,7 @@ import 'alertifyjs/build/css/themes/default.min.css'; // atau theme lain seperti
 import router from './router'
 import { createPinia } from 'pinia'
 import { createHead } from '@vueuse/head'
+import rupiahPlugin from "@/plugins/rupiahPlugin";
 
 // PrimeVue
 import PrimeVue from 'primevue/config'
