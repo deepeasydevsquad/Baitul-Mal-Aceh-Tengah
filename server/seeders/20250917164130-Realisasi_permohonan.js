@@ -3,8 +3,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-    await queryInterface.bulkInsert('Realisasi_permohonans', [
- 
+      await queryInterface.bulkInsert('Realisasi_permohonans', [
       {
         permohonan_id: 1, 
         status: 'approve',
@@ -23,7 +22,6 @@ module.exports = {
   },
 
   async down (queryInterface, Sequelize) {
-
     await queryInterface.bulkDelete('Realisasi_permohonans', null, {});
   }
 };

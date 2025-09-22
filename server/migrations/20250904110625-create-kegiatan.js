@@ -71,9 +71,6 @@ module.exports = {
       tahun: {
         type: Sequelize.INTEGER
       },
-      name: {
-        type: Sequelize.STRING
-      },
       banner: {
         type: Sequelize.STRING
       },
