@@ -280,8 +280,10 @@ function formatToRupiah(angka: number | string) {
                 <td class="px-6 py-4 text-center font-medium text-gray-800 align-top">
                   {{ new Date(data.createdAt).toLocaleString('id-ID') }}
                 </td>
-                <td class="px-6 py-4 text-center font-medium text-gray-800 align-top">
-                  <div class="grid grid-cols-2 gap-2 px-2 py-4">
+                <td
+                  class="px-6 py-4 text-center font-medium text-gray-800 align-top items-center justufy-center"
+                >
+                  <div class="flex flex-col gap-2 px-2 py-4 items-center">
                     <!-- Kalau belum ditutup -->
                     <template v-if="data.status !== 'ditutup'">
                       <LightButton @click="openModalEdit(data.id)">

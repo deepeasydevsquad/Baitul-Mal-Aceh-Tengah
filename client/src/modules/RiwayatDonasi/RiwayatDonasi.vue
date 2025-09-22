@@ -319,3 +319,17 @@ async function deleteData(id: number) {
     />
   </div>
 </template>
+
+<style>
+.text-xs {
+  font-size: 0.75rem; /* kecilin font */
+}
+.px-2 {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+.py-2 {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+</style>
