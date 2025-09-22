@@ -153,7 +153,7 @@ const validateForm = () => {
   }
 
   if (!form.value.asnaf_id) {
-    errors.value.asnaf_id = 'Kategori wajib diisi.'
+    errors.value.asnaf_id = 'Asnaf wajib diisi.'
     isValid = false
   }
 
@@ -482,8 +482,8 @@ function openImageInNewTab() {
               <SelectField
                 id="asnaf_id"
                 v-model="form.asnaf_id"
-                label="Kategori Kegiatan"
-                :options="[{ id: '', name: '-- Pilih Kategori Kegiatan --' }, ...asnafOption]"
+                label="Daftar Asnaf"
+                :options="[{ id: '', name: '-- Pilih Asnaf --' }, ...asnafOption]"
                 required
                 :error="errors.asnaf_id"
               />
@@ -604,7 +604,7 @@ function openImageInNewTab() {
               <div
                 v-for="(item, index) in form.kecamatan_penyaluran"
                 :key="'kec-' + index"
-                class="flex gap-2 mb-2"
+                class="flex gap-2 mb-5"
               >
                 <!-- Select Kecamatan -->
                 <div class="w-full">
@@ -623,7 +623,7 @@ function openImageInNewTab() {
                     :id="'kuota-kecamatan-' + index"
                     v-model="item.kuota"
                     label="Kuota"
-                    placeholder=""
+                    placeholder="Kuota"
                     type="number"
                     required
                   />
@@ -648,9 +648,10 @@ function openImageInNewTab() {
 
               <!-- Tambah Row -->
               <BaseButton
+                class="w-full"
                 type="button"
                 variant="warning"
-                size="sm"
+                size="md"
                 @click="form.kecamatan_penyaluran.push({ kecamatan_id: '', kuota: 0 })"
               >
                 + Tambah Kecamatan
@@ -662,7 +663,7 @@ function openImageInNewTab() {
               <div
                 v-for="(item, index) in form.desa_penyaluran"
                 :key="'kec-' + index"
-                class="flex gap-2 mb-2"
+                class="flex gap-2 mb-5"
               >
                 <!-- Select Desa -->
                 <div class="w-full">
@@ -681,7 +682,7 @@ function openImageInNewTab() {
                     :id="'kuota-desa-' + index"
                     v-model="item.kuota"
                     label="Kuota"
-                    placeholder=""
+                    placeholder="Kuota"
                     type="number"
                     required
                   />
@@ -689,9 +690,7 @@ function openImageInNewTab() {
 
                 <!-- Hapus -->
                 <div class="flex justify-center gap-2 items-center">
-                  <DangerButton
-                    class="mt-7"
-                    :disabled="
+                  <DangerButton class="mt-7" :disabled="
                       isSubmitting ||
                       !form.desa_penyaluran.some(
                         (item, idx) => idx === index && !item.desa_id,
@@ -706,9 +705,10 @@ function openImageInNewTab() {
 
               <!-- Tambah Row -->
               <BaseButton
+                class="w-full"
                 type="button"
                 variant="warning"
-                size="sm"
+                size="md"
                 @click="form.desa_penyaluran.push({ desa_id: '', kuota: 0 })"
               >
                 + Tambah Desa
