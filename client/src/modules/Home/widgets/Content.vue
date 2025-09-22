@@ -59,7 +59,7 @@
     }
 
     try {
-      const baseUrl = window.location.protocol + '//' + window.location.hostname + ':3001'
+      const baseUrl = window.location.protocol + '//' + window.location.hostname + ':3003'
       const response = await axios.post(baseUrl + '/auth/login_member', { username : form.value.username, password: form.value.password})
       // filter
       if (response.status === 200) {
