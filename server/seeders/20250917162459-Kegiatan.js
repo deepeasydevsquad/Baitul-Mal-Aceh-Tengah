@@ -3,15 +3,10 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-    /**
-     * Menambahkan data seed ke dalam tabel Kegiatans.
-     * Pastikan nama tabel 'Kegiatans' sesuai dengan yang digenerate oleh Sequelize.
-     */
-    await queryInterface.bulkInsert('Kegiatans', [
-      // Contoh 1: Kegiatan Bantuan Pendidikan
-      {
-        asnaf_id: 1, // Pastikan ada asnaf dengan id=1
-        program_id: 1, // Pastikan ada program dengan id=1
+        await queryInterface.bulkInsert('Kegiatans', [
+        {
+        asnaf_id: 1,
+        program_id: 1,
         kode: 'PEND-001',
         nama_kegiatan: 'Bantuan Pendidikan Anak Yatim & Dhuafa',
         slug: 'bantuan-pendidikan-anak-yatim-dhuafa-2025',
@@ -24,6 +19,7 @@ module.exports = {
         jenis_penyaluran: 'langsung',
         status_kegiatan: 'sedang_berlangsung',
         tahun: 2025,
+        name: 'Bantuan Pendidikan 2025',
         banner: 'korban.png',
         desc: 'Program bantuan biaya pendidikan untuk siswa/siswi yatim dan dhuafa di seluruh kabupaten.',
         createdAt: new Date(),
@@ -73,9 +69,7 @@ module.exports = {
   },
 
   async down (queryInterface, Sequelize) {
-    /**
-     * Menghapus semua data dari tabel Kegiatans.
-     */
     await queryInterface.bulkDelete('Kegiatans', null, {});
   }
 };
+

@@ -3,14 +3,9 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    /**
-     * Menambahkan data seed ke dalam tabel Kegiatan_keseketariatans.
-     * Pastikan nama tabel 'Kegiatan_keseketariatans' sesuai dengan yang digenerate oleh Sequelize.
-     */
-    await queryInterface.bulkInsert(
+      await queryInterface.bulkInsert(
       "Kegiatan_keseketariatans",
       [
-        // Contoh 1: Bantuan untuk Instansi
         {
           kode: "SEK-001",
           nama_kegiatan: "Bantuan Operasional Dayah Modern",
@@ -32,9 +27,6 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    /**
-     * Menghapus semua data dari tabel Kegiatan_keseketariatans.
-     */
     await queryInterface.bulkDelete("Kegiatan_keseketariatans", null, {});
   },
 };
