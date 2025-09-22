@@ -661,7 +661,7 @@ function openImageInNewTab() {
             <div v-if="form.area_penyaluran === 'desa'" class="col-span-4">
               <div
                 v-for="(item, index) in form.desa_penyaluran"
-                :key="'kec-' + index"
+                :key="'desa-' + index"
                 class="flex gap-2 mb-2"
               >
                 <!-- Select Desa -->
