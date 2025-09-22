@@ -31,7 +31,7 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 // import Confirm from 'confirmjs'
-
+import rupiahPlugin from '@/plugins/rupiahPlugin'
 
 // <font-awesome-icon icon="fa-solid fa-cloud-arrow-up" />
 // FontAwesome Icons - Solid
