@@ -213,9 +213,9 @@ function formatToRupiah(angka: number | string) {
             <tr>
               <th class="w-[20%] px-6 py-3 font-medium">Banner</th>
               <th class="w-[40%] px-6 py-3 font-medium">Informasi Donasi</th>
-              <th class="w-[10%] px-6 py-3 font-medium">Status</th>
-              <th class="w-[10%] px-6 py-3 font-medium">Datetime</th>
-              <th class="w-[20%] px-6 py-3 font-medium">Aksi</th>
+              <th class="w-[15%] px-6 py-3 font-medium">Status</th>
+              <th class="w-[15%] px-6 py-3 font-medium">Datetime</th>
+              <th class="w-[10%] px-6 py-3 font-medium">Aksi</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
@@ -247,29 +247,29 @@ function formatToRupiah(angka: number | string) {
                 <td class="px-6 py-4 text-center font-medium text-gray-800">
                   <table class="w-full border border-gray-300 rounded-lg">
                     <tbody>
-                      <tr class="border-b">
-                        <th class="w-[30%] px-4 py-2 text-left font-medium bg-gray-100">Name</th>
-                        <td class="px-4 py-2">{{ data.name }}</td>
+                      <tr class="border-b border-gray-300">
+                        <th class="w-[40%] px-4 py-2 text-left font-medium bg-gray-100">Name</th>
+                        <td class="px-4 py-2 text-right">{{ data.name }}</td>
                       </tr>
-                      <tr class="border-b">
+                      <tr class="border-b border-gray-300">
                         <th class="px-4 py-2 text-left font-medium bg-gray-100">Tahun</th>
-                        <td class="px-4 py-2">{{ data.tahun }}</td>
+                        <td class="px-4 py-2 text-right">{{ data.tahun }}</td>
                       </tr>
-                      <tr class="border-b">
+                      <tr class="border-b border-gray-300">
                         <th class="px-4 py-2 text-left font-medium bg-gray-100">
                           Target Donasi Terkumpul
                         </th>
-                        <td class="px-4 py-2">
+                        <td class="px-4 py-2  text-right">
                           {{ formatToRupiah(data.target_donasi_terkumpul) }}
                         </td>
                       </tr>
-                      <tr class="border-b">
+                      <tr class="border-b border-gray-300">
                         <th class="px-4 py-2 text-left font-medium bg-gray-100">Total Orang</th>
-                        <td class="px-4 py-2">{{ data.total_orang }}</td>
+                        <td class="px-4 py-2 text-right">{{ data.total_orang }}</td>
                       </tr>
                       <tr>
                         <th class="px-4 py-2 text-left font-medium bg-gray-100">Total Nominal</th>
-                        <td class="px-4 py-2">{{ formatToRupiah(data.total_nominal) }}</td>
+                        <td class="px-4 py-2 text-right">{{ formatToRupiah(data.total_nominal) }}</td>
                       </tr>
                     </tbody>
                   </table>
@@ -280,16 +280,16 @@ function formatToRupiah(angka: number | string) {
                 <td class="px-6 py-4 text-center font-medium text-gray-800 align-top">
                   {{ new Date(data.createdAt).toLocaleString('id-ID') }}
                 </td>
-                <td class="px-6 py-4 text-center font-medium text-gray-800 align-top">
-                  <div class="grid grid-cols-2 gap-2 px-2 py-4">
+                <td class="py-4 text-center font-medium text-gray-800 align-top">
+                  <div class="flex flex-col items-center gap-1 px-0 py-4">
                     <!-- Kalau belum ditutup -->
                     <template v-if="data.status !== 'ditutup'">
                       <LightButton @click="openModalEdit(data.id)">
                         <EditIcon />
                       </LightButton>
-                      <ButtonGreen @click="openModalDonasi(data.id)">
+                      <LightButton @click="openModalDonasi(data.id)">
                         <IconMoney />
-                      </ButtonGreen>
+                      </LightButton>
                       <DangerButton @click="tutup_program(data.id)">
                         <LockIcon />
                       </DangerButton>
