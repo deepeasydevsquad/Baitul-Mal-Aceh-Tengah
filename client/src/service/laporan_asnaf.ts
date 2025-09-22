@@ -14,9 +14,12 @@ export const get_laporan_asnaf = (tahun: string, asnaf: number) => {
   })
 }
 
-export const download_excel_asnaf = (tahun: string, asnaf: string = 'Fakir') => {
-    return api.get('/download_excel_laporan_penyaluran/list', {
-      params: { tahun, asnaf },
-      responseType: 'blob'
-    })
-  }
+export const download_excel_asnaf = (tahun: string, asnafType: string) => {
+  return api.get('/download_excel_laporan_penyaluran/list', {
+    params: { 
+      tahun, 
+      asnaf: asnafType 
+    },
+    responseType: 'blob'
+  })
+}

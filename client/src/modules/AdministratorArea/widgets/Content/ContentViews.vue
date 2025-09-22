@@ -23,6 +23,11 @@ import ProgramDonasi from '@/modules/ProgramDonasi/ProgramDonasi.vue'
 import DaftarTab from '@/modules/DaftarTab/DaftarTab.vue'
 import desa from '../../../Desa/Desa.vue'
 import DaftarAsnaf from '@/modules/DaftarAsnaf/DaftarAsnaf.vue'
+import LaporanAsnafMiskin from '@/modules/LaporanAsnaf/LaporanAsnafMIskin.vue'
+import LaporanAsnafFisabilillah from '@/modules/LaporanAsnaf/LaporanAsnafFisabilillah.vue'
+import LaporanAsnafGharim from '@/modules/LaporanAsnaf/LaporanAsnafGharim.vue'
+import LaporanAsnafMuallaf from '@/modules/LaporanAsnaf/LaporanAsnafMuallaf.vue'
+import LaporanAsnafIbnuSabil from '@/modules/LaporanAsnaf/LaporanAsnafIbnuSabil.vue'
 
 const tabComponents = {
   daftar_kecamatan: kecamatan,
@@ -45,6 +50,11 @@ const tabComponents = {
   laporan_asnaf_fakir: LaporanAsnafFakir,
   program_donasi: ProgramDonasi,
   daftar_tab:DaftarTab,
+  laporan_asnaf_miskin: LaporanAsnafMiskin,
+  laporan_asnaf_fisabilillah: LaporanAsnafFisabilillah,
+  laporan_asnaf_gharim: LaporanAsnafGharim,
+  laporan_asnaf_muallaf: LaporanAsnafMuallaf,
+  laporan_asnaf_ibnu_sabil: LaporanAsnafIbnuSabil,
   daftar_asnaf:DaftarAsnaf,
 }
 
