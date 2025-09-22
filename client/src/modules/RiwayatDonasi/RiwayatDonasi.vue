@@ -29,8 +29,10 @@ const { currentPage, perPage, totalRow, totalPages, nextPage, prevPage, pageNow,
   usePagination(fetchData, { perPage: itemsPerPage.value })
 
 // Notification & Confirmation
-const { showNotification, notificationType, notificationMessage, displayNotification } = useNotification()
-const { showConfirmDialog, confirmTitle, confirmMessage, displayConfirmation, confirm, cancel } = useConfirmation()
+const { showNotification, notificationType, notificationMessage, displayNotification } =
+  useNotification()
+const { showConfirmDialog, confirmTitle, confirmMessage, displayConfirmation, confirm, cancel } =
+  useConfirmation()
 
 // Interfaces
 interface Member {
@@ -75,7 +77,7 @@ async function fetchData() {
       perpage: perPage.value,
       pageNumber: currentPage.value,
       status: status.value,
-      konfirmasi_pembayaran: status_konfirmasi.value
+      konfirmasi_pembayaran: status_konfirmasi.value,
     })
     RiwayatDonasi.value = response.data
     totalRow.value = response.total
@@ -124,14 +126,12 @@ async function deleteData(id: number) {
             v-model="search"
             @input="fetchData"
             placeholder="Cari riwayat donasi..."
-            class="w-full sm:w-64 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700
-                   focus:border-green-900 focus:ring-2 focus:ring-green-900 transition"
+            class="w-full sm:w-64 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:border-green-900 focus:ring-2 focus:ring-green-900 transition"
           />
           <select
             v-model="status"
             @change="fetchData"
-            class="block w-full sm:w-48 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700
-                   focus:ring-2 focus:ring-green-900 focus:border-green-900 transition"
+            class="block w-full sm:w-48 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:ring-2 focus:ring-green-900 focus:border-green-900 transition"
           >
             <option value="">Semua Status</option>
             <option value="SUCCESS">Success</option>
@@ -141,8 +141,7 @@ async function deleteData(id: number) {
           <select
             v-model="status_konfirmasi"
             @change="fetchData"
-            class="block w-full sm:w-48 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700
-                   focus:ring-2 focus:ring-green-900 focus:border-green-900 transition"
+            class="block w-full sm:w-48 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:ring-2 focus:ring-green-900 focus:border-green-900 transition"
           >
             <option value="">Semua Konfirmasi</option>
             <option value="sudah_dikirim">Sudah dikirim</option>
@@ -152,75 +151,110 @@ async function deleteData(id: number) {
       </div>
 
       <!-- Table -->
-      <div class="overflow-hidden rounded-xl border border-gray-200 shadow">
+      <div class="overflow-x-auto rounded-xl border border-gray-200 shadow">
         <SkeletonTable v-if="isTableLoading" :columns="totalColumns" :rows="itemsPerPage" />
         <table v-else class="w-full border-collapse bg-white text-sm">
           <thead class="bg-gray-50 text-gray-700 text-center border-b border-gray-300">
             <tr>
-              <th class="w-[30%] px-6 py-3 font-medium">Info Donasi</th>
+              <th class="w-[20%] px-6 py-3 font-medium">Info Donasi</th>
               <th class="w-[30%] px-6 py-3 font-medium">Info Pemasukan</th>
               <th class="w-[10%] px-6 py-3 font-medium">Status</th>
               <th class="w-[10%] px-6 py-3 font-medium">Status Konfirmasi</th>
               <th class="w-[10%] px-6 py-3 font-medium">Datetimes</th>
-              <th class="w-[10%] px-6 py-3 font-medium">Aksi</th>
+              <th class="w-[5%] px-6 py-3 font-medium">Aksi</th>
             </tr>
           </thead>
 
           <tbody class="divide-y divide-gray-100">
             <template v-if="RiwayatDonasi.length">
-              <tr v-for="data in RiwayatDonasi" :key="data.id" class="hover:bg-gray-50 transition-colors">
+              <tr
+                v-for="data in RiwayatDonasi"
+                :key="data.id"
+                class="hover:bg-gray-50 transition-colors"
+              >
                 <!-- Info Member -->
                 <td class="px-6 py-4 text-left font-medium text-gray-800">
-                  <div class="w-full border border-gray-800 rounded-lg p-3 space-y-4">
-                    <div class="border-b">
-                      <div class="text-sm font-medium text-gray-600">NAMA</div>
-                      <div class="text-base font-semibold text-gray-900">{{ data.Member?.username }}</div>
-                    </div>
-                    <div>
-                      <div class="text-sm font-medium text-gray-600">NIK</div>
-                      <div class="text-base font-semibold text-gray-900">{{ data.Member?.nomor_ktp }}</div>
-                    </div>
-                  </div>
+                  <table class="w-full border border-gray-300 rounded-lg">
+                    <tbody>
+                      <tr class="border-b">
+                        <th class="w-[5%] px-4 py-2 text-left font-medium bg-gray-100">NAMA</th>
+                        <td class="px-4 py-2">{{ data.Member?.username }}</td>
+                      </tr>
+                      <tr>
+                        <th class="px-4 py-2 text-left font-medium bg-gray-100">NIK</th>
+                        <td class="px-4 py-2">
+                          {{
+                            data.Member?.nomor_ktp
+                              ? data.Member.nomor_ktp.replace(
+                                  /^(\d{4})(\d+)(\d{4})$/,
+                                  (_, start, middle, end) =>
+                                    start + '*'.repeat(middle.length) + end,
+                                )
+                              : ''
+                          }}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </td>
 
                 <!-- Info Program & Nominal -->
                 <td class="px-6 py-4 text-left font-medium text-gray-800">
-                  <div class="w-full border border-gray-800 rounded-lg p-3 space-y-4">
-                    <div class="border-b">
-                      <div class="text-sm font-medium text-gray-600">Nama Program</div>
-                      <div class="text-base font-semibold text-gray-900">{{ data.Program_donasi?.name }}</div>
-                    </div>
-                    <div class="border-b">
-                      <div class="text-sm font-medium text-gray-600">Tahun</div>
-                      <div class="text-base font-semibold text-gray-900">{{ data.Program_donasi?.tahun }}</div>
-                    </div>
-                    <div class="border-b">
-                      <div class="text-sm font-medium text-gray-600">Status Program</div>
-                      <div class="text-base font-semibold text-gray-900">{{ data.Program_donasi?.status.replace(/_/g, ' ').toUpperCase() }}</div>
-                    </div>
-                    <div>
-                      <div class="text-sm font-medium text-gray-600">Nominal</div>
-                      <div class="text-base font-semibold text-gray-900">Rp {{ Number(data.nominal).toLocaleString('id-ID') }}</div>
-                    </div>
-                  </div>
+                  <table class="w-full border border-gray-300 rounded-lg">
+                    <tbody>
+                      <tr class="border-b">
+                        <th class="w-[30%] px-4 py-2 text-left font-medium bg-gray-100">
+                          Nama Program
+                        </th>
+                        <td class="px-4 py-2">{{ data.Program_donasi?.name }}</td>
+                      </tr>
+                      <tr class="border-b">
+                        <th class="px-4 py-2 text-left font-medium bg-gray-100">Tahun</th>
+                        <td class="px-4 py-2">{{ data.Program_donasi?.tahun }}</td>
+                      </tr>
+                      <tr class="border-b">
+                        <th class="px-4 py-2 text-left font-medium bg-gray-100">Status Program</th>
+                        <td class="px-4 py-2">
+                          {{ data.Program_donasi?.status.replace(/_/g, ' ').toUpperCase() }}
+                        </td>
+                      </tr>
+                      <tr>
+                        <th class="px-4 py-2 text-left font-medium bg-gray-100">Nominal</th>
+                        <td class="px-4 py-2">
+                          Rp {{ Number(data.nominal).toLocaleString('id-ID') }}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </td>
 
                 <!-- Status -->
-                <td class="px-6 py-4 text-center font-medium"
-                    :class="{
-                      'text-green-600 font-semibold': data.status === 'SUCCESS' || data.status === 'success',
-                      'text-yellow-600 font-semibold': data.status === 'PROCESS' || data.status === 'process',
-                      'text-red-600 font-semibold': data.status === 'FAILED' || data.status === 'failed'
-                    }">
+                <td
+                  class="px-6 py-4 text-center font-medium"
+                  :class="{
+                    'text-green-600 font-semibold':
+                      data.status === 'SUCCESS' || data.status === 'success',
+                    'text-yellow-600 font-semibold':
+                      data.status === 'PROCESS' || data.status === 'process',
+                    'text-red-600 font-semibold':
+                      data.status === 'FAILED' || data.status === 'failed',
+                  }"
+                >
                   {{ data.status.replace(/_/g, ' ').toUpperCase() }}
                 </td>
 
                 <!-- Status Konfirmasi -->
-                <td class="px-6 py-4 text-center font-medium"
-                    :class="{
-                      'text-green-600 font-semibold': data.status_konfirmasi === 'SUDAH_DIKIRIM' || data.status_konfirmasi === 'sudah_dikirim',
-                      'text-red-600 font-semibold': data.status_konfirmasi === 'BELUM_DIKIRIM' || data.status_konfirmasi === 'belum_dikirim'
-                    }">
+                <td
+                  class="px-6 py-4 text-center font-medium"
+                  :class="{
+                    'text-green-600 font-semibold':
+                      data.status_konfirmasi === 'SUDAH_DIKIRIM' ||
+                      data.status_konfirmasi === 'sudah_dikirim',
+                    'text-red-600 font-semibold':
+                      data.status_konfirmasi === 'BELUM_DIKIRIM' ||
+                      data.status_konfirmasi === 'belum_dikirim',
+                  }"
+                >
                   {{ data.status_konfirmasi.replace(/_/g, ' ').toUpperCase() }}
                 </td>
 
