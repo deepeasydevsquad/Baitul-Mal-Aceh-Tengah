@@ -17,6 +17,7 @@ import 'alertifyjs/build/css/themes/default.min.css'; // atau theme lain seperti
 import router from './router'
 import { createPinia } from 'pinia'
 import { createHead } from '@vueuse/head'
+import rupiahPlugin from "@/plugins/rupiahPlugin";
 
 // PrimeVue
 import PrimeVue from 'primevue/config'
@@ -31,7 +32,7 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 // import Confirm from 'confirmjs'
-
+import rupiahPlugin from '@/plugins/rupiahPlugin'
 
 // <font-awesome-icon icon="fa-solid fa-cloud-arrow-up" />
 // FontAwesome Icons - Solid
@@ -66,7 +67,12 @@ import {
   faUserPlus,
   faUserClock,
   faClipboardQuestion,
-  faDownload
+  faCloudArrowDown,
+  faBan,
+  faToggleOn,
+  faToggleOff,
+  faDownload,
+  faGripVertical,
 } from '@fortawesome/free-solid-svg-icons'
 
 // FontAwesome Icons - Regular
@@ -86,7 +92,7 @@ library.add(
   faShieldAlt, faEnvelope, faClipboardCheck, faLayerGroup, faPeopleCarry, faTicketSimple, faMoneyBillWave, faPlane,
   faBuilding, faPlaneArrival, faCircle, faClock, farUser, faCcVisa, faWhatsapp, faEye, faEyeSlash, faCloudArrowUp, faCodeBranch,
   faLock, faLockOpen, faPlaneCircleCheck, faHandshake, faGear, faRightFromBracket, faPeopleGroup, faHandHoldingHeart, faClockRotateLeft, faCoins, faChartLine, faQuestionCircle, faListOl, faFileSignature, faClipboardCheck, faFileContract, faListCheck, faBriefcase, faMap, faMapLocationDot, faBuildingColumns, faFileLines, faHandHoldingMedical, faHandHoldingHand, faHandsHoldingCircle, faRoute, faHandHoldingDroplet, faHandshakeAngle, faUserShield, faScroll, faMessage, faClipboardUser, faUserPlus,
-  faUserClock, faClipboardQuestion, faDownload,
+  faUserClock, faClipboardQuestion, faCloudArrowDown, faBan, faToggleOn, faToggleOff, faDownload, faGripVertical,
 )
 
 // Buat App Vue
@@ -103,6 +109,7 @@ app.use(PrimeVue, {
     preset: Aura
   }
 })
+app.use(rupiahPlugin)
 
 router.beforeEach((to, from, next) => {
   const defaultTitle = 'Nama Aplikasi Anda'

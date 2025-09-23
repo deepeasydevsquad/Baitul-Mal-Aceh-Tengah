@@ -17,12 +17,21 @@ import TemplatePesanWhatsapp from '@/modules/TemplatePesanWhatsapp/TemplatePesan
 import DaftarKeanggotaan from '@/modules/DaftarKeanggotaan/DaftarKeanggotaan.vue'
 import kecamatan from '@/modules/Kecamatan/Kecamatan.vue'
 import SystemLog from '@/modules/SystemLog/SystemLog.vue'
+import ProgramKegiatanBantuan from '@/modules/ProgramKegiatanBantuan/ProgramKegiatanBantuan.vue'
 import DaftarProgram from '@/modules/DaftarProgram/DaftarProgram.vue'
 import LaporanAsnafFakir from '@/modules/LaporanAsnaf/LaporanAsnafFakir.vue'
 import ProgramDonasi from '@/modules/ProgramDonasi/ProgramDonasi.vue'
 import DaftarTab from '@/modules/DaftarTab/DaftarTab.vue'
 import desa from '../../../Desa/Desa.vue'
 import RiwayatDonasi from '@/modules/RiwayatDonasi/RiwayatDonasi.vue'
+  import DaftarAsnaf from '@/modules/DaftarAsnaf/DaftarAsnaf.vue'
+import LaporanAsnafMiskin from '@/modules/LaporanAsnaf/LaporanAsnafMIskin.vue'
+import LaporanAsnafFisabilillah from '@/modules/LaporanAsnaf/LaporanAsnafFisabilillah.vue'
+import LaporanAsnafGharim from '@/modules/LaporanAsnaf/LaporanAsnafGharim.vue'
+import LaporanAsnafMuallaf from '@/modules/LaporanAsnaf/LaporanAsnafMuallaf.vue'
+import LaporanAsnafIbnuSabil from '@/modules/LaporanAsnaf/LaporanAsnafIbnuSabil.vue'
+import UrutanBagianMonev from '@/modules/UrutanBagianMonev/UrutanBagianMonev.vue'
+import { url } from 'inspector'
 
 const tabComponents = {
   daftar_kecamatan: kecamatan,
@@ -41,11 +50,19 @@ const tabComponents = {
   daftar_keanggotaan: DaftarKeanggotaan,
   daftar_surveyor: Surveyor,
   pengaturan_umum: PengaturanUmum,
+  program_kegiatan_bantuan: ProgramKegiatanBantuan,
   daftar_program: DaftarProgram,
   laporan_asnaf_fakir: LaporanAsnafFakir,
   program_donasi: ProgramDonasi,
   daftar_tab:DaftarTab,
   riwayat_donasi: RiwayatDonasi,
+  laporan_asnaf_miskin: LaporanAsnafMiskin,
+  laporan_asnaf_fisabilillah: LaporanAsnafFisabilillah,
+  laporan_asnaf_gharim: LaporanAsnafGharim,
+  laporan_asnaf_muallaf: LaporanAsnafMuallaf,
+  laporan_asnaf_ibnu_sabil: LaporanAsnafIbnuSabil,
+  daftar_asnaf:DaftarAsnaf,
+  urutan_bagian_monev: UrutanBagianMonev
 }
 
 const selectedTab = useSelectedTab() // untuk menampung daftar tab yang menu / submenunya di click

@@ -38,6 +38,7 @@ const emit = defineEmits<{
 
 // Function: Close modal
 const closeModal = () => {
+  if (isSubmitting.value) return
   resetForm()
   emit('close')
 }
@@ -164,7 +165,7 @@ const fetchData = async () => {
     kecamatan.value = response.data
     console.log(response)
   } catch (error) {
-    displayNotification('Gagal mengambil data bank', 'error')
+    displayNotification('Gagal mengambil data kecamatan', 'error')
   } finally {
     isLoading.value = false
   }
@@ -205,12 +206,12 @@ const handleSubmit = async () => {
     const response = await add_keanggotaan(formData)
     console.log(response)
     emit('status', { error_msg: response.error_msg || response, error: response.error })
-    closeModal()
   } catch (error: any) {
     console.error(error)
     displayNotification(error.response.data.error_msg || error.response.data.message, 'error')
   } finally {
     isSubmitting.value = false
+    closeModal()
   }
 }
 
@@ -413,12 +414,29 @@ watch(
           />
         </div>
         <!-- Actions -->
-        <div class="pt-4">
+        <div class="flex justify-end gap-3 mt-4">
+          <BaseButton
+            @click="closeModal"
+            type="button"
+            :disabled="isSubmitting"
+            variant="secondary"
+          >
+            Batal
+          </BaseButton>
           <BaseButton
             type="submit"
-            fullWidth
             variant="primary"
-            :disabled="isSubmitting"
+            :disabled="
+              !(
+                form.tipeAkun &&
+                form.wa_number &&
+                form.kecamatan_id &&
+                form.desa_id &&
+                form.alamat &&
+                form.username.trim() &&
+                form.fullname.trim()
+              ) || isSubmitting
+            "
             @click="handleSubmit"
           >
             <span v-if="isSubmitting">Menyimpan...</span>

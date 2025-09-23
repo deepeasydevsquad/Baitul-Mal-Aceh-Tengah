@@ -68,19 +68,31 @@ async function fetchData() {
   try {
     const response = await get_laporan_asnaf(selectedTahun.value, asnafId)
     const flattenedData = response.data.data.flatMap((group: any) => group.data)
+    
     allLaporanRows.value = flattenedData
     totalRow.value = flattenedData.length
     updatePaginatedData()
+    
   } catch (error) {
     allLaporanRows.value = []
     totalRow.value = 0
     paginatedLaporanData.value = []
+    
     console.error('Error fetching data:', error)
-    displayNotification('Gagal mengambil data laporan', 'error')
+    
+    if (error.response?.status !== 404) {
+      if (error.request) {
+        displayNotification('Tidak dapat terhubung ke server', 'error')
+      } else {
+        displayNotification('Terjadi kesalahan saat mengambil data', 'error')
+      }
+    }
+    
   } finally {
     isTableLoading.value = false
   }
 }
+
 
 // Function: Download Excel
 async function downloadExcel() {

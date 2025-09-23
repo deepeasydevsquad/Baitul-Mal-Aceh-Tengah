@@ -59,7 +59,6 @@ class Model_cud {
     const body = this.req.body;
 
     try {
-      console.log("body hentai", body);
       const model_r = new Model_r(this.req);
       const info_daftar_keanggotaan = await model_r.info_daftar_keanggotaan(
         body.id
