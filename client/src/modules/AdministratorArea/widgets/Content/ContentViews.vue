@@ -21,8 +21,10 @@ import KegiatanKeseketariatan from '@/modules/KegiatanKeseketariatan/KegiatanKes
 import DaftarKeanggotaan from '@/modules/DaftarKeanggotaan/DaftarKeanggotaan.vue'
 import kecamatan from '@/modules/Kecamatan/Kecamatan.vue'
 import SystemLog from '@/modules/SystemLog/SystemLog.vue'
+import PengaturanWhatsapp from'@/modules/PengaturanWhatsapp/PengaturanWhatsapp.vue'
 
 const tabComponents = {
+  pengaturan_whatsapp: PengaturanWhatsapp,
   daftar_kecamatan: kecamatan,
   syarat: syarat,
   daftar_bank: Bank,
