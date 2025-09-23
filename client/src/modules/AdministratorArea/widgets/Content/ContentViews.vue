@@ -23,7 +23,8 @@ import LaporanAsnafFakir from '@/modules/LaporanAsnaf/LaporanAsnafFakir.vue'
 import ProgramDonasi from '@/modules/ProgramDonasi/ProgramDonasi.vue'
 import DaftarTab from '@/modules/DaftarTab/DaftarTab.vue'
 import desa from '../../../Desa/Desa.vue'
-import DaftarAsnaf from '@/modules/DaftarAsnaf/DaftarAsnaf.vue'
+import RiwayatDonasi from '@/modules/RiwayatDonasi/RiwayatDonasi.vue'
+  import DaftarAsnaf from '@/modules/DaftarAsnaf/DaftarAsnaf.vue'
 import LaporanAsnafMiskin from '@/modules/LaporanAsnaf/LaporanAsnafMIskin.vue'
 import LaporanAsnafFisabilillah from '@/modules/LaporanAsnaf/LaporanAsnafFisabilillah.vue'
 import LaporanAsnafGharim from '@/modules/LaporanAsnaf/LaporanAsnafGharim.vue'
@@ -31,6 +32,7 @@ import LaporanAsnafMuallaf from '@/modules/LaporanAsnaf/LaporanAsnafMuallaf.vue'
 import LaporanAsnafIbnuSabil from '@/modules/LaporanAsnaf/LaporanAsnafIbnuSabil.vue'
 import UrutanBagianMonev from '@/modules/UrutanBagianMonev/UrutanBagianMonev.vue'
 import { url } from 'inspector'
+
 const tabComponents = {
   daftar_kecamatan: kecamatan,
   syarat: syarat,
@@ -53,6 +55,7 @@ const tabComponents = {
   laporan_asnaf_fakir: LaporanAsnafFakir,
   program_donasi: ProgramDonasi,
   daftar_tab:DaftarTab,
+  riwayat_donasi: RiwayatDonasi,
   laporan_asnaf_miskin: LaporanAsnafMiskin,
   laporan_asnaf_fisabilillah: LaporanAsnafFisabilillah,
   laporan_asnaf_gharim: LaporanAsnafGharim,
