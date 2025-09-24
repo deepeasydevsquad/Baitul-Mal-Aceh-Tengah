@@ -119,11 +119,7 @@ async function deleteData(id: number) {
     <LoadingSpinner v-if="isLoading" label="Memuat halaman..." />
     <div v-else class="space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <BaseButton
-          @click="openAddModal"
-          variant="primary"
-          type="button"
-        >
+        <BaseButton @click="openAddModal" variant="primary" type="button">
           <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" />
           Tambah Daftar Asnaf
         </BaseButton>
@@ -137,33 +133,32 @@ async function deleteData(id: number) {
             v-model="search"
             @change="fetchData"
             placeholder="Cari Asnaf..."
-            class="w-full sm:w-64 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700
-                   focus:border-[#14532d] focus:ring-2 focus:ring-[#14532d] transition"
+            class="w-full sm:w-64 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:border-[#14532d] focus:ring-2 focus:ring-[#14532d] transition"
           />
         </div>
       </div>
 
       <!-- Table -->
       <div class="overflow-hidden rounded-xl border border-gray-200 shadow-md">
-  <SkeletonTable v-if="isTableLoading" :columns="totalColumns" :rows="itemsPerPage" />
-  <table v-else class="table-fixed w-full border-collapse bg-white text-sm">
-    <!-- tambahkan border-b di thead -->
-    <thead class="bg-gray-50 text-gray-700 text-center border-b border-gray-300">
-      <tr>
-        <th class="w-[50%] px-6 py-4 font-medium font-bold text-gray-900">Daftar Asnaf</th>
-        <th class="w-[30%] px-6 py-4 font-medium font-bold text-gray-900">Datetimes</th>
-        <th class="w-[20%] px-6 py-4 font-medium font-bold text-gray-900">Aksi</th>
-      </tr>
-    </thead>
+        <SkeletonTable v-if="isTableLoading" :columns="totalColumns" :rows="itemsPerPage" />
+        <table v-else class="table-fixed w-full border-collapse bg-white text-sm">
+          <!-- tambahkan border-b di thead -->
+          <thead class="bg-gray-50 text-gray-700 text-center border-b border-gray-300">
+            <tr>
+              <th class="w-[50%] px-6 py-4 font-medium font-bold text-gray-900">Daftar Asnaf</th>
+              <th class="w-[30%] px-6 py-4 font-medium font-bold text-gray-900">Datetimes</th>
+              <th class="w-[20%] px-6 py-4 font-medium font-bold text-gray-900">Aksi</th>
+            </tr>
+          </thead>
 
-    <tbody class="divide-y divide-gray-100">
+          <tbody class="divide-y divide-gray-100">
             <template v-if="DaftardataAsnaf.length > 0">
               <tr
                 v-for="asnaf in DaftardataAsnaf"
                 :key="asnaf.id"
                 class="hover:bg-gray-50 transition-colors text-left"
               >
-                <td class="px-4 py-2 text-gray-600 ">
+                <td class="px-4 py-2 text-gray-600">
                   {{ asnaf.name }}
                 </td>
                 <td class="px-6 py-4 text-gray-600 text-center">
@@ -185,8 +180,9 @@ async function deleteData(id: number) {
             <!-- Empty State -->
             <tr v-else>
               <td :colspan="4" class="px-6 py-8 text-center text-gray-500">
-                <font-awesome-icon icon="fa-solid fa-database" class="text-2xl mb-2 text-gray-400" />
-                <p class="text-sm">Belum ada Daftar Asnaf.</p>
+                <font-awesome-icon icon="fa-solid fa-database" class="text-4xl mb-2 text-gray-400" />
+                <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ada data</h3>
+                <p class="text-sm">Belum ada data asnaf.</p>
               </td>
             </tr>
           </tbody>
@@ -211,16 +207,34 @@ async function deleteData(id: number) {
     <!-- Modal Tambah -->
     <FormAdd
       :is-modal-open="isAddModalOpen"
-      @close="isAddModalOpen = false; fetchData()"
-      @status="(payload) => displayNotification(payload.error_msg || 'Asnaf Berhasil Ditambahkan.', payload.error ? 'error' : 'success')"
+      @close="
+        isAddModalOpen = false,
+        fetchData()
+      "
+      @status="
+        (payload) =>
+          displayNotification(
+            payload.error_msg || 'Asnaf Berhasil Ditambahkan.',
+            payload.error ? 'error' : 'success',
+          )
+      "
     />
 
     <!-- Modal Edit -->
     <FormEdit
       :is-modal-open="isEditModalOpen"
       :selected-asnaf="DaftarselectedAsnaf"
-      @close="isEditModalOpen = false; fetchData()"
-      @status="(payload) => displayNotification(payload.error_msg || 'Deskripsi Berhasil Diupdate!', payload.error ? 'error' : 'success')"
+      @close="
+        isEditModalOpen = false,
+        fetchData()
+      "
+      @status="
+        (payload) =>
+          displayNotification(
+            payload.error_msg || 'Deskripsi Berhasil Diupdate!',
+            payload.error ? 'error' : 'success',
+          )
+      "
     />
 
     <!-- Confirmation -->
@@ -229,8 +243,8 @@ async function deleteData(id: number) {
       :confirmTitle="confirmTitle"
       :confirmMessage="confirmMessage"
     >
-      <BaseButton variant="warning" @click="confirm">Ya</BaseButton>
       <BaseButton variant="secondary" @click="cancel">Tidak</BaseButton>
+      <BaseButton variant="warning" @click="confirm">Ya</BaseButton>
     </Confirmation>
 
     <!-- Notification -->
