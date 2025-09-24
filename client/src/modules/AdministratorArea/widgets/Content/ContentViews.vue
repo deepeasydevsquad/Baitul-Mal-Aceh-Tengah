@@ -122,7 +122,7 @@ watch(
   <div class="mb-0 dark:border-gray-700">
     <ul class="flex flex-wrap -mb-px text-sm font-medium text-center text-graydark" id="default-tab" data-tabs-toggle="#default-tab-content" role="tablist">
       <li class="me-2" role="presentation" v-for="(item, key) in selectedTab.sharedArray" :key="key">
-          <div :id="`tooltip-default-${tab.sharedObject[item.id].path}`" role="tooltip" class="absolute invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700 z-999999">
+          <div :id="`tooltip-default-${tab.sharedObject[item.id].path}`" role="tooltip" class="absolute invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-graydark rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700 z-999999">
               {{ tab.sharedObject[item.id].title }}
               <div class="tooltip-arrow" data-popper-arrow></div>
           </div>
