@@ -44,6 +44,7 @@ module.exports = {
       { name: 'Request Keanggotaan', icon : 'fa-solid fa-user-plus', path: 'request_keanggotaan', desc:'Permintaan pendaftaran keanggotaan baru.',  createdAt: new Date(), updatedAt: new Date() },
       { name: 'Template Pesan Whatsapp', icon : 'fa-solid fa-message', path: 'template_pesan_whatsapp', desc:'Template pesan otomatis untuk Whatsapp.',  createdAt: new Date(), updatedAt: new Date() },
       { name: 'Bakal Penerima Bantuan', icon : 'fa-solid fa-user-clock', path: 'bakal_penerima_bantuan', desc:'Daftar penerima bantuan yang masih dalam proses penyaluran bantuan.',  createdAt: new Date(), updatedAt: new Date() },
+      { name: 'Validasi Permohonan Bantuan', icon : 'fa-solid fa-clipboard-check', path: 'validasi_permohonan_bantuan', desc:'Proses validasi syarat-syarat permohonan bantuan yang masuk.',  createdAt: new Date(), updatedAt: new Date() },
     ], {});
   },
 

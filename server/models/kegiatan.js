@@ -58,6 +58,7 @@ module.exports = (sequelize, DataTypes) => {
     status_kegiatan: DataTypes.ENUM(["sedang_berlangsung", "selesai"]),
     tahun: DataTypes.INTEGER,
     banner: DataTypes.STRING,
+    periode_bantuan: DataTypes.ENUM(["tahunan", "bulanan"]),
     desc: DataTypes.TEXT
   }, {
     sequelize,
