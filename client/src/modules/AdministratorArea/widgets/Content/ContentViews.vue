@@ -1,7 +1,10 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick, watch } from 'vue'
 import { useSelectedTab, useGlobalTab, useGlobalActiveTab, useTabTerpilih } from '../../../../stores/sidebar'
-import 'flowbite'
+// import 'flowbite'
+// import { FwbTooltip } from 'flowbite-vue'
+// import TooltipWrapper from '@/components/Tooltip/TooltipWrapper.vue'
+import { initTooltips } from 'flowbite'
 import Surveyor from '@/modules/Surveyor/Surveyor.vue'
 import syarat from '@/modules/Syarat/syarat.vue'
 import SystemLogSurveyor from '@/modules/SystemLogSurveyor/SystemLogSurveyor.vue'
@@ -99,37 +102,43 @@ const selectTab = (tabPath: string, key: number) => {
   mulaiPilihTab.value = true
 }
 
-onMounted(() => {
+onMounted(async () => {
   window.addEventListener("resize", () => {
     windowWidth.value = window.innerWidth
   })
 })
+
+watch(
+  () => selectedTab.sharedArray,
+  async () => {
+    await nextTick()
+    initTooltips()
+  },
+  { deep: true }
+)
 </script>
 
 <template>
   <div class="mb-0 dark:border-gray-700">
     <ul class="flex flex-wrap -mb-px text-sm font-medium text-center text-graydark" id="default-tab" data-tabs-toggle="#default-tab-content" role="tablist">
       <li class="me-2" role="presentation" v-for="(item, key) in selectedTab.sharedArray" :key="key">
-        <button class="inline-block p-4 rounded-t-lg rrr" :id="`${tab.sharedObject[item.id].path}-tab`" :data-tabs-target="`#${tab.sharedObject[item.id].path}`"
-          type="button" role="tab" :aria-controls="`${tab.sharedObject[item.id].path}`" :aria-selected="
-            activeTab.sharedString === tab.sharedObject[item.id].path ||
-            (tabTerpilih.sharedNumber === 0 && key === 0)
-              ? 'true'
-              : 'false'
-          "
-          @click="selectTab(tab.sharedObject[item.id].path, key)"
-          :class="
-            activeTab.sharedString === tab.sharedObject[item.id].path ||
-            (tabTerpilih.sharedNumber === 0 && key === 0)
-              ? 'active-tab bg-white !text-green-900 font-semibold hover:text-green-700 dark:text-green-900 dark:hover:text-green-900 border-[#3a477d] dark:border-[#3a477d]'
-              : 'inactive-tab text-gray-500 hover:text-gray-600 dark:text-gray-400 border-gray-100 hover:border-gray-300 dark:border-gray-700 dark:hover:text-gray-300'
-          "
-          :title="tab.sharedObject[item.id].name">
-          <font-awesome-icon :icon="tab.sharedObject[item.id].icon" />
-          <span class="ml-2 flex-1 truncate">
-            {{ dynamicLabel(  tab.sharedObject[item.id].name ) }}
-          </span>
-        </button>
+          <div :id="`tooltip-default-${tab.sharedObject[item.id].path}`" role="tooltip" class="absolute invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700 z-999999">
+              {{ tab.sharedObject[item.id].title }}
+              <div class="tooltip-arrow" data-popper-arrow></div>
+          </div>
+          <button :data-tooltip-target="`tooltip-default-${tab.sharedObject[item.id].path}`" class="inline-block p-4 rounded-t-lg rrr" :id="`${tab.sharedObject[item.id].path}-tab`" :data-tabs-target="`#${tab.sharedObject[item.id].path}`"
+            type="button" role="tab" :aria-controls="`${tab.sharedObject[item.id].path}`"
+            :aria-selected="activeTab.sharedString === tab.sharedObject[item.id].path || (tabTerpilih.sharedNumber === 0 && key === 0) ? 'true' : 'false'"
+            @click="selectTab(tab.sharedObject[item.id].path, key)" :class="activeTab.sharedString === tab.sharedObject[item.id].path ||
+              (tabTerpilih.sharedNumber === 0 && key === 0)
+                ? 'active-tab bg-white !text-green-900 font-semibold hover:text-green-700 dark:text-green-900 dark:hover:text-green-900 border-[#3a477d] dark:border-[#3a477d]'
+                : 'inactive-tab text-gray-500 hover:text-gray-600 dark:text-gray-400 border-gray-100 hover:border-gray-300 dark:border-gray-700 dark:hover:text-gray-300'
+            " >
+            <font-awesome-icon :icon="tab.sharedObject[item.id].icon" />
+            <span class="ml-2 flex-1 truncate">
+              {{ dynamicLabel(  tab.sharedObject[item.id].name ) }}
+            </span>
+          </button>
       </li>
     </ul>
   </div>
