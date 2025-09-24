@@ -7,14 +7,14 @@ module.exports = {
       "Banks",
       [
         {
-          img: 'bank_aceh.png',
-          name: 'Bank Aceh',
+          img: "bank_aceh.png",
+          name: "Bank Aceh",
           createdAt: new Date(),
           updatedAt: new Date(),
         },
         {
-          img: 'bank_syariah_indonesia.png',
-          name: 'Bank Syariah Indonesia',
+          img: "bank_syariah_indonesia.png",
+          name: "Bank Syariah Indonesia",
           createdAt: new Date(),
           updatedAt: new Date(),
         },

@@ -8,7 +8,7 @@ validation.check_id_keanggotaan = async (value) => {
   if (!check) {
     throw new Error("Anggota keanggotaan tidak terdaftar di pangkalan data");
   }
-  return true
+  return true;
 };
 
 // Validasi id kecamatan apakah sudah ada di database
@@ -51,7 +51,9 @@ validation.check_username = async (value, { req }) => {
     });
 
     if (check) {
-      throw new Error("Member dengan nama yang sama sudah terdaftar di pangkalan data");
+      throw new Error(
+        "Member dengan nama yang sama sudah terdaftar di pangkalan data"
+      );
     }
   } else {
     const check = await Member.findOne({
@@ -61,7 +63,9 @@ validation.check_username = async (value, { req }) => {
     });
 
     if (check) {
-      throw new Error("Member dengan nama yang sama sudah terdaftar di pangkalan data");
+      throw new Error(
+        "Member dengan nama yang sama sudah terdaftar di pangkalan data"
+      );
     }
   }
 
@@ -84,32 +88,31 @@ validation.check_password = async (value, { req }) => {
 validation.validateData = (req, res, next) => {
   const form = req.body;
 
-  if (form.tipeAkun === 'instansi') {
+  if (form.tipeAkun === "instansi") {
     if (!form.kecamatan_id) {
-      throw new Error('Kecamatan tidak boleh kosong.');
+      throw new Error("Kecamatan tidak boleh kosong.");
     }
     if (!form.desa_id) {
-      throw new Error('Desa tidak boleh kosong.');
+      throw new Error("Desa tidak boleh kosong.");
     }
-  } else if (form.tipeAkun === 'perorangan') {
+  } else if (form.tipeAkun === "perorangan") {
     if (!form.nomor_ktp) {
-      throw new Error('Nomor KTP tidak boleh kosong.');
+      throw new Error("Nomor KTP tidak boleh kosong.");
     }
     if (!form.nomor_kk) {
-      throw new Error('Nomor KK tidak boleh kosong.');
+      throw new Error("Nomor KK tidak boleh kosong.");
     }
     if (!form.birth_date) {
-      throw new Error('Tanggal Lahir tidak boleh kosong.');
+      throw new Error("Tanggal Lahir tidak boleh kosong.");
     }
     if (!form.kecamatan_id) {
-      throw new Error('Kecamatan tidak boleh kosong.');
+      throw new Error("Kecamatan tidak boleh kosong.");
     }
     if (!form.desa_id) {
-      throw new Error('Desa tidak boleh kosong.');
+      throw new Error("Desa tidak boleh kosong.");
     }
   }
   next();
 };
-
 
 module.exports = validation;
