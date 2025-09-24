@@ -7,7 +7,7 @@ const fs = require("fs");
 const validation = {};
 
 // Validasi id desa apakah sudah ada di database
-validation.check_id_desa = async (value) => {  
+validation.check_id_desa = async (value) => {
   const check = await desa.findByPk(value);
   if (!check) {
     throw new Error("desa tidak terdaftar di pangkalan data");

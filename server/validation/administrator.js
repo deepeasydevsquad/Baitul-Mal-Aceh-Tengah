@@ -68,7 +68,9 @@ validation.check_username = async (value, { req }) => {
     });
 
     if (check) {
-      throw new Error("User dengan nama yang sama sudah terdaftar di pangkalan data");
+      throw new Error(
+        "User dengan nama yang sama sudah terdaftar di pangkalan data"
+      );
     }
   } else {
     const check = await User.findOne({
@@ -78,7 +80,9 @@ validation.check_username = async (value, { req }) => {
     });
 
     if (check) {
-      throw new Error("User dengan nama yang sama sudah terdaftar di pangkalan data");
+      throw new Error(
+        "User dengan nama yang sama sudah terdaftar di pangkalan data"
+      );
     }
   }
 
