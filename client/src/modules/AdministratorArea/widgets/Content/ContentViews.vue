@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useSelectedTab, useGlobalTab, useGlobalActiveTab, useTabTerpilih } from '../../../../stores/sidebar'
+import {
+  useSelectedTab,
+  useGlobalTab,
+  useGlobalActiveTab,
+  useTabTerpilih,
+} from '../../../../stores/sidebar'
 import 'flowbite'
 import Surveyor from '@/modules/Surveyor/Surveyor.vue'
 import syarat from '@/modules/Syarat/syarat.vue'
@@ -30,6 +35,7 @@ import LaporanAsnafGharim from '@/modules/LaporanAsnaf/LaporanAsnafGharim.vue'
 import LaporanAsnafMuallaf from '@/modules/LaporanAsnaf/LaporanAsnafMuallaf.vue'
 import LaporanAsnafIbnuSabil from '@/modules/LaporanAsnaf/LaporanAsnafIbnuSabil.vue'
 import UrutanBagianMonev from '@/modules/UrutanBagianMonev/UrutanBagianMonev.vue'
+import Penetapan from '@/modules/Penetapan/Penetapan.vue'
 import { url } from 'inspector'
 const tabComponents = {
   daftar_kecamatan: kecamatan,
@@ -52,14 +58,15 @@ const tabComponents = {
   daftar_program: DaftarProgram,
   laporan_asnaf_fakir: LaporanAsnafFakir,
   program_donasi: ProgramDonasi,
-  daftar_tab:DaftarTab,
+  daftar_tab: DaftarTab,
   laporan_asnaf_miskin: LaporanAsnafMiskin,
   laporan_asnaf_fisabilillah: LaporanAsnafFisabilillah,
   laporan_asnaf_gharim: LaporanAsnafGharim,
   laporan_asnaf_muallaf: LaporanAsnafMuallaf,
   laporan_asnaf_ibnu_sabil: LaporanAsnafIbnuSabil,
-  daftar_asnaf:DaftarAsnaf,
-  urutan_bagian_monev: UrutanBagianMonev
+  daftar_asnaf: DaftarAsnaf,
+  urutan_bagian_monev: UrutanBagianMonev,
+  penetapan_kriteria_syarat_surveyor: Penetapan,
 }
 
 const selectedTab = useSelectedTab() // untuk menampung daftar tab yang menu / submenunya di click

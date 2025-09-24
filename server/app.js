@@ -74,6 +74,7 @@ const arr_router = [
   "tab",
   "daftar_asnaf",
   "urutan_bagian_monev",
+  "penetapan",
 ];
 
 const arr = {};
