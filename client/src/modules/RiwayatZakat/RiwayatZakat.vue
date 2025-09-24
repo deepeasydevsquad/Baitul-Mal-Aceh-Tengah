@@ -10,6 +10,7 @@ import Pagination from '@/components/Pagination/Pagination.vue'
 import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue'
 import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
 import FormAdd from '@/modules/RiwayatZakat/widgets/FormAdd.vue'
+import BaseSelect from '@/components/Form/BaseSelect.vue'
 
 // Composable
 import { usePagination } from '@/composables/usePagination'
@@ -17,80 +18,84 @@ import { useConfirmation } from '@/composables/useConfirmation'
 import { useNotification } from '@/composables/useNotification'
 
 // Service API
-import { get_riwayat_zakat, delete_riwayat_zakat, add_riwayat_zakat } from '@/service/riwayat_zakat'
+import { list, delete_riwayat_zakat } from '@/service/riwayat_zakat'
 
-// State
+// State: Loading
 const isLoading = ref(false)
 const isTableLoading = ref(false)
 
-// Pagination
+// Composable: pagination
 const itemsPerPage = ref<number>(100)
 const totalColumns = ref<number>(6)
+
 const { currentPage, perPage, totalRow, totalPages, nextPage, prevPage, pageNow, pages } =
   usePagination(fetchData, { perPage: itemsPerPage.value })
 
-// Notification & Confirmation
+// Composable: notification
 const { showNotification, notificationType, notificationMessage, displayNotification } =
   useNotification()
+
+// Composable: confirmation
 const { showConfirmDialog, confirmTitle, confirmMessage, displayConfirmation, confirm, cancel } =
   useConfirmation()
 
-// Interfaces
-interface Member {
-  id: number
-  username: string
-  nomor_ktp: string
-}
-
-interface Riwayat_pengumpulan {
-  id: number
-  invoice: string
-  nominal: number
-  status: string
-}
-
 interface RiwayatZakat {
   id: number
+  member_id: number
+  member_name: string
+  member_nik: string
+  invoice: string
+  type: string
   nominal: number
+  kode: string
   status: string
-  status_konfirmasi: string
-  createdAt: string
-  updatedAt: string
-  Member?: Member
-  Riwayat_pengumpulan?: Riwayat_pengumpulan
+  konfirmasi_pembayaran: string
+  datetimes: string
 }
 
-const RiwayatZakat = ref<RiwayatZakat[]>([])
+const dataRiwayatZakat = ref<RiwayatZakat[]>([])
 
-// Search & Filters
+// Function: Modal
+const isModalAddOpen = ref(false)
+
+function openModalAdd() {
+  isModalAddOpen.value = true
+}
+
+// Function: Fetch Data
 const search = ref('')
-const status = ref('')
-const status_konfirmasi = ref('')
+const selectStatus = ref('')
+const selectStatusKonfirmasi = ref('belum_dikirim')
 
 async function fetchData() {
   isTableLoading.value = true
   try {
-    const response = await get_riwayat_zakat({
+    const response = await list({
       search: search.value,
       perpage: perPage.value,
       pageNumber: currentPage.value,
-      status: status.value,
-      konfirmasi_pembayaran: status_konfirmasi.value,
+      status: selectStatus.value,
+      konfirmasi_pembayaran: selectStatusKonfirmasi.value,
     })
-    RiwayatZakat.value = response.data
+
+    dataRiwayatZakat.value = response.data
     totalRow.value = response.total
+    console.log(dataRiwayatZakat.value)
   } catch (error) {
-    displayNotification('Gagal mengambil data riwayat zakat', 'error')
+    displayNotification('Gagal mengambil data riwayat_zakat', 'error')
   } finally {
     isTableLoading.value = false
   }
 }
 
-onMounted(fetchData)
+onMounted(async () => {
+  await fetchData()
+})
 
+// Function: Delete Data
 async function deleteData(id: number) {
   displayConfirmation(
-    'Hapus Data Riwayat zakat',
+    'Hapus Data Riwayat Zakat',
     'Apakah Anda yakin ingin menghapus data riwayat zakat ini?',
     async () => {
       try {
@@ -98,8 +103,8 @@ async function deleteData(id: number) {
         await delete_riwayat_zakat(id)
         displayNotification('Data riwayat zakat berhasil dihapus', 'success')
         await fetchData()
-      } catch (error) {
-        displayNotification('Gagal menghapus data riwayat zakat', 'error')
+      } catch (error: any) {
+        displayNotification(error.response.data.error_msg, 'error')
       } finally {
         isLoading.value = false
       }
@@ -110,169 +115,189 @@ async function deleteData(id: number) {
 
 <template>
   <div class="mx-auto p-4">
-    <!-- Loading -->
+    <!-- Header -->
     <LoadingSpinner v-if="isLoading" label="Memuat halaman..." />
-
     <div v-else class="space-y-4">
-      <!-- Search & Filter -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <BaseButton
+          @click="openModalAdd()"
+          variant="primary"
+          :loading="isModalAddOpen"
+          type="button"
+        >
+          <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" /> Tambah Riwayat Zakat
+        </BaseButton>
+
+        <!-- Search -->
         <div class="flex items-center w-full sm:w-auto gap-2">
-          <label for="search" class="mr-2 text-sm font-medium text-gray-600">Cari</label>
+          <label for="search" class="mr-2 text-sm font-medium text-gray-600">Filter</label>
+
+          <!-- Status -->
+          <BaseSelect
+            v-model="selectStatus"
+            :options="[
+              { value: 'process', label: 'Proses' },
+              { value: 'success', label: 'Sukses' },
+              { value: 'failed', label: 'Gagal' },
+            ]"
+            placeholder="Semua Status"
+            @change="fetchData"
+          />
+
+          <!-- Status Konfirmasi -->
+          <BaseSelect
+            v-model="selectStatusKonfirmasi"
+            :options="[
+              { value: 'belum_dikirim', label: 'Belum Dikirim' },
+              { value: 'sudah_dikirim', label: 'Sudah Dikirim' },
+            ]"
+            placeholder="Semua Status Konfirmasi"
+            @change="fetchData"
+          />
+
+          <!-- Search -->
           <input
             id="search"
             type="text"
             v-model="search"
-            @input="fetchData"
-            placeholder="Cari NAMA/NIK MUZAKKI, NAMA..."
-            class="w-full sm:w-64 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:border-green-900 focus:ring-2 focus:ring-green-900 transition"
+            @change="fetchData"
+            placeholder="Cari Nama / Nomor Nik / Nomor Akun..."
+            class="w-full sm:w-86 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:border-green-900 focus:ring-2 focus:ring-green-900 transition"
           />
-          <select
-            v-model="status"
-            @change="fetchData"
-            class="block w-full sm:w-48 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:ring-2 focus:ring-green-900 focus:border-green-900 transition"
-          >
-            <option value="">Semua Status</option>
-            <option value="SUCCESS">Success</option>
-            <option value="PROCESS">Process</option>
-            <option value="FAILED">Failed</option>
-          </select>
-          <select
-            v-model="status_konfirmasi"
-            @change="fetchData"
-            class="block w-full sm:w-48 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:ring-2 focus:ring-green-900 focus:border-green-900 transition"
-          >
-            <option value="">Semua Konfirmasi</option>
-            <option value="sudah_dikirim">Sudah dikirim</option>
-            <option value="belum_dikirim">Belum dikirim</option>
-          </select>
         </div>
       </div>
 
       <!-- Table -->
-      <div class="overflow-x-auto rounded-xl border border-gray-200 shadow">
+      <div class="overflow-hidden rounded-xl border border-gray-200 shadow-md">
         <SkeletonTable v-if="isTableLoading" :columns="totalColumns" :rows="itemsPerPage" />
         <table v-else class="w-full border-collapse bg-white text-sm">
           <thead class="bg-gray-50 text-gray-700 text-center border-b border-gray-300">
             <tr>
-              <th class="w-[20%] px-6 py-3 font-medium">Info Member</th>
-              <th class="w-[30%] px-6 py-3 font-medium">Info Pemasukan</th>
-              <th class="w-[10%] px-6 py-3 font-medium">Status</th>
-              <th class="w-[10%] px-6 py-3 font-medium">Status Konfirmasi</th>
-              <th class="w-[10%] px-6 py-3 font-medium">Datetimes</th>
-              <th class="w-[5%] px-6 py-3 font-medium">Aksi</th>
+              <th
+                class="w-[30%] text-center px-6 py-4 font-medium font-bold text-gray-900 text-center"
+              >
+                Info Member
+              </th>
+              <th
+                class="w-[30%] text-center px-6 py-4 font-medium font-bold text-gray-900 text-center"
+              >
+                Info Pemasukan
+              </th>
+              <th
+                class="w-[10%] text-center px-6 py-4 font-medium font-bold text-gray-900 text-center"
+              >
+                Status
+              </th>
+              <th
+                class="w-[10%] text-center px-6 py-4 font-medium font-bold text-gray-900 text-center"
+              >
+                Status Konfirmasi
+              </th>
+              <th
+                class="w-[10%] text-center px-6 py-4 font-medium font-bold text-gray-900 text-center"
+              >
+                Datetimes
+              </th>
+              <th
+                class="w-[10%] text-center px-6 py-4 font-medium font-bold text-gray-900 text-center"
+              >
+                Aksi
+              </th>
             </tr>
           </thead>
-
           <tbody class="divide-y divide-gray-100">
-            <template v-if="RiwayatZakat.length">
+            <template v-if="dataRiwayatZakat.length > 0">
               <tr
-                v-for="data in RiwayatZakat"
-                :key="data.id"
+                v-for="riwayat_zakat in dataRiwayatZakat"
+                :key="riwayat_zakat.id"
                 class="hover:bg-gray-50 transition-colors"
               >
-                <!-- Info Member -->
-                <td class="px-6 py-4 text-left font-medium text-gray-800">
-                  <table class="w-full border border-gray-300 rounded-lg">
-                    <tbody>
-                      <tr class="border-b">
-                        <th class="w-[5%] px-4 py-2 text-left font-medium bg-gray-100">NAMA MUZAKKI</th>
-                        <td class="px-4 py-2">{{ data.Member?.username }}</td>
-                      </tr>
-                      <tr>
-                        <th class="px-4 py-2 text-left font-medium bg-gray-100">NIK MUZAKKI</th>
-                        <td class="px-4 py-2">
-                          {{
-                            data.Member?.nomor_ktp
-                              ? data.Member.nomor_ktp.replace(
-                                  /^(\d{4})(\d+)(\d{4})$/,
-                                  (_, start, middle, end) =>
-                                    start + '*'.repeat(middle.length) + end,
-                                )
-                              : ''
-                          }}
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
+                <td class="px-6 py-4 text-start align-middle">
+                  <tr class="border border-gray-300">
+                    <td class="w-[45%] bg-gray-200 px-4 py-1 font-semibold">NAMA MUZAKKI</td>
+                    <td class="px-4 py-1 font-bold">
+                      {{ riwayat_zakat.member_name }}
+                    </td>
+                  </tr>
+                  <tr class="border border-gray-300">
+                    <td class="w-[45%] bg-gray-200 px-4 py-1 font-semibold">NIK MUZAKKI</td>
+                    <td class="px-4 py-1 font-bold">
+                      {{ riwayat_zakat.member_nik }}
+                    </td>
+                  </tr>
                 </td>
-
-                <!-- Info Program & Nominal -->
-                <td class="px-6 py-4 text-left font-medium text-gray-800">
-                  <table class="w-full border border-gray-300 rounded-lg">
-                    <tbody>
-                      <tr class="border-b">
-                        <th class="w-[30%] px-4 py-2 text-left font-medium bg-gray-100">
-                          INVOICE
-                        </th>
-                        <td class="px-4 py-2">{{ data.Riwayat_pengumpulan?.invoice }}</td>
-                      </tr>
-                      <tr>
-                        <th class="px-4 py-2 text-left font-medium bg-gray-100">NOMINAL</th>
-                        <td class="px-4 py-2">
-                          Rp {{ Number(data.nominal).toLocaleString('id-ID') }}
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
+                <td class="px-6 py-4 text-start font-medium text-gray-800">
+                  <tr class="border border-gray-300">
+                    <td class="w-[45%] bg-gray-200 px-4 py-1 font-semibold">INVOICE</td>
+                    <td class="px-4 py-1 font-bold">
+                      {{ riwayat_zakat.invoice }}
+                    </td>
+                  </tr>
+                  <tr class="border border-gray-300">
+                    <td class="w-[45%] bg-gray-200 px-4 py-1 font-semibold">NOMINAL</td>
+                    <td class="px-4 py-1 font-bold">
+                      {{ $formatToRupiah(riwayat_zakat.nominal) }}
+                    </td>
+                  </tr>
                 </td>
-
-                <!-- Status -->
-                <td
-                  class="px-6 py-4 text-center font-medium"
-                  :class="{
-                    'text-green-600 font-semibold':
-                      data.status === 'SUCCESS' || data.status === 'success',
-                    'text-yellow-600 font-semibold':
-                      data.status === 'PROCESS' || data.status === 'process',
-                    'text-red-600 font-semibold':
-                      data.status === 'FAILED' || data.status === 'failed',
-                  }"
-                >
-                  {{ data.status.replace(/_/g, ' ').toUpperCase() }}
+                <td class="px-6 py-4 text-center font-bold text-gray-800">
+                  <span
+                    :class="{
+                      'text-green-500': riwayat_zakat.status === 'success',
+                      'text-yellow-500': riwayat_zakat.status === 'process',
+                      'text-red-500': riwayat_zakat.status === 'failed',
+                    }"
+                  >
+                    {{
+                      {
+                        success: 'SUKSES',
+                        process: 'PROSES',
+                        failed: 'GAGAL',
+                      }[riwayat_zakat.status]
+                    }}
+                  </span>
                 </td>
-
-                <!-- Status Konfirmasi -->
-                <td
-                  class="px-6 py-4 text-center font-medium"
-                  :class="{
-                    'text-green-600 font-semibold':
-                      data.status_konfirmasi === 'SUDAH_DIKIRIM' ||
-                      data.status_konfirmasi === 'sudah_dikirim',
-                    'text-red-600 font-semibold':
-                      data.status_konfirmasi === 'BELUM_DIKIRIM' ||
-                      data.status_konfirmasi === 'belum_dikirim',
-                  }"
-                >
-                  {{ data.status_konfirmasi.replace(/_/g, ' ').toUpperCase() }}
+                <td class="px-6 py-4 text-center font-bold text-gray-800">
+                  <span
+                    :class="
+                      riwayat_zakat.konfirmasi_pembayaran === 'sudah_dikirim'
+                        ? 'text-green-500'
+                        : 'text-red-500'
+                    "
+                  >
+                    {{
+                      riwayat_zakat.konfirmasi_pembayaran === 'sudah_dikirim'
+                        ? 'SUDAH DIKIRIM'
+                        : 'BELUM DIKIRIM'
+                    }}
+                  </span>
                 </td>
-
-                <!-- Datetimes -->
                 <td class="px-6 py-4 text-center font-medium text-gray-800">
-                  {{ new Date(data.createdAt).toLocaleString('id-ID') }}
+                  {{ riwayat_zakat.datetimes }}
                 </td>
-
-                <!-- Aksi -->
                 <td class="px-6 py-4">
                   <div class="flex justify-center gap-2">
-                    <DangerButton @click="deleteData(data.id)">
-                      <DeleteIcon />
-                    </DangerButton>
+                    <DangerButton @click="deleteData(riwayat_zakat.id)"
+                      ><DeleteIcon
+                    /></DangerButton>
                   </div>
                 </td>
               </tr>
             </template>
-
             <!-- Empty State -->
             <tr v-else>
               <td :colspan="totalColumns" class="px-6 py-8 text-center text-gray-500">
+                <font-awesome-icon
+                  icon="fa-solid fa-hand-holding-dollar"
+                  class="text-4xl mb-2 text-gray-400"
+                />
                 <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ada data</h3>
                 <p class="text-sm">Belum ada data riwayat zakat.</p>
               </td>
             </tr>
           </tbody>
-
           <!-- Pagination -->
-          <tfoot class="bg-gray-100 font-bold">
+          <tfoot>
             <Pagination
               :current-page="currentPage"
               :total-pages="totalPages"
@@ -288,6 +313,19 @@ async function deleteData(id: number) {
       </div>
     </div>
 
+    <!-- Modal FormAdd -->
+    <FormAdd
+      :is-modal-open="isModalAddOpen"
+      @close="((isModalAddOpen = false), fetchData())"
+      @status="
+        (payload: any) =>
+          displayNotification(
+            payload.error_msg || 'Tambah/Update RiwayatZakat gagal',
+            payload.error ? 'error' : 'success',
+          )
+      "
+    />
+
     <!-- Confirmation -->
     <Confirmation
       :showConfirmDialog="showConfirmDialog"
@@ -297,7 +335,6 @@ async function deleteData(id: number) {
       <BaseButton variant="secondary" @click="cancel">Tidak</BaseButton>
       <BaseButton variant="warning" @click="confirm">Ya</BaseButton>
     </Confirmation>
-
     <!-- Notification -->
     <Notification
       :showNotification="showNotification"
@@ -307,17 +344,3 @@ async function deleteData(id: number) {
     />
   </div>
 </template>
-
-<style>
-.text-xs {
-  font-size: 0.75rem; /* kecilin font */
-}
-.px-2 {
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
-}
-.py-2 {
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-}
-</style>

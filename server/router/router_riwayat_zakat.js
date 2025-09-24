@@ -8,6 +8,12 @@ const {
 
 const router = express.Router();
 
+router.get(
+  "/riwayat_zakat/list_member",
+  authenticateTokenAdministrator,
+  controllers.list_member
+);
+
 router.post(
   "/riwayat_zakat/list",
   authenticateTokenAdministrator,
@@ -22,10 +28,9 @@ router.post(
       .withMessage("Page Number Tidak Boleh Kosong")
       .isInt()
       .withMessage("Page Number Harus Angka"),
-    body("search")
-      .optional()
-      .isString()
-      .withMessage("Search Harus String"),
+    body("search").optional().isString().withMessage("Search Harus String"),
+    body("status").optional(),
+    body("konfirmasi_pembayaran").optional(),
   ],
   controllers.list
 );
@@ -33,29 +38,34 @@ router.post(
 router.post(
   "/riwayat_zakat/add",
   authenticateTokenAdministrator,
-  validation.upload.single("banner"),
   [
     body("member_id")
       .notEmpty()
-      .withMessage("Member_id Tidak Boleh Kosong")
-      .isString()
-      .withMessage("Member_id Harus String"),
-    body("tahun")
-      .notEmpty()
-      .withMessage("Tahun Tidak Boleh Kosong")
+      .withMessage("Member ID Tidak Boleh Kosong")
       .isInt()
-      .withMessage("Tahun Harus Angka"),
-    body("deskripsi")
+      .withMessage("Member ID Harus Angka")
+      .custom(validation.check_id_member),
+    body("nominal")
       .notEmpty()
-      .withMessage("Deskripsi Tidak Boleh Kosong")
-      .isString()
-      .withMessage("Deskripsi Harus String"),
-    body("target_donasi_terkumpul")
+      .withMessage("Nominal Tidak Boleh Kosong")
+      .isInt()
+      .withMessage("Nominal Harus Angka"),
+    body("tipe_zakat")
       .notEmpty()
-      .withMessage("Target Donasi Terkumpul Tidak Boleh Kosong"),
-    body("waktu_donasi")
+      .withMessage("Tipe Zakat Tidak Boleh Kosong")
+      .isIn([
+        "zakat_harta",
+        "zakat_simpanan",
+        "zakat_profesi",
+        "zakat_perdagangan",
+        "zakat_pertanian",
+      ])
+      .withMessage("Tipe Zakat tidak valid"),
+    body("status_pemasukan")
       .notEmpty()
-      .withMessage("Waktu Donasi Tidak Boleh Kosong"),
+      .withMessage("Status Pemasukan Tidak Boleh Kosong")
+      .isIn(["belum_dikirim", "sudah_dikirim"])
+      .withMessage("Status Pemasukan Harus String"),
   ],
   controllers.add
 );
@@ -65,8 +75,10 @@ router.post(
   authenticateTokenAdministrator,
   [
     body("id")
-      .notEmpty().withMessage("ID Tidak Boleh Kosong")
-      .isInt().withMessage("ID Harus Angka")
+      .notEmpty()
+      .withMessage("ID Tidak Boleh Kosong")
+      .isInt()
+      .withMessage("ID Harus Angka")
       .custom(validation.check_id_riwayat_zakat),
   ],
   controllers.delete

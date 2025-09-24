@@ -1,11 +1,21 @@
-"use strict";
-
 const { Riwayat_pengumpulan, Member } = require("../../../models");
 const { Op } = require("sequelize");
+const moment = require("moment");
 
 class Model_r {
   constructor(req) {
     this.req = req;
+  }
+
+  async list_member() {
+    const result = await Member.findAndCountAll();
+
+    const data = result.rows.map((e) => ({
+      id: e.id,
+      name: e.fullname,
+    }));
+
+    return { data, total: result.count };
   }
 
   async list_riwayat_zakat() {
@@ -103,6 +113,34 @@ class Model_r {
       };
     }
   }
+  async info_riwayat_zakat(id) {
+    try {
+      const result = await Riwayat_pengumpulan.findByPk(id, {
+        include: [
+          {
+            model: Member,
+            attributes: ["fullname", "nomor_ktp", "kode"],
+          },
+        ],
+      });
+      return {
+        id: result.id,
+        invoice: result.invoice,
+        tipe: result.tipe,
+        nominal: result.nominal,
+        kode: result.kode,
+        status: result.status,
+        konfirmasi_pembayaran: result.konfirmasi_pembayaran,
+        member_id: result.member_id,
+        member_name: result.Member?.fullname,
+        member_nik: result.Member?.nomor_ktp,
+        datetime: moment(result.updatedAt).format("YYYY-MM-DD HH:mm:ss"),
+      };
+    } catch (error) {
+      console.error("Error fetching riwayat zakat data:", error);
+      return {};
+    }
+  }
 
   async gen_invoice() {
     let kode;
@@ -122,7 +160,7 @@ class Model_r {
       exists = await Riwayat_pengumpulan.findOne({ where: { kode } });
     } while (exists);
 
-    return kode; // ✅ perbaikan return
+    return kode;
   }
 }
 

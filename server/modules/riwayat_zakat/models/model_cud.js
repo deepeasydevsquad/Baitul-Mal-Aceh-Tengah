@@ -21,11 +21,11 @@ class Model_cud {
       const insert = await Riwayat_pengumpulan.add(
         {
           member_id: body.member_id,
-          invoice: body.invoice,
+          invoice: invoice,
           tipe: body.tipe,
           nominal: body.nominal,
-          kode: 500000,
-          status: body.status,
+          kode: "000",
+          konfirmasi_pembayaran: body.status_pemasukan,
           createdAt: myDate,
           updatedAt: myDate,
         },
@@ -34,7 +34,7 @@ class Model_cud {
         }
       );
 
-      this.message = `Menambahkan Riwayat_pengumpulan Baru dengan Invoice Riwayat_pengumpulan: ${body.name} dan ID Riwayat_pengumpulan: ${insert.id}`;
+      this.message = `Menambahkan Riwayat pengumpulan Baru dengan Invoice Riwayat pengumpulan: ${invoice} dan ID Riwayat pengumpulan: ${insert.id}`;
     } catch (error) {
       this.state = false;
     }
@@ -47,20 +47,19 @@ class Model_cud {
 
     try {
       const model_r = new Model_r(this.req);
-      const Riwayat_pengumpulan = await model_r.Riwayat_pengumpulan(body.id);
+      const Riwayat_pengumpulan = await model_r.info_riwayat_zakat(body.id);
 
       await Riwayat_pengumpulan.destroy({
         where: { id: body.id },
         transaction: this.t,
       });
 
-      this.message = `Menghapus Riwayat_pengumpulan dengan Nama Riwayat_pengumpulan: ${Riwayat_pengumpulan.name} dan ID Riwayat_pengumpulan: ${Riwayat_pengumpulan.id}`;
+      this.message = `Menghapus Riwayat pengumpulan dengan Nama member Riwayat_pengumpulan: ${info_riwayat_infaq.member_name} dan ID Riwayat pengumpulan: ${Riwayat_pengumpulan.id}`;
     } catch (error) {
       this.state = false;
     }
   }
 
-  response
   async response() {
     if (this.state) {
       await writeLog(this.req, this.t, {

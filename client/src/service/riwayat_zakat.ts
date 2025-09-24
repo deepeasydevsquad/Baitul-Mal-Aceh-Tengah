@@ -36,34 +36,3 @@ export const delete_riwayat_zakat = async (param: any) => {
   }
 }
 
-export const tutup = async (param: any) => {
-  try {
-    const response = await api.post('/riwayat_zakat/tutup', param )
-    return response.data
-  } catch (error) {
-    console.error('Gagal menambahkan riwayat:', error)
-    throw error
-  }
-}
-
-export const detail = async (param: any) => {
-  try {
-    const response = await api.post('/riwayat_zakat/detail', param)
-    return response.data
-  } catch (error) {
-    console.error('Gagal membuat zakat:', error)
-    throw error
-  }
-}
-
-
-
-export const daftar_member = async () => {
-  try {
-    const response = await api.get('/riwayat_zakat/daftar_member')
-    return response.data
-  } catch (error) {
-    console.error('Gagal membuat zakat:', error)
-    throw error
-  }
-}
