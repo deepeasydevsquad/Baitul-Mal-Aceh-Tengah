@@ -110,10 +110,10 @@ async function deleteData(id: number) {
       try {
         isLoading.value = true
         await delete_surveyor({ id : id })
-        displayNotification('Data bank berhasil dihapus', 'success')
+        displayNotification('Data surveyor berhasil dihapus', 'success')
         await fetchData()
       } catch (error) {
-        displayNotification('Gagal menghapus data bank', 'error')
+        displayNotification('Gagal menghapus data surveyor', 'error')
       } finally {
         isLoading.value = false
       }

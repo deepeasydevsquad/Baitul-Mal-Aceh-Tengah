@@ -135,7 +135,7 @@ class Model_r {
         await Tab.findAll().then(async (value) => {
             await Promise.all(
               await value.map(async (e) => {
-                tab = {...tab,...{[e.id] : { id : e.id, name : e.name, icon : e.icon, path: e.path, desc : e.desc }}};
+                tab = {...tab,...{[e.id] : { id : e.id, name : e.name, icon : e.icon, path: e.path, title: e.title,  desc : e.desc }}};
               })
             );
         });

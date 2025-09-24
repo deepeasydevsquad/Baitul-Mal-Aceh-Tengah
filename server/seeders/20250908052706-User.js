@@ -8,10 +8,11 @@ module.exports = {
       [
         {
           grup_id: 1,
-          name: 'Administrator',
-          kode: 'AS1233',
-          username: 'admin',
-          password: "$2a$10$Zr648UXQwtmNNUqeHhE5oujX.ecj7Kz4xL8Fv9iOQXMOREUf2PVDK",
+          name: "Administrator",
+          kode: "AS1233",
+          username: "admin",
+          password:
+            "$2a$10$Zr648UXQwtmNNUqeHhE5oujX.ecj7Kz4xL8Fv9iOQXMOREUf2PVDK",
           createdAt: new Date(),
           updatedAt: new Date(),
         },

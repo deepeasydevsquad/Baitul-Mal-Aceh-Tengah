@@ -37,6 +37,7 @@ const emit = defineEmits<{
 
 // Function: Close modal
 const closeModal = () => {
+  if (isSubmitting.value) return
   resetForm()
   emit('close')
 }
@@ -155,7 +156,6 @@ const fetchData = async () => {
   }
 }
 
-
 // Function: Handle submit
 const isSubmitting = ref(false)
 const form = ref<{
@@ -195,10 +195,10 @@ const handleSubmit = async () => {
     JSON.stringify(
       Object.fromEntries(
         Object.entries(form.value).map(([key, value]) =>
-          value === null ? [key, ''] : [key, value]
-        )
-      )
-    )
+          value === null ? [key, ''] : [key, value],
+        ),
+      ),
+    ),
   )
   formData.id = props.selectedKeanggotaan.id
   console.log(formData)
@@ -209,12 +209,12 @@ const handleSubmit = async () => {
     const response = await edit_keanggotaan(formData)
     console.log(response)
     emit('status', { error_msg: response.error_msg, error: response.error })
-    closeModal()
   } catch (error: any) {
     console.error(error)
     displayNotification(error.response.data.error_msg || error.response.data.message, 'error', 5000)
   } finally {
     isSubmitting.value = false
+    closeModal()
   }
 }
 
@@ -261,7 +261,6 @@ watch(
     }
   },
 )
-
 </script>
 
 <template>
@@ -442,16 +441,33 @@ watch(
         </div>
 
         <!-- Actions -->
-        <div class="pt-4">
+        <div class="flex justify-end gap-3 mt-4">
+          <BaseButton
+            @click="closeModal"
+            type="button"
+            :disabled="isSubmitting"
+            variant="secondary"
+          >
+            Batal
+          </BaseButton>
           <BaseButton
             type="submit"
-            fullWidth
             variant="primary"
-            :disabled="isSubmitting"
+            :disabled="
+              !(
+                form.tipeAkun &&
+                form.wa_number &&
+                form.kecamatan_id &&
+                form.desa_id &&
+                form.alamat &&
+                form.username.trim() &&
+                form.fullname.trim()
+              ) || isSubmitting
+            "
             @click="handleSubmit"
           >
             <span v-if="isSubmitting">Menyimpan...</span>
-            <span v-else>Simpan</span>
+            <span v-else>Simpan Perubahan </span>
           </BaseButton>
         </div>
       </div>

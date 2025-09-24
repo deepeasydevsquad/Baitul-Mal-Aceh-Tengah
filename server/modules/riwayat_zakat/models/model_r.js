@@ -36,8 +36,8 @@ class Model_r {
     }
 
     // filter konfirmasi
-    if (body.konfirmasi && body.konfirmasi !== "") {
-      where.konfirmasi_pembayaran = body.konfirmasi;
+    if (body.konfirmasi_pembayaran && body.konfirmasi_pembayaran !== "") {
+      where.konfirmasi_pembayaran = body.konfirmasi_pembayaran;
     }
 
     // filter search (di relasi Member)
@@ -91,13 +91,10 @@ class Model_r {
           kode: row.kode,
           konfirmasi_pembayaran: row.konfirmasi_pembayaran,
           tipe: row.tipe,
-          createdAt: row.createdAt,
-          updatedAt: row.updatedAt,
-          member: {
-            id: row.Member?.id,
-            fullname: row.Member?.fullname,
-            nomor_ktp: row.Member?.nomor_ktp,
-          },
+          datetimes: moment(row.updatedAt).format("YYYY-MM-DD HH:mm:ss"),
+          member_id: row.Member?.id,
+          member_name: row.Member?.fullname,
+          member_nik: row.Member?.nomor_ktp,
         };
       });
 
@@ -143,7 +140,7 @@ class Model_r {
   }
 
   async gen_invoice() {
-    let kode;
+    let invoice;
     let exists = true;
 
     do {
@@ -155,12 +152,12 @@ class Model_r {
       // 6 angka random
       const numbers = Math.floor(100000 + Math.random() * 900000);
 
-      kode = `${letters}${numbers}`;
+      invoice = `${letters}${numbers}`;
 
-      exists = await Riwayat_pengumpulan.findOne({ where: { kode } });
+      exists = await Riwayat_pengumpulan.findOne({ where: { invoice } });
     } while (exists);
 
-    return kode;
+    return invoice;
   }
 }
 

@@ -212,30 +212,30 @@ async function deleteData(id: number) {
                 :key="riwayat_zakat.id"
                 class="hover:bg-gray-50 transition-colors"
               >
-                <td class="px-6 py-4 text-start align-middle">
+                <td class="px-6 py-4 text-start align-middle w-[30%]">
                   <tr class="border border-gray-300">
-                    <td class="w-[45%] bg-gray-200 px-4 py-1 font-semibold">NAMA MUZAKKI</td>
-                    <td class="px-4 py-1 font-bold">
+                    <td class="bg-gray-200 px-4 py-1 font-semibold">NAMA MUZAKKI</td>
+                    <td class="px-4 py-1 font-bold w-full">
                       {{ riwayat_zakat.member_name }}
                     </td>
                   </tr>
                   <tr class="border border-gray-300">
-                    <td class="w-[45%] bg-gray-200 px-4 py-1 font-semibold">NIK MUZAKKI</td>
-                    <td class="px-4 py-1 font-bold">
+                    <td class="bg-gray-200 px-4 py-1 font-semibold">NIK MUZAKKI</td>
+                    <td class="px-4 py-1 font-bold w-full">
                       {{ riwayat_zakat.member_nik }}
                     </td>
                   </tr>
                 </td>
-                <td class="px-6 py-4 text-start font-medium text-gray-800">
+                <td class="px-6 py-4 text-start font-medium text-gray-800 w-[30%]">
                   <tr class="border border-gray-300">
-                    <td class="w-[45%] bg-gray-200 px-4 py-1 font-semibold">INVOICE</td>
-                    <td class="px-4 py-1 font-bold">
-                      {{ riwayat_zakat.invoice }}
+                    <td class="bg-gray-200 px-4 py-1 font-semibold">INVOICE</td>
+                    <td class="px-4 py-1 font-bold w-full">
+                      #{{ riwayat_zakat.invoice }}
                     </td>
                   </tr>
                   <tr class="border border-gray-300">
-                    <td class="w-[45%] bg-gray-200 px-4 py-1 font-semibold">NOMINAL</td>
-                    <td class="px-4 py-1 font-bold">
+                    <td class="bg-gray-200 px-4 py-1 font-semibold">NOMINAL</td>
+                    <td class="px-4 py-1 font-bold w-full">
                       {{ $formatToRupiah(riwayat_zakat.nominal) }}
                     </td>
                   </tr>

@@ -1,4 +1,4 @@
-const { Riwayat_pengumpulan, Member } = require("../models");
+const { Op, Riwayat_pengumpulan, Member } = require("../models");
 
 const validation = {};
 
@@ -12,12 +12,19 @@ validation.check_id_member = async (value) => {
 };
 
 // Validasi id riwayat apakah sudah ada di database
-validation.check_id_riwayat_zakat = async (value, { req }) => {
-  const body = req.body;
+validation.check_id_riwayat_zakat = async (value) => {
   const check = await Riwayat_pengumpulan.findOne({
     where: {
       id: value,
-      tipe: body.tipe,
+      tipe: {
+        [Op.in]: [
+          "zakat_harta",
+          "zakat_simpanan",
+          "zakat_profesi",
+          "zakat_perdagangan",
+          "zakat_pertanian",
+        ],
+      },
     },
   });
 

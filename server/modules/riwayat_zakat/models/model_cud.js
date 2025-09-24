@@ -1,6 +1,7 @@
 const { sequelize, Riwayat_pengumpulan, Member } = require("../../../models");
 const Model_r = require("../models/model_r");
 const { writeLog } = require("../../../helper/writeLogHelper");
+const moment = require("moment");
 
 class Model_cud {
   constructor(req) {
@@ -17,12 +18,16 @@ class Model_cud {
     const myDate = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
     const body = this.req.body;
 
+    console.log("_____________Ddddddddddddddddddddd____________");
+    console.log(body);
+    console.log("_____________Ddddddddddddddddddddd____________");
+
     try {
-      const insert = await Riwayat_pengumpulan.add(
+      const insert = await Riwayat_pengumpulan.create(
         {
           member_id: body.member_id,
           invoice: invoice,
-          tipe: body.tipe,
+          tipe: body.tipe_zakat,
           nominal: body.nominal,
           kode: "000",
           konfirmasi_pembayaran: body.status_pemasukan,
@@ -47,14 +52,15 @@ class Model_cud {
 
     try {
       const model_r = new Model_r(this.req);
-      const Riwayat_pengumpulan = await model_r.info_riwayat_zakat(body.id);
+      const info_riwayat_zakat = await model_r.info_riwayat_zakat(body.id);
+      console.log(body)
 
       await Riwayat_pengumpulan.destroy({
         where: { id: body.id },
         transaction: this.t,
       });
 
-      this.message = `Menghapus Riwayat pengumpulan dengan Nama member Riwayat_pengumpulan: ${info_riwayat_infaq.member_name} dan ID Riwayat pengumpulan: ${Riwayat_pengumpulan.id}`;
+      this.message = `Menghapus Riwayat pengumpulan dengan Nama member Riwayat_pengumpulan: ${info_riwayat_zakat.member_name} dan ID Riwayat pengumpulan: ${info_riwayat_zakat.id}`;
     } catch (error) {
       this.state = false;
     }
