@@ -1,8 +1,8 @@
-import api_administrator from './api_administrator'
+import api from './api_administrator'
 
-export const get_info_pengaturan_umum = async () => {
+export const list = async () => {
   try {
-    const response = await api_administrator.get('/pengaturan_whatsapp/get_info_pengaturan_whatsapp')
+    const response = await api.get('/pengaturan_whatsapp/list')
     return response.data
   } catch (error) {
     console.error('Gagal mengambil informasi pengaturan', error)
@@ -10,16 +10,33 @@ export const get_info_pengaturan_umum = async () => {
   }
 }
 
-export const edit_pengaturan_umum = async (formData: FormData) => {
+
+export const start = async () => {
   try {
-    const response = await api_administrator.post('/pengaturan_umum/edit', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    })
+    const response = await api.get('/pengaturan_whatsapp/start')
+    return response.data
+  } catch (error) {
+    console.error('Gagal mengambil informasi pengaturan', error)
+    throw error
+  }
+}
+
+export const get_konfigurasi = async () => {
+  try {
+    const response = await api.get('/pengaturan_whatsapp/get_konfigurasi')
     return response.data
   } catch (error) {
     console.error('Gagal memperbarui pengaturan umum', error)
     throw error
   }
+}
+
+export const update_konfigurasi = async (param: any) => {
+    try {
+        const response = await api.post('/pengaturan_whatsapp/update', param)
+        return response.data
+    } catch (error) {
+        console.error("Error add surveyor", error);
+        throw error
+    }
 }
