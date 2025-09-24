@@ -420,7 +420,7 @@ module.exports = {
           updatedAt: new Date(),
         },
         {
-          name: "Lap. Sekretariatan",
+          name: "Lap. Kesekretariatan",
           title: "Laporan Kesekretariatan",
           icon: "fa-solid fa-file-pen",
           path: "laporan_sekretariatan",

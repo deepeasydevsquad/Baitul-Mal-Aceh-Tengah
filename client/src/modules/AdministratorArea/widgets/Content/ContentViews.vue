@@ -6,9 +6,6 @@ import {
   useGlobalActiveTab,
   useTabTerpilih,
 } from '../../../../stores/sidebar'
-// import 'flowbite'
-// import { FwbTooltip } from 'flowbite-vue'
-// import TooltipWrapper from '@/components/Tooltip/TooltipWrapper.vue'
 import { initTooltips } from 'flowbite'
 import Surveyor from '@/modules/Surveyor/Surveyor.vue'
 import syarat from '@/modules/Syarat/syarat.vue'
