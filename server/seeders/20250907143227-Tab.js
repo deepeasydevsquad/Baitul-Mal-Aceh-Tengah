@@ -49,6 +49,13 @@ module.exports = {
       { name: 'Lap. Pengumpulan', title: 'Laporan Pengumpulan', icon : 'fa-solid fa-file-import', path: 'laporan_pengumpulan', desc:'Laporan tahunan terkait pengumpulan dana dan bantuan.',  createdAt: new Date(), updatedAt: new Date() },
       { name: 'Lap. Pendistribusian', title: 'Laporan Pendistribusian', icon : 'fa-solid fa-file-export', path: 'laporan_pendistribusian', desc:'Laporan tahunan terkait pendistribusian dana dan bantuan.',  createdAt: new Date(), updatedAt: new Date() },
       { name: 'Lap. Perencanaan', title: 'Laporan Perencanaan', icon : 'fa-solid fa-file-pen', path: 'laporan_perencanaan', desc:'Laporan tahunan terkait perencanaan program dan bantuan.',  createdAt: new Date(), updatedAt: new Date() },
+      { name: 'Lap. Sekretariatan', title: 'Laporan Kesekretariatan', icon : 'fa-solid fa-file-pen', path: 'laporan_sekretariatan', desc:'Laporan tahunan terkait kegiatan dan administrasi sekretariatan.',  createdAt: new Date(), updatedAt: new Date() },
+      { name: 'R. Distribusi Per Asnaf', title: 'Rekap Distribusi Asnaf', icon : 'fa-solid fa-table-list', path: 'rekap_distribusi_asnaf', desc:'Rekap distribusi bantuan berdasarkan golongan asnaf.',  createdAt: new Date(), updatedAt: new Date() },
+      { name: 'R. Distribusi Per Kode Asnaf', title: 'Rekap Distribusi Kode Asnaf', icon : 'fa-solid fa-table-list', path: 'rekap_distribusi_kode_asnaf', desc:'Rekap distribusi bantuan berdasarkan kode asnaf.',  createdAt: new Date(), updatedAt: new Date() },
+      { name: 'R. Distribusi Per Kec', title: 'Rekap Distribusi Kecamatan', icon : 'fa-solid fa-table-list', path: 'rekap_distribusi_kecamatan', desc:'Rekap distribusi bantuan berdasarkan kecamatan.',  createdAt: new Date(), updatedAt: new Date() },
+      { name: 'R. Pengumpulan Per Asnaf', title: 'Rekap Pengumpulan Asnaf', icon : 'fa-solid fa-table-list', path: 'rekap_pengumpulan_asnaf', desc:'Rekap pengumpulan dana berdasarkan golongan asnaf.',  createdAt: new Date(), updatedAt: new Date() },
+      { name: 'R. Pengumpulan Per Kode Asnaf', title: 'Rekap Pengumpulan Kode Asnaf', icon : 'fa-solid fa-table-list', path: 'rekap_pengumpulan_kode_asnaf', desc:'Rekap pengumpulan dana berdasarkan kode asnaf.',  createdAt: new Date(), updatedAt: new Date() },
+      { name: 'R. Pengumpulan Per Kec', title: 'Rekap Pengumpulan Kecamatan', icon : 'fa-solid fa-table-list', path: 'rekap_pengumpulan_kecamatan', desc:'Rekap pengumpulan dana berdasarkan kecamatan.',  createdAt: new Date(), updatedAt: new Date() },
     ], {});
   },
 
