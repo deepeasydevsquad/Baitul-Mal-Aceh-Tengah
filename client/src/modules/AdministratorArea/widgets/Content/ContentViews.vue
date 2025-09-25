@@ -22,6 +22,7 @@ import TemplatePesanWhatsapp from '@/modules/TemplatePesanWhatsapp/TemplatePesan
 import DaftarKeanggotaan from '@/modules/DaftarKeanggotaan/DaftarKeanggotaan.vue'
 import kecamatan from '@/modules/Kecamatan/Kecamatan.vue'
 import SystemLog from '@/modules/SystemLog/SystemLog.vue'
+import LaporanUmum from '@/modules/DaftarLaporanUmum/LaporanUmum.vue'
 import ProgramKegiatanBantuan from '@/modules/ProgramKegiatanBantuan/ProgramKegiatanBantuan.vue'
 import DaftarProgram from '@/modules/DaftarProgram/DaftarProgram.vue'
 import LaporanAsnafFakir from '@/modules/LaporanAsnaf/LaporanAsnafFakir.vue'
@@ -37,6 +38,7 @@ import LaporanAsnafMuallaf from '@/modules/LaporanAsnaf/LaporanAsnafMuallaf.vue'
 import LaporanAsnafIbnuSabil from '@/modules/LaporanAsnaf/LaporanAsnafIbnuSabil.vue'
 import RiwayatZakat from '@/modules/RiwayatZakat/RiwayatZakat.vue'
 import UrutanBagianMonev from '@/modules/UrutanBagianMonev/UrutanBagianMonev.vue'
+import RiwayatInfaq from '@/modules/RiwayatInfaq/RiwayatInfaq.vue'
 
 const tabComponents = {
   daftar_kecamatan: kecamatan,
@@ -55,6 +57,7 @@ const tabComponents = {
   daftar_keanggotaan: DaftarKeanggotaan,
   daftar_surveyor: Surveyor,
   pengaturan_umum: PengaturanUmum,
+  laporan_umum : LaporanUmum,
   program_kegiatan_bantuan: ProgramKegiatanBantuan,
   daftar_program: DaftarProgram,
   laporan_asnaf_fakir: LaporanAsnafFakir,
@@ -69,6 +72,7 @@ const tabComponents = {
   daftar_asnaf: DaftarAsnaf,
   riwayat_zakat: RiwayatZakat,
   urutan_bagian_monev: UrutanBagianMonev,
+  riwayat_infaq: RiwayatInfaq
 }
 
 const selectedTab = useSelectedTab()

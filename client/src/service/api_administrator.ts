@@ -88,7 +88,6 @@ api.interceptors.response.use(
   },
 )
 
-
-        // localStorage.setItem('administrator_access_token', response.data.access_token)
-        // localStorage.setItem('administrator_refresh_token', response.data.refresh_token)
+// localStorage.setItem('administrator_access_token', response.data.access_token)
+// localStorage.setItem('administrator_refresh_token', response.data.refresh_token)
 export default api

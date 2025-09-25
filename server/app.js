@@ -67,6 +67,7 @@ const arr_router = [
   "daftar_keanggotaan",
   "surveyor",
   "pengaturan_umum",
+  "laporan_umum",
   "program_kegiatan_bantuan",
   "daftar_program",
   "laporan_asnaf",
@@ -77,6 +78,7 @@ const arr_router = [
   "monev",
   "riwayat_zakat",
   "urutan_bagian_monev",
+  "riwayat_infaq",
 ];
 
 const arr = {};
