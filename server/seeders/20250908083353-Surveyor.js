@@ -7,11 +7,11 @@ module.exports = {
       "Surveyors",
       [
         {
-            name: 'Muhammad Arif',
-            nik: '11779715629381',
-            whatsapp_number: '085262802141',
-            createdAt: new Date(),
-            updatedAt: new Date(),
+          name: "Muhammad Arif",
+          nik: "11779715629381",
+          whatsapp_number: "085262802141",
+          createdAt: new Date(),
+          updatedAt: new Date(),
         },
       ],
       {}

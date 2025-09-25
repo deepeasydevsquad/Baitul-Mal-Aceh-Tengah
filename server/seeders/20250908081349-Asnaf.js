@@ -7,32 +7,32 @@ module.exports = {
       "Asnafs",
       [
         {
-          name: 'Asnaf Fakir',
+          name: "Asnaf Fakir",
           createdAt: new Date(),
           updatedAt: new Date(),
         },
         {
-          name: 'Asnaf Miskin',
+          name: "Asnaf Miskin",
           createdAt: new Date(),
           updatedAt: new Date(),
         },
         {
-          name: 'Asnaf Muallaf',
+          name: "Asnaf Muallaf",
           createdAt: new Date(),
           updatedAt: new Date(),
         },
         {
-          name: 'Asnaf Gharim',
+          name: "Asnaf Gharim",
           createdAt: new Date(),
           updatedAt: new Date(),
         },
         {
-          name: 'Asnaf Fisabilillah',
+          name: "Asnaf Fisabilillah",
           createdAt: new Date(),
           updatedAt: new Date(),
         },
         {
-          name: 'Asnaf Ibnu Sabil',
+          name: "Asnaf Ibnu Sabil",
           createdAt: new Date(),
           updatedAt: new Date(),
         },

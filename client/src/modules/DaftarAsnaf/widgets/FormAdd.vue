@@ -138,7 +138,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', handleEscape))
           <BaseButton
             type="submit"
             variant="primary"
-            :disabled="!(form.name.trim()) || isSubmitting"
+            :disabled="!form.name.trim() || isSubmitting"
             @click="handleSubmit"
           >
             <span v-if="isSubmitting">Menyimpan...</span>

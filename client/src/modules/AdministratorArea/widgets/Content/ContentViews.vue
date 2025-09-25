@@ -1,7 +1,12 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useSelectedTab, useGlobalTab, useGlobalActiveTab, useTabTerpilih } from '../../../../stores/sidebar'
-import 'flowbite'
+import { ref, onMounted, nextTick, watch } from 'vue'
+import {
+  useSelectedTab,
+  useGlobalTab,
+  useGlobalActiveTab,
+  useTabTerpilih,
+} from '../../../../stores/sidebar'
+import { initTooltips } from 'flowbite'
 import Surveyor from '@/modules/Surveyor/Surveyor.vue'
 import syarat from '@/modules/Syarat/syarat.vue'
 import SystemLogSurveyor from '@/modules/SystemLogSurveyor/SystemLogSurveyor.vue'
@@ -23,6 +28,7 @@ import LaporanAsnafFakir from '@/modules/LaporanAsnaf/LaporanAsnafFakir.vue'
 import ProgramDonasi from '@/modules/ProgramDonasi/ProgramDonasi.vue'
 import DaftarTab from '@/modules/DaftarTab/DaftarTab.vue'
 import desa from '../../../Desa/Desa.vue'
+import RiwayatDonasi from '@/modules/RiwayatDonasi/RiwayatDonasi.vue'
 import DaftarAsnaf from '@/modules/DaftarAsnaf/DaftarAsnaf.vue'
 import LaporanAsnafMiskin from '@/modules/LaporanAsnaf/LaporanAsnafMIskin.vue'
 import LaporanAsnafFisabilillah from '@/modules/LaporanAsnaf/LaporanAsnafFisabilillah.vue'
@@ -31,7 +37,7 @@ import LaporanAsnafMuallaf from '@/modules/LaporanAsnaf/LaporanAsnafMuallaf.vue'
 import LaporanAsnafIbnuSabil from '@/modules/LaporanAsnaf/LaporanAsnafIbnuSabil.vue'
 import UrutanBagianMonev from '@/modules/UrutanBagianMonev/UrutanBagianMonev.vue'
 import RiwayatInfaq from '@/modules/RiwayatInfaq/RiwayatInfaq.vue'
-import { url } from 'inspector'
+
 const tabComponents = {
   daftar_kecamatan: kecamatan,
   syarat: syarat,
@@ -53,7 +59,8 @@ const tabComponents = {
   daftar_program: DaftarProgram,
   laporan_asnaf_fakir: LaporanAsnafFakir,
   program_donasi: ProgramDonasi,
-  daftar_tab:DaftarTab,
+  daftar_tab: DaftarTab,
+  riwayat_donasi: RiwayatDonasi,
   laporan_asnaf_miskin: LaporanAsnafMiskin,
   laporan_asnaf_fisabilillah: LaporanAsnafFisabilillah,
   laporan_asnaf_gharim: LaporanAsnafGharim,
@@ -64,24 +71,58 @@ const tabComponents = {
   riwayat_infaq: RiwayatInfaq
 }
 
-const selectedTab = useSelectedTab() // untuk menampung daftar tab yang menu / submenunya di click
+const selectedTab = useSelectedTab()
 const tab = useGlobalTab()
 const activeTab = useGlobalActiveTab()
 const tabTerpilih = useTabTerpilih()
+const windowWidth = ref(window.innerWidth)
 
-//const props = defineProps<{ default: string; tabAwal: any }>()
+const dynamicLabel = (val: string) => {
+  if (windowWidth.value < 640) {
+    // < sm → mobile
+    return ''
+  } else if (windowWidth.value < 1269) {
+    // sm
+    return val.slice(0, 8) + '...'
+  } else if (windowWidth.value < 1467) {
+    // md
+    return val.slice(0, 8) + '...'
+  } else if (windowWidth.value < 1611) {
+    // lg
+    return val.slice(0, 13) + '...'
+  } else if (windowWidth.value < 1707) {
+    // xl
+    return val.slice(0, 16) + '...'
+  } else {
+    // 2xl atau lebih
+    return val
+  }
+}
+
 const mulaiPilihTab = ref(false)
-
 const selectTab = (tabPath: string, key: number) => {
-  // tabTerpilih.value = key
   tabTerpilih.setNumber(key)
-  activeTab.setString(tabPath) // Menandai tab yang dipilih
+  activeTab.setString(tabPath)
   mulaiPilihTab.value = true
 }
+
+onMounted(async () => {
+  window.addEventListener('resize', () => {
+    windowWidth.value = window.innerWidth
+  })
+})
+
+watch(
+  () => selectedTab.sharedArray,
+  async () => {
+    await nextTick()
+    initTooltips()
+  },
+  { deep: true },
+)
 </script>
 
 <template>
-  <!--  -->
   <div class="mb-0 dark:border-gray-700">
     <ul
       class="flex flex-wrap -mb-px text-sm font-medium text-center text-graydark"
@@ -95,7 +136,16 @@ const selectTab = (tabPath: string, key: number) => {
         v-for="(item, key) in selectedTab.sharedArray"
         :key="key"
       >
+        <div
+          :id="`tooltip-default-${tab.sharedObject[item.id].path}`"
+          role="tooltip"
+          class="absolute invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-graydark rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700 z-999999"
+        >
+          {{ tab.sharedObject[item.id].title }}
+          <div class="tooltip-arrow" data-popper-arrow></div>
+        </div>
         <button
+          :data-tooltip-target="`tooltip-default-${tab.sharedObject[item.id].path}`"
           class="inline-block p-4 rounded-t-lg rrr"
           :id="`${tab.sharedObject[item.id].path}-tab`"
           :data-tabs-target="`#${tab.sharedObject[item.id].path}`"
@@ -112,19 +162,18 @@ const selectTab = (tabPath: string, key: number) => {
           :class="
             activeTab.sharedString === tab.sharedObject[item.id].path ||
             (tabTerpilih.sharedNumber === 0 && key === 0)
-              ? 'AAA bg-white !text-green-900 font-semibold hover:text-green-700 dark:text-green-900 dark:hover:text-green-900 border-[#3a477d] dark:border-[#3a477d]'
-              : 'BBB inline-block p-4 rounded-t-lg dark:border-transparent text-gray-500 hover:text-gray-600 dark:text-gray-400 border-gray-100 hover:border-gray-300 dark:border-gray-700 dark:hover:text-gray-300'
+              ? 'active-tab bg-white !text-green-900 font-semibold hover:text-green-700 dark:text-green-900 dark:hover:text-green-900 border-[#3a477d] dark:border-[#3a477d]'
+              : 'inactive-tab text-gray-500 hover:text-gray-600 dark:text-gray-400 border-gray-100 hover:border-gray-300 dark:border-gray-700 dark:hover:text-gray-300'
           "
         >
           <font-awesome-icon :icon="tab.sharedObject[item.id].icon" />
-          <span class="hidden lg:inline ml-2">
-            {{ tab.sharedObject[item.id].name }}
+          <span class="ml-2 flex-1 truncate">
+            {{ dynamicLabel(tab.sharedObject[item.id].name) }}
           </span>
         </button>
       </li>
     </ul>
   </div>
-
   <div id="default-tab-content ">
     <div
       v-for="(item, key) in selectedTab.sharedArray"
@@ -148,5 +197,4 @@ const selectTab = (tabPath: string, key: number) => {
     </div>
   </div>
 </template>
-
 <style scoped></style>
