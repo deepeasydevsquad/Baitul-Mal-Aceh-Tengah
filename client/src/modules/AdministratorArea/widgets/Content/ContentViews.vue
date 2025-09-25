@@ -22,6 +22,7 @@ import TemplatePesanWhatsapp from '@/modules/TemplatePesanWhatsapp/TemplatePesan
 import DaftarKeanggotaan from '@/modules/DaftarKeanggotaan/DaftarKeanggotaan.vue'
 import kecamatan from '@/modules/Kecamatan/Kecamatan.vue'
 import SystemLog from '@/modules/SystemLog/SystemLog.vue'
+import LaporanUmum from '@/modules/DaftarLaporanUmum/LaporanUmum.vue'
 import ProgramKegiatanBantuan from '@/modules/ProgramKegiatanBantuan/ProgramKegiatanBantuan.vue'
 import DaftarProgram from '@/modules/DaftarProgram/DaftarProgram.vue'
 import LaporanAsnafFakir from '@/modules/LaporanAsnaf/LaporanAsnafFakir.vue'
@@ -55,6 +56,7 @@ const tabComponents = {
   daftar_keanggotaan: DaftarKeanggotaan,
   daftar_surveyor: Surveyor,
   pengaturan_umum: PengaturanUmum,
+  laporan_umum : LaporanUmum,
   program_kegiatan_bantuan: ProgramKegiatanBantuan,
   daftar_program: DaftarProgram,
   laporan_asnaf_fakir: LaporanAsnafFakir,
