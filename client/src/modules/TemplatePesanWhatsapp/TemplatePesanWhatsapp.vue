@@ -1,99 +1,99 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted } from 'vue'
-import Notification from '@/components/Modal/Notification.vue'
-import Confirmation from '@/components/Modal/Confirmation.vue'
-import BaseButton from '@/components/Button/BaseButton.vue'
-import LightButton from '@/components/Button/LightButton.vue'
-import EditIcon from '@/components/Icons/EditIcon.vue'
-import DangerButton from '@/components/Button/DangerButton.vue'
-import DeleteIcon from '@/components/Icons/DeleteIcon.vue'
-import Pagination from '@/components/Pagination/Pagination.vue'
-import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue'
-import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
-import FormAdd from '@/modules/TemplatePesanWhatsapp/widgets/FormAdd.vue'
-import FormEdit from '@/modules/TemplatePesanWhatsapp/widgets/FormEdit.vue'
+import { ref, onMounted } from 'vue';
+import Notification from '@/components/Modal/Notification.vue';
+import Confirmation from '@/components/Modal/Confirmation.vue';
+import BaseButton from '@/components/Button/BaseButton.vue';
+import LightButton from '@/components/Button/LightButton.vue';
+import EditIcon from '@/components/Icons/EditIcon.vue';
+import DangerButton from '@/components/Button/DangerButton.vue';
+import DeleteIcon from '@/components/Icons/DeleteIcon.vue';
+import Pagination from '@/components/Pagination/Pagination.vue';
+import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
+import FormAdd from '@/modules/TemplatePesanWhatsapp/widgets/FormAdd.vue';
+import FormEdit from '@/modules/TemplatePesanWhatsapp/widgets/FormEdit.vue';
 
 // Composable
-import { usePagination } from '@/composables/usePagination'
-import { useConfirmation } from '@/composables/useConfirmation'
-import { useNotification } from '@/composables/useNotification'
+import { usePagination } from '@/composables/usepagination';
+import { useConfirmation } from '@/composables/useConfirmation';
+import { useNotification } from '@/composables/useNotification';
 
 // Service API
 import {
   get_template_pesan_whatsapp,
   delete_template_pesan_whatsapp,
-} from '@/service/template_pesan_whatsapp'
+} from '@/service/template_pesan_whatsapp';
 
 // State: Loading
-const isLoading = ref(false)
-const isTableLoading = ref(false)
+const isLoading = ref(false);
+const isTableLoading = ref(false);
 
 // Composable: pagination
-const itemsPerPage = ref<number>(100)
-const totalColumns = ref<number>(5)
+const itemsPerPage = ref<number>(100);
+const totalColumns = ref<number>(5);
 
 const { currentPage, perPage, totalRow, totalPages, nextPage, prevPage, pageNow, pages } =
-  usePagination(fetchData, { perPage: itemsPerPage.value })
+  usePagination(fetchData, { perPage: itemsPerPage.value });
 
 // Composable: notification
 const { showNotification, notificationType, notificationMessage, displayNotification } =
-  useNotification()
+  useNotification();
 
 // Composable: confirmation
 const { showConfirmDialog, confirmTitle, confirmMessage, displayConfirmation, confirm, cancel } =
-  useConfirmation()
+  useConfirmation();
 
 // State Data
 interface Data {
-  id: number
-  name: string
-  type: string
-  message: string
-  variable: string | any[]
+  id: number;
+  name: string;
+  type: string;
+  message: string;
+  variable: string | any[];
 }
 
-const dataTemplates_pesan_whatsapp = ref<Data[]>([])
+const dataTemplates_pesan_whatsapp = ref<Data[]>([]);
 
 // Function: Modal
-const isModalAddOpen = ref(false)
-const isModalEditOpen = ref(false)
-const selectedTemplatePesanWhatsapp = ref<any>(null)
+const isModalAddOpen = ref(false);
+const isModalEditOpen = ref(false);
+const selectedTemplatePesanWhatsapp = ref<any>(null);
 
 function openModalAdd() {
-  isModalAddOpen.value = true
+  isModalAddOpen.value = true;
 }
 
 function openModalEdit(template: any) {
-  selectedTemplatePesanWhatsapp.value = template
-  isModalEditOpen.value = true
+  selectedTemplatePesanWhatsapp.value = template;
+  isModalEditOpen.value = true;
 }
 
 // Function: Fetch Data
-const search = ref('')
+const search = ref('');
 
 async function fetchData() {
-  isTableLoading.value = true
+  isTableLoading.value = true;
   try {
     const response = await get_template_pesan_whatsapp({
       search: search.value,
       perpage: perPage.value,
       pageNumber: currentPage.value,
-    })
+    });
 
-    dataTemplates_pesan_whatsapp.value = response.data
-    totalRow.value = response.total
+    dataTemplates_pesan_whatsapp.value = response.data;
+    totalRow.value = response.total;
   } catch (error) {
-    displayNotification('Gagal mengambil template pesan whatsapp', 'error')
+    displayNotification('Gagal mengambil template pesan whatsapp', 'error');
   } finally {
-    isTableLoading.value = false
+    isTableLoading.value = false;
   }
 }
 
 onMounted(async () => {
-  await fetchData()
-  totalColumns.value = document.querySelectorAll('thead th').length
-})
+  await fetchData();
+  totalColumns.value = document.querySelectorAll('thead th').length;
+});
 
 // Function: Delete Data
 async function deleteData(id: number) {
@@ -102,17 +102,17 @@ async function deleteData(id: number) {
     'Apakah Anda yakin ingin menghapus data template pesan whatsapp ini?',
     async () => {
       try {
-        isLoading.value = true
-        await delete_template_pesan_whatsapp(id)
-        displayNotification('Data template pesan whatsapp berhasil dihapus', 'success')
-        await fetchData()
+        isLoading.value = true;
+        await delete_template_pesan_whatsapp(id);
+        displayNotification('Data template pesan whatsapp berhasil dihapus', 'success');
+        await fetchData();
       } catch (error) {
-        displayNotification('Gagal menghapus data template pesan whatsapp', 'error')
+        displayNotification('Gagal menghapus data template pesan whatsapp', 'error');
       } finally {
-        isLoading.value = false
+        isLoading.value = false;
       }
     },
-  )
+  );
 }
 </script>
 

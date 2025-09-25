@@ -15,7 +15,7 @@ import FormAdd from '@/modules/ProgramDonasi/widgets/FormAdd.vue';
 import FormEdit from '@/modules/ProgramDonasi/widgets/FormEdit.vue';
 
 // Composable
-import { usePagination } from '@/composables/usePagination';
+import { usePagination } from '@/composables/usepagination';
 import { useConfirmation } from '@/composables/useConfirmation';
 import { useNotification } from '@/composables/useNotification';
 import { useDynamicLabel } from '@/composables/useDynamicLabel';

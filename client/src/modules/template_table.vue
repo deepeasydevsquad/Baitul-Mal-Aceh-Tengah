@@ -15,7 +15,7 @@ import FormAdd from '@/modules/Bank/widgets/FormAdd.vue'
 import FormEdit from '@/modules/Bank/widgets/FormEdit.vue'
 
 // Composable
-import { usePagination } from '@/composables/usePagination'
+import { usePagination } from '@/composables/usepagination'
 import { useConfirmation } from '@/composables/useConfirmation'
 import { useNotification } from '@/composables/useNotification'
 
@@ -142,8 +142,7 @@ async function deleteData(id: number) {
             v-model="search"
             @change="fetchData"
             placeholder="Cari bank..."
-            class="w-full sm:w-64 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700
-                   focus:border-green-900 focus:ring-2 focus:ring-green-900 transition"
+            class="w-full sm:w-64 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:border-green-900 focus:ring-2 focus:ring-green-900 transition"
           />
         </div>
       </div>
@@ -161,11 +160,7 @@ async function deleteData(id: number) {
           </thead>
           <tbody class="divide-y divide-gray-100">
             <template v-if="datas">
-              <tr
-                v-for="data in datas"
-                :key="data.id"
-                class="hover:bg-gray-50 transition-colors"
-              >
+              <tr v-for="data in datas" :key="data.id" class="hover:bg-gray-50 transition-colors">
                 <td class="px-6 py-4 text-center font-medium text-gray-800">
                   <!-- FIELD 1 -->
                 </td>
@@ -191,7 +186,10 @@ async function deleteData(id: number) {
             <!-- Empty State -->
             <tr v-else>
               <td :colspan="totalColumns" class="px-6 py-8 text-center text-gray-500">
-                <font-awesome-icon icon="fa-solid fa-database" class="text-4xl mb-2 text-gray-400" />
+                <font-awesome-icon
+                  icon="fa-solid fa-database"
+                  class="text-4xl mb-2 text-gray-400"
+                />
                 <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ada data</h3>
                 <p class="text-sm">Belum ada data field.</p>
               </td>
@@ -218,16 +216,34 @@ async function deleteData(id: number) {
     <!-- Modal FormAdd -->
     <FormAdd
       :is-modal-open="isModalAddOpen"
-      @close="isModalAddOpen = false; fetchData()"
-      @status="(payload: any) => displayNotification(payload.error_msg || 'Tambah/Update Bank gagal', payload.error ? 'error' : 'success')"
+      @close="
+        isModalAddOpen = false;
+        fetchData();
+      "
+      @status="
+        (payload: any) =>
+          displayNotification(
+            payload.error_msg || 'Tambah/Update Bank gagal',
+            payload.error ? 'error' : 'success',
+          )
+      "
     />
 
     <!-- Modal FormEdit -->
     <FormEdit
       :is-modal-open="isModalEditOpen"
       :selected-bank="selectedBank"
-      @close="isModalEditOpen = false; fetchData()"
-      @status="(payload: any) => displayNotification(payload.error_msg || 'Tambah/Update Bank gagal', payload.error ? 'error' : 'success')"
+      @close="
+        isModalEditOpen = false;
+        fetchData();
+      "
+      @status="
+        (payload: any) =>
+          displayNotification(
+            payload.error_msg || 'Tambah/Update Bank gagal',
+            payload.error ? 'error' : 'success',
+          )
+      "
     />
 
     <!-- Confirmation -->
@@ -249,4 +265,3 @@ async function deleteData(id: number) {
     />
   </div>
 </template>
-

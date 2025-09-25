@@ -1,126 +1,126 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted, computed } from 'vue'
-import Notification from '@/components/Modal/Notification.vue'
-import Confirmation from '@/components/Modal/Confirmation.vue'
-import BaseButton from '@/components/Button/BaseButton.vue'
-import LightButton from '@/components/Button/LightButton.vue'
-import BaseSelect from '@/components/Form/BaseSelect.vue'
-import EditIcon from '@/components/Icons/EditIcon.vue'
-import DangerButton from '@/components/Button/DangerButton.vue'
-import DeleteIcon from '@/components/Icons/DeleteIcon.vue'
-import Pagination from '@/components/Pagination/Pagination.vue'
-import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue'
-import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
-import FormAdd from '@/modules/ProgramKegiatanBantuan/widgets/FormAdd.vue'
-import FormEdit from '@/modules/ProgramKegiatanBantuan/widgets/FormEdit.vue'
-import FormStatusKegiatan from '@/modules/ProgramKegiatanBantuan/widgets/FormStatusKegiatan.vue'
+import { ref, onMounted, computed } from 'vue';
+import Notification from '@/components/Modal/Notification.vue';
+import Confirmation from '@/components/Modal/Confirmation.vue';
+import BaseButton from '@/components/Button/BaseButton.vue';
+import LightButton from '@/components/Button/LightButton.vue';
+import BaseSelect from '@/components/Form/BaseSelect.vue';
+import EditIcon from '@/components/Icons/EditIcon.vue';
+import DangerButton from '@/components/Button/DangerButton.vue';
+import DeleteIcon from '@/components/Icons/DeleteIcon.vue';
+import Pagination from '@/components/Pagination/Pagination.vue';
+import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
+import FormAdd from '@/modules/ProgramKegiatanBantuan/widgets/FormAdd.vue';
+import FormEdit from '@/modules/ProgramKegiatanBantuan/widgets/FormEdit.vue';
+import FormStatusKegiatan from '@/modules/ProgramKegiatanBantuan/widgets/FormStatusKegiatan.vue';
 
 // Composable
-import { usePagination } from '@/composables/usePagination'
-import { useConfirmation } from '@/composables/useConfirmation'
-import { useNotification } from '@/composables/useNotification'
+import { usePagination } from '@/composables/usepagination';
+import { useConfirmation } from '@/composables/useConfirmation';
+import { useNotification } from '@/composables/useNotification';
 
 // Service API
 import {
   get_filter_type,
   get_program_bantuan,
   delete_program_bantuan,
-} from '@/service/program_kegiatan_bantuan'
+} from '@/service/program_kegiatan_bantuan';
 
 // State: Loading
-const isLoading = ref(false)
-const isTableLoading = ref(false)
+const isLoading = ref(false);
+const isTableLoading = ref(false);
 
 // Composable: pagination
-const itemsPerPage = ref<number>(100)
-const totalColumns = ref<number>(5)
+const itemsPerPage = ref<number>(100);
+const totalColumns = ref<number>(5);
 
 const { currentPage, perPage, totalRow, totalPages, nextPage, prevPage, pageNow, pages } =
-  usePagination(fetchData, { perPage: itemsPerPage.value })
+  usePagination(fetchData, { perPage: itemsPerPage.value });
 
 // Composable: notification
 const { showNotification, notificationType, notificationMessage, displayNotification } =
-  useNotification()
+  useNotification();
 
 // Composable: confirmation
 const { showConfirmDialog, confirmTitle, confirmMessage, displayConfirmation, confirm, cancel } =
-  useConfirmation()
+  useConfirmation();
 
 // State Data program bantuan
-const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL
+const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
 interface ProgramKegiatanBantuan {
-  id: number
-  asnaf_id: number
-  program_id: number
-  kategori_asnaf: string
-  kategori_program: string
-  kode: string
-  nama_kegiatan: string
-  slug: string
-  status_tampil: string
-  jumlah_dana: number
-  jumlah_maksimal_nominal_bantuan: number
-  jumlah_target_penerima: number
-  sumber_dana: string
-  area_penyaluran: string
-  jenis_penyaluran: string
-  status_kegiatan: boolean,
-  tahun: string
-  banner: string
-  desc: string
-  datetimes: string
+  id: number;
+  asnaf_id: number;
+  program_id: number;
+  kategori_asnaf: string;
+  kategori_program: string;
+  kode: string;
+  nama_kegiatan: string;
+  slug: string;
+  status_tampil: string;
+  jumlah_dana: number;
+  jumlah_maksimal_nominal_bantuan: number;
+  jumlah_target_penerima: number;
+  sumber_dana: string;
+  area_penyaluran: string;
+  jenis_penyaluran: string;
+  status_kegiatan: boolean;
+  tahun: string;
+  banner: string;
+  desc: string;
+  datetimes: string;
 }
 
-const dataProgramBantuan = ref<ProgramKegiatanBantuan[]>([])
+const dataProgramBantuan = ref<ProgramKegiatanBantuan[]>([]);
 
 // Function: Modal
-const isModalAddOpen = ref(false)
-const isModalEditOpen = ref(false)
-const isModalStatusOpen = ref(false)
-const selectedProgramKegiatanBantuan = ref<any>(null)
+const isModalAddOpen = ref(false);
+const isModalEditOpen = ref(false);
+const isModalStatusOpen = ref(false);
+const selectedProgramKegiatanBantuan = ref<any>(null);
 
 function openModalAdd() {
-  isModalAddOpen.value = true
+  isModalAddOpen.value = true;
 }
 
 function openModalStatus(programKegiatanBantuan: any) {
-  selectedProgramKegiatanBantuan.value = programKegiatanBantuan
-  isModalStatusOpen.value = true
+  selectedProgramKegiatanBantuan.value = programKegiatanBantuan;
+  isModalStatusOpen.value = true;
 }
 
 function openModalEdit(programKegiatanBantuan: any) {
-  selectedProgramKegiatanBantuan.value = programKegiatanBantuan
-  isModalEditOpen.value = true
+  selectedProgramKegiatanBantuan.value = programKegiatanBantuan;
+  isModalEditOpen.value = true;
 }
 
 // Function: Fetch Data & filter
-const search = ref('')
-const statusOption = ref<{ value: string; label: string }[]>([])
-const asnafOption = ref<{ value: number; label: string }[]>([])
-const programOption = ref<{ value: number; label: string }[]>([])
-const yearOption = ref<{ value: number; label: string }[]>([])
+const search = ref('');
+const statusOption = ref<{ value: string; label: string }[]>([]);
+const asnafOption = ref<{ value: number; label: string }[]>([]);
+const programOption = ref<{ value: number; label: string }[]>([]);
+const yearOption = ref<{ value: number; label: string }[]>([]);
 
-const selectedStatus = ref('')
-const selectedAsnaf = ref('')
-const selectedProgram = ref('')
-const selectedYear = ref('')
+const selectedStatus = ref('');
+const selectedAsnaf = ref('');
+const selectedProgram = ref('');
+const selectedYear = ref('');
 
 async function fetchData() {
-  isTableLoading.value = true
+  isTableLoading.value = true;
   try {
-    const responseFilterType = await get_filter_type()
+    const responseFilterType = await get_filter_type();
 
     statusOption.value = [
       { value: 'sedang_berlangsung', label: 'Sedang Berlangsung' },
       { value: 'selesai', label: 'Selesai' },
-    ]
-    ;(asnafOption.value = responseFilterType.data.type_asnaf_id),
+    ];
+    ((asnafOption.value = responseFilterType.data.type_asnaf_id),
       (programOption.value = responseFilterType.data.type_program_id),
-      (yearOption.value = responseFilterType.data.type_year)
+      (yearOption.value = responseFilterType.data.type_year));
 
-    console.log(responseFilterType)
+    console.log(responseFilterType);
 
     const response = await get_program_bantuan({
       search: search.value,
@@ -130,22 +130,22 @@ async function fetchData() {
       type_asnaf_id: selectedAsnaf.value,
       type_program_id: selectedProgram.value,
       type_year: selectedYear.value,
-    })
+    });
 
-    console.log(response)
+    console.log(response);
 
-    dataProgramBantuan.value = response.data
-    totalRow.value = response.total
+    dataProgramBantuan.value = response.data;
+    totalRow.value = response.total;
   } catch (error) {
-    displayNotification('Gagal mengambil data program bantuan', 'error')
+    displayNotification('Gagal mengambil data program bantuan', 'error');
   } finally {
-    isTableLoading.value = false
+    isTableLoading.value = false;
   }
 }
 
 onMounted(async () => {
-  await fetchData()
-})
+  await fetchData();
+});
 
 // Function: Delete Data
 async function deleteData(id: number) {
@@ -154,17 +154,17 @@ async function deleteData(id: number) {
     'Apakah Anda yakin ingin menghapus data program kegiatan bantuan ini?',
     async () => {
       try {
-        isLoading.value = true
-        await delete_program_bantuan(id)
-        displayNotification('Data program kegiatan bantuan berhasil dihapus', 'success')
-        await fetchData()
+        isLoading.value = true;
+        await delete_program_bantuan(id);
+        displayNotification('Data program kegiatan bantuan berhasil dihapus', 'success');
+        await fetchData();
       } catch (error) {
-        displayNotification('Gagal menghapus data program kegiatan bantuan', 'error')
+        displayNotification('Gagal menghapus data program kegiatan bantuan', 'error');
       } finally {
-        isLoading.value = false
+        isLoading.value = false;
       }
     },
-  )
+  );
 }
 </script>
 
@@ -347,14 +347,10 @@ async function deleteData(id: number) {
                         <td class="px-4 py-1 font-bold">
                           <span
                             :class="
-                              data.status_kegiatan === false
-                                ? 'text-yellow-500'
-                                : 'text-green-500'
+                              data.status_kegiatan === false ? 'text-yellow-500' : 'text-green-500'
                             "
                             >{{
-                              data.status_kegiatan === false
-                                ? 'SEDANG BERLANGSUNG'
-                                : 'SELESAI'
+                              data.status_kegiatan === false ? 'SEDANG BERLANGSUNG' : 'SELESAI'
                             }}</span
                           >
                         </td>

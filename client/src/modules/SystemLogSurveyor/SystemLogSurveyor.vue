@@ -1,67 +1,67 @@
 <script setup lang="ts">
 // Library
-import { onMounted, ref } from 'vue'
-import Pagination from '@/components/Pagination/Pagination.vue'
-import Notification from '@/components/Modal/Notification.vue'
-import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue'
+import { onMounted, ref } from 'vue';
+import Pagination from '@/components/Pagination/Pagination.vue';
+import Notification from '@/components/Modal/Notification.vue';
+import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
 
 // Composable
-import { usePagination } from '@/composables/usePagination'
-import { useNotification } from '@/composables/useNotification'
+import { usePagination } from '@/composables/usepagination';
+import { useNotification } from '@/composables/useNotification';
 
 // Service API
-import { list } from '@/service/system_log_surveyor'
+import { list } from '@/service/system_log_surveyor';
 
 // State: Loading
-const isTableLoading = ref(false)
+const isTableLoading = ref(false);
 
 // Composable: pagination
-const itemsPerPage = ref<number>(100)
-const totalColumns = ref<number>(4)
+const itemsPerPage = ref<number>(100);
+const totalColumns = ref<number>(4);
 
 const { currentPage, perPage, totalRow, totalPages, nextPage, prevPage, pageNow, pages } =
-  usePagination(fetchData, { perPage: itemsPerPage.value })
+  usePagination(fetchData, { perPage: itemsPerPage.value });
 
 // Composable: notification
 const { showNotification, notificationType, notificationMessage, displayNotification } =
-  useNotification()
+  useNotification();
 
 // State Data Surveyor
 interface SurveyorLog {
-  id: number
-  message: string
-  ip: string
-  nama_surveyor: string | null
-  createdAt: string
-  updatedAt: string
+  id: number;
+  message: string;
+  ip: string;
+  nama_surveyor: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Function: fetch data
-const search = ref('')
-const dataSurveyorLog = ref<SurveyorLog[]>([])
+const search = ref('');
+const dataSurveyorLog = ref<SurveyorLog[]>([]);
 
 async function fetchData() {
-  isTableLoading.value = true
+  isTableLoading.value = true;
   try {
     const response = await list({
       search: search.value,
       perpage: perPage.value,
       pageNumber: currentPage.value,
-    })
+    });
 
-    dataSurveyorLog.value = response.data
-    totalRow.value = response.total
-    console.log(dataSurveyorLog.value)
+    dataSurveyorLog.value = response.data;
+    totalRow.value = response.total;
+    console.log(dataSurveyorLog.value);
   } catch (error: any) {
-    displayNotification(error.response?.data?.message || 'Gagal mengambil data surveyor', 'error')
+    displayNotification(error.response?.data?.message || 'Gagal mengambil data surveyor', 'error');
   } finally {
-    isTableLoading.value = false
+    isTableLoading.value = false;
   }
 }
 
 onMounted(async () => {
-  await fetchData()
-})
+  await fetchData();
+});
 </script>
 
 <template>

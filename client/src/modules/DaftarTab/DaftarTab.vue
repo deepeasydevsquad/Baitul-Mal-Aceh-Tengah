@@ -1,96 +1,95 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted } from 'vue'
-import Notification from '@/components/Modal/Notification.vue'
-import Confirmation from '@/components/Modal/Confirmation.vue'
-import BaseButton from '@/components/Button/BaseButton.vue'
-import LightButton from '@/components/Button/LightButton.vue'
-import EditIcon from '@/components/Icons/EditIcon.vue'
-import Pagination from '@/components/Pagination/Pagination.vue'
-import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue'
-import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
+import { ref, onMounted } from 'vue';
+import Notification from '@/components/Modal/Notification.vue';
+import Confirmation from '@/components/Modal/Confirmation.vue';
+import BaseButton from '@/components/Button/BaseButton.vue';
+import LightButton from '@/components/Button/LightButton.vue';
+import EditIcon from '@/components/Icons/EditIcon.vue';
+import Pagination from '@/components/Pagination/Pagination.vue';
+import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
 
 // Form
-import FormEdit from '@/modules/DaftarTab/widgets/FormEdit.vue'
+import FormEdit from '@/modules/DaftarTab/widgets/FormEdit.vue';
 
 // Composable
-import { usePagination } from '@/composables/usePagination'
-import { useConfirmation } from '@/composables/useConfirmation'
-import { useNotification } from '@/composables/useNotification'
+import { usePagination } from '@/composables/usepagination';
+import { useConfirmation } from '@/composables/useConfirmation';
+import { useNotification } from '@/composables/useNotification';
 
 // Service API
-import { get_tab, } from '@/service/daftar_tab'
+import { get_tab } from '@/service/daftar_tab';
 
 // Loading
-const isLoading = ref(false)
-const isTableLoading = ref(false)
+const isLoading = ref(false);
+const isTableLoading = ref(false);
 
 // Pagination
-const itemsPerPage = ref<number>(20)
-const totalColumns = ref<number>(4)
+const itemsPerPage = ref<number>(20);
+const totalColumns = ref<number>(4);
 
 const { currentPage, perPage, totalRow, totalPages, nextPage, prevPage, pageNow, pages } =
-  usePagination(fetchData, { perPage: itemsPerPage.value })
+  usePagination(fetchData, { perPage: itemsPerPage.value });
 
 // Notification
 const { showNotification, notificationType, notificationMessage, displayNotification } =
-  useNotification()
+  useNotification();
 
 // Confirmation
 const { showConfirmDialog, confirmTitle, confirmMessage, displayConfirmation, confirm, cancel } =
-  useConfirmation()
+  useConfirmation();
 
 // Interface
 interface Tab {
-  id: number
-  name: string
-  icon: string
-  path: string
-  desc: string
+  id: number;
+  name: string;
+  icon: string;
+  path: string;
+  desc: string;
 }
 
-const dataTab = ref<Tab[]>([])
+const dataTab = ref<Tab[]>([]);
 
 // Modal state
-const isAddModalOpen = ref(false)
-const isEditModalOpen = ref(false)
-const selectedTab = ref<any>(null)
+const isAddModalOpen = ref(false);
+const isEditModalOpen = ref(false);
+const selectedTab = ref<any>(null);
 
 function openAddModal() {
-  isAddModalOpen.value = true
+  isAddModalOpen.value = true;
 }
 
 function openEditModal(tab: any) {
-  selectedTab.value = tab
-  isEditModalOpen.value = true
+  selectedTab.value = tab;
+  isEditModalOpen.value = true;
 }
 
 // Fetch data
-const search = ref('')
+const search = ref('');
 
 async function fetchData() {
-  isTableLoading.value = true
+  isTableLoading.value = true;
   try {
     const response = await get_tab({
       search: search.value,
       perpage: perPage.value,
       pageNumber: currentPage.value,
-    })
+    });
 
-    dataTab.value = response.data
-    totalRow.value = response.total
+    dataTab.value = response.data;
+    totalRow.value = response.total;
   } catch (error) {
-    displayNotification('Gagal mengambil tab', 'error')
+    displayNotification('Gagal mengambil tab', 'error');
   } finally {
-    isTableLoading.value = false
+    isTableLoading.value = false;
   }
 }
 
 onMounted(async () => {
-  await fetchData()
-  totalColumns.value = document.querySelectorAll('thead th').length
-})
-
+  await fetchData();
+  totalColumns.value = document.querySelectorAll('thead th').length;
+});
 </script>
 
 <template>
@@ -99,8 +98,6 @@ onMounted(async () => {
     <LoadingSpinner v-if="isLoading" label="Memuat halaman..." />
     <div v-else class="space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center justify-end gap-4">
-
-
         <!-- Search -->
         <div class="flex items-center w-full sm:w-auto">
           <label for="search" class="mr-2 text-sm font-medium text-gray-600">Cari</label>
@@ -110,14 +107,13 @@ onMounted(async () => {
             v-model="search"
             @change="fetchData"
             placeholder="Cari Nama Tab..."
-            class="w-full sm:w-64 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700
-                   focus:border-[#14532d] focus:ring-2 focus:ring-[#14532d] transition"
+            class="w-full sm:w-64 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:border-[#14532d] focus:ring-2 focus:ring-[#14532d] transition"
           />
         </div>
       </div>
 
       <!-- Table -->
-      <div class=" rounded-xl border border-gray-200 shadow">
+      <div class="rounded-xl border border-gray-200 shadow">
         <SkeletonTable v-if="isTableLoading" :columns="totalColumns" :rows="itemsPerPage" />
         <table v-else class="table-fixed w-full border-collapse bg-white text-sm">
           <thead class="bg-gray-50 text-gray-700 text-center">
@@ -162,7 +158,10 @@ onMounted(async () => {
             <!-- Empty State -->
             <tr v-else>
               <td :colspan="4" class="px-6 py-8 text-center text-gray-500">
-                <font-awesome-icon icon="fa-solid fa-database" class="text-2xl mb-2 text-gray-400" />
+                <font-awesome-icon
+                  icon="fa-solid fa-database"
+                  class="text-2xl mb-2 text-gray-400"
+                />
                 <p class="text-sm">Belum ada Tab.</p>
               </td>
             </tr>
@@ -188,8 +187,14 @@ onMounted(async () => {
     <FormEdit
       :is-modal-open="isEditModalOpen"
       :selected-tab="selectedTab"
-      @close="isEditModalOpen = false; fetchData()"
-      @status="(payload) => displayNotification(payload.error_msg || 'Berhasil', payload.error ? 'error' : 'success')"
+      @close="
+        isEditModalOpen = false;
+        fetchData();
+      "
+      @status="
+        (payload) =>
+          displayNotification(payload.error_msg || 'Berhasil', payload.error ? 'error' : 'success')
+      "
     />
 
     <!-- Confirmation -->

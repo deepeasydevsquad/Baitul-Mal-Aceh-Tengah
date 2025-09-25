@@ -12,7 +12,7 @@ import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
 
 // Composable
 import { useNotification } from '@/composables/useNotification';
-import { usePagination } from '@/composables/usePagination';
+import { usePagination } from '@/composables/usepagination';
 import { useConfirmation } from '@/composables/useConfirmation';
 
 // Service API
