@@ -1,74 +1,74 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted } from 'vue'
-import Notification from '@/components/Modal/Notification.vue'
-import Confirmation from '@/components/Modal/Confirmation.vue'
-import BaseButton from '@/components/Button/BaseButton.vue'
-import DangerButton from '@/components/Button/DangerButton.vue'
-import DeleteIcon from '@/components/Icons/DeleteIcon.vue'
-import Pagination from '@/components/Pagination/Pagination.vue'
-import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue'
-import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
-import FormAdd from '@/modules/RiwayatZakat/widgets/FormAdd.vue'
-import BaseSelect from '@/components/Form/BaseSelect.vue'
+import { ref, onMounted } from 'vue';
+import Notification from '@/components/Modal/Notification.vue';
+import Confirmation from '@/components/Modal/Confirmation.vue';
+import BaseButton from '@/components/Button/BaseButton.vue';
+import DangerButton from '@/components/Button/DangerButton.vue';
+import DeleteIcon from '@/components/Icons/DeleteIcon.vue';
+import Pagination from '@/components/Pagination/Pagination.vue';
+import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
+import FormAdd from '@/modules/RiwayatZakat/widgets/FormAdd.vue';
+import BaseSelect from '@/components/Form/BaseSelect.vue';
 
 // Composable
-import { usePagination } from '@/composables/usePagination'
-import { useConfirmation } from '@/composables/useConfirmation'
-import { useNotification } from '@/composables/useNotification'
+import { usePagination } from '@/composables/usePagination';
+import { useConfirmation } from '@/composables/useConfirmation';
+import { useNotification } from '@/composables/useNotification';
 
 // Service API
-import { list, delete_riwayat_zakat } from '@/service/riwayat_zakat'
+import { list, delete_riwayat_zakat } from '@/service/riwayat_zakat';
 
 // State: Loading
-const isLoading = ref(false)
-const isTableLoading = ref(false)
+const isLoading = ref(false);
+const isTableLoading = ref(false);
 
 // Composable: pagination
-const itemsPerPage = ref<number>(100)
-const totalColumns = ref<number>(6)
+const itemsPerPage = ref<number>(100);
+const totalColumns = ref<number>(6);
 
 const { currentPage, perPage, totalRow, totalPages, nextPage, prevPage, pageNow, pages } =
-  usePagination(fetchData, { perPage: itemsPerPage.value })
+  usePagination(fetchData, { perPage: itemsPerPage.value });
 
 // Composable: notification
 const { showNotification, notificationType, notificationMessage, displayNotification } =
-  useNotification()
+  useNotification();
 
 // Composable: confirmation
 const { showConfirmDialog, confirmTitle, confirmMessage, displayConfirmation, confirm, cancel } =
-  useConfirmation()
+  useConfirmation();
 
 interface RiwayatZakat {
-  id: number
-  member_id: number
-  member_name: string
-  member_nik: string
-  invoice: string
-  type: string
-  nominal: number
-  kode: string
-  status: string
-  konfirmasi_pembayaran: string
-  datetimes: string
+  id: number;
+  member_id: number;
+  member_name: string;
+  member_nik: string;
+  invoice: string;
+  type: string;
+  nominal: number;
+  kode: string;
+  status: string;
+  konfirmasi_pembayaran: string;
+  datetimes: string;
 }
 
-const dataRiwayatZakat = ref<RiwayatZakat[]>([])
+const dataRiwayatZakat = ref<RiwayatZakat[]>([]);
 
 // Function: Modal
-const isModalAddOpen = ref(false)
+const isModalAddOpen = ref(false);
 
 function openModalAdd() {
-  isModalAddOpen.value = true
+  isModalAddOpen.value = true;
 }
 
 // Function: Fetch Data
-const search = ref('')
-const selectStatus = ref('')
-const selectStatusKonfirmasi = ref('belum_dikirim')
+const search = ref('');
+const selectStatus = ref('');
+const selectStatusKonfirmasi = ref('belum_dikirim');
 
 async function fetchData() {
-  isTableLoading.value = true
+  isTableLoading.value = true;
   try {
     const response = await list({
       search: search.value,
@@ -76,21 +76,21 @@ async function fetchData() {
       pageNumber: currentPage.value,
       status: selectStatus.value,
       konfirmasi_pembayaran: selectStatusKonfirmasi.value,
-    })
+    });
 
-    dataRiwayatZakat.value = response.data
-    totalRow.value = response.total
-    console.log(dataRiwayatZakat.value)
+    dataRiwayatZakat.value = response.data;
+    totalRow.value = response.total;
+    console.log(dataRiwayatZakat.value);
   } catch (error) {
-    displayNotification('Gagal mengambil data riwayat_zakat', 'error')
+    displayNotification('Gagal mengambil data riwayat_zakat', 'error');
   } finally {
-    isTableLoading.value = false
+    isTableLoading.value = false;
   }
 }
 
 onMounted(async () => {
-  await fetchData()
-})
+  await fetchData();
+});
 
 // Function: Delete Data
 async function deleteData(id: number) {
@@ -99,17 +99,17 @@ async function deleteData(id: number) {
     'Apakah Anda yakin ingin menghapus data riwayat zakat ini?',
     async () => {
       try {
-        isLoading.value = true
-        await delete_riwayat_zakat(id)
-        displayNotification('Data riwayat zakat berhasil dihapus', 'success')
-        await fetchData()
+        isLoading.value = true;
+        await delete_riwayat_zakat(id);
+        displayNotification('Data riwayat zakat berhasil dihapus', 'success');
+        await fetchData();
       } catch (error: any) {
-        displayNotification(error.response.data.error_msg, 'error')
+        displayNotification(error.response.data.error_msg, 'error');
       } finally {
-        isLoading.value = false
+        isLoading.value = false;
       }
     },
-  )
+  );
 }
 </script>
 
@@ -212,33 +212,41 @@ async function deleteData(id: number) {
                 :key="riwayat_zakat.id"
                 class="hover:bg-gray-50 transition-colors"
               >
-                <td class="px-6 py-4 text-start align-middle w-[30%]">
-                  <tr class="border border-gray-300">
-                    <td class="bg-gray-200 px-4 py-1 font-semibold">NAMA MUZAKKI</td>
-                    <td class="px-4 py-1 font-bold w-full">
-                      {{ riwayat_zakat.member_name }}
-                    </td>
-                  </tr>
-                  <tr class="border border-gray-300">
-                    <td class="bg-gray-200 px-4 py-1 font-semibold">NIK MUZAKKI</td>
-                    <td class="px-4 py-1 font-bold w-full">
-                      {{ riwayat_zakat.member_nik }}
-                    </td>
-                  </tr>
+                <td class="px-6 py-4 text-start align-middle w-[30%] align-top">
+                  <table class="w-full border border-gray-300 rounded-lg">
+                    <tbody>
+                      <tr class="border-b border-gray-300">
+                        <td class="w-[40%] bg-gray-100 px-4 py-2 font-medium">Nama Muzakki</td>
+                        <td class="px-4 py-2 font-medium w-full text-right">
+                          {{ riwayat_zakat.member_name }}
+                        </td>
+                      </tr>
+                      <tr class="border border-gray-300">
+                        <td class="bg-gray-100 px-4 py-2 font-medium">NIK Muzakki</td>
+                        <td class="px-4 py-2 font-medium w-full text-right">
+                          {{ riwayat_zakat.member_nik }}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </td>
-                <td class="px-6 py-4 text-start font-medium text-gray-800 w-[30%]">
-                  <tr class="border border-gray-300">
-                    <td class="bg-gray-200 px-4 py-1 font-semibold">INVOICE</td>
-                    <td class="px-4 py-1 font-bold w-full">
-                      #{{ riwayat_zakat.invoice }}
-                    </td>
-                  </tr>
-                  <tr class="border border-gray-300">
-                    <td class="bg-gray-200 px-4 py-1 font-semibold">NOMINAL</td>
-                    <td class="px-4 py-1 font-bold w-full">
-                      {{ $formatToRupiah(riwayat_zakat.nominal) }}
-                    </td>
-                  </tr>
+                <td class="px-6 py-4 text-start font-medium text-gray-800 w-[30%] align-top">
+                  <table class="w-full border border-gray-300 rounded-lg">
+                    <tbody>
+                      <tr class="border border-gray-300">
+                        <td class="bg-gray-100 px-4 py-2 font-medium">Invoice</td>
+                        <td class="px-4 py-2 font-medium w-full text-right">
+                          #{{ riwayat_zakat.invoice }}
+                        </td>
+                      </tr>
+                      <tr class="border border-gray-300">
+                        <td class="bg-gray-100 px-4 py-2 font-medium">Nominal</td>
+                        <td class="px-4 py-2 font-medium w-full text-right">
+                          {{ $formatToRupiah(riwayat_zakat.nominal) }}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </td>
                 <td class="px-6 py-4 text-center font-bold text-gray-800">
                   <span

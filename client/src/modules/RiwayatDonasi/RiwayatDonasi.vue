@@ -1,76 +1,76 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted } from 'vue'
-import Notification from '@/components/Modal/Notification.vue'
-import Confirmation from '@/components/Modal/Confirmation.vue'
-import BaseButton from '@/components/Button/BaseButton.vue'
-import DangerButton from '@/components/Button/DangerButton.vue'
-import DeleteIcon from '@/components/Icons/DeleteIcon.vue'
-import Pagination from '@/components/Pagination/Pagination.vue'
-import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue'
-import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
+import { ref, onMounted } from 'vue';
+import Notification from '@/components/Modal/Notification.vue';
+import Confirmation from '@/components/Modal/Confirmation.vue';
+import BaseButton from '@/components/Button/BaseButton.vue';
+import DangerButton from '@/components/Button/DangerButton.vue';
+import DeleteIcon from '@/components/Icons/DeleteIcon.vue';
+import Pagination from '@/components/Pagination/Pagination.vue';
+import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
 
 // Composable
-import { usePagination } from '@/composables/usePagination'
-import { useConfirmation } from '@/composables/useConfirmation'
-import { useNotification } from '@/composables/useNotification'
+import { usePagination } from '@/composables/usePagination';
+import { useConfirmation } from '@/composables/useConfirmation';
+import { useNotification } from '@/composables/useNotification';
 
 // Service API
-import { get_riwayat_donasi, delete_riwayat_donasi } from '@/service/riwayat_donasi'
+import { get_riwayat_donasi, delete_riwayat_donasi } from '@/service/riwayat_donasi';
 
 // State
-const isLoading = ref(false)
-const isTableLoading = ref(false)
+const isLoading = ref(false);
+const isTableLoading = ref(false);
 
 // Pagination
-const itemsPerPage = ref<number>(100)
-const totalColumns = ref<number>(6)
+const itemsPerPage = ref<number>(100);
+const totalColumns = ref<number>(6);
 const { currentPage, perPage, totalRow, totalPages, nextPage, prevPage, pageNow, pages } =
-  usePagination(fetchData, { perPage: itemsPerPage.value })
+  usePagination(fetchData, { perPage: itemsPerPage.value });
 
 // Notification & Confirmation
 const { showNotification, notificationType, notificationMessage, displayNotification } =
-  useNotification()
+  useNotification();
 const { showConfirmDialog, confirmTitle, confirmMessage, displayConfirmation, confirm, cancel } =
-  useConfirmation()
+  useConfirmation();
 
 // Interfaces
 interface Member {
-  id: number
-  username: string
-  nomor_ktp: string
-  whatsapp_number: string
-  alamat: string
+  id: number;
+  username: string;
+  nomor_ktp: string;
+  whatsapp_number: string;
+  alamat: string;
 }
 
 interface ProgramDonasi {
-  id: number
-  name: string
-  tahun: number
-  status: string
-  deskripsi: string
+  id: number;
+  name: string;
+  tahun: number;
+  status: string;
+  deskripsi: string;
 }
 
 interface RiwayatDonasi {
-  id: number
-  nominal: number
-  status: string
-  status_konfirmasi: string
-  createdAt: string
-  updatedAt: string
-  Member?: Member
-  Program_donasi?: ProgramDonasi
+  id: number;
+  nominal: number;
+  status: string;
+  status_konfirmasi: string;
+  createdAt: string;
+  updatedAt: string;
+  Member?: Member;
+  Program_donasi?: ProgramDonasi;
 }
 
-const RiwayatDonasi = ref<RiwayatDonasi[]>([])
+const RiwayatDonasi = ref<RiwayatDonasi[]>([]);
 
 // Search & Filters
-const search = ref('')
-const status = ref('')
-const status_konfirmasi = ref('')
+const search = ref('');
+const status = ref('');
+const status_konfirmasi = ref('');
 
 async function fetchData() {
-  isTableLoading.value = true
+  isTableLoading.value = true;
   try {
     const response = await get_riwayat_donasi({
       search: search.value,
@@ -78,17 +78,17 @@ async function fetchData() {
       pageNumber: currentPage.value,
       status: status.value,
       konfirmasi_pembayaran: status_konfirmasi.value,
-    })
-    RiwayatDonasi.value = response.data
-    totalRow.value = response.total
+    });
+    RiwayatDonasi.value = response.data;
+    totalRow.value = response.total;
   } catch (error) {
-    displayNotification('Gagal mengambil data riwayat donasi', 'error')
+    displayNotification('Gagal mengambil data riwayat donasi', 'error');
   } finally {
-    isTableLoading.value = false
+    isTableLoading.value = false;
   }
 }
 
-onMounted(fetchData)
+onMounted(fetchData);
 
 async function deleteData(id: number) {
   displayConfirmation(
@@ -96,17 +96,17 @@ async function deleteData(id: number) {
     'Apakah Anda yakin ingin menghapus data riwayat donasi ini?',
     async () => {
       try {
-        isLoading.value = true
-        await delete_riwayat_donasi(id)
-        displayNotification('Data riwayat donasi berhasil dihapus', 'success')
-        await fetchData()
+        isLoading.value = true;
+        await delete_riwayat_donasi(id);
+        displayNotification('Data riwayat donasi berhasil dihapus', 'success');
+        await fetchData();
       } catch (error) {
-        displayNotification('Gagal menghapus data riwayat donasi', 'error')
+        displayNotification('Gagal menghapus data riwayat donasi', 'error');
       } finally {
-        isLoading.value = false
+        isLoading.value = false;
       }
     },
-  )
+  );
 }
 </script>
 
@@ -173,16 +173,16 @@ async function deleteData(id: number) {
                 class="hover:bg-gray-50 transition-colors"
               >
                 <!-- Info Member -->
-                <td class="px-6 py-4 text-left font-medium text-gray-800">
+                <td class="px-6 py-4 text-left font-medium text-gray-800 align-top">
                   <table class="w-full border border-gray-300 rounded-lg">
                     <tbody>
-                      <tr class="border-b">
-                        <th class="w-[5%] px-4 py-2 text-left font-medium bg-gray-100">NAMA</th>
-                        <td class="px-4 py-2">{{ data.Member?.username }}</td>
+                      <tr class="border-b border-gray-300">
+                        <th class="w-[5%] px-4 py-2 text-left font-medium bg-gray-100">Nama</th>
+                        <td class="px-4 py-2 text-right">{{ data.Member?.username }}</td>
                       </tr>
-                      <tr>
+                      <tr class="border-b border-gray-300">
                         <th class="px-4 py-2 text-left font-medium bg-gray-100">NIK</th>
-                        <td class="px-4 py-2">
+                        <td class="px-4 py-2 text-right">
                           {{
                             data.Member?.nomor_ktp
                               ? data.Member.nomor_ktp.replace(
@@ -199,28 +199,28 @@ async function deleteData(id: number) {
                 </td>
 
                 <!-- Info Program & Nominal -->
-                <td class="px-6 py-4 text-left font-medium text-gray-800">
+                <td class="px-6 py-4 text-left font-medium text-gray-800 align-top">
                   <table class="w-full border border-gray-300 rounded-lg">
                     <tbody>
-                      <tr class="border-b">
-                        <th class="w-[30%] px-4 py-2 text-left font-medium bg-gray-100">
+                      <tr class="border-b border-gray-300">
+                        <th class="w-[40%] px-4 py-2 text-left font-medium bg-gray-100">
                           Nama Program
                         </th>
-                        <td class="px-4 py-2">{{ data.Program_donasi?.name }}</td>
+                        <td class="px-4 py-2 text-right">{{ data.Program_donasi?.name }}</td>
                       </tr>
-                      <tr class="border-b">
+                      <tr class="border-b border-gray-300">
                         <th class="px-4 py-2 text-left font-medium bg-gray-100">Tahun</th>
-                        <td class="px-4 py-2">{{ data.Program_donasi?.tahun }}</td>
+                        <td class="px-4 py-2 text-right">{{ data.Program_donasi?.tahun }}</td>
                       </tr>
-                      <tr class="border-b">
+                      <tr class="border-b border-gray-300">
                         <th class="px-4 py-2 text-left font-medium bg-gray-100">Status Program</th>
-                        <td class="px-4 py-2">
+                        <td class="px-4 py-2 text-right">
                           {{ data.Program_donasi?.status.replace(/_/g, ' ').toUpperCase() }}
                         </td>
                       </tr>
-                      <tr>
+                      <tr class="border-b border-gray-300">
                         <th class="px-4 py-2 text-left font-medium bg-gray-100">Nominal</th>
-                        <td class="px-4 py-2">
+                        <td class="px-4 py-2 text-right">
                           Rp {{ Number(data.nominal).toLocaleString('id-ID') }}
                         </td>
                       </tr>
