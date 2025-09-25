@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 // Gunakan variabel lingkungan dari .env
-const API_BASE_URL = window.location.protocol + '//' + window.location.hostname + ':3001'
+const API_BASE_URL = window.location.protocol + '//' + window.location.hostname + ':3003'
 
 // Base URL API
 const api = axios.create({
@@ -88,7 +88,6 @@ api.interceptors.response.use(
   },
 )
 
-
-        // localStorage.setItem('administrator_access_token', response.data.access_token)
-        // localStorage.setItem('administrator_refresh_token', response.data.refresh_token)
+// localStorage.setItem('administrator_access_token', response.data.access_token)
+// localStorage.setItem('administrator_refresh_token', response.data.refresh_token)
 export default api
