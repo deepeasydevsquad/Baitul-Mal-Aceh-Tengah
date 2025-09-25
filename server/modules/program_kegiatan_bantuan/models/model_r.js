@@ -232,46 +232,6 @@ class Model_r {
         ],
       });
 
-      // const ids_kegiatan = result.rows.map((item) => item.id);
-      // const permohonan_id = await Permohonan.findAndCountAll({
-      //   attributes: ["id"],
-      //   where: {
-      //     kegiatan_id: {
-      //       [Op.in]: ids_kegiatan,
-      //     },
-      //   },
-      // });
-
-      // const ids_permohonan = permohonan_id.rows.map((item) => item.id);
-      // const realisasi_permohonan = await Realisasi_permohonan.findAll({
-      //   attributes: ["id", "status", "status_realisasi"],
-      //   where: {
-      //     permohonan_id: {
-      //       [Op.in]: ids_permohonan,
-      //     },
-      //   },
-      // });
-
-      // const total_approve = realisasi_permohonan.filter(
-      //   (item) => item.status === "approve"
-      // ).length;
-      // const total_reject = realisasi_permohonan.filter((item) =>
-      //   [
-      //     "reject_berkas",
-      //     "reject_tidak_layak",
-      //     "reject_sudah_pernah",
-      //     "reject_unkriteria",
-      //     "reject_administrasi",
-      //   ].includes(item.status)
-      // ).length;
-      // const total_tunda = realisasi_permohonan.filter(
-      //   (item) => item.status === "ditunda"
-      // ).length;
-
-      // console.log("total_approve", total_approve);
-      // console.log("total_reject", total_reject);
-      // console.log("total_tunda", total_tunda);
-
       return {
         data: result.rows.map((item) => ({
           id: item.id,
@@ -289,11 +249,6 @@ class Model_r {
           sumber_dana: item.sumber_dana,
           area_penyaluran: item.area_penyaluran,
           jenis_penyaluran: item.jenis_penyaluran,
-          // status_kegiatan: item.status_kegiatan,
-          // total_permohonan: permohonan_id.count,
-          // total_permohonan_approve: total_approve,
-          // total_permohonan_reject: total_reject,
-          // total_permohonan_tunda: total_tunda,
           status_kegiatan: item.status_kegiatan === "selesai",
           tahun: item.tahun,
           banner: item.banner,

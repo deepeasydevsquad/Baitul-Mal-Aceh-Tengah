@@ -190,11 +190,9 @@ async function deleteData(id: number) {
             <!-- Empty State -->
             <tr v-else>
               <td :colspan="4" class="px-6 py-8 text-center text-gray-500">
-                <font-awesome-icon
-                  icon="fa-solid fa-database"
-                  class="text-2xl mb-2 text-gray-400"
-                />
-                <p class="text-sm">Belum ada Daftar Asnaf.</p>
+                <font-awesome-icon icon="fa-solid fa-database" class="text-4xl mb-2 text-gray-400" />
+                <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ada data</h3>
+                <p class="text-sm">Belum ada data asnaf.</p>
               </td>
             </tr>
           </tbody>
@@ -219,7 +217,10 @@ async function deleteData(id: number) {
     <!-- Modal Tambah -->
     <FormAdd
       :is-modal-open="isAddModalOpen"
-      @close="handleCloseAdd"
+      @close="
+        isAddModalOpen = false,
+        fetchData()
+      "
       @status="
         (payload) =>
           displayNotification(
@@ -233,7 +234,10 @@ async function deleteData(id: number) {
     <FormEdit
       :is-modal-open="isEditModalOpen"
       :selected-asnaf="DaftarselectedAsnaf"
-      @close="handleCloseEdit"
+      @close="
+        isEditModalOpen = false,
+        fetchData()
+      "
       @status="
         (payload) =>
           displayNotification(
@@ -249,8 +253,8 @@ async function deleteData(id: number) {
       :confirmTitle="confirmTitle"
       :confirmMessage="confirmMessage"
     >
-      <BaseButton variant="warning" @click="confirm">Ya</BaseButton>
       <BaseButton variant="secondary" @click="cancel">Tidak</BaseButton>
+      <BaseButton variant="warning" @click="confirm">Ya</BaseButton>
     </Confirmation>
 
     <!-- Notification -->
