@@ -195,28 +195,28 @@ async function deleteData(id: number) {
                 <td class="px-6 py-4 text-center font-medium text-gray-800">
                   <table class="border border-gray-300 w-full text-sm text-left">
                     <tbody>
-                      <tr>
-                        <td class="w-[45%] bg-gray-200 px-4 py-2 font-semibold">DESA</td>
+                      <tr class="border border-gray-300">
+                        <td class="w-[45%] bg-gray-100 px-4 py-2 font-medium">Desa</td>
                         <td class="px-4 py-2">{{ data.desa_name || '-' }}</td>
                       </tr>
-                      <tr>
-                        <td class="w-[45%] bg-gray-200 px-4 py-2 font-semibold">KECAMATAN</td>
+                      <tr class="border border-gray-300">
+                        <td class="w-[45%] bg-gray-100 px-4 py-2 font-medium">Kecamatan</td>
                         <td class="px-4 py-2">{{ data.kecamatan_name || '-' }}</td>
                       </tr>
-                      <tr>
-                        <td class="w-[45%] bg-gray-200 px-4 py-2 font-semibold">NOMOR WHATSAPP</td>
+                      <tr class="border border-gray-300">
+                        <td class="w-[45%] bg-gray-100 px-4 py-2 font-medium">Nomor Whatsapp</td>
                         <td class="px-4 py-2">{{ data.whatsapp_number || '-' }}</td>
                       </tr>
-                      <tr>
-                        <td class="w-[45%] bg-gray-200 px-4 py-2 font-semibold">NOMOR KTP</td>
+                      <tr class="border border-gray-300">
+                        <td class="w-[45%] bg-gray-100 px-4 py-2 font-medium">Nomor KTP</td>
                         <td class="px-4 py-2">{{ data.nomor_ktp || '-' }}</td>
                       </tr>
-                      <tr>
-                        <td class="w-[45%] bg-gray-200 px-4 py-2 font-semibold">NOMOR KK</td>
+                      <tr class="border border-gray-300">
+                        <td class="w-[45%] bg-gray-100 px-4 py-2 font-medium">Nomor KK</td>
                         <td class="px-4 py-2">{{ data.nomor_kk || '-' }}</td>
                       </tr>
-                      <tr>
-                        <td class="w-[45%] bg-gray-200 px-4 py-2 font-semibold">TANGGAL LAHIR</td>
+                      <tr class="border border-gray-300">
+                        <td class="w-[45%] bg-gray-100 px-4 py-2 font-medium">Tanggal Lahir</td>
                         <td class="px-4 py-2">{{ data.birth_date || '-' }}</td>
                       </tr>
                     </tbody>

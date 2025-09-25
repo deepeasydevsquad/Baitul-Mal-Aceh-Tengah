@@ -1,45 +1,45 @@
 <script setup lang="ts">
-import { ref, onMounted, nextTick, watch } from 'vue'
+import { ref, onMounted, nextTick, watch } from 'vue';
 import {
   useSelectedTab,
   useGlobalTab,
   useGlobalActiveTab,
   useTabTerpilih,
-} from '../../../../stores/sidebar'
-import { initTooltips } from 'flowbite'
-import Surveyor from '@/modules/Surveyor/Surveyor.vue'
-import syarat from '@/modules/Syarat/syarat.vue'
-import SystemLogSurveyor from '@/modules/SystemLogSurveyor/SystemLogSurveyor.vue'
-import Bank from '@/modules/Bank/Bank.vue'
-import RequestKeanggotaan from '@/modules/RequestKeanggotaan/RequestKeanggotaan.vue'
-import RunningText from '@/modules/RunningText/RunningText.vue'
-import BankPengumpulan from '@/modules/BankPengumpulan/BankPengumpulan.vue'
-import PengaturanUmum from '@/modules/PengaturanUmum/PengaturanUmum.vue'
-import GrupAkses from '@/modules/GrupAkses/GrupAkses.vue'
-import DaftarPengguna from '@/modules/DaftarPengguna/DaftarPengguna.vue'
-import KegiatanKeseketariatan from '@/modules/KegiatanKeseketariatan/KegiatanKeseketariatan.vue'
-import TemplatePesanWhatsapp from '@/modules/TemplatePesanWhatsapp/TemplatePesanWhatsapp.vue'
-import DaftarKeanggotaan from '@/modules/DaftarKeanggotaan/DaftarKeanggotaan.vue'
-import kecamatan from '@/modules/Kecamatan/Kecamatan.vue'
-import SystemLog from '@/modules/SystemLog/SystemLog.vue'
-import PengaturanWhatsapp from'@/modules/PengaturanWhatsapp/PengaturanWhatsapp.vue'
-import LaporanUmum from '@/modules/DaftarLaporanUmum/LaporanUmum.vue'
-import ProgramKegiatanBantuan from '@/modules/ProgramKegiatanBantuan/ProgramKegiatanBantuan.vue'
-import DaftarProgram from '@/modules/DaftarProgram/DaftarProgram.vue'
-import LaporanAsnafFakir from '@/modules/LaporanAsnaf/LaporanAsnafFakir.vue'
-import ProgramDonasi from '@/modules/ProgramDonasi/ProgramDonasi.vue'
-import DaftarTab from '@/modules/DaftarTab/DaftarTab.vue'
-import desa from '../../../Desa/Desa.vue'
-import RiwayatDonasi from '@/modules/RiwayatDonasi/RiwayatDonasi.vue'
-import DaftarAsnaf from '@/modules/DaftarAsnaf/DaftarAsnaf.vue'
-import LaporanAsnafMiskin from '@/modules/LaporanAsnaf/LaporanAsnafMIskin.vue'
-import LaporanAsnafFisabilillah from '@/modules/LaporanAsnaf/LaporanAsnafFisabilillah.vue'
-import LaporanAsnafGharim from '@/modules/LaporanAsnaf/LaporanAsnafGharim.vue'
-import LaporanAsnafMuallaf from '@/modules/LaporanAsnaf/LaporanAsnafMuallaf.vue'
-import LaporanAsnafIbnuSabil from '@/modules/LaporanAsnaf/LaporanAsnafIbnuSabil.vue'
-import RiwayatZakat from '@/modules/RiwayatZakat/RiwayatZakat.vue'
-import UrutanBagianMonev from '@/modules/UrutanBagianMonev/UrutanBagianMonev.vue'
-import RiwayatInfaq from '@/modules/RiwayatInfaq/RiwayatInfaq.vue'
+} from '../../../../stores/sidebar';
+import { initTooltips } from 'flowbite';
+import Surveyor from '@/modules/Surveyor/Surveyor.vue';
+import syarat from '@/modules/Syarat/syarat.vue';
+import SystemLogSurveyor from '@/modules/SystemLogSurveyor/SystemLogSurveyor.vue';
+import Bank from '@/modules/Bank/Bank.vue';
+import RequestKeanggotaan from '@/modules/RequestKeanggotaan/RequestKeanggotaan.vue';
+import RunningText from '@/modules/RunningText/RunningText.vue';
+import BankPengumpulan from '@/modules/BankPengumpulan/BankPengumpulan.vue';
+import PengaturanUmum from '@/modules/PengaturanUmum/PengaturanUmum.vue';
+import GrupAkses from '@/modules/GrupAkses/GrupAkses.vue';
+import DaftarPengguna from '@/modules/DaftarPengguna/DaftarPengguna.vue';
+import KegiatanKeseketariatan from '@/modules/KegiatanKeseketariatan/KegiatanKeseketariatan.vue';
+import TemplatePesanWhatsapp from '@/modules/TemplatePesanWhatsapp/TemplatePesanWhatsapp.vue';
+import DaftarKeanggotaan from '@/modules/DaftarKeanggotaan/DaftarKeanggotaan.vue';
+import kecamatan from '@/modules/Kecamatan/Kecamatan.vue';
+import SystemLog from '@/modules/SystemLog/SystemLog.vue';
+import PengaturanWhatsapp from '@/modules/PengaturanWhatsapp/PengaturanWhatsapp.vue';
+import LaporanUmum from '@/modules/DaftarLaporanUmum/LaporanUmum.vue';
+import ProgramKegiatanBantuan from '@/modules/ProgramKegiatanBantuan/ProgramKegiatanBantuan.vue';
+import DaftarProgram from '@/modules/DaftarProgram/DaftarProgram.vue';
+import LaporanAsnafFakir from '@/modules/LaporanAsnaf/LaporanAsnafFakir.vue';
+import ProgramDonasi from '@/modules/ProgramDonasi/ProgramDonasi.vue';
+import DaftarTab from '@/modules/DaftarTab/DaftarTab.vue';
+import desa from '../../../Desa/Desa.vue';
+import RiwayatDonasi from '@/modules/RiwayatDonasi/RiwayatDonasi.vue';
+import DaftarAsnaf from '@/modules/DaftarAsnaf/DaftarAsnaf.vue';
+import LaporanAsnafMiskin from '@/modules/LaporanAsnaf/LaporanAsnafMIskin.vue';
+import LaporanAsnafFisabilillah from '@/modules/LaporanAsnaf/LaporanAsnafFisabilillah.vue';
+import LaporanAsnafGharim from '@/modules/LaporanAsnaf/LaporanAsnafGharim.vue';
+import LaporanAsnafMuallaf from '@/modules/LaporanAsnaf/LaporanAsnafMuallaf.vue';
+import LaporanAsnafIbnuSabil from '@/modules/LaporanAsnaf/LaporanAsnafIbnuSabil.vue';
+import RiwayatZakat from '@/modules/RiwayatZakat/RiwayatZakat.vue';
+import UrutanBagianMonev from '@/modules/UrutanBagianMonev/UrutanBagianMonev.vue';
+import RiwayatInfaq from '@/modules/RiwayatInfaq/RiwayatInfaq.vue';
 
 const tabComponents = {
   pengaturan_whatsapp: PengaturanWhatsapp,
@@ -59,7 +59,7 @@ const tabComponents = {
   daftar_keanggotaan: DaftarKeanggotaan,
   daftar_surveyor: Surveyor,
   pengaturan_umum: PengaturanUmum,
-  laporan_umum : LaporanUmum,
+  laporan_umum: LaporanUmum,
   program_kegiatan_bantuan: ProgramKegiatanBantuan,
   daftar_program: DaftarProgram,
   laporan_asnaf_fakir: LaporanAsnafFakir,
@@ -74,58 +74,58 @@ const tabComponents = {
   daftar_asnaf: DaftarAsnaf,
   riwayat_zakat: RiwayatZakat,
   urutan_bagian_monev: UrutanBagianMonev,
-  riwayat_infaq: RiwayatInfaq
-}
+  riwayat_infaq: RiwayatInfaq,
+};
 
-const selectedTab = useSelectedTab()
-const tab = useGlobalTab()
-const activeTab = useGlobalActiveTab()
-const tabTerpilih = useTabTerpilih()
-const windowWidth = ref(window.innerWidth)
+const selectedTab = useSelectedTab();
+const tab = useGlobalTab();
+const activeTab = useGlobalActiveTab();
+const tabTerpilih = useTabTerpilih();
+const windowWidth = ref(window.innerWidth);
 
 const dynamicLabel = (val: string) => {
   if (windowWidth.value < 640) {
     // < sm → mobile
-    return ''
+    return '';
   } else if (windowWidth.value < 1269) {
     // sm
-    return val.slice(0, 8) + '...'
+    return val.slice(0, 8) + '...';
   } else if (windowWidth.value < 1467) {
     // md
-    return val.slice(0, 8) + '...'
+    return val.slice(0, 8) + '...';
   } else if (windowWidth.value < 1611) {
     // lg
-    return val.slice(0, 13) + '...'
+    return val.slice(0, 13) + '...';
   } else if (windowWidth.value < 1707) {
     // xl
-    return val.slice(0, 16) + '...'
+    return val.slice(0, 16) + '...';
   } else {
     // 2xl atau lebih
-    return val
+    return val;
   }
-}
+};
 
-const mulaiPilihTab = ref(false)
+const mulaiPilihTab = ref(false);
 const selectTab = (tabPath: string, key: number) => {
-  tabTerpilih.setNumber(key)
-  activeTab.setString(tabPath)
-  mulaiPilihTab.value = true
-}
+  tabTerpilih.setNumber(key);
+  activeTab.setString(tabPath);
+  mulaiPilihTab.value = true;
+};
 
 onMounted(async () => {
   window.addEventListener('resize', () => {
-    windowWidth.value = window.innerWidth
-  })
-})
+    windowWidth.value = window.innerWidth;
+  });
+});
 
 watch(
   () => selectedTab.sharedArray,
   async () => {
-    await nextTick()
-    initTooltips()
+    await nextTick();
+    initTooltips();
   },
   { deep: true },
-)
+);
 </script>
 
 <template>

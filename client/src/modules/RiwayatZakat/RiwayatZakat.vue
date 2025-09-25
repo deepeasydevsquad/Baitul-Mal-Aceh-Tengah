@@ -16,6 +16,7 @@ import BaseSelect from '@/components/Form/BaseSelect.vue';
 import { usePagination } from '@/composables/usePagination';
 import { useConfirmation } from '@/composables/useConfirmation';
 import { useNotification } from '@/composables/useNotification';
+import { useDynamicLabel } from '@/composables/useDynamicLabel';
 
 // Service API
 import { list, delete_riwayat_zakat } from '@/service/riwayat_zakat';
@@ -38,6 +39,9 @@ const { showNotification, notificationType, notificationMessage, displayNotifica
 // Composable: confirmation
 const { showConfirmDialog, confirmTitle, confirmMessage, displayConfirmation, confirm, cancel } =
   useConfirmation();
+
+// Composable: dynamic label
+const { dynamicLabel } = useDynamicLabel();
 
 interface RiwayatZakat {
   id: number;
@@ -125,7 +129,8 @@ async function deleteData(id: number) {
           :loading="isModalAddOpen"
           type="button"
         >
-          <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" /> Tambah Riwayat Zakat
+          <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" />
+          {{ dynamicLabel('Tambah Riwayat Zakat') }}
         </BaseButton>
 
         <!-- Search -->

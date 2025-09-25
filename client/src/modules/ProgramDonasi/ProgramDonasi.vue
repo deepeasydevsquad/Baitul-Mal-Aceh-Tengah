@@ -18,6 +18,7 @@ import FormEdit from '@/modules/ProgramDonasi/widgets/FormEdit.vue';
 import { usePagination } from '@/composables/usePagination';
 import { useConfirmation } from '@/composables/useConfirmation';
 import { useNotification } from '@/composables/useNotification';
+import { useDynamicLabel } from '@/composables/useDynamicLabel';
 
 // Service API
 import { list, delete_program, tutup } from '@/service/program_donasi';
@@ -45,6 +46,8 @@ const { showNotification, notificationType, notificationMessage, displayNotifica
 const { showConfirmDialog, confirmTitle, confirmMessage, displayConfirmation, confirm, cancel } =
   useConfirmation();
 
+// Composable: dynamic label
+const { dynamicLabel } = useDynamicLabel();
 // State Data Bank
 const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
@@ -178,7 +181,7 @@ function formatToRupiah(angka: number | string) {
           type="button"
         >
           <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" />
-          Tambah Program
+          {{ dynamicLabel('Tambah Program') }}
         </BaseButton>
 
         <!-- Search -->
