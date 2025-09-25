@@ -17,7 +17,7 @@ import FormEdit from '@/modules/ProgramKegiatanBantuan/widgets/FormEdit.vue';
 import FormStatusKegiatan from '@/modules/ProgramKegiatanBantuan/widgets/FormStatusKegiatan.vue';
 
 // Composable
-import { usePagination } from '@/composables/usePagination';
+import { usePagination } from '@/composables/usepagination';
 import { useConfirmation } from '@/composables/useConfirmation';
 import { useNotification } from '@/composables/useNotification';
 

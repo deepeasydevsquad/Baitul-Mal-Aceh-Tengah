@@ -15,7 +15,7 @@ import FormAdd from '@/modules/Bank/widgets/FormAdd.vue'
 import FormEdit from '@/modules/Bank/widgets/FormEdit.vue'
 
 // Composable
-import { usePagination } from '@/composables/usePagination'
+import { usePagination } from '@/composables/usepagination'
 import { useConfirmation } from '@/composables/useConfirmation'
 import { useNotification } from '@/composables/useNotification'
 

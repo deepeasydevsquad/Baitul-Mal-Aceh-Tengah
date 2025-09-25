@@ -15,7 +15,7 @@ import FormAdd from '@/modules/Desa/widgets/FormAdd.vue';
 import FormEdit from '@/modules/Desa/widgets/FormEdit.vue';
 
 // Composable
-import { usePagination } from '@/composables/usePagination';
+import { usePagination } from '@/composables/usepagination';
 import { useConfirmation } from '@/composables/useConfirmation';
 import { useNotification } from '@/composables/useNotification';
 

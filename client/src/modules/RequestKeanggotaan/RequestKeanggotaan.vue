@@ -11,7 +11,7 @@ import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
 
 // Composable
-import { usePagination } from '@/composables/usePagination';
+import { usePagination } from '@/composables/usepagination';
 import { useNotification } from '@/composables/useNotification';
 import { useConfirmation } from '@/composables/useConfirmation';
 
