@@ -44,12 +44,12 @@ exports.add_syarat = async (req, res) => {
     if (await model_cud.response()) {
       res.status(200).json({
         error: false,
-        error_msg: "Kriteria berhasil ditambahkan.",
+        error_msg: "Syarat berhasil ditambahkan.",
       });
     } else {
       res.status(400).json({
         error: true,
-        error_msg: "Kriteria gagal ditambahkan.",
+        error_msg: "Syarat gagal ditambahkan.",
       });
     }
   } catch (error) {
@@ -134,15 +134,63 @@ exports.add_surveyor = async (req, res) => {
     if (await model_cud.response()) {
       res.status(200).json({
         error: false,
-        error_msg: "Kriteria berhasil ditambahkan.",
+        error_msg: "Surveyor berhasil ditambahkan.",
       });
     } else {
       res.status(400).json({
         error: true,
-        error_msg: "Kriteria gagal ditambahkan.",
+        error_msg: "Surveyor gagal ditambahkan.",
       });
     }
   } catch (error) {
     handleServerError(res, error);
+  }
+};
+
+exports.daftar_list = async (req, res) => {
+  if (!(await handleValidationErrors(req, res))) return;
+
+  try {
+    const model_r = new Model_r(req);
+    const feedBack = await model_r.program_kegiatan_bantuan();
+
+    res.status(200).json({
+      error: false,
+      data: feedBack.data,
+      total: feedBack.total,
+    });
+  } catch (error) {
+    handleServerError(res, error);
+  }
+};
+
+exports.get_filter_type = async (req, res) => {
+  if (!(await handleValidationErrors(req, res))) return;
+
+  try {
+    const model_r = new Model_r(req);
+    const feedBack = await model_r.get_filter_type();
+
+    res.status(200).json({
+      error: false,
+      data: feedBack,
+      total: 1,
+    });
+  } catch (error) {
+    handleServerError(res, error);
+  }
+};
+
+exports.send_pesan = async (req, res) => {
+  if (!(await handleValidationErrors(req, res))) return;
+  try {
+    const model = new Model_r(req);
+    const data = await model.kirim_pesan_wa();
+    return res.status(200).json(data); // pake return
+  } catch (error) {
+    console.error("_____DDDDD_______");
+    console.error(error);
+    console.error("_____DDDDD_______");
+    return handleServerError(res, error); // kasih full error object
   }
 };

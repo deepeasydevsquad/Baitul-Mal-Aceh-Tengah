@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue'
 import Notification from '@/components/Modal/Notification.vue'
 import BaseButton from '@/components/Button/BaseButton.vue'
 import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
@@ -31,15 +31,18 @@ const surveyorOptions = ref<any[]>([])
 const nama_kegiatan = ref('')
 const form = ref<{ sk: File | string }>({ sk: '' })
 const errors = ref<Record<string, string>>({})
+const previewUrl = ref<string | null>(null)
 
 // Reset form
 const resetForm = () => {
-  surveyorList.value = [{ id: '' }]
+  surveyorList.value = [{ id: null }]
   errors.value = {}
   form.value.sk = ''
   nama_kegiatan.value = ''
+  previewUrl.value = null
 }
 
+// Validasi
 // Validasi
 const validateForm = () => {
   let isValid = true
@@ -50,12 +53,19 @@ const validateForm = () => {
     isValid = false
   }
 
+  const usedIds = new Set<string>()
   surveyorList.value.forEach((item, index) => {
     if (!item.id) {
       errors.value[`surveyor_id_${index}`] = 'Surveyor tidak boleh kosong.'
       isValid = false
+    } else if (usedIds.has(item.id)) {
+      errors.value[`surveyor_id_${index}`] = 'Surveyor ini sudah dipilih.'
+      isValid = false
+    } else {
+      usedIds.add(item.id)
     }
   })
+
   return isValid
 }
 
@@ -63,21 +73,44 @@ const validateForm = () => {
 const fetchData = async () => {
   try {
     const response = await daftar_surveyor()
-    surveyorOptions.value = [{ id: '', name: '-- Pilih Surveyor --' }, ...response.data]
-
-    // ambil nama kegiatan dari surveyor pertama
+    surveyorOptions.value = [
+      { id: null, name: '-- Pilih Surveyor --' },
+      ...response.data.map((s: any) => ({
+        id: String(s.id),
+        name: s.name,
+      })),
+    ]
   } catch (error: any) {
     const msg = error.response?.data?.message || 'Terjadi kesalahan'
     displayNotification(msg, 'error')
   }
 }
 
+const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL
+
+// ...
+
 // Detail surveyor by kegiatan
 const fetchDetailSurveyor = async () => {
   try {
     const response = await detail_surveyor({ kegiatan_id: props.selectedKegiatan })
-    surveyorList.value = response.data.map((s: any) => ({ id: s.id }))
-    nama_kegiatan.value = response.data[0]?.kegiatan || ''
+    if (response.data.length > 0) {
+      surveyorList.value = response.data.map((s: any) => ({ id: String(s.id) }))
+
+      nama_kegiatan.value = response.data[0]?.kegiatan || ''
+      previewUrl.value = response.data[0]?.sk
+        ? `${BASE_URL}/uploads/img/sk_penetapan/${response.data[0].sk}`
+        : null
+      form.value.sk = response.data[0]?.sk
+    } else {
+      // fallback kalau ga ada surveyor
+      surveyorList.value = [{ id: null }]
+      previewUrl.value = null
+      form.value.sk = ''
+    }
+
+    console.log('ini response data', response.data)
+    console.log('ini image list', previewUrl.value)
   } catch (error: any) {
     const msg = error.response?.data?.message || 'Terjadi kesalahan'
     displayNotification(msg, 'error')
@@ -89,8 +122,8 @@ watch(
   () => props.isModalOpen,
   async (val) => {
     if (val) {
-      await fetchData()
       await fetchDetailSurveyor()
+      await fetchData()
     } else {
       resetForm()
     }
@@ -110,6 +143,8 @@ const handleSubmit = async () => {
     surveyorList.value.forEach((s, i) => {
       formData.append(`surveyor[${i}][surveyor_id]`, s.id)
     })
+
+    formData.append('kegiatan_name', nama_kegiatan.value)
 
     const response = await add_surveyor(formData)
     emit('status', { error_msg: response.error_msg, error: response.error })
@@ -136,7 +171,25 @@ const closeModal = () => {
 }
 
 // File handler
-const handleFile = (file: File | null) => (form.value.sk = file || '')
+const handleFile = (file: File | null) => {
+  if (!file) {
+    previewUrl.value = null
+    form.value.sk = ''
+    return
+  }
+  previewUrl.value = URL.createObjectURL(file)
+  form.value.sk = file
+}
+
+const fileName = computed(() => {
+  if (form.value.sk instanceof File) {
+    return form.value.sk.name
+  }
+  if (typeof form.value.sk === 'string' && form.value.sk) {
+    return form.value.sk.split('/').pop() || ''
+  }
+  return ''
+})
 
 // Escape key
 const handleEscape = (e: KeyboardEvent) => {
@@ -189,10 +242,12 @@ onBeforeUnmount(() => document.removeEventListener('keydown', handleEscape))
             id="sk-upload"
             label="Upload SK Surveyor"
             buttonText="Pilih File"
-            accept=".jpg,.jpeg,.png,.pdf"
+            accept=".jpg,.jpeg,.png"
             :error="errors.sk"
             :maxSize="2000"
             dimensionsInfo="A4 atau sesuai format"
+            :initialFileName="fileName"
+            :initialPreview="previewUrl || ''"
             @file-selected="handleFile"
           />
 

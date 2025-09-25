@@ -1,5 +1,28 @@
 import api from '@/service/api_administrator'
 
+
+export const get_program_bantuan = async (param: any) => {
+  try {
+    const response = await api.post('/penetapan/list', param)
+    return response.data
+  } catch (error) {
+    console.error('Gagal mengambil request program kegiatan bantuan:', error)
+    throw error
+  }
+}
+
+
+export const get_filter_type = async () => {
+  try {
+    const response = await api.get('/penetapan/get_filter_type')
+    return response.data
+  } catch (error) {
+    console.error('Gagal mengambil program kegiatan bantuan:', error)
+    throw error
+  }
+}
+
+
 export const daftar_syarat = async () => {
   try {
     const response = await api.get('/penetapan/daftar_syarat')
@@ -79,6 +102,16 @@ export const add_surveyor = async (param: any) => {
         "Content-Type": "multipart/form-data",
       },
     })
+    return response.data
+  } catch (error) {
+    console.error('Gagal menambahkan program:', error)
+    throw error
+  }
+}
+
+export const send_pesan = async (param: any) => {
+  try {
+    const response = await api.post('/penetapan/send_pesan', param)
     return response.data
   } catch (error) {
     console.error('Gagal menambahkan program:', error)

@@ -12,8 +12,6 @@ import Pagination from '@/components/Pagination/Pagination.vue'
 import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue'
 import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
 
-import FormEdit from '@/modules/Bank/widgets/FormEdit.vue'
-
 // Composable
 import { usePagination } from '@/composables/usePagination'
 import { useConfirmation } from '@/composables/useConfirmation'
@@ -23,9 +21,13 @@ import IconPlus from '@/components/Icons/IconPlus.vue'
 import FormSyarat from './Widgets/FormSyarat.vue'
 import FormKriteria from './Widgets/FormKriteria.vue'
 import FormSurveyor from './Widgets/FormSurveyor.vue'
+import FormAdd from '@/modules/ProgramKegiatanBantuan/widgets/FormAdd.vue'
 
 // Service API
-// import { get_bank, delete_bank } from '@/service/bank'
+import { get_filter_type, get_program_bantuan, send_pesan } from '@/service/penetapan'
+import BaseSelect from '@/components/Form/BaseSelect.vue'
+import SuratIcon from '@/components/Icons/SuratIcon.vue'
+import ButtonGreen from '@/components/Button/ButtonGreen.vue'
 
 // State: Loading
 const isLoading = ref(false)
@@ -33,7 +35,7 @@ const isTableLoading = ref(false)
 
 // Composable: pagination
 const itemsPerPage = ref<number>(100)
-const totalColumns = ref<number>(3)
+const totalColumns = ref<number>(5)
 
 const { currentPage, perPage, totalRow, totalPages, nextPage, prevPage, pageNow, pages } =
   usePagination(fetchData, { perPage: itemsPerPage.value })
@@ -49,18 +51,42 @@ const { showConfirmDialog, confirmTitle, confirmMessage, displayConfirmation, co
 // State Data Bank
 const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL
 
-interface Data {
+interface Surveyor {
   id: number
   name: string
-  value: string
+  access_code: string
 }
 
-// const datas = ref<Data[]>([])
-const datas = ref<Data[]>([
-  { id: 1, name: 'Item A', value: '100' },
-  { id: 2, name: 'Item B', value: '200' },
-  { id: 3, name: 'Item C', value: '300' },
-])
+interface SK {
+  sk: string
+}
+
+interface ProgramKegiatanBantuan {
+  id: number
+  asnaf_id: number
+  program_id: number
+  kategori_asnaf: string
+  kategori_program: string
+  kode: string
+  nama_kegiatan: string
+  slug: string
+  status_tampil: string
+  jumlah_dana: number
+  jumlah_maksimal_nominal_bantuan: number
+  jumlah_target_penerima: number
+  sumber_dana: string
+  area_penyaluran: string
+  jenis_penyaluran: string
+  status_kegiatan: boolean
+  tahun: string
+  banner: string
+  desc: string
+  datetimes: string
+  kegiatans: SK[]
+  surveyors: Surveyor[]
+}
+
+const dataProgramBantuan = ref<ProgramKegiatanBantuan[]>([])
 
 // Function: Modal
 const isModalAddOpen = ref(false)
@@ -74,39 +100,66 @@ function openModalAdd() {
 }
 
 function openModalSyarat(id: any) {
-  selectedKegiatan.value = 1
+  selectedKegiatan.value = id
   console.log('selectedBank Parent', selectedKegiatan.value)
   isModalEditSyarat.value = true
 }
 
 function openModalKriteria(id: any) {
-  selectedKegiatan.value = 1
+  selectedKegiatan.value = id
   console.log('selectedBank Parent', selectedKegiatan.value)
   isModalEditKriteria.value = true
 }
 
 function openModalSurveyor(id: any) {
-  selectedKegiatan.value = 1
+  selectedKegiatan.value = id
   console.log('selectedBank Parent', selectedKegiatan.value)
   isModalEditSurveyor.value = true
 }
 
 // Function: Fetch Data
 const search = ref('')
+const statusOption = ref<{ value: string; label: string }[]>([])
+const asnafOption = ref<{ value: number; label: string }[]>([])
+const programOption = ref<{ value: number; label: string }[]>([])
+const yearOption = ref<{ value: number; label: string }[]>([])
+
+const selectedStatus = ref('')
+const selectedAsnaf = ref('')
+const selectedProgram = ref('')
+const selectedYear = ref('')
 
 async function fetchData() {
   isTableLoading.value = true
   try {
-    // const response = await get_bank({
-    //   search: search.value,
-    //   perpage: perPage.value,
-    //   pageNumber: currentPage.value,
-    // })
-    // datas.value = response.data
-    // totalRow.value = response.total
-    // console.log(datas.value)
+    const responseFilterType = await get_filter_type()
+
+    statusOption.value = [
+      { value: 'sedang_berlangsung', label: 'Sedang Berlangsung' },
+      { value: 'selesai', label: 'Selesai' },
+    ]
+    ;(asnafOption.value = responseFilterType.data.type_asnaf_id),
+      (programOption.value = responseFilterType.data.type_program_id),
+      (yearOption.value = responseFilterType.data.type_year)
+
+    console.log(responseFilterType)
+
+    const response = await get_program_bantuan({
+      search: search.value,
+      perpage: perPage.value,
+      pageNumber: currentPage.value,
+      type_status_kegiatan: selectedStatus.value,
+      type_asnaf_id: selectedAsnaf.value,
+      type_program_id: selectedProgram.value,
+      type_year: selectedYear.value,
+    })
+
+    console.log(response)
+
+    dataProgramBantuan.value = response.data
+    totalRow.value = response.total
   } catch (error) {
-    displayNotification('Gagal mengambil data bank', 'error')
+    displayNotification('Gagal mengambil data program bantuan', 'error')
   } finally {
     isTableLoading.value = false
   }
@@ -117,18 +170,37 @@ onMounted(async () => {
 })
 
 // Function: Delete Data
-async function deleteData(id: number) {
+
+function openSkSurveyor(skFileName: string) {
+  const url = `${BASE_URL}/uploads/img/sk_penetapan/${skFileName}`
+  window.open(url, '_blank') // buka di tab baru browser
+}
+
+const copyLink = async (accessCode: string) => {
+  try {
+    console.log('========DDDDD=========')
+    console.log(accessCode)
+    console.log('========DDDDD=========')
+    const url = `localhost:5173/survey?code=${accessCode}`
+    await navigator.clipboard.writeText(url)
+    displayNotification('Link berhasil disalin', 'success')
+  } catch (err) {
+    console.error('Gagal salin link:', err)
+  }
+}
+
+async function kirim_pesan(kegiatan_id: number) {
   displayConfirmation(
-    'Hapus Data Bank',
-    'Apakah Anda yakin ingin menghapus data bank ini?',
+    'Kirim Pesan',
+    'Apakah Anda yakin ingin mengirim pesan ke semua surveyor?',
     async () => {
       try {
         isLoading.value = true
-        // await delete_bank(id)
-        displayNotification('Data bank berhasil dihapus', 'success')
+        await send_pesan({ kegiatan_id: kegiatan_id })
+        displayNotification('Pesan Berhasil Dikirim', 'success')
         await fetchData()
       } catch (error) {
-        displayNotification('Gagal menghapus data bank', 'error')
+        displayNotification('Gagal mengirim pesan', 'error')
       } finally {
         isLoading.value = false
       }
@@ -143,26 +215,58 @@ async function deleteData(id: number) {
     <LoadingSpinner v-if="isLoading" label="Memuat halaman..." />
     <div v-else class="space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <BaseButton
-          @click="openModalAdd()"
-          variant="primary"
-          :loading="isModalAddOpen || isModalEditSyarat"
-          type="button"
-        >
-          <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" />
-          Tambah Bank
-        </BaseButton>
+        <div class="flex items-center w-full sm:w-auto gap-2">
+          <BaseButton
+            @click="openModalAdd()"
+            variant="primary"
+            :loading="isModalAddOpen"
+            type="button"
+          >
+            <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" />
+            Tambah Program Kegiatan
+          </BaseButton>
+          <label for="search" class="mr-2 text-sm font-medium text-gray-600">Filter</label>
 
-        <!-- Search -->
-        <div class="flex items-center w-full sm:w-auto">
-          <label for="search" class="mr-2 text-sm font-medium text-gray-600">Cari</label>
+          <!-- Status -->
+          <BaseSelect
+            v-model="selectedStatus"
+            :options="statusOption"
+            placeholder="Semua Status"
+            @change="fetchData"
+          />
+
+          <!-- Asnaf -->
+          <BaseSelect
+            v-model="selectedAsnaf"
+            :options="asnafOption"
+            placeholder="Semua Asnaf"
+            @change="fetchData"
+          />
+
+          <!-- Program -->
+          <BaseSelect
+            v-model="selectedProgram"
+            :options="programOption"
+            placeholder="Semua Program"
+            @change="fetchData"
+          />
+
+          <!-- Tahun -->
+          <BaseSelect
+            v-model="selectedYear"
+            :options="yearOption"
+            placeholder="Semua Tahun"
+            @change="fetchData"
+          />
+
+          <!-- Search -->
           <input
             id="search"
             type="text"
             v-model="search"
             @change="fetchData"
-            placeholder="Cari bank..."
-            class="w-full sm:w-64 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:border-green-900 focus:ring-2 focus:ring-green-900 transition"
+            placeholder="Cari Nama Kegiatan . . ."
+            class="w-full sm:w-64 rounded-md border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:border-green-900 focus:ring-2 focus:ring-green-900 transition"
           />
         </div>
       </div>
@@ -172,26 +276,32 @@ async function deleteData(id: number) {
         <SkeletonTable v-if="isTableLoading" :columns="totalColumns" :rows="itemsPerPage" />
         <table v-else class="w-full border-collapse bg-white text-sm">
           <thead class="bg-gray-50 text-gray-700 text-center border-b border-gray-300">
-            <tr>
-              <th class="w-[30%] px-6 py-3 font-medium">Logo Bank</th>
-              <th class="w-[50%] px-6 py-3 font-medium">Nama Bank</th>
-              <th class="w-[20%] px-6 py-3 font-medium">Aksi</th>
+            <tr class="border-b border-gray-300">
+              <th class="w-[20%] px-6 py-3 font-medium">Banner</th>
+              <th class="w-[25%] px-6 py-3 font-medium">Info Penyaluran</th>
+              <th class="w-[30%] px-6 py-3 font-medium">Info Detail Penyaluran</th>
+              <th class="w-[15%] px-6 py-3 font-medium">Datetimes</th>
+              <th class="w-[10%] px-6 py-3 font-medium">Aksi</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
-            <template v-if="datas">
-              <tr v-for="data in datas" :key="data.id" class="hover:bg-gray-50 transition-colors">
-                <td class="px-6 py-4 text-center align-middle">
+            <template v-if="dataProgramBantuan.length > 0">
+              <tr
+                v-for="data in dataProgramBantuan"
+                :key="data.id"
+                class="hover:bg-gray-50 transition-colors"
+              >
+                <td class="px-6 py-4 text-center align-top">
                   <center>
                     <div
                       v-if="data.banner && data.banner !== '-'"
                       class="relative rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden"
-                      style="width: 100px; height: 33px"
+                      style="width: 301px; height: 165px"
                       :class="{ 'bg-gray-200': !data.banner || data.banner === '-' }"
                     >
                       <img
-                        :src="BASE_URL + '/uploads/img/program_donasi/' + data.banner"
-                        :alt="`Foto data ${data.banner}`"
+                        :src="BASE_URL + '/uploads/img/program_kegiatan_bantuan/' + data.banner"
+                        :alt="`Banner ${data.nama_kegiatan}`"
                         class="object-contain max-w-full max-h-full mx-auto"
                         @error="data.banner = '-'"
                       />
@@ -200,13 +310,162 @@ async function deleteData(id: number) {
                       v-else
                       class="bg-gray-200 text-gray-500 text-center px-4 relative aspect-video max-w-sm rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden"
                     >
-                      <p class="text-sm font-medium">Gambar tidak tersedia</p>
+                      <font-awesome-icon icon="fa-solid fa-image" class="text-2xl text-gray-400" />
                     </div>
                   </center>
                 </td>
-                <td class="px-6 py-4 text-center font-medium text-gray-800">{{ data.name }}</td>
-                <td class="px-6 py-4 text-center font-medium text-gray-800">{{ data.value }}</td>
-                <td class="px-6 py-4">
+                <td class="px-6 py-4 align-top font-normal text-gray-800">
+                  <table class="border border-gray-300 w-full text-xs text-left">
+                    <tbody>
+                      <tr class="border-b border-gray-300">
+                        <td class="w-[45%] bg-gray-200 px-4 py-1 font-semibold">
+                          NAMA KEGIATAN PENYALURAN
+                        </td>
+                        <td class="px-4 py-1">{{ data.nama_kegiatan || '-' }}</td>
+                      </tr>
+                      <tr class="border-b border-gray-300">
+                        <td class="w-[45%] bg-gray-200 px-4 py-1 font-semibold">JENIS KEGIATAN</td>
+                        <td class="px-4 py-1">{{ data.nama_kegiatan || '-' }}</td>
+                      </tr>
+                      <tr class="border-b border-gray-300">
+                        <td class="w-[45%] bg-gray-200 px-4 py-1 font-semibold">TAHUN</td>
+                        <td class="px-4 py-1">{{ data.tahun || '-' }}</td>
+                      </tr>
+                      <tr class="border-b border-gray-300">
+                        <td class="w-[45%] bg-gray-200 px-4 py-1 font-semibold">KATEGORI</td>
+                        <td class="px-4 py-1">{{ data.kategori_asnaf || '-' }}</td>
+                      </tr>
+                      <tr class="border-b border-gray-300">
+                        <td class="w-[45%] bg-gray-200 px-4 py-1 font-semibold">PROGRAM</td>
+                        <td class="px-4 py-1">{{ data.kategori_program || '-' }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+                <td class="px-6 py-4 text-center font-normal text-gray-800">
+                  <table class="border border-gray-300 w-full text-xs text-left">
+                    <tbody>
+                      <tr class="border-b border-gray-300">
+                        <td class="w-[45%] bg-gray-200 px-4 py-1 font-semibold">DANA</td>
+                        <td class="px-4 py-1">{{ $formatToRupiah(data.jumlah_dana) || '-' }}</td>
+                      </tr>
+                      <tr class="border-b border-gray-300">
+                        <td class="w-[45%] bg-gray-200 px-4 py-1 font-semibold">
+                          JENIS PENYALURAN
+                        </td>
+                        <td class="px-4 py-1">{{ data.jenis_penyaluran.toUpperCase() || '-' }}</td>
+                      </tr>
+                      <tr class="border-b border-gray-300">
+                        <td class="w-[45%] bg-gray-200 px-4 py-1 font-semibold">KUOTA PENERIMA</td>
+                        <td class="px-4 py-1">{{ data.jumlah_target_penerima || '-' }} Penerima</td>
+                      </tr>
+                      <tr class="border-b border-gray-300">
+                        <td class="w-[45%] bg-gray-200 px-4 py-1 font-semibold">
+                          MAKSIMAL BANTUAN PER ORANG
+                        </td>
+                        <td class="px-4 py-1">
+                          {{ $formatToRupiah(data.jumlah_maksimal_nominal_bantuan) || '-' }}
+                        </td>
+                      </tr>
+                      <tr class="border-b border-gray-300">
+                        <td class="w-[45%] bg-gray-200 px-4 py-1 font-semibold">SUMBER DANA</td>
+                        <td class="px-4 py-1">{{ data.sumber_dana.toUpperCase() || '-' }}</td>
+                      </tr>
+                      <tr class="border-b border-gray-300">
+                        <td class="w-[45%] bg-gray-200 px-4 py-1 font-semibold">TAMPIL</td>
+                        <td class="px-4 py-1 font-semibold">
+                          <span
+                            :class="
+                              data.status_tampil === 'tampil' ? 'text-green-500' : 'text-red-500'
+                            "
+                            >{{ data.status_tampil === 'tampil' ? 'TAMPIL' : 'TIDAK TAMPIL' }}</span
+                          >
+                        </td>
+                      </tr>
+                      <tr class="border-b border-gray-300">
+                        <td class="w-[45%] bg-gray-200 px-4 py-1 font-semibold">STATUS</td>
+                        <td class="px-4 py-1 font-bold">
+                          <span
+                            :class="
+                              data.status_kegiatan === false ? 'text-yellow-500' : 'text-green-500'
+                            "
+                            >{{
+                              data.status_kegiatan === false ? 'SEDANG BERLANGSUNG' : 'SELESAI'
+                            }}</span
+                          >
+                        </td>
+                      </tr>
+                      <tr class="border-b border-gray-300">
+                        <td class="w-[45%] bg-gray-200 px-4 py-1 font-semibold">AREA PENYALURAN</td>
+                        <td class="px-4 py-1 text-red-500 font-bold">
+                          {{
+                            data.area_penyaluran === 'semua_pemohon'
+                              ? 'SEMUA PEMOHON'
+                              : data.area_penyaluran === 'kabupaten'
+                                ? 'KABUPATEN'
+                                : data.area_penyaluran === 'instansi'
+                                  ? 'INSTANSI'
+                                  : data.area_penyaluran === 'kecamatan'
+                                    ? 'KECAMATAN'
+                                    : data.area_penyaluran === 'desa'
+                                      ? 'DESA'
+                                      : '-'
+                          }}
+                        </td>
+                      </tr>
+                      <tr class="border-b border-gray-300">
+                        <td class="w-[45%] bg-gray-200 px-4 py-1 font-semibold">SK SURVEYOR</td>
+                        <td class="px-4 py-1">
+                          <div
+                            v-if="data.kegiatans && data.kegiatans.length > 0"
+                            @click="openSkSurveyor(data.kegiatans[0].sk)"
+                            class="w-24 h-10 bg-gray-200 flex items-center justify-center cursor-pointer border rounded hover:bg-gray-300"
+                          >
+                            Klik untuk lihat
+                          </div>
+                          <div v-else>-</div>
+                        </td>
+                      </tr>
+
+                      <tr class="border-b border-gray-300">
+                        <td class="w-[45%] bg-gray-200 px-4 py-1 font-semibold">Surveyor</td>
+                        <td class="px-4 py-1">
+                          <div v-if="data.surveyors && data.surveyors.length > 0">
+                            <!-- List surveyor -->
+                            <div
+                              v-for="(s, i) in data.surveyors"
+                              :key="i"
+                              class="flex justify-between items-center mb-1"
+                            >
+                              <span>{{ s.name }}</span>
+                              <button
+                                @click="copyLink(s.access_code)"
+                                class="bg-white text-black text-sm px-2 py-1 rounded border border-black hover:bg-gray-200"
+                              >
+                                <SuratIcon />
+                              </button>
+                            </div>
+
+                            <!-- Button kirim WA di baris sendiri -->
+                            <div class="mt-2 flex justify-end">
+                              <ButtonGreen
+                                @click="kirim_pesan(data.id)"
+                                class="flex items-center gap-2"
+                              >
+                                <font-awesome-icon icon="fa-brands fa-whatsapp" />
+                              </ButtonGreen>
+                            </div>
+                          </div>
+                          <div v-else>-</div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+                <td class="px-6 py-4 align-top text-center font-medium text-gray-800">
+                  {{ data.datetimes }}
+                </td>
+                <td class="px-6 py-4 align-top text-center font-medium text-gray-800">
                   <div class="flex justify-center gap-2">
                     <LightButton @click="openModalSyarat(data.id)">
                       <font-awesome-icon icon="fa-solid fa-file-contract"></font-awesome-icon>
@@ -217,12 +476,6 @@ async function deleteData(id: number) {
                     <LightButton @click="openModalSurveyor(data.id)">
                       <font-awesome-icon icon="fa-solid fa-users"></font-awesome-icon>
                     </LightButton>
-                    <LightButton @click="">
-                      <font-awesome-icon icon="fa-brands fa-whatsapp"></font-awesome-icon>
-                    </LightButton>
-                    <DangerButton @click="deleteData(data.id)">
-                      <DeleteIcon />
-                    </DangerButton>
                   </div>
                 </td>
               </tr>
@@ -232,11 +485,11 @@ async function deleteData(id: number) {
             <tr v-else>
               <td :colspan="totalColumns" class="px-6 py-8 text-center text-gray-500">
                 <font-awesome-icon
-                  icon="fa-solid fa-database"
+                  icon="fa-solid fa-people-carry-box"
                   class="text-4xl mb-2 text-gray-400"
                 />
                 <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ada data</h3>
-                <p class="text-sm">Belum ada data field.</p>
+                <p class="text-sm">Belum ada data program kegiatan bantuan.</p>
               </td>
             </tr>
           </tbody>
@@ -257,6 +510,18 @@ async function deleteData(id: number) {
         </table>
       </div>
     </div>
+
+    <FormAdd
+      :is-modal-open="isModalAddOpen"
+      @close="((isModalAddOpen = false), fetchData())"
+      @status="
+        (payload: any) =>
+          displayNotification(
+            payload.error_msg || 'Tambah/Update program kegiatan bantuan gagal',
+            payload.error ? 'error' : 'success',
+          )
+      "
+    />
 
     <!-- Modal FormEdit -->
     <FormSyarat
@@ -292,7 +557,7 @@ async function deleteData(id: number) {
       @status="
         (payload: any) =>
           displayNotification(
-            payload.error_msg || 'Tambah/Update Kriteria gagal',
+            payload.error_msg || 'Tambah/Update Surveyor gagal',
             payload.error ? 'error' : 'success',
           )
       "

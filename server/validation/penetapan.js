@@ -15,13 +15,8 @@ const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadPath),
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase();
-    let safeName = req.body.kegiatan_name || "sk_penetapan";
-    safeName = safeName
-      .replace(/\s+/g, "_")
-      .replace(/[^a-zA-Z0-9_]/g, "")
-      .toLowerCase();
-
-    const filename = `${safeName}${ext}`;
+    const timestamp = Date.now(); // angka unik biar ga tabrakan
+    const filename = `sk_${timestamp}${ext}`;
     req.body.photoPath = filename;
     cb(null, filename);
   },

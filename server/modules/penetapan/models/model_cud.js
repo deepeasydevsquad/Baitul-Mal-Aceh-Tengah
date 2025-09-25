@@ -122,7 +122,7 @@ class Model_cud {
 
   async addSurveyor() {
     const body = this.req.body;
-    const file = this.req.file; // misal pake multer untuk handle upload
+    const file = this.req.file;
     const myDate = moment().format("YYYY-MM-DD HH:mm:ss");
 
     console.log("body:", body);
@@ -131,12 +131,20 @@ class Model_cud {
     await this.initialize();
 
     try {
-      // validasi
-      if (!body || !body.surveyor) {
-        throw new Error("Data surveyor tidak boleh kosong");
-      }
+      const kegiatanId = body.kegiatan_id;
 
-      // konversi surveyor ke array kalo masih string (FormData biasanya string)
+      // cari sk lama sebelum dihapus
+      const existing = await Surveyor_kegiatan.findOne({
+        where: { kegiatan_id: kegiatanId },
+      });
+      const oldSk = existing ? existing.sk : null;
+
+      // tentukan nama file yang dipakai
+      const skFileName = file
+        ? file.filename // kalau ada upload baru
+        : body.sk || oldSk; // kalau gak ada, pakai body.sk (kalau frontend kirim), else oldSk
+
+      // parse surveyor array
       let surveyorArray = body.surveyor;
       if (typeof body.surveyor === "string") {
         surveyorArray = JSON.parse(body.surveyor);
@@ -145,9 +153,6 @@ class Model_cud {
       if (!Array.isArray(surveyorArray) || surveyorArray.length === 0) {
         throw new Error("Data surveyor tidak boleh kosong");
       }
-
-      const kegiatanId = body.kegiatan_id;
-      const skFileName = file ? file.filename : body.sk; // ambil nama file dari upload
 
       // hapus surveyor lama
       await Surveyor_kegiatan.destroy({
