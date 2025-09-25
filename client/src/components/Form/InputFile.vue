@@ -44,7 +44,7 @@
       Ukuran maksimum: {{ maxSize }} KB. Tipe file: {{ accept }}.
     </p>
     <p v-if="!hideInfo" class="text-xs text-gray-500">
-      Dimensi maks: {{ dimensionsInfo }}
+      Dimensi: {{ dimensionsInfo }}
     </p>
 
     <!-- Preview (opsional) -->

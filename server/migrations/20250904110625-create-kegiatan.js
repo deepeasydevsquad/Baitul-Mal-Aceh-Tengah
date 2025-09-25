@@ -71,11 +71,13 @@ module.exports = {
       tahun: {
         type: Sequelize.INTEGER
       },
-      name: {
-        type: Sequelize.STRING
-      },
       banner: {
         type: Sequelize.STRING
+      },
+      periode_bantuan: {
+        type: Sequelize.ENUM,
+        values: ["tahunan", "bulanan"],
+        defaultValue : "tahunan"
       },
       desc: {
         type: Sequelize.TEXT

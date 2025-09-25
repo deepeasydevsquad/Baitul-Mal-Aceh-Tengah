@@ -75,8 +75,4 @@ router.post(
   controllersAdministrator.logout_administrator_process
 );
 
-// administrator
-
-// auth/login_administrator
-
 module.exports = router;

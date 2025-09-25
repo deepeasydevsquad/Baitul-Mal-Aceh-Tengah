@@ -10,7 +10,7 @@ const cookieParser = require("cookie-parser");
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 3003;
 
 // CORS dinamis, izinkan semua origin yang datang
 app.use(
@@ -62,10 +62,21 @@ const arr_router = [
   "kecamatan",
   "kegiatan_kesekretariatan",
   "bank_pengumpulan",
+  "template_pesan_whatsapp",
+  "desa",
   "daftar_keanggotaan",
   "surveyor",
   "pengaturan_umum",
-  "laporan_umum"
+  "laporan_umum",
+  "program_kegiatan_bantuan",
+  "daftar_program",
+  "laporan_asnaf",
+  "program_donasi",
+  "tab",
+  "riwayat_donasi",
+  "daftar_asnaf",
+  "urutan_bagian_monev",
+  "riwayat_infaq",
 ];
 
 const arr = {};
