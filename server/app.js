@@ -75,6 +75,7 @@ const arr_router = [
   "riwayat_donasi",
   "daftar_asnaf",
   "urutan_bagian_monev",
+  "riwayat_infaq",
 ];
 
 const arr = {};

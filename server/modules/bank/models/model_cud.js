@@ -83,7 +83,7 @@ class Model_cud {
         }
       );
 
-      this.message = `Memperbaharui Data Bank dengan Nama Bank: ${info_bank.name} dan ID Bank: ${body.id} menjadi Nama Bank ${body.name}`;
+      this.message = `Memperbaharui Bank dengan Nama Bank: ${info_bank.name} dan ID Bank: ${body.id} menjadi Nama Bank ${body.name}`;
     } catch (error) {
       this.state = false;
       this.message = error.message;
