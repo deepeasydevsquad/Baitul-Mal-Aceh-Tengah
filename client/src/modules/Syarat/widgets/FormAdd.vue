@@ -85,6 +85,7 @@ const handleSubmit = async () => {
 
 // Close modal
 const closeModal = () => {
+  if (isSubmitting.value) return
   resetForm()
   emit('close')
 }

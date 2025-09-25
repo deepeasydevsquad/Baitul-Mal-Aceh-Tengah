@@ -1,9 +1,7 @@
 const express = require("express");
 const { body, validationResult } = require("express-validator");
 const controllers = require("../modules/bank_pengumpulan/controllers/index");
-const {
-  authenticateTokenAdministrator,
-} = require("../middleware/authenticateToken");
+const { authenticateTokenAdministrator } = require("../middleware/authenticateToken");
 const validation = require("../validation/bank_pengumpulan");
 
 const router = express.Router();
@@ -39,7 +37,9 @@ router.post(
 router.post(
   "/bank_pengumpulan/edit",
   authenticateTokenAdministrator,
-  [body("id").isInt().withMessage("ID harus berupa angka"), ...validation.edit],
+  [
+    body("id").isInt().withMessage("ID harus berupa angka"), ...validation.edit
+  ],
   handleValidation,
   controllers.edit_bank_pengumpulan
 );

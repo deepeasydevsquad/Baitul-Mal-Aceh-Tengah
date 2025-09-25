@@ -12,9 +12,6 @@ exports.list_grup = async (req, res) => {
     const data = await model.list_grup();
     return res.status(200).json(data); // pake return
   } catch (error) {
-    console.error("_____DDDDD_______");
-    console.error(error);
-    console.error("_____DDDDD_______");
     return handleServerError(res, error); // kasih full error object
   }
 };
@@ -26,9 +23,6 @@ exports.list_menu_by_id = async (req, res) => {
     const data = await model.list_menu_by_id();
     return res.status(200).json(data); // pake return
   } catch (error) {
-    console.error("_____DDDDD_______");
-    console.error(error);
-    console.error("_____DDDDD_______");
     return handleServerError(res, error); // kasih full error object
   }
 };
@@ -40,9 +34,6 @@ exports.list_menu = async (req, res) => {
     const data = await model.list_menu();
     return res.status(200).json(data); // pake return
   } catch (error) {
-    console.error("_____DDDDD_______");
-    console.error(error);
-    console.error("_____DDDDD_______");
     return handleServerError(res, error); // kasih full error object
   }
 };
