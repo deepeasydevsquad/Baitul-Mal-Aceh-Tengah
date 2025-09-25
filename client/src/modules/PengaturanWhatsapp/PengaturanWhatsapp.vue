@@ -1,117 +1,117 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted, computed } from 'vue'
-import Notification from '@/components/Modal/Notification.vue'
-import Confirmation from '@/components/Modal/Confirmation.vue'
-import BaseButton from '@/components/Button/BaseButton.vue'
-import LightButton from '@/components/Button/LightButton.vue'
-import EditIcon from '@/components/Icons/EditIcon.vue'
-import DangerButton from '@/components/Button/DangerButton.vue'
-import DeleteIcon from '@/components/Icons/DeleteIcon.vue'
-import Pagination from '@/components/Pagination/Pagination.vue'
-import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue'
-import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
+import { ref, onMounted, computed } from 'vue';
+import Notification from '@/components/Modal/Notification.vue';
+import Confirmation from '@/components/Modal/Confirmation.vue';
+import BaseButton from '@/components/Button/BaseButton.vue';
+import LightButton from '@/components/Button/LightButton.vue';
+import EditIcon from '@/components/Icons/EditIcon.vue';
+import DangerButton from '@/components/Button/DangerButton.vue';
+import DeleteIcon from '@/components/Icons/DeleteIcon.vue';
+import Pagination from '@/components/Pagination/Pagination.vue';
+import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
 
 // Composable
-import { usePagination } from '@/composables/usePagination'
-import { useConfirmation } from '@/composables/useConfirmation'
-import { useNotification } from '@/composables/useNotification'
+import { usePagination } from '@/composables/usePagination';
+import { useConfirmation } from '@/composables/useConfirmation';
+import { useNotification } from '@/composables/useNotification';
 
 // Service API
-import { list, start } from '@/service/pengaturan_whatsapp'
-import IconSupport from '@/components/Icons/IconSupport.vue'
-import GearIcon from '@/components/Icons/GearIcon.vue'
-import FormKonfigurasi from './widget/FormKonfigurasi.vue'
+import { list, start } from '@/service/pengaturan_whatsapp';
+import IconSupport from '@/components/Icons/IconSupport.vue';
+import GearIcon from '@/components/Icons/GearIcon.vue';
+import FormKonfigurasi from './widget/FormKonfigurasi.vue';
 
 // State: Loading
-const isLoading = ref(false)
-const isTableLoading = ref(false)
+const isLoading = ref(false);
+const isTableLoading = ref(false);
 
 // Composable: pagination
-const itemsPerPage = ref<number>(100)
-const totalColumns = ref<number>(3)
+const itemsPerPage = ref<number>(100);
+const totalColumns = ref<number>(3);
 
 const { currentPage, perPage, totalRow, totalPages, nextPage, prevPage, pageNow, pages } =
-  usePagination(fetchData, { perPage: itemsPerPage.value })
+  usePagination(fetchData, { perPage: itemsPerPage.value });
 
 // Composable: notification
 const { showNotification, notificationType, notificationMessage, displayNotification } =
-  useNotification()
+  useNotification();
 
 // Composable: confirmation
 const { showConfirmDialog, confirmTitle, confirmMessage, displayConfirmation, confirm, cancel } =
-  useConfirmation()
+  useConfirmation();
 
 // State Data Bank
-const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL
+const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
 interface Data {
-  api_key: string
-  device_key: string
-  status: string
-  expired_at: string
-  created_at: string
-  whatsapp_number: string
+  api_key: string;
+  device_key: string;
+  status: string;
+  expired_at: string;
+  created_at: string;
+  whatsapp_number: string;
 }
 
-const datas = ref<Data[]>([])
+const datas = ref<Data[]>([]);
 
 // Function: Modal
-const isModalKonfigurasi = ref(false)
-const isModalEditOpen = ref(false)
-const selectedBank = ref<any>(null)
+const isModalKonfigurasi = ref(false);
+const isModalEditOpen = ref(false);
+const selectedBank = ref<any>(null);
 
 function openModalAdd() {
-  isModalKonfigurasi.value = true
+  isModalKonfigurasi.value = true;
 }
 
 async function fetchData() {
-  isTableLoading.value = true
+  isTableLoading.value = true;
   try {
-    const response = await list()
+    const response = await list();
 
-    datas.value = response.data
+    datas.value = response.data;
 
-    console.log(datas.value)
+    console.log(datas.value);
   } catch (error) {
-    displayNotification('Gagal mengambil data bank', 'error')
+    displayNotification('Gagal mengambil data bank', 'error');
   } finally {
-    isTableLoading.value = false
+    isTableLoading.value = false;
   }
 }
 
 onMounted(async () => {
-  await fetchData()
-})
+  await fetchData();
+});
 
-const qrUrl = ref('')
+const qrUrl = ref('');
 
 const restart = async () => {
-  isLoading.value = true
-  qrUrl.value = null // reset QR dulu setiap kali restart
+  isLoading.value = true;
+  qrUrl.value = null; // reset QR dulu setiap kali restart
   try {
-    const response = await start()
-    console.log(response)
+    const response = await start();
+    console.log(response);
 
     if (response.todo === 'scan') {
       // kalau butuh scan → notif merah + tampilkan QR
-      displayNotification('Perlu scan QR dulu', 'error')
+      displayNotification('Perlu scan QR dulu', 'error');
       if (response.qr_url) {
-        qrUrl.value = response.qr_url
+        qrUrl.value = response.qr_url;
       }
     } else if (response.todo === 'connected') {
       // kalau udah konek → notif hijau
-      displayNotification('Perangkat terhubung', 'success')
+      displayNotification('Perangkat terhubung', 'success');
     } else {
       // fallback
-      displayNotification(response.message || 'Status tidak diketahui', 'warning')
+      displayNotification(response.message || 'Status tidak diketahui', 'warning');
     }
   } catch (error) {
-    displayNotification('Gagal restart koneksi', 'error')
+    displayNotification('Gagal restart koneksi', 'error');
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
-}
+};
 </script>
 
 <template>
@@ -142,11 +142,11 @@ const restart = async () => {
       <div class="overflow-hidden rounded-xl border border-gray-200 shadow bg-white p-6">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
           <!-- Kiri: Informasi -->
-          <div class="border rounded-xl overflow-hidden shadow h-full flex flex-col">
-            <div class="bg-gray-200 px-4 py-2 font-semibold text-gray-800 text-center">
+          <div class="border border-t border-gray-300 overflow-hidden shadow h-full flex flex-col">
+            <div class="bg-gray-200 px-4 py-2 font-medium text-gray-800 text-center">
               INFORMASI PERANGKAT
             </div>
-            <div class="border border-t-0 divide-y flex-1">
+            <div class="divide-y divide-gray-300 flex-1">
               <div class="grid grid-cols-[1fr_20px_1fr] px-4 py-2">
                 <span>Nomor WA</span>
                 <span>:</span>
