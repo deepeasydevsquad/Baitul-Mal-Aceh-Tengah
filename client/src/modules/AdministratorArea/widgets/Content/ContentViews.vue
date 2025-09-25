@@ -22,6 +22,7 @@ import TemplatePesanWhatsapp from '@/modules/TemplatePesanWhatsapp/TemplatePesan
 import DaftarKeanggotaan from '@/modules/DaftarKeanggotaan/DaftarKeanggotaan.vue'
 import kecamatan from '@/modules/Kecamatan/Kecamatan.vue'
 import SystemLog from '@/modules/SystemLog/SystemLog.vue'
+import PengaturanWhatsapp from'@/modules/PengaturanWhatsapp/PengaturanWhatsapp.vue'
 import LaporanUmum from '@/modules/DaftarLaporanUmum/LaporanUmum.vue'
 import ProgramKegiatanBantuan from '@/modules/ProgramKegiatanBantuan/ProgramKegiatanBantuan.vue'
 import DaftarProgram from '@/modules/DaftarProgram/DaftarProgram.vue'
@@ -41,6 +42,7 @@ import UrutanBagianMonev from '@/modules/UrutanBagianMonev/UrutanBagianMonev.vue
 import RiwayatInfaq from '@/modules/RiwayatInfaq/RiwayatInfaq.vue'
 
 const tabComponents = {
+  pengaturan_whatsapp: PengaturanWhatsapp,
   daftar_kecamatan: kecamatan,
   syarat: syarat,
   daftar_bank: Bank,
