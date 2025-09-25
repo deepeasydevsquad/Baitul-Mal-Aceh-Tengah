@@ -36,6 +36,7 @@ import LaporanAsnafFisabilillah from '@/modules/LaporanAsnaf/LaporanAsnafFisabil
 import LaporanAsnafGharim from '@/modules/LaporanAsnaf/LaporanAsnafGharim.vue'
 import LaporanAsnafMuallaf from '@/modules/LaporanAsnaf/LaporanAsnafMuallaf.vue'
 import LaporanAsnafIbnuSabil from '@/modules/LaporanAsnaf/LaporanAsnafIbnuSabil.vue'
+import RiwayatZakat from '@/modules/RiwayatZakat/RiwayatZakat.vue'
 import UrutanBagianMonev from '@/modules/UrutanBagianMonev/UrutanBagianMonev.vue'
 import RiwayatInfaq from '@/modules/RiwayatInfaq/RiwayatInfaq.vue'
 
@@ -68,7 +69,8 @@ const tabComponents = {
   laporan_asnaf_gharim: LaporanAsnafGharim,
   laporan_asnaf_muallaf: LaporanAsnafMuallaf,
   laporan_asnaf_ibnu_sabil: LaporanAsnafIbnuSabil,
-  daftar_asnaf:DaftarAsnaf,
+  daftar_asnaf: DaftarAsnaf,
+  riwayat_zakat: RiwayatZakat,
   urutan_bagian_monev: UrutanBagianMonev,
   riwayat_infaq: RiwayatInfaq
 }

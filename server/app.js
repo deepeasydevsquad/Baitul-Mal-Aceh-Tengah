@@ -75,6 +75,8 @@ const arr_router = [
   "tab",
   "riwayat_donasi",
   "daftar_asnaf",
+  "monev",
+  "riwayat_zakat",
   "urutan_bagian_monev",
   "riwayat_infaq",
 ];
