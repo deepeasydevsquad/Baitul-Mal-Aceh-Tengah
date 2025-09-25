@@ -117,17 +117,10 @@ async function deleteData(id: number) {
 
     <div v-else class="space-y-4">
       <!-- Search & Filter -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-end gap-4">
         <div class="flex items-center w-full sm:w-auto gap-2">
-          <label for="search" class="mr-2 text-sm font-medium text-gray-600">Cari</label>
-          <input
-            id="search"
-            type="text"
-            v-model="search"
-            @input="fetchData"
-            placeholder="Cari riwayat donasi..."
-            class="w-full sm:w-64 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:border-green-900 focus:ring-2 focus:ring-green-900 transition"
-          />
+          <label for="search" class="mr-2 text-sm font-medium text-gray-600">Filter</label>
+
           <select
             v-model="status"
             @change="fetchData"
@@ -147,6 +140,14 @@ async function deleteData(id: number) {
             <option value="sudah_dikirim">Sudah dikirim</option>
             <option value="belum_dikirim">Belum dikirim</option>
           </select>
+          <input
+            id="search"
+            type="text"
+            v-model="search"
+            @input="fetchData"
+            placeholder="Cari Nama / Nomor Nik / Nomor Akun..."
+            class="w-full sm:w-64 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:border-green-900 focus:ring-2 focus:ring-green-900 transition"
+          />
         </div>
       </div>
 
