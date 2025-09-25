@@ -17,7 +17,7 @@ import FormAdd from '@/modules/DaftarAsnaf/widgets/FormAdd.vue';
 import FormEdit from '@/modules/DaftarAsnaf/widgets/FormEdit.vue';
 
 // Composable
-import { usePagination } from '@/composables/usepagination';
+import { usePagination } from '@/composables/usePagination';
 import { useConfirmation } from '@/composables/useConfirmation';
 import { useNotification } from '@/composables/useNotification';
 

@@ -25,7 +25,7 @@ import {
 // Import Composables
 import { useNotification } from '@/composables/useNotification';
 import { useConfirmation } from '@/composables/useConfirmation';
-import { usePagination } from '@/composables/usepagination';
+import { usePagination } from '@/composables/usePagination';
 
 // State: Loading
 const isLoading = ref(false);

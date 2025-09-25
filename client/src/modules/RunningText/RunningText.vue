@@ -27,7 +27,7 @@ import FormAdd from './Widgets/FormAdd.vue';
 import FormEdit from './Widgets/FormEdit.vue';
 
 // Composable
-import { usePagination } from '@/composables/usepagination';
+import { usePagination } from '@/composables/usePagination';
 import { useConfirmation } from '@/composables/useConfirmation';
 import { useNotification } from '@/composables/useNotification';
 

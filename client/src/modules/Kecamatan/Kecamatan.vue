@@ -15,7 +15,7 @@ import FormAdd from '@/modules/Kecamatan/widgets/FormAdd.vue';
 import FormEdit from '@/modules/Kecamatan/widgets/FormEdit.vue';
 
 // Composable
-import { usePagination } from '@/composables/usepagination';
+import { usePagination } from '@/composables/usePagination';
 import { useConfirmation } from '@/composables/useConfirmation';
 import { useNotification } from '@/composables/useNotification';
 

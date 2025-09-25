@@ -9,7 +9,7 @@ import Pagination from '@/components/Pagination/Pagination.vue';
 
 // Composable
 import { useNotification } from '@/composables/useNotification';
-import { usePagination } from '@/composables/usepagination';
+import { usePagination } from '@/composables/usePagination';
 
 // Service API
 import { get_laporan_asnaf, get_tahun, download_excel_asnaf } from '@/service/laporan_asnaf';
