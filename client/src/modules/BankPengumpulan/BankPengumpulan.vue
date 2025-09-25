@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted } from 'vue';
 // Import komponen UI
-import DeleteIcon from '@/components/Icons/DeleteIcon.vue'
-import EditIcon from '@/components/Icons/EditIcon.vue'
-import DangerButton from '@/components/Button/DangerButton.vue'
-import Notification from '@/components/Modal/Notification.vue'
-import Confirmation from '@/components/Modal/Confirmation.vue'
-import BaseButton from '@/components/Button/BaseButton.vue'
-import LightButton from '@/components/Button/LightButton.vue'
-import Pagination from '@/components/Pagination/Pagination.vue'
-import FormAdd from './Widgets/FormAdd.vue'
-import FormEdit from './Widgets/FormEdit.vue'
-import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
-import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue'
+import DeleteIcon from '@/components/Icons/DeleteIcon.vue';
+import EditIcon from '@/components/Icons/EditIcon.vue';
+import DangerButton from '@/components/Button/DangerButton.vue';
+import Notification from '@/components/Modal/Notification.vue';
+import Confirmation from '@/components/Modal/Confirmation.vue';
+import BaseButton from '@/components/Button/BaseButton.vue';
+import LightButton from '@/components/Button/LightButton.vue';
+import Pagination from '@/components/Pagination/Pagination.vue';
+import FormAdd from './Widgets/FormAdd.vue';
+import FormEdit from './Widgets/FormEdit.vue';
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
+import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
 
 // Import service API
 import {
@@ -20,16 +20,16 @@ import {
   addBankPengumpulan,
   updateBankPengumpulan,
   deleteBankPengumpulan,
-} from '@/service/bank_pengumpulan'
+} from '@/service/bank_pengumpulan';
 
 // Import Composables
-import { useNotification } from '@/composables/useNotification'
-import { useConfirmation } from '@/composables/useConfirmation'
-import { usePagination } from '@/composables/usePagination'
+import { useNotification } from '@/composables/useNotification';
+import { useConfirmation } from '@/composables/useConfirmation';
+import { usePagination } from '@/composables/usePaginations';
 
 // State: Loading
-const isLoading = ref(false)
-const isTableLoading = ref(false)
+const isLoading = ref(false);
+const isTableLoading = ref(false);
 
 // Composables
 const {
@@ -38,70 +38,70 @@ const {
   notificationMessage,
   displayNotification,
   hideNotification,
-} = useNotification()
+} = useNotification();
 
 const { showConfirmDialog, confirmTitle, confirmMessage, displayConfirmation, confirm, cancel } =
-  useConfirmation()
+  useConfirmation();
 
 // Composables: pagination
-const totalColumns = ref<number>(6)
-const itemsPerPage = ref<number>(100)
+const totalColumns = ref<number>(6);
+const itemsPerPage = ref<number>(100);
 
 const { currentPage, totalPages, totalRow, perPage, pages, nextPage, prevPage, pageNow } =
-  usePagination(fetchData, { perPage: itemsPerPage.value })
+  usePagination(fetchData, { perPage: itemsPerPage.value });
 
 // Function: fetch data
-const search = ref('')
+const search = ref('');
 
 async function fetchData() {
-  isTableLoading.value = true
+  isTableLoading.value = true;
   try {
     const response = await getBankPengumpulan({
       search: search.value,
       perpage: perPage.value,
       pageNumber: currentPage.value,
-    })
-    totalRow.value = response.total
-    dataBankPengumpulan.value = response.data
+    });
+    totalRow.value = response.total;
+    dataBankPengumpulan.value = response.data;
   } catch (error) {
-    displayNotification('Gagal mengambil data.', 'error')
+    displayNotification('Gagal mengambil data.', 'error');
   } finally {
-    isTableLoading.value = false
+    isTableLoading.value = false;
   }
 }
 
 // Interface definitions
 interface Bank {
-  id: number
-  name: string
+  id: number;
+  name: string;
 }
 
 interface BankPengumpulan {
-  id: number
-  bank_id: number
-  tipe: string
-  nomor_akun_bank: string
-  nama_akun_bank: string
-  createdAt: string | null
-  updatedAt: string | null
-  Bank?: Bank
+  id: number;
+  bank_id: number;
+  tipe: string;
+  nomor_akun_bank: string;
+  nama_akun_bank: string;
+  createdAt: string | null;
+  updatedAt: string | null;
+  Bank?: Bank;
 }
 
 // State lokal komponen
-const dataBankPengumpulan = ref<BankPengumpulan[]>([])
-const isModalAddOpen = ref(false)
-const formAddRef = ref<any>(null)
+const dataBankPengumpulan = ref<BankPengumpulan[]>([]);
+const isModalAddOpen = ref(false);
+const formAddRef = ref<any>(null);
 
 // Fungsi untuk mengambil pesan error dari response API
 const getErrorMessage = (error: any): string => {
   if (error.response?.data?.message) {
-    return error.response.data.message
+    return error.response.data.message;
   }
   if (error.response?.data?.errors && Array.isArray(error.response.data.errors)) {
-    return error.response.data.errors[0]?.msg || 'Terjadi kesalahan validasi'
+    return error.response.data.errors[0]?.msg || 'Terjadi kesalahan validasi';
   }
-  return 'Terjadi kesalahan pada server'
-}
+  return 'Terjadi kesalahan pada server';
+};
 
 // Handler untuk menyimpan data baru
 
@@ -111,85 +111,85 @@ const handleSaveNewData = async (formData: any) => {
     tipe: formData.jenisPemasukan,
     nama_akun_bank: formData.namaAkunBank,
     nomor_akun_bank: formData.nomorAkunBank,
-  }
+  };
   try {
-    await addBankPengumpulan(payload)
-    isModalAddOpen.value = false
-    displayNotification('Data berhasil ditambahkan!', 'success')
-    await fetchData()
+    await addBankPengumpulan(payload);
+    isModalAddOpen.value = false;
+    displayNotification('Data berhasil ditambahkan!', 'success');
+    await fetchData();
   } catch (error: any) {
     if (error.response?.data?.errors && formAddRef.value?.parseServerErrors) {
-      formAddRef.value.parseServerErrors(error)
-      return
+      formAddRef.value.parseServerErrors(error);
+      return;
     }
-    const errorMessage = getErrorMessage(error)
-    displayNotification(errorMessage, 'error')
+    const errorMessage = getErrorMessage(error);
+    displayNotification(errorMessage, 'error');
   }
-}
+};
 
 // Handler untuk menyimpan data yang diedit
-const isEditLoading = ref(false)
-const isModalEditOpen = ref(false)
-const editData = ref<BankPengumpulan | null>(null)
-const formEditRef = ref<any>(null)
+const isEditLoading = ref(false);
+const isModalEditOpen = ref(false);
+const editData = ref<BankPengumpulan | null>(null);
+const formEditRef = ref<any>(null);
 
 const handleSaveEditData = async (formData: BankPengumpulan) => {
-  isEditLoading.value = true
+  isEditLoading.value = true;
   try {
-    await updateBankPengumpulan(formData.id, formData)
-    isModalEditOpen.value = false
-    displayNotification('Data berhasil diperbarui!', 'success')
-    await fetchData()
+    await updateBankPengumpulan(formData.id, formData);
+    isModalEditOpen.value = false;
+    displayNotification('Data berhasil diperbarui!', 'success');
+    await fetchData();
   } catch (error: any) {
     if (error.response?.data?.errors && formEditRef.value?.parseServerErrors) {
-      formEditRef.value.parseServerErrors(error)
-      return
+      formEditRef.value.parseServerErrors(error);
+      return;
     }
-    const errorMessage = getErrorMessage(error)
-    displayNotification(errorMessage, 'error')
+    const errorMessage = getErrorMessage(error);
+    displayNotification(errorMessage, 'error');
   } finally {
-    isEditLoading.value = false
+    isEditLoading.value = false;
   }
-}
+};
 
 // Handler untuk menghapus data
 const handleDelete = (item: BankPengumpulan) => {
   const truncatedName =
     item.nama_akun_bank.length > 30
       ? `${item.nama_akun_bank.substring(0, 30)}...`
-      : item.nama_akun_bank
+      : item.nama_akun_bank;
 
   displayConfirmation(
     'Konfirmasi Hapus',
     `Apakah Anda yakin ingin menghapus data atas nama "${truncatedName}"?`,
     async () => {
-      isLoading.value = true
+      isLoading.value = true;
       try {
-        await deleteBankPengumpulan(item.id)
-        displayNotification('Data berhasil dihapus.', 'success')
-        await fetchData()
+        await deleteBankPengumpulan(item.id);
+        displayNotification('Data berhasil dihapus.', 'success');
+        await fetchData();
       } catch (error: any) {
         const errorMessage =
-          error.response?.data?.message || 'Gagal menghapus data. Silakan coba lagi.'
-        displayNotification(errorMessage, 'error')
+          error.response?.data?.message || 'Gagal menghapus data. Silakan coba lagi.';
+        displayNotification(errorMessage, 'error');
       } finally {
-        isLoading.value = false
+        isLoading.value = false;
       }
     },
-  )
-}
+  );
+};
 
 // Handler untuk UI
 const openModalAdd = () => {
-  isModalAddOpen.value = true
-}
+  isModalAddOpen.value = true;
+};
 const handleEdit = (item: BankPengumpulan) => {
-  editData.value = { ...item }
-  isModalEditOpen.value = true
-}
+  editData.value = { ...item };
+  isModalEditOpen.value = true;
+};
 
 // Lifecycle hook
-onMounted(fetchData)
+onMounted(fetchData);
 </script>
 
 <template>

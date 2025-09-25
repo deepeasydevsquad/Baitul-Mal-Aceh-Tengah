@@ -14,7 +14,7 @@ import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
 import FormAdd from '@/modules/KegiatanKeseketariatan/widgets/FormAdd.vue';
 
 // Composable
-import { usePagination } from '@/composables/usePagination';
+import { usePagination } from '@/composables/usePaginations';
 import { useConfirmation } from '@/composables/useConfirmation';
 import { useNotification } from '@/composables/useNotification';
 
