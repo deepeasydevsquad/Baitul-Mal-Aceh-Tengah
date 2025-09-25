@@ -15,7 +15,7 @@ import FormAdd from '@/modules/TemplatePesanWhatsapp/widgets/FormAdd.vue';
 import FormEdit from '@/modules/TemplatePesanWhatsapp/widgets/FormEdit.vue';
 
 // Composable
-import { usePagination } from '@/composables/usepagination';
+import { usePagination } from '@/composables/usePaginations';
 import { useConfirmation } from '@/composables/useConfirmation';
 import { useNotification } from '@/composables/useNotification';
 

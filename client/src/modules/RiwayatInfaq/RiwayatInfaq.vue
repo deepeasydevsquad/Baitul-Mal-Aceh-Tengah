@@ -13,7 +13,7 @@ import FormAdd from '@/modules/RiwayatInfaq/widgets/FormAdd.vue';
 import BaseSelect from '@/components/Form/BaseSelect.vue';
 
 // Composable
-import { usePagination } from '@/composables/usepagination';
+import { usePagination } from '@/composables/usePaginations';
 import { useConfirmation } from '@/composables/useConfirmation';
 import { useNotification } from '@/composables/useNotification';
 import { useDynamicLabel } from '@/composables/useDynamicLabel';

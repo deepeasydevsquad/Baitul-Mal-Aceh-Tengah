@@ -6,7 +6,7 @@ import Notification from '@/components/Modal/Notification.vue';
 import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
 
 // Composable
-import { usePagination } from '@/composables/usepagination';
+import { usePagination } from '@/composables/usePaginations';
 import { useNotification } from '@/composables/useNotification';
 
 // Service API

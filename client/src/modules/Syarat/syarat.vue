@@ -17,7 +17,7 @@ import FormAdd from '@/modules/Syarat/widgets/FormAdd.vue';
 import FormEdit from '@/modules/Syarat/widgets/FormEdit.vue';
 
 // Composable
-import { usePagination } from '@/composables/usepagination';
+import { usePagination } from '@/composables/usePaginations';
 import { useConfirmation } from '@/composables/useConfirmation';
 import { useNotification } from '@/composables/useNotification';
 
