@@ -1,159 +1,159 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted, computed } from 'vue'
-import Notification from '@/components/Modal/Notification.vue'
-import Confirmation from '@/components/Modal/Confirmation.vue'
-import BaseButton from '@/components/Button/BaseButton.vue'
-import LightButton from '@/components/Button/LightButton.vue'
-import EditIcon from '@/components/Icons/EditIcon.vue'
-import DangerButton from '@/components/Button/DangerButton.vue'
-import DeleteIcon from '@/components/Icons/DeleteIcon.vue'
-import Pagination from '@/components/Pagination/Pagination.vue'
-import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue'
-import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
+import { ref, onMounted, computed } from 'vue';
+import Notification from '@/components/Modal/Notification.vue';
+import Confirmation from '@/components/Modal/Confirmation.vue';
+import BaseButton from '@/components/Button/BaseButton.vue';
+import LightButton from '@/components/Button/LightButton.vue';
+import EditIcon from '@/components/Icons/EditIcon.vue';
+import DangerButton from '@/components/Button/DangerButton.vue';
+import DeleteIcon from '@/components/Icons/DeleteIcon.vue';
+import Pagination from '@/components/Pagination/Pagination.vue';
+import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
 
 // Composable
-import { usePagination } from '@/composables/usePagination'
-import { useConfirmation } from '@/composables/useConfirmation'
-import { useNotification } from '@/composables/useNotification'
-import IconCommunity from '@/components/Icons/IconCommunity.vue'
-import IconPlus from '@/components/Icons/IconPlus.vue'
-import FormSyarat from './Widgets/FormSyarat.vue'
-import FormKriteria from './Widgets/FormKriteria.vue'
-import FormSurveyor from './Widgets/FormSurveyor.vue'
-import FormAdd from '@/modules/ProgramKegiatanBantuan/widgets/FormAdd.vue'
+import { usePagination } from '@/composables/usePaginations';
+import { useConfirmation } from '@/composables/useConfirmation';
+import { useNotification } from '@/composables/useNotification';
+import IconCommunity from '@/components/Icons/IconCommunity.vue';
+import IconPlus from '@/components/Icons/IconPlus.vue';
+import FormSyarat from './Widgets/FormSyarat.vue';
+import FormKriteria from './Widgets/FormKriteria.vue';
+import FormSurveyor from './Widgets/FormSurveyor.vue';
+import FormAdd from '@/modules/ProgramKegiatanBantuan/widgets/FormAdd.vue';
 
 // Service API
-import { get_filter_type, get_program_bantuan, send_pesan } from '@/service/penetapan'
-import BaseSelect from '@/components/Form/BaseSelect.vue'
-import SuratIcon from '@/components/Icons/SuratIcon.vue'
-import ButtonGreen from '@/components/Button/ButtonGreen.vue'
+import { get_filter_type, get_program_bantuan, send_pesan } from '@/service/penetapan';
+import BaseSelect from '@/components/Form/BaseSelect.vue';
+import SuratIcon from '@/components/Icons/SuratIcon.vue';
+import ButtonGreen from '@/components/Button/ButtonGreen.vue';
 
 // State: Loading
-const isLoading = ref(false)
-const isTableLoading = ref(false)
+const isLoading = ref(false);
+const isTableLoading = ref(false);
 
 // Composable: pagination
-const itemsPerPage = ref<number>(100)
-const totalColumns = ref<number>(5)
+const itemsPerPage = ref<number>(100);
+const totalColumns = ref<number>(5);
 
 const { currentPage, perPage, totalRow, totalPages, nextPage, prevPage, pageNow, pages } =
-  usePagination(fetchData, { perPage: itemsPerPage.value })
+  usePagination(fetchData, { perPage: itemsPerPage.value });
 
 // Composable: notification
 const { showNotification, notificationType, notificationMessage, displayNotification } =
-  useNotification()
+  useNotification();
 
 // Composable: confirmation
 const { showConfirmDialog, confirmTitle, confirmMessage, displayConfirmation, confirm, cancel } =
-  useConfirmation()
+  useConfirmation();
 
 // State Data Bank
-const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL
+const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
 interface Surveyor {
-  id: number
-  name: string
-  access_code: string
+  id: number;
+  name: string;
+  access_code: string;
 }
 
 interface SK {
-  sk: string
+  sk: string;
 }
 
 interface ProgramKegiatanBantuan {
-  id: number
-  asnaf_id: number
-  program_id: number
-  kategori_asnaf: string
-  kategori_program: string
-  kode: string
-  nama_kegiatan: string
-  slug: string
-  status_tampil: string
-  jumlah_dana: number
-  jumlah_maksimal_nominal_bantuan: number
-  jumlah_target_penerima: number
-  sumber_dana: string
-  area_penyaluran: string
-  jenis_penyaluran: string
-  status_kegiatan: boolean
-  tahun: string
-  banner: string
-  desc: string
-  datetimes: string
-  kegiatans: SK[]
-  surveyors: Surveyor[]
+  id: number;
+  asnaf_id: number;
+  program_id: number;
+  kategori_asnaf: string;
+  kategori_program: string;
+  kode: string;
+  nama_kegiatan: string;
+  slug: string;
+  status_tampil: string;
+  jumlah_dana: number;
+  jumlah_maksimal_nominal_bantuan: number;
+  jumlah_target_penerima: number;
+  sumber_dana: string;
+  area_penyaluran: string;
+  jenis_penyaluran: string;
+  status_kegiatan: boolean;
+  tahun: string;
+  banner: string;
+  desc: string;
+  datetimes: string;
+  kegiatans: SK[];
+  surveyors: Surveyor[];
 }
 
-const dataProgramBantuan = ref<ProgramKegiatanBantuan[]>([])
+const dataProgramBantuan = ref<ProgramKegiatanBantuan[]>([]);
 
-const isModalEditSyarat = ref(false)
-const isModalEditKriteria = ref(false)
-const isModalEditSurveyor = ref(false)
-const selectedKegiatan = ref<any>(null)
+const isModalEditSyarat = ref(false);
+const isModalEditKriteria = ref(false);
+const isModalEditSurveyor = ref(false);
+const selectedKegiatan = ref<any>(null);
 
 function openModalSyarat(id: any) {
-  selectedKegiatan.value = id
-  console.log('selectedBank Parent', selectedKegiatan.value)
-  isModalEditSyarat.value = true
+  selectedKegiatan.value = id;
+  console.log('selectedBank Parent', selectedKegiatan.value);
+  isModalEditSyarat.value = true;
 }
 
 function openModalKriteria(id: any) {
-  selectedKegiatan.value = id
-  console.log('selectedBank Parent', selectedKegiatan.value)
-  isModalEditKriteria.value = true
+  selectedKegiatan.value = id;
+  console.log('selectedBank Parent', selectedKegiatan.value);
+  isModalEditKriteria.value = true;
 }
 
 function openModalSurveyor(id: any) {
-  selectedKegiatan.value = id
-  console.log('selectedBank Parent', selectedKegiatan.value)
-  isModalEditSurveyor.value = true
+  selectedKegiatan.value = id;
+  console.log('selectedBank Parent', selectedKegiatan.value);
+  isModalEditSurveyor.value = true;
 }
 
 // Function: Fetch Data
-const search = ref('')
+const search = ref('');
 
 async function fetchData() {
-  isTableLoading.value = true
+  isTableLoading.value = true;
   try {
     const response = await get_program_bantuan({
       search: search.value,
       perpage: perPage.value,
       pageNumber: currentPage.value,
-    })
+    });
 
-    console.log(response)
+    console.log(response);
 
-    dataProgramBantuan.value = response.data
-    totalRow.value = response.total
+    dataProgramBantuan.value = response.data;
+    totalRow.value = response.total;
   } catch (error) {
-    displayNotification('Gagal mengambil data program bantuan', 'error')
+    displayNotification('Gagal mengambil data program bantuan', 'error');
   } finally {
-    isTableLoading.value = false
+    isTableLoading.value = false;
   }
 }
 
 onMounted(async () => {
-  await fetchData()
-})
+  await fetchData();
+});
 
 // Function: Delete Data
 
 function openSkSurveyor(skFileName: string) {
-  const url = `${BASE_URL}/uploads/img/sk_penetapan/${skFileName}`
-  window.open(url, '_blank') // buka di tab baru browser
+  const url = `${BASE_URL}/uploads/img/sk_penetapan/${skFileName}`;
+  window.open(url, '_blank'); // buka di tab baru browser
 }
 
 const copyLink = async (accessCode: string) => {
   try {
-    const url = `localhost:5173/survey?code=${accessCode}`
-    await navigator.clipboard.writeText(url)
-    displayNotification('Link berhasil disalin', 'success')
+    const url = `localhost:5173/survey?code=${accessCode}`;
+    await navigator.clipboard.writeText(url);
+    displayNotification('Link berhasil disalin', 'success');
   } catch (err) {
-    console.error('Gagal salin link:', err)
+    console.error('Gagal salin link:', err);
   }
-}
+};
 
 async function kirim_pesan(kegiatan_id: number) {
   displayConfirmation(
@@ -161,17 +161,17 @@ async function kirim_pesan(kegiatan_id: number) {
     'Apakah Anda yakin ingin mengirim pesan ke semua surveyor?',
     async () => {
       try {
-        isLoading.value = true
-        await send_pesan({ kegiatan_id: kegiatan_id })
-        displayNotification('Pesan Berhasil Dikirim', 'success')
-        await fetchData()
+        isLoading.value = true;
+        await send_pesan({ kegiatan_id: kegiatan_id });
+        displayNotification('Pesan Berhasil Dikirim', 'success');
+        await fetchData();
       } catch (error) {
-        displayNotification('Gagal mengirim pesan', 'error')
+        displayNotification('Gagal mengirim pesan', 'error');
       } finally {
-        isLoading.value = false
+        isLoading.value = false;
       }
     },
-  )
+  );
 }
 </script>
 
