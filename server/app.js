@@ -81,6 +81,7 @@ const arr_router = [
   "riwayat_zakat",
   "urutan_bagian_monev",
   "riwayat_infaq",
+  "pertanyaan_monev",
 ];
 
 const arr = {};
