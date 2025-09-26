@@ -5,8 +5,10 @@ const {
     handleServerError,
 } = require("../../../helper/handleError");
 
+const constrollers = {};
+
 // list asnaf
-exports.list_asnaf = async (req, res) => {
+constrollers.list_asnaf = async (req, res) => {
     // filter error
     if (!(await handleValidationErrors(req, res))) return;
 
@@ -26,7 +28,7 @@ exports.list_asnaf = async (req, res) => {
 };
 
 // tambah asnaf
-exports.add = async (req, res) => {
+constrollers.add = async (req, res) => {
     if (!(await handleValidationErrors(req, res))) return;
 
     try {
@@ -35,12 +37,12 @@ exports.add = async (req, res) => {
 
         if (await model.response()) {
             res.status(200).json({
-                message: model.message || "Berhasil menambahkan asnaf baru",
+                message: "Berhasil menambahkan asnaf baru",
                 status: "success",
             });
         } else {
             res.status(400).json({
-                message: model.message || "Gagal menambahkan asnaf baru",
+                message: "Gagal menambahkan asnaf baru",
                 status: "failed",
             });
         }
@@ -51,7 +53,7 @@ exports.add = async (req, res) => {
 };
 
 // edit asnaf
-exports.update = async (req, res) => {
+constrollers.update = async (req, res) => {
     if (!(await handleValidationErrors(req, res))) return;
 
     try {
@@ -60,12 +62,12 @@ exports.update = async (req, res) => {
 
         if (await model.response()) {
             res.status(200).json({
-                message: model.message || "Berhasil memperbarui asnaf",
+                message: "Berhasil memperbarui asnaf",
                 status: "success",
             });
         } else {
             res.status(400).json({
-                message: model.message || "Gagal memperbarui asnaf",
+                message: "Gagal memperbarui asnaf",
                 status: "failed",
             });
         }
@@ -76,7 +78,7 @@ exports.update = async (req, res) => {
 };
 
 // hapus asnaf
-exports.delete = async (req, res) => {
+constrollers.delete = async (req, res) => {
     if (!(await handleValidationErrors(req, res))) return;
 
     try {
@@ -85,12 +87,12 @@ exports.delete = async (req, res) => {
 
         if (await model.response()) {
             res.status(200).json({
-                message: model.message || "Berhasil menghapus asnaf",
+                message: "Berhasil menghapus asnaf",
                 status: "success",
             });
         } else {
             res.status(400).json({
-                message: model.message || "Gagal menghapus asnaf",
+                message: "Gagal menghapus asnaf",
                 status: "failed",
             });
         }
@@ -101,7 +103,7 @@ exports.delete = async (req, res) => {
 };
 
 // ambil detail asnaf
-exports.detail = async (req, res) => {
+constrollers.detail = async (req, res) => {
     if (!(await handleValidationErrors(req, res))) return;
 
     try {
@@ -116,7 +118,7 @@ exports.detail = async (req, res) => {
             });
         } else {
             res.status(404).json({
-                message: "Syarat tidak ditemukan",
+                message: "Detail Asnaf tidak ditemukan",
                 status: "failed",
             });
         }
@@ -126,3 +128,4 @@ exports.detail = async (req, res) => {
     }
 };
 
+module.exports = constrollers;

@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Member extends Model {
     /**
@@ -25,21 +23,24 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
   }
-  Member.init({
-    kode: DataTypes.STRING,
-    desa_id: DataTypes.INTEGER,
-    tipe: DataTypes.ENUM(["perorangan", "instansi"]),
-    fullname: DataTypes.STRING,
-    nomor_ktp: DataTypes.STRING,
-    nomor_kk: DataTypes.STRING,
-    whatsapp_number: DataTypes.STRING,
-    birth_date: DataTypes.DATEONLY,
-    alamat: DataTypes.TEXT,
-    username: DataTypes.STRING,
-    password: DataTypes.STRING
-  }, {
-    sequelize,
-    modelName: 'Member',
-  });
+  Member.init(
+    {
+      kode: DataTypes.STRING,
+      desa_id: DataTypes.INTEGER,
+      tipe: DataTypes.ENUM(["perorangan", "instansi"]),
+      fullname: DataTypes.STRING,
+      nomor_ktp: DataTypes.STRING,
+      nomor_kk: DataTypes.STRING,
+      whatsapp_number: DataTypes.STRING,
+      birth_date: DataTypes.DATEONLY,
+      alamat: DataTypes.TEXT,
+      username: DataTypes.STRING,
+      password: DataTypes.STRING,
+    },
+    {
+      sequelize,
+      modelName: "Member",
+    }
+  );
   return Member;
 };

@@ -1,106 +1,105 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted } from 'vue'
-import Notification from '@/components/Modal/Notification.vue'
-import Confirmation from '@/components/Modal/Confirmation.vue'
-import BaseButton from '@/components/Button/BaseButton.vue'
-import LightButton from '@/components/Button/LightButton.vue'
-import EditIcon from '@/components/Icons/EditIcon.vue'
-import DangerButton from '@/components/Button/DangerButton.vue'
-import DeleteIcon from '@/components/Icons/DeleteIcon.vue'
-import Pagination from '@/components/Pagination/Pagination.vue'
-import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue'
-import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
-import FormAdd from '@/modules/DaftarKeanggotaan/widgets/FormAdd.vue'
-import FormEdit from '@/modules/DaftarKeanggotaan/widgets/FormEdit.vue'
+import { ref, onMounted } from 'vue';
+import Notification from '@/components/Modal/Notification.vue';
+import Confirmation from '@/components/Modal/Confirmation.vue';
+import BaseButton from '@/components/Button/BaseButton.vue';
+import LightButton from '@/components/Button/LightButton.vue';
+import EditIcon from '@/components/Icons/EditIcon.vue';
+import DangerButton from '@/components/Button/DangerButton.vue';
+import DeleteIcon from '@/components/Icons/DeleteIcon.vue';
+import Pagination from '@/components/Pagination/Pagination.vue';
+import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
+import FormAdd from '@/modules/DaftarKeanggotaan/widgets/FormAdd.vue';
+import FormEdit from '@/modules/DaftarKeanggotaan/widgets/FormEdit.vue';
 
 // Composable
-import { usePagination } from '@/composables/usePagination'
-import { useConfirmation } from '@/composables/useConfirmation'
-import { useNotification } from '@/composables/useNotification'
+import { usePagination } from '@/composables/usePaginations';
+import { useConfirmation } from '@/composables/useConfirmation';
+import { useNotification } from '@/composables/useNotification';
 
 // Service API
-import { get_daftar_keanggotaan, delete_keanggotaan } from '@/service/daftar_keanggotaan'
+import { get_daftar_keanggotaan, delete_keanggotaan } from '@/service/daftar_keanggotaan';
 
 // State: Loading
-const isLoading = ref(false)
-const isTableLoading = ref(false)
+const isLoading = ref(false);
+const isTableLoading = ref(false);
 
 // Composable: pagination
-const itemsPerPage = ref<number>(100)
-const totalColumns = ref<number>(6)
+const itemsPerPage = ref<number>(100);
+const totalColumns = ref<number>(6);
 
 const { currentPage, perPage, totalRow, totalPages, nextPage, prevPage, pageNow, pages } =
-usePagination(fetchData, { perPage: itemsPerPage.value })
+  usePagination(fetchData, { perPage: itemsPerPage.value });
 
 // Composable: notification
 const { showNotification, notificationType, notificationMessage, displayNotification } =
-useNotification()
+  useNotification();
 
 // Composable: confirmation
 const { showConfirmDialog, confirmTitle, confirmMessage, displayConfirmation, confirm, cancel } =
-useConfirmation()
-
+  useConfirmation();
 
 interface Data {
-  id: number
-  kode: string
-  fullname: string
-  tipe: string
-  nomor_ktp: string
-  nomor_kk: string
-  whatsapp_number: string
-  birth_date: string
-  alamat: string
-  datetime: string
-  desa_name: string
-  kecamatan_name: string
+  id: number;
+  kode: string;
+  fullname: string;
+  tipe: string;
+  nomor_ktp: string;
+  nomor_kk: string;
+  whatsapp_number: string;
+  birth_date: string;
+  alamat: string;
+  datetime: string;
+  desa_name: string;
+  kecamatan_name: string;
 }
 
-const dataDaftarKeanggotaan = ref<Data[]>([])
+const dataDaftarKeanggotaan = ref<Data[]>([]);
 
 // Function: Modal
-const isModalAddOpen = ref(false)
-const isModalEditOpen = ref(false)
-const selectedKeanggotaan = ref<any>(null)
+const isModalAddOpen = ref(false);
+const isModalEditOpen = ref(false);
+const selectedKeanggotaan = ref<any>(null);
 
 function openModalAdd() {
-  isModalAddOpen.value = true
+  isModalAddOpen.value = true;
 }
 
 function openModalEdit(daftar_keanggotaan: any) {
-  selectedKeanggotaan.value = daftar_keanggotaan
-  console.log("Keanggotaan Parent", selectedKeanggotaan.value)
-  isModalEditOpen.value = true
+  selectedKeanggotaan.value = daftar_keanggotaan;
+  console.log('Keanggotaan Parent', selectedKeanggotaan.value);
+  isModalEditOpen.value = true;
 }
 
 // Function: Fetch Data
-const search = ref('')
-const type = ref('')
+const search = ref('');
+const type = ref('');
 
 async function fetchData() {
-  isTableLoading.value = true
+  isTableLoading.value = true;
   try {
     const response = await get_daftar_keanggotaan({
       search: search.value,
       perpage: perPage.value,
       pageNumber: currentPage.value,
       type: type.value,
-    })
+    });
 
-    dataDaftarKeanggotaan.value = response.data
-    totalRow.value = response.total
-    console.log(dataDaftarKeanggotaan.value)
+    dataDaftarKeanggotaan.value = response.data;
+    totalRow.value = response.total;
+    console.log(dataDaftarKeanggotaan.value);
   } catch (error) {
-    displayNotification('Gagal mengambil data daftar keanggotaan', 'error')
+    displayNotification('Gagal mengambil data daftar keanggotaan', 'error');
   } finally {
-    isTableLoading.value = false
+    isTableLoading.value = false;
   }
 }
 
 onMounted(async () => {
-  await fetchData()
-})
+  await fetchData();
+});
 
 // Function: Delete Data
 async function deleteData(id: number) {
@@ -109,17 +108,17 @@ async function deleteData(id: number) {
     'Apakah Anda yakin ingin menghapus data keanggotaan ini?',
     async () => {
       try {
-        isLoading.value = true
-        await delete_keanggotaan(id)
-        displayNotification('Data keanggotaan berhasil dihapus', 'success')
-        await fetchData()
+        isLoading.value = true;
+        await delete_keanggotaan(id);
+        displayNotification('Data keanggotaan berhasil dihapus', 'success');
+        await fetchData();
       } catch (error) {
-        displayNotification('Gagal menghapus data keanggotaan', 'error')
+        displayNotification('Gagal menghapus data keanggotaan', 'error');
       } finally {
-        isLoading.value = false
+        isLoading.value = false;
       }
     },
-  )
+  );
 }
 </script>
 
@@ -148,8 +147,7 @@ async function deleteData(id: number) {
             v-model="search"
             @change="fetchData"
             placeholder="Cari Nama / Kode / Nomor Whatsapp . . ."
-            class="w-full sm:w-96 rounded-s-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700
-                   focus:border-green-900 focus:ring-2 focus:ring-green-900 transition"
+            class="w-full sm:w-96 rounded-s-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:border-green-900 focus:ring-2 focus:ring-green-900 transition"
           />
           <select
             id="type"
@@ -197,28 +195,28 @@ async function deleteData(id: number) {
                 <td class="px-6 py-4 text-center font-medium text-gray-800">
                   <table class="border border-gray-300 w-full text-sm text-left">
                     <tbody>
-                      <tr>
-                        <td class="w-[45%] bg-gray-200 px-4 py-2 font-semibold">DESA</td>
+                      <tr class="border border-gray-300">
+                        <td class="w-[45%] bg-gray-100 px-4 py-2 font-medium">Desa</td>
                         <td class="px-4 py-2">{{ data.desa_name || '-' }}</td>
                       </tr>
-                      <tr>
-                        <td class="w-[45%] bg-gray-200 px-4 py-2 font-semibold">KECAMATAN</td>
+                      <tr class="border border-gray-300">
+                        <td class="w-[45%] bg-gray-100 px-4 py-2 font-medium">Kecamatan</td>
                         <td class="px-4 py-2">{{ data.kecamatan_name || '-' }}</td>
                       </tr>
-                      <tr>
-                        <td class="w-[45%] bg-gray-200 px-4 py-2 font-semibold">NOMOR WHATSAPP</td>
+                      <tr class="border border-gray-300">
+                        <td class="w-[45%] bg-gray-100 px-4 py-2 font-medium">Nomor Whatsapp</td>
                         <td class="px-4 py-2">{{ data.whatsapp_number || '-' }}</td>
                       </tr>
-                      <tr>
-                        <td class="w-[45%] bg-gray-200 px-4 py-2 font-semibold">NOMOR KTP</td>
+                      <tr class="border border-gray-300">
+                        <td class="w-[45%] bg-gray-100 px-4 py-2 font-medium">Nomor KTP</td>
                         <td class="px-4 py-2">{{ data.nomor_ktp || '-' }}</td>
                       </tr>
-                      <tr>
-                        <td class="w-[45%] bg-gray-200 px-4 py-2 font-semibold">NOMOR KK</td>
+                      <tr class="border border-gray-300">
+                        <td class="w-[45%] bg-gray-100 px-4 py-2 font-medium">Nomor KK</td>
                         <td class="px-4 py-2">{{ data.nomor_kk || '-' }}</td>
                       </tr>
-                      <tr>
-                        <td class="w-[45%] bg-gray-200 px-4 py-2 font-semibold">TANGGAL LAHIR</td>
+                      <tr class="border border-gray-300">
+                        <td class="w-[45%] bg-gray-100 px-4 py-2 font-medium">Tanggal Lahir</td>
                         <td class="px-4 py-2">{{ data.birth_date || '-' }}</td>
                       </tr>
                     </tbody>
@@ -270,16 +268,34 @@ async function deleteData(id: number) {
     <!-- Modal FormAdd -->
     <FormAdd
       :is-modal-open="isModalAddOpen"
-      @close="isModalAddOpen = false; fetchData()"
-      @status="(payload: any) => displayNotification(payload.error_msg || 'Tambah/Update Keanggotaan gagal', payload.error ? 'error' : 'success')"
+      @close="
+        isModalAddOpen = false;
+        fetchData();
+      "
+      @status="
+        (payload: any) =>
+          displayNotification(
+            payload.error_msg || 'Tambah/Update Keanggotaan gagal',
+            payload.error ? 'error' : 'success',
+          )
+      "
     />
 
     <!-- Modal FormEdit -->
     <FormEdit
       :is-modal-open="isModalEditOpen"
       :selected-keanggotaan="selectedKeanggotaan"
-      @close="isModalEditOpen = false; fetchData()"
-      @status="(payload: any) => displayNotification(payload.error_msg || 'Tambah/Update Keanggotaan gagal', payload.error ? 'error' : 'success')"
+      @close="
+        isModalEditOpen = false;
+        fetchData();
+      "
+      @status="
+        (payload: any) =>
+          displayNotification(
+            payload.error_msg || 'Tambah/Update Keanggotaan gagal',
+            payload.error ? 'error' : 'success',
+          )
+      "
     />
 
     <!-- Confirmation -->
@@ -301,4 +317,3 @@ async function deleteData(id: number) {
     />
   </div>
 </template>
-

@@ -1,132 +1,130 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted, watch, computed } from 'vue'
-import Notification from '@/components/Modal/Notification.vue'
-import BaseButton from '@/components/Button/BaseButton.vue'
-import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue'
-import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
-import Pagination from '@/components/Pagination/Pagination.vue'
+import { ref, onMounted, watch, computed } from 'vue';
+import Notification from '@/components/Modal/Notification.vue';
+import BaseButton from '@/components/Button/BaseButton.vue';
+import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
+import Pagination from '@/components/Pagination/Pagination.vue';
 
 // Composable
-import { useNotification } from '@/composables/useNotification'
-import { usePagination } from '@/composables/usePagination'
+import { useNotification } from '@/composables/useNotification';
+import { usePagination } from '@/composables/usePaginations';
 
 // Service API
-import { get_laporan_asnaf, get_tahun, download_excel_asnaf } from '@/service/laporan_asnaf'
+import { get_laporan_asnaf, get_tahun, download_excel_asnaf } from '@/service/laporan_asnaf';
 
 // State: Loading
-const isLoading = ref(false)
-const isTableLoading = ref(false)
+const isLoading = ref(false);
+const isTableLoading = ref(false);
 
 // State Data Laporan
-const allLaporanRows = ref<(string | number)[][]>([])
-const paginatedLaporanData = ref<(string | number)[][]>([])
-const selectedTahun = ref('0') // '0' untuk "Semua Tahun"
+const allLaporanRows = ref<(string | number)[][]>([]);
+const paginatedLaporanData = ref<(string | number)[][]>([]);
+const selectedTahun = ref('0'); // '0' untuk "Semua Tahun"
 const tahunOptions = ref<{ value: string; text: string }[]>([
   { value: '0', text: 'Pilih Semua Tahun' },
-])
-const asnafId = 3 // ID untuk Asnaf Muallaf
+]);
+const asnafId = 3; // ID untuk Asnaf Muallaf
 
 // Composable: notification
 const { showNotification, notificationType, notificationMessage, displayNotification } =
-  useNotification()
+  useNotification();
 
 // Composable: pagination
-const itemsPerPage = ref<number>(10)
-const totalColumns = ref<number>(7)
+const itemsPerPage = ref<number>(10);
+const totalColumns = ref<number>(7);
 
 function updatePaginatedData() {
-  isTableLoading.value = true
-  const start = (currentPage.value - 1) * perPage.value
-  const end = start + perPage.value
-  paginatedLaporanData.value = allLaporanRows.value.slice(start, end)
-  isTableLoading.value = false
+  isTableLoading.value = true;
+  const start = (currentPage.value - 1) * perPage.value;
+  const end = start + perPage.value;
+  paginatedLaporanData.value = allLaporanRows.value.slice(start, end);
+  isTableLoading.value = false;
 }
 
 const { currentPage, perPage, totalRow, totalPages, nextPage, prevPage, pageNow, pages } =
-  usePagination(updatePaginatedData, { perPage: itemsPerPage.value })
+  usePagination(updatePaginatedData, { perPage: itemsPerPage.value });
 
-const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL
+const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
 // Function: Fetch Tahun Options
 async function fetchTahunOptions() {
   try {
-    const response = await get_tahun()
+    const response = await get_tahun();
     const years = response.data.data.map((year: string) => ({
       value: year,
       text: `Tahun ${year}`,
-    }))
-    tahunOptions.value = [{ value: '0', text: 'Pilih Semua Tahun' }, ...years]
+    }));
+    tahunOptions.value = [{ value: '0', text: 'Pilih Semua Tahun' }, ...years];
   } catch (error) {
-    displayNotification('Gagal mengambil data tahun', 'error')
+    displayNotification('Gagal mengambil data tahun', 'error');
   }
 }
 
 // Function: Fetch Data Laporan
 async function fetchData() {
-  isTableLoading.value = true
+  isTableLoading.value = true;
   try {
-    const response = await get_laporan_asnaf(selectedTahun.value, asnafId)
-    const flattenedData = response.data.data.flatMap((group: any) => group.data)
-    
-    allLaporanRows.value = flattenedData
-    totalRow.value = flattenedData.length
-    updatePaginatedData()
-    
+    const response = await get_laporan_asnaf(selectedTahun.value, asnafId);
+    const flattenedData = response.data.data.flatMap((group: any) => group.data);
+
+    allLaporanRows.value = flattenedData;
+    totalRow.value = flattenedData.length;
+    updatePaginatedData();
   } catch (error) {
-    allLaporanRows.value = []
-    totalRow.value = 0
-    paginatedLaporanData.value = []
-    
-    console.error('Error fetching data:', error)
-    
+    allLaporanRows.value = [];
+    totalRow.value = 0;
+    paginatedLaporanData.value = [];
+
+    console.error('Error fetching data:', error);
+
     if (error.response?.status !== 404) {
       if (error.request) {
-        displayNotification('Tidak dapat terhubung ke server', 'error')
+        displayNotification('Tidak dapat terhubung ke server', 'error');
       } else {
-        displayNotification('Terjadi kesalahan saat mengambil data', 'error')
+        displayNotification('Terjadi kesalahan saat mengambil data', 'error');
       }
     }
-    
   } finally {
-    isTableLoading.value = false
+    isTableLoading.value = false;
   }
 }
 
 // Function: Download Excel
 async function downloadExcel() {
   try {
-    const response = await download_excel_asnaf(selectedTahun.value, 'Muallaf')
+    const response = await download_excel_asnaf(selectedTahun.value, 'Muallaf');
 
-    const blob = new Blob([response.data])
-    const url = window.URL.createObjectURL(blob)
+    const blob = new Blob([response.data]);
+    const url = window.URL.createObjectURL(blob);
 
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `Laporan_Asnaf_Muallaf_${selectedTahun.value}.xlsx`
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Laporan_Asnaf_Muallaf_${selectedTahun.value}.xlsx`;
 
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 
-    window.URL.revokeObjectURL(url)
-    displayNotification('Download berhasil', 'success')
+    window.URL.revokeObjectURL(url);
+    displayNotification('Download berhasil', 'success');
   } catch (error) {
-    console.error('Download error:', error)
-    displayNotification('Gagal mendownload file', 'error')
+    console.error('Download error:', error);
+    displayNotification('Gagal mendownload file', 'error');
   }
 }
 
 // Lifecycle Hooks
 onMounted(async () => {
-  isLoading.value = true
-  await fetchTahunOptions()
-  await fetchData()
-  isLoading.value = false
-})
+  isLoading.value = true;
+  await fetchTahunOptions();
+  await fetchData();
+  isLoading.value = false;
+});
 
 // Watcher untuk memuat ulang data ketika tahun diganti
-watch(selectedTahun, fetchData)
+watch(selectedTahun, fetchData);
 </script>
 
 <template>

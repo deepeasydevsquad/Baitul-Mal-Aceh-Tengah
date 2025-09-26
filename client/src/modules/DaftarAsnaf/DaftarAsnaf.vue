@@ -1,96 +1,106 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted } from 'vue'
-import Notification from '@/components/Modal/Notification.vue'
-import Confirmation from '@/components/Modal/Confirmation.vue'
-import BaseButton from '@/components/Button/BaseButton.vue'
-import LightButton from '@/components/Button/LightButton.vue'
-import EditIcon from '@/components/Icons/EditIcon.vue'
-import DangerButton from '@/components/Button/DangerButton.vue'
-import DeleteIcon from '@/components/Icons/DeleteIcon.vue'
-import Pagination from '@/components/Pagination/Pagination.vue'
-import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue'
-import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
+import { ref, onMounted } from 'vue';
+import Notification from '@/components/Modal/Notification.vue';
+import Confirmation from '@/components/Modal/Confirmation.vue';
+import BaseButton from '@/components/Button/BaseButton.vue';
+import LightButton from '@/components/Button/LightButton.vue';
+import EditIcon from '@/components/Icons/EditIcon.vue';
+import DangerButton from '@/components/Button/DangerButton.vue';
+import DeleteIcon from '@/components/Icons/DeleteIcon.vue';
+import Pagination from '@/components/Pagination/Pagination.vue';
+import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
 
 // Form
-import FormAdd from '@/modules/DaftarAsnaf/widgets/FormAdd.vue'
-import FormEdit from '@/modules/DaftarAsnaf/widgets/FormEdit.vue'
+import FormAdd from '@/modules/DaftarAsnaf/widgets/FormAdd.vue';
+import FormEdit from '@/modules/DaftarAsnaf/widgets/FormEdit.vue';
 
 // Composable
-import { usePagination } from '@/composables/usePagination'
-import { useConfirmation } from '@/composables/useConfirmation'
-import { useNotification } from '@/composables/useNotification'
+import { usePagination } from '@/composables/usePaginations';
+import { useConfirmation } from '@/composables/useConfirmation';
+import { useNotification } from '@/composables/useNotification';
 
 // Service API
-import { get_daftar_asnaf, edit_daftar_asnaf, delete_daftar_asnaf } from '@/service/daftar_asnaf'
+import { get_daftar_asnaf, edit_daftar_asnaf, delete_daftar_asnaf } from '@/service/daftar_asnaf';
 
 // Loading
-const isLoading = ref(false)
-const isTableLoading = ref(false)
+const isLoading = ref(false);
+const isTableLoading = ref(false);
 
 // Pagination
-const itemsPerPage = ref<number>(10)
-const totalColumns = ref<number>(3)
+const itemsPerPage = ref<number>(10);
+const totalColumns = ref<number>(3);
 
 const { currentPage, perPage, totalRow, totalPages, nextPage, prevPage, pageNow, pages } =
-  usePagination(fetchData, { perPage: itemsPerPage.value })
+  usePagination(fetchData, { perPage: itemsPerPage.value });
 
 // Notification
 const { showNotification, notificationType, notificationMessage, displayNotification } =
-  useNotification()
+  useNotification();
 
 // Confirmation
 const { showConfirmDialog, confirmTitle, confirmMessage, displayConfirmation, confirm, cancel } =
-  useConfirmation()
+  useConfirmation();
 
 // Interface
 interface DaftarAsnaf {
-  id: number
-  name: string
-  createdAt: string
-  updatedAt: string
+  id: number;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-const DaftardataAsnaf = ref<DaftarAsnaf[]>([])
+const DaftardataAsnaf = ref<DaftarAsnaf[]>([]);
 
 // Modal state
-const isAddModalOpen = ref(false)
-const isEditModalOpen = ref(false)
-const DaftarselectedAsnaf = ref<any>(null)
+const isAddModalOpen = ref(false);
+const isEditModalOpen = ref(false);
+const DaftarselectedAsnaf = ref<any>(null);
 
 function openAddModal() {
-  isAddModalOpen.value = true
+  isAddModalOpen.value = true;
 }
 
 function openEditModal(asnaf: any) {
-  DaftarselectedAsnaf.value = asnaf
-  isEditModalOpen.value = true
+  DaftarselectedAsnaf.value = asnaf;
+  isEditModalOpen.value = true;
 }
 
+const handleCloseAdd = () => {
+  isAddModalOpen.value = false;
+  fetchData();
+};
+
+const handleCloseEdit = () => {
+  isEditModalOpen.value = false;
+  fetchData();
+};
+
 // Fetch data
-const search = ref('')
+const search = ref('');
 
 async function fetchData() {
-  isTableLoading.value = true
+  isTableLoading.value = true;
   try {
     const response = await get_daftar_asnaf({
       search: search.value,
       perpage: perPage.value,
       pageNumber: currentPage.value,
-    })
+    });
 
-    DaftardataAsnaf.value = response.data
-    totalRow.value = response.total
+    DaftardataAsnaf.value = response.data;
+    totalRow.value = response.total;
   } catch (error) {
-    displayNotification('Gagal mengambil asnaf', 'error')
+    displayNotification('Gagal mengambil asnaf', 'error');
   } finally {
-    isTableLoading.value = false
+    isTableLoading.value = false;
   }
 }
 
 onMounted(async () => {
-  await fetchData()
-})
+  await fetchData();
+});
 
 // Delete
 async function deleteData(id: number) {
@@ -99,17 +109,17 @@ async function deleteData(id: number) {
     'Apakah anda yakin ingin menghapus Asnaf ini?',
     async () => {
       try {
-        isLoading.value = true
-        await delete_daftar_asnaf(id)
-        displayNotification('Daftar Asnaf Berhasil Dihapus.', 'success')
-        await fetchData()
+        isLoading.value = true;
+        await delete_daftar_asnaf(id);
+        displayNotification('Daftar Asnaf Berhasil Dihapus.', 'success');
+        await fetchData();
       } catch (error) {
-        displayNotification('Gagal menghapus Asnaf', 'error')
+        displayNotification('Gagal menghapus Asnaf', 'error');
       } finally {
-        isLoading.value = false
+        isLoading.value = false;
       }
     },
-  )
+  );
 }
 </script>
 
@@ -119,11 +129,7 @@ async function deleteData(id: number) {
     <LoadingSpinner v-if="isLoading" label="Memuat halaman..." />
     <div v-else class="space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <BaseButton
-          @click="openAddModal"
-          variant="primary"
-          type="button"
-        >
+        <BaseButton @click="openAddModal" variant="primary" type="button">
           <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" />
           Tambah Daftar Asnaf
         </BaseButton>
@@ -137,33 +143,32 @@ async function deleteData(id: number) {
             v-model="search"
             @change="fetchData"
             placeholder="Cari Asnaf..."
-            class="w-full sm:w-64 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700
-                   focus:border-[#14532d] focus:ring-2 focus:ring-[#14532d] transition"
+            class="w-full sm:w-64 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:border-[#14532d] focus:ring-2 focus:ring-[#14532d] transition"
           />
         </div>
       </div>
 
       <!-- Table -->
       <div class="overflow-hidden rounded-xl border border-gray-200 shadow-md">
-  <SkeletonTable v-if="isTableLoading" :columns="totalColumns" :rows="itemsPerPage" />
-  <table v-else class="table-fixed w-full border-collapse bg-white text-sm">
-    <!-- tambahkan border-b di thead -->
-    <thead class="bg-gray-50 text-gray-700 text-center border-b border-gray-300">
-      <tr>
-        <th class="w-[50%] px-6 py-4 font-medium font-bold text-gray-900">Daftar Asnaf</th>
-        <th class="w-[30%] px-6 py-4 font-medium font-bold text-gray-900">Datetimes</th>
-        <th class="w-[20%] px-6 py-4 font-medium font-bold text-gray-900">Aksi</th>
-      </tr>
-    </thead>
+        <SkeletonTable v-if="isTableLoading" :columns="totalColumns" :rows="itemsPerPage" />
+        <table v-else class="table-fixed w-full border-collapse bg-white text-sm">
+          <!-- tambahkan border-b di thead -->
+          <thead class="bg-gray-50 text-gray-700 text-center border-b border-gray-300">
+            <tr>
+              <th class="w-[50%] px-6 py-4 font-medium font-bold text-gray-900">Daftar Asnaf</th>
+              <th class="w-[30%] px-6 py-4 font-medium font-bold text-gray-900">Datetimes</th>
+              <th class="w-[20%] px-6 py-4 font-medium font-bold text-gray-900">Aksi</th>
+            </tr>
+          </thead>
 
-    <tbody class="divide-y divide-gray-100">
+          <tbody class="divide-y divide-gray-100">
             <template v-if="DaftardataAsnaf.length > 0">
               <tr
                 v-for="asnaf in DaftardataAsnaf"
                 :key="asnaf.id"
                 class="hover:bg-gray-50 transition-colors text-left"
               >
-                <td class="px-4 py-2 text-gray-600 ">
+                <td class="px-4 py-2 text-gray-600">
                   {{ asnaf.name }}
                 </td>
                 <td class="px-6 py-4 text-gray-600 text-center">
@@ -185,8 +190,12 @@ async function deleteData(id: number) {
             <!-- Empty State -->
             <tr v-else>
               <td :colspan="4" class="px-6 py-8 text-center text-gray-500">
-                <font-awesome-icon icon="fa-solid fa-database" class="text-2xl mb-2 text-gray-400" />
-                <p class="text-sm">Belum ada Daftar Asnaf.</p>
+                <font-awesome-icon
+                  icon="fa-solid fa-database"
+                  class="text-4xl mb-2 text-gray-400"
+                />
+                <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ada data</h3>
+                <p class="text-sm">Belum ada data asnaf.</p>
               </td>
             </tr>
           </tbody>
@@ -211,16 +220,28 @@ async function deleteData(id: number) {
     <!-- Modal Tambah -->
     <FormAdd
       :is-modal-open="isAddModalOpen"
-      @close="isAddModalOpen = false; fetchData()"
-      @status="(payload) => displayNotification(payload.error_msg || 'Asnaf Berhasil Ditambahkan.', payload.error ? 'error' : 'success')"
+      @close="((isAddModalOpen = false), fetchData())"
+      @status="
+        (payload) =>
+          displayNotification(
+            payload.error_msg || 'Asnaf Berhasil Ditambahkan.',
+            payload.error ? 'error' : 'success',
+          )
+      "
     />
 
     <!-- Modal Edit -->
     <FormEdit
       :is-modal-open="isEditModalOpen"
       :selected-asnaf="DaftarselectedAsnaf"
-      @close="isEditModalOpen = false; fetchData()"
-      @status="(payload) => displayNotification(payload.error_msg || 'Deskripsi Berhasil Diupdate!', payload.error ? 'error' : 'success')"
+      @close="((isEditModalOpen = false), fetchData())"
+      @status="
+        (payload) =>
+          displayNotification(
+            payload.error_msg || 'Deskripsi Berhasil Diupdate!',
+            payload.error ? 'error' : 'success',
+          )
+      "
     />
 
     <!-- Confirmation -->
@@ -229,8 +250,8 @@ async function deleteData(id: number) {
       :confirmTitle="confirmTitle"
       :confirmMessage="confirmMessage"
     >
-      <BaseButton variant="warning" @click="confirm">Ya</BaseButton>
       <BaseButton variant="secondary" @click="cancel">Tidak</BaseButton>
+      <BaseButton variant="warning" @click="confirm">Ya</BaseButton>
     </Confirmation>
 
     <!-- Notification -->

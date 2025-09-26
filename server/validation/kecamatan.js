@@ -7,7 +7,7 @@ const fs = require("fs");
 const validation = {};
 
 // Validasi id kecamatan apakah sudah ada di database
-validation.check_id_kecamatan = async (value) => {  
+validation.check_id_kecamatan = async (value) => {
   const check = await kecamatan.findByPk(value);
   if (!check) {
     throw new Error("kecamatan tidak terdaftar di pangkalan data");

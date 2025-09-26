@@ -1,113 +1,116 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted, computed } from 'vue'
-import Notification from '@/components/Modal/Notification.vue'
-import Confirmation from '@/components/Modal/Confirmation.vue'
-import BaseButton from '@/components/Button/BaseButton.vue'
-import LightButton from '@/components/Button/LightButton.vue'
-import EditIcon from '@/components/Icons/EditIcon.vue'
-import DangerButton from '@/components/Button/DangerButton.vue'
-import DeleteIcon from '@/components/Icons/DeleteIcon.vue'
-import Pagination from '@/components/Pagination/Pagination.vue'
-import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue'
-import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
-import FormAdd from '@/modules/ProgramDonasi/widgets/FormAdd.vue'
-import FormEdit from '@/modules/ProgramDonasi/widgets/FormEdit.vue'
+import { ref, onMounted, computed } from 'vue';
+import Notification from '@/components/Modal/Notification.vue';
+import Confirmation from '@/components/Modal/Confirmation.vue';
+import BaseButton from '@/components/Button/BaseButton.vue';
+import LightButton from '@/components/Button/LightButton.vue';
+import EditIcon from '@/components/Icons/EditIcon.vue';
+import DangerButton from '@/components/Button/DangerButton.vue';
+import DeleteIcon from '@/components/Icons/DeleteIcon.vue';
+import Pagination from '@/components/Pagination/Pagination.vue';
+import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
+import FormAdd from '@/modules/ProgramDonasi/widgets/FormAdd.vue';
+import FormEdit from '@/modules/ProgramDonasi/widgets/FormEdit.vue';
 
 // Composable
-import { usePagination } from '@/composables/usePagination'
-import { useConfirmation } from '@/composables/useConfirmation'
-import { useNotification } from '@/composables/useNotification'
+import { usePagination } from '@/composables/usePaginations';
+import { useConfirmation } from '@/composables/useConfirmation';
+import { useNotification } from '@/composables/useNotification';
+import { useDynamicLabel } from '@/composables/useDynamicLabel';
 
 // Service API
-import { list, delete_program, tutup } from '@/service/program_donasi'
-import IconMoney from '@/components/Icons/IconMoney.vue'
-import ButtonGreen from '@/components/Button/ButtonGreen.vue'
-import FormDonasi from './widgets/FormDonasi.vue'
-import LockIcon from '@/components/Icons/LockIcon.vue'
+import { list, delete_program, tutup } from '@/service/program_donasi';
+import IconMoney from '@/components/Icons/IconMoney.vue';
+import ButtonGreen from '@/components/Button/ButtonGreen.vue';
+import FormDonasi from './widgets/FormDonasi.vue';
+import LockIcon from '@/components/Icons/LockIcon.vue';
 
 // State: Loading
-const isLoading = ref(false)
-const isTableLoading = ref(false)
+const isLoading = ref(false);
+const isTableLoading = ref(false);
 
 // Composable: pagination
-const itemsPerPage = ref<number>(100)
-const totalColumns = ref<number>(5)
+const itemsPerPage = ref<number>(100);
+const totalColumns = ref<number>(5);
 
 const { currentPage, perPage, totalRow, totalPages, nextPage, prevPage, pageNow, pages } =
-  usePagination(fetchData, { perPage: itemsPerPage.value })
+  usePagination(fetchData, { perPage: itemsPerPage.value });
 
 // Composable: notification
 const { showNotification, notificationType, notificationMessage, displayNotification } =
-  useNotification()
+  useNotification();
 
 // Composable: confirmation
 const { showConfirmDialog, confirmTitle, confirmMessage, displayConfirmation, confirm, cancel } =
-  useConfirmation()
+  useConfirmation();
 
+// Composable: dynamic label
+const { dynamicLabel } = useDynamicLabel();
 // State Data Bank
-const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL
+const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
 interface Data {
-  id: number
-  banner: string
-  name: string
-  tahun: string
-  target_donasi_terkumpul: string
-  waktu_donasi: string
-  total_nominal: string
-  total_orang: string
-  status: string
-  createdAt: Date
+  id: number;
+  banner: string;
+  name: string;
+  tahun: string;
+  target_donasi_terkumpul: string;
+  waktu_donasi: string;
+  total_nominal: string;
+  total_orang: string;
+  status: string;
+  createdAt: Date;
 }
 
-const datas = ref<Data[]>([])
+const datas = ref<Data[]>([]);
 
 // Function: Modal
-const isModalAddOpen = ref(false)
-const isModalEditOpen = ref(false)
-const isModalDonasiOpen = ref(false)
-const donasiSelected = ref<any>(null)
+const isModalAddOpen = ref(false);
+const isModalEditOpen = ref(false);
+const isModalDonasiOpen = ref(false);
+const donasiSelected = ref<any>(null);
 
 function openModalAdd() {
-  isModalAddOpen.value = true
+  isModalAddOpen.value = true;
 }
 
 function openModalDonasi(id: any) {
-  donasiSelected.value = id
-  isModalDonasiOpen.value = true
+  donasiSelected.value = id;
+  isModalDonasiOpen.value = true;
 }
 
 function openModalEdit(id: any) {
-  donasiSelected.value = id
-  isModalEditOpen.value = true
+  donasiSelected.value = id;
+  isModalEditOpen.value = true;
 }
 
 // Function: Fetch Data
-const search = ref('')
-const status = ref('')
+const search = ref('');
+const status = ref('');
 async function fetchData() {
-  isTableLoading.value = true
+  isTableLoading.value = true;
   try {
     const response = await list({
       search: search.value,
       perpage: perPage.value,
       pageNumber: currentPage.value,
       status: status.value,
-    })
-    datas.value = response.data
-    totalRow.value = response.total
-    console.log(datas.value)
+    });
+    datas.value = response.data;
+    totalRow.value = response.total;
+    console.log(datas.value);
   } catch (error) {
-    displayNotification('Gagal mengambil data bank', 'error')
+    displayNotification('Gagal mengambil data bank', 'error');
   } finally {
-    isTableLoading.value = false
+    isTableLoading.value = false;
   }
 }
 
 onMounted(async () => {
-  await fetchData()
-})
+  await fetchData();
+});
 
 // Function: Delete Data
 async function deleteData(id: number) {
@@ -116,17 +119,17 @@ async function deleteData(id: number) {
     'Apakah Anda yakin ingin menghapus data program donasi ini?',
     async () => {
       try {
-        isLoading.value = true
-        await delete_program({ id: id })
-        displayNotification('Data Program Donasi berhasil dihapus', 'success')
-        await fetchData()
+        isLoading.value = true;
+        await delete_program({ id: id });
+        displayNotification('Data Program Donasi berhasil dihapus', 'success');
+        await fetchData();
       } catch (error) {
-        displayNotification('Gagal menghapus data bank', 'error')
+        displayNotification('Gagal menghapus data bank', 'error');
       } finally {
-        isLoading.value = false
+        isLoading.value = false;
       }
     },
-  )
+  );
 }
 
 async function tutup_program(id: number) {
@@ -135,33 +138,33 @@ async function tutup_program(id: number) {
     'Apakah Anda yakin ingin menutup Program Donasi ini?',
     async () => {
       try {
-        isLoading.value = true
-        await tutup({ id: id })
-        displayNotification(' Program Donasi berhasil diTutup', 'success')
-        await fetchData()
+        isLoading.value = true;
+        await tutup({ id: id });
+        displayNotification(' Program Donasi berhasil diTutup', 'success');
+        await fetchData();
       } catch (error) {
-        displayNotification('Gagal mengTutup data Program Donasi', 'error')
+        displayNotification('Gagal mengTutup data Program Donasi', 'error');
       } finally {
-        isLoading.value = false
+        isLoading.value = false;
       }
     },
-  )
+  );
 }
 
 function formatToRupiah(angka: number | string) {
-  let numberString = angka.toString().replace(/[^,\d]/g, '')
-  let split = numberString.split(',')
-  let sisa = split[0].length % 3
-  let rupiah = split[0].substr(0, sisa)
-  let ribuan = split[0].substr(sisa).match(/\d{3}/gi)
+  let numberString = angka.toString().replace(/[^,\d]/g, '');
+  let split = numberString.split(',');
+  let sisa = split[0].length % 3;
+  let rupiah = split[0].substr(0, sisa);
+  let ribuan = split[0].substr(sisa).match(/\d{3}/gi);
 
   if (ribuan) {
-    let separator = sisa ? '.' : ''
-    rupiah += separator + ribuan.join('.')
+    let separator = sisa ? '.' : '';
+    rupiah += separator + ribuan.join('.');
   }
 
-  rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah
-  return 'Rp ' + rupiah
+  rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
+  return 'Rp ' + rupiah;
 }
 </script>
 
@@ -178,7 +181,7 @@ function formatToRupiah(angka: number | string) {
           type="button"
         >
           <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" />
-          Tambah Program
+          {{ dynamicLabel('Tambah Program') }}
         </BaseButton>
 
         <!-- Search -->
@@ -244,7 +247,7 @@ function formatToRupiah(angka: number | string) {
                     </div>
                   </center>
                 </td>
-                <td class="px-6 py-4 text-center font-medium text-gray-800">
+                <td class="px-6 py-4 text-center font-medium text-gray-800 align-top">
                   <table class="w-full border border-gray-300 rounded-lg">
                     <tbody>
                       <tr class="border-b border-gray-300">
@@ -259,7 +262,7 @@ function formatToRupiah(angka: number | string) {
                         <th class="px-4 py-2 text-left font-medium bg-gray-100">
                           Target Donasi Terkumpul
                         </th>
-                        <td class="px-4 py-2  text-right">
+                        <td class="px-4 py-2 text-right">
                           {{ formatToRupiah(data.target_donasi_terkumpul) }}
                         </td>
                       </tr>
@@ -269,7 +272,9 @@ function formatToRupiah(angka: number | string) {
                       </tr>
                       <tr>
                         <th class="px-4 py-2 text-left font-medium bg-gray-100">Total Nominal</th>
-                        <td class="px-4 py-2 text-right">{{ formatToRupiah(data.total_nominal) }}</td>
+                        <td class="px-4 py-2 text-right">
+                          {{ formatToRupiah(data.total_nominal) }}
+                        </td>
                       </tr>
                     </tbody>
                   </table>
