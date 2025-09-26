@@ -110,14 +110,17 @@ const validateForm = () => {
     isValid = false;
   }
 
-  if (!formData.value.parent_id && !formData.value.jenis_monev) {
-    errors.jenis_monev = 'Jenis monev harus dipilih';
-    isValid = false;
-  }
+  // Validasi untuk pertanyaan parent
+  if (!formData.value.parent_id) {
+    if (!formData.value.jenis_monev) {
+      errors.jenis_monev = 'Jenis monev harus dipilih';
+      isValid = false;
+    }
 
-  if (!formData.value.bagian) {
-    errors.bagian = 'Bagian harus dipilih';
-    isValid = false;
+    if (!formData.value.bagian) {
+      errors.bagian = 'Bagian harus dipilih';
+      isValid = false;
+    }
   }
 
   return isValid;
@@ -131,6 +134,7 @@ async function handleSubmit() {
       ...formData.value,
       tipe: formData.value.jenis_monev?.split('_')[0],
     };
+
     await update_pertanyaan(payload);
     emit('status', { error: false, error_msg: 'Pertanyaan berhasil diperbarui!' });
     closeModal();
@@ -254,8 +258,8 @@ const formatText = (text: string) => {
             </p>
           </div>
 
-          <!-- Bagian -->
-          <div>
+          <!-- Bagian (Hanya untuk parent) -->
+          <div v-if="!formData.parent_id">
             <label for="edit_bagian" class="block text-sm font-medium text-gray-700 mb-1"
               >Bagian <span class="text-red-500">*</span></label
             >
@@ -307,9 +311,8 @@ const formatText = (text: string) => {
               :loading="isSubmitting"
               :disabled="
                 !(
-                  formData.jenis_monev &&
-                  formData.bagian &&
-                  formData.pertanyaan.trim() &&
+                  (!formData.parent_id ? formData.jenis_monev && formData.bagian : true) &&
+                  formData.pertanyaan?.trim() &&
                   formData.bentuk_pertanyaan
                 ) || isSubmitting
               "

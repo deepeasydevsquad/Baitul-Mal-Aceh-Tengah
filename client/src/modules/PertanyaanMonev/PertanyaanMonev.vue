@@ -248,12 +248,12 @@ const formatText = (text: string) => {
                     <tr class="hover:bg-gray-50 transition-colors">
                       <td class="px-4 py-3 text-gray-700 text-center">{{ index + 1 }}</td>
                       <td class="px-4 py-3 text-gray-800">{{ pertanyaan.pertanyaan }}</td>
-                      <td class="px-4 py-3 text-gray-700 capitalize">{{ pertanyaan.tipe }}</td>
-                      <td class="px-4 py-3 text-gray-700">
+                      <td class="px-4 py-3 text-gray-700 capitalize text-center">{{ pertanyaan.tipe }}</td>
+                      <td class="px-4 py-3 text-gray-700 text-center">
                         {{ formatText(pertanyaan.jenis_monev) }}
                       </td>
-                      <td class="px-4 py-3 text-gray-700">{{ formatText(pertanyaan.bagian) }}</td>
-                      <td class="px-4 py-3 text-gray-700 capitalize">
+                      <td class="px-4 py-3 text-gray-700 text-center">{{ formatText(pertanyaan.bagian) }}</td>
+                      <td class="px-4 py-3 text-gray-700 capitalize text-center">
                         {{ pertanyaan.bentuk_pertanyaan }}
                       </td>
                       <td class="px-4 py-3 text-gray-700"></td>
@@ -284,10 +284,10 @@ const formatText = (text: string) => {
                         <span class="mr-2 text-gray-400">└─</span>
                         {{ child.pertanyaan }}
                       </td>
-                      <td class="px-4 py-3 text-gray-700 capitalize">{{ child.tipe }}</td>
-                      <td class="px-4 py-3 text-gray-700">{{ formatText(child.jenis_monev) }}</td>
-                      <td class="px-4 py-3 text-gray-700">{{ formatText(child.bagian) }}</td>
-                      <td class="px-4 py-3 text-gray-700 capitalize">
+                      <td class="px-4 py-3 text-gray-700 capitalize text-center">{{ child.tipe }}</td>
+                      <td class="px-4 py-3 text-gray-700 text-center">{{ formatText(child.jenis_monev) }}</td>
+                      <td class="px-4 py-3 text-gray-700 text-center">{{ formatText(child.bagian) }}</td>
+                      <td class="px-4 py-3 text-gray-700 capitalize text-center">
                         {{ child.bentuk_pertanyaan }}
                       </td>
                       <td class="px-4 py-3 text-gray-700"></td>
