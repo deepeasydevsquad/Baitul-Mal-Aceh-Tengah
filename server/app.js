@@ -80,6 +80,7 @@ const arr_router = [
   "monev",
   "riwayat_zakat",
   "urutan_bagian_monev",
+  "penetapan",
   "riwayat_infaq",
 ];
 
