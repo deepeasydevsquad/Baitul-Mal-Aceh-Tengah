@@ -206,6 +206,7 @@ class Model_r {
 
     try {
       const result = await Kegiatan.findAndCountAll({
+        distinct: true,
         limit,
         offset: (page - 1) * limit,
         order: [["id", "ASC"]],
@@ -240,6 +241,17 @@ class Model_r {
             attributes: ["id", "name"],
           },
           {
+            model: Syarat_kegiatan,
+            include: {
+              model: Syarat,
+              attributes: ["id", "name"],
+            },
+          },
+          {
+            model: Kriteria,
+            attributes: ["id", "name"],
+          },
+          {
             model: Surveyor_kegiatan,
             attributes: ["id", "sk", "access_code"],
             include: [
@@ -251,6 +263,10 @@ class Model_r {
           },
         ],
       });
+
+      console.log("CCCCC");
+      console.log(result);
+      console.log("CCCCC");
 
       return {
         data: result.rows.map((item) => ({
@@ -274,7 +290,16 @@ class Model_r {
           banner: item.banner,
           desc: item.desc,
           datetimes: moment(item.updatedAt).format("YYYY-MM-DD HH:mm:ss"),
-
+          syarat:
+            item.Syarat_kegiatans?.map((syk) => ({
+              id: syk.Syarat.id,
+              name: syk.Syarat.name,
+            })) || [],
+          kriteria:
+            item.Kriteria?.map((k) => ({
+              id: k.id,
+              name: k.name,
+            })) || [],
           // 🟢 List semua kegiatan
           kegiatans:
             item.Surveyor_kegiatans?.map((sk) => ({
