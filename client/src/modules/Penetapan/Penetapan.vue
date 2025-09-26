@@ -88,16 +88,10 @@ interface ProgramKegiatanBantuan {
 
 const dataProgramBantuan = ref<ProgramKegiatanBantuan[]>([])
 
-// Function: Modal
-const isModalAddOpen = ref(false)
 const isModalEditSyarat = ref(false)
 const isModalEditKriteria = ref(false)
 const isModalEditSurveyor = ref(false)
 const selectedKegiatan = ref<any>(null)
-
-function openModalAdd() {
-  isModalAddOpen.value = true
-}
 
 function openModalSyarat(id: any) {
   selectedKegiatan.value = id
@@ -119,39 +113,14 @@ function openModalSurveyor(id: any) {
 
 // Function: Fetch Data
 const search = ref('')
-const statusOption = ref<{ value: string; label: string }[]>([])
-const asnafOption = ref<{ value: number; label: string }[]>([])
-const programOption = ref<{ value: number; label: string }[]>([])
-const yearOption = ref<{ value: number; label: string }[]>([])
-
-const selectedStatus = ref('')
-const selectedAsnaf = ref('')
-const selectedProgram = ref('')
-const selectedYear = ref('')
 
 async function fetchData() {
   isTableLoading.value = true
   try {
-    const responseFilterType = await get_filter_type()
-
-    statusOption.value = [
-      { value: 'sedang_berlangsung', label: 'Sedang Berlangsung' },
-      { value: 'selesai', label: 'Selesai' },
-    ]
-    ;(asnafOption.value = responseFilterType.data.type_asnaf_id),
-      (programOption.value = responseFilterType.data.type_program_id),
-      (yearOption.value = responseFilterType.data.type_year)
-
-    console.log(responseFilterType)
-
     const response = await get_program_bantuan({
       search: search.value,
       perpage: perPage.value,
       pageNumber: currentPage.value,
-      type_status_kegiatan: selectedStatus.value,
-      type_asnaf_id: selectedAsnaf.value,
-      type_program_id: selectedProgram.value,
-      type_year: selectedYear.value,
     })
 
     console.log(response)
@@ -178,9 +147,6 @@ function openSkSurveyor(skFileName: string) {
 
 const copyLink = async (accessCode: string) => {
   try {
-    console.log('========DDDDD=========')
-    console.log(accessCode)
-    console.log('========DDDDD=========')
     const url = `localhost:5173/survey?code=${accessCode}`
     await navigator.clipboard.writeText(url)
     displayNotification('Link berhasil disalin', 'success')
@@ -214,51 +180,8 @@ async function kirim_pesan(kegiatan_id: number) {
     <!-- Header -->
     <LoadingSpinner v-if="isLoading" label="Memuat halaman..." />
     <div v-else class="space-y-4">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-end gap-4">
         <div class="flex items-center w-full sm:w-auto gap-2">
-          <BaseButton
-            @click="openModalAdd()"
-            variant="primary"
-            :loading="isModalAddOpen"
-            type="button"
-          >
-            <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" />
-            Tambah Program Kegiatan
-          </BaseButton>
-          <label for="search" class="mr-2 text-sm font-medium text-gray-600">Filter</label>
-
-          <!-- Status -->
-          <BaseSelect
-            v-model="selectedStatus"
-            :options="statusOption"
-            placeholder="Semua Status"
-            @change="fetchData"
-          />
-
-          <!-- Asnaf -->
-          <BaseSelect
-            v-model="selectedAsnaf"
-            :options="asnafOption"
-            placeholder="Semua Asnaf"
-            @change="fetchData"
-          />
-
-          <!-- Program -->
-          <BaseSelect
-            v-model="selectedProgram"
-            :options="programOption"
-            placeholder="Semua Program"
-            @change="fetchData"
-          />
-
-          <!-- Tahun -->
-          <BaseSelect
-            v-model="selectedYear"
-            :options="yearOption"
-            placeholder="Semua Tahun"
-            @change="fetchData"
-          />
-
           <!-- Search -->
           <input
             id="search"

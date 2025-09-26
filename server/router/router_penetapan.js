@@ -23,10 +23,6 @@ router.post(
       .isInt()
       .withMessage("Page Number Harus Angka"),
     body("search").optional().isString().withMessage("Search Harus String"),
-    body("type_status_kegiatan").optional(),
-    body("type_asnaf_id").optional(),
-    body("type_program_id").optional(),
-    body("type_year").optional(),
   ],
   controllers.daftar_list
 );
