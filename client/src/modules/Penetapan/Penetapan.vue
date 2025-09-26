@@ -61,6 +61,16 @@ interface SK {
   sk: string;
 }
 
+interface Syarat {
+  id: number;
+  name: string;
+}
+
+interface Kriteria {
+  id: number;
+  name: string;
+}
+
 interface ProgramKegiatanBantuan {
   id: number;
   asnaf_id: number;
@@ -84,6 +94,8 @@ interface ProgramKegiatanBantuan {
   datetimes: string;
   kegiatans: SK[];
   surveyors: Surveyor[];
+  syarat: Syarat[];
+  kriteria: Kriteria[];
 }
 
 const dataProgramBantuan = ref<ProgramKegiatanBantuan[]>([]);
@@ -262,12 +274,6 @@ async function kirim_pesan(kegiatan_id: number) {
                         <td class="w-[45%] bg-gray-200 px-4 py-1 font-semibold">PROGRAM</td>
                         <td class="px-4 py-1">{{ data.kategori_program || '-' }}</td>
                       </tr>
-                    </tbody>
-                  </table>
-                </td>
-                <td class="px-6 py-4 text-center font-normal text-gray-800">
-                  <table class="border border-gray-300 w-full text-xs text-left">
-                    <tbody>
                       <tr class="border-b border-gray-300">
                         <td class="w-[45%] bg-gray-200 px-4 py-1 font-semibold">DANA</td>
                         <td class="px-4 py-1">{{ $formatToRupiah(data.jumlah_dana) || '-' }}</td>
@@ -380,6 +386,55 @@ async function kirim_pesan(kegiatan_id: number) {
                             </div>
                           </div>
                           <div v-else>-</div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+                <td class="px-6 py-4 text-center font-normal text-gray-800 align-top">
+                  <table class="border border-gray-300 w-full text-xs text-left">
+                    <thead>
+                      <tr class="border-b border-gray-300">
+                        <th class="px-6 py-4 text-center bg-gray-200 font-medium text-gray-800">
+                          Syarat & Prasyarat
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-if="data.syarat.length == 0">
+                        <td class="px-6 py-4 text-center font-normal text-gray-400">
+                          Syarat & Prasyarat Tidak Ditemukan
+                        </td>
+                      </tr>
+                      <tr v-else v-for="s in data.syarat" :key="s.id">
+                        <td
+                          class="px-6 py-4 text-center border border-b border-gray-300 font-normal text-gray-800"
+                        >
+                          {{ s.name }}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                  <table class="border border-gray-300 w-full text-xs text-left mt-5">
+                    <thead>
+                      <tr class="border-b border-gray-300">
+                        <th class="px-6 py-4 text-center bg-gray-200 font-medium text-gray-800">
+                          Kriteria
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-if="data.kriteria.length == 0">
+                        <td class="px-6 py-4 text-center font-normal text-gray-400">
+                          Kriteria Tidak Ditemukan
+                        </td>
+                      </tr>
+                      <tr v-else v-for="k in data.kriteria" :key="k.id">
+                        <td
+                          class="px-6 py-4 text-center border border-b border-gray-300 font-normal text-gray-800"
+                        >
+                          {{ k.name }}
                         </td>
                       </tr>
                     </tbody>
