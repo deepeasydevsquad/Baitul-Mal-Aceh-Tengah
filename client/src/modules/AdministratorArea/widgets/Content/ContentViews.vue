@@ -40,8 +40,9 @@ import LaporanAsnafIbnuSabil from '@/modules/LaporanAsnaf/LaporanAsnafIbnuSabil.
 import RiwayatZakat from '@/modules/RiwayatZakat/RiwayatZakat.vue';
 import UrutanBagianMonev from '@/modules/UrutanBagianMonev/UrutanBagianMonev.vue';
 import RiwayatInfaq from '@/modules/RiwayatInfaq/RiwayatInfaq.vue';
-import Penetapan from '@/modules/Penetapan/Penetapan.vue'
-  
+import PertanyaanMonev from '@/modules/PertanyaanMonev/PertanyaanMonev.vue';
+import Penetapan from '@/modules/Penetapan/Penetapan.vue'  
+
 const tabComponents = {
   pengaturan_whatsapp: PengaturanWhatsapp,
   daftar_kecamatan: kecamatan,
@@ -76,6 +77,7 @@ const tabComponents = {
   riwayat_zakat: RiwayatZakat,
   urutan_bagian_monev: UrutanBagianMonev,
   riwayat_infaq: RiwayatInfaq,
+  pertanyaan_monev: PertanyaanMonev,
   penetapan_kriteria_syarat_surveyor: Penetapan,
 };
 
