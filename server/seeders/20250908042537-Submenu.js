@@ -137,7 +137,7 @@ module.exports = {
           menu_id: menus[4].id,
           name: "Rekap",
           path: "rekap",
-          tab: `[{"id":"${tabs[47].id}"},{"id":"${tabs[48].id}"},{"id":"${tabs[49].id}"},{"id":"${tabs[50].id}"},{"id":"${tabs[51].id}"},{"id":"${tabs[52].id}"}]`,
+          tab: `[{"id":"${tabs[47].id}"},{"id":"${tabs[48].id}"},{"id":"${tabs[49].id}"},{"id":"${tabs[50].id}"}]`,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
