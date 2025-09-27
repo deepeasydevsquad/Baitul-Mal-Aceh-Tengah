@@ -464,6 +464,15 @@ module.exports = {
           createdAt: new Date(),
           updatedAt: new Date(),
         },
+        {
+          name: "R. Pengumpulan Per Kecamatan",
+          title: "Rekap Pengumpulan Per Kecamatan",
+          icon: "fa-solid fa-table-list",
+          path: "rekap_pengumpulan_per_kecamatan",
+          desc: "Rekap pengumpulan dana per kecamatan.",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
       ],
       {}
     );
