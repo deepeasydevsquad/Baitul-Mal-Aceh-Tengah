@@ -164,15 +164,15 @@ class Model_r {
         data.push({
           tahun,
           pengumpulan: {
-            zakat: await convertToRP(zakatPengumpulan),
-            infaq: await convertToRP(infaqPengumpulan),
-            donasi: await convertToRP(donasi),
-            total: await convertToRP(totalPengumpulan),
+            zakat: zakatPengumpulan,
+            infaq: infaqPengumpulan,
+            donasi: donasi,
+            total: totalPengumpulan,
           },
           distribusi: {
-            zakat: await convertToRP(zakatDistribusi),
-            infaq: await convertToRP(infaqDistribusi),
-            total: await convertToRP(totalDistribusi),
+            zakat: zakatDistribusi,
+            infaq: infaqDistribusi,
+            total: totalDistribusi,
           },
         });
       }

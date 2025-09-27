@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // Library
 import { ref, onMounted } from 'vue';
+import VueApexCharts from 'vue3-apexcharts';
 import Notification from '@/components/Modal/Notification.vue';
 import Pagination from '@/components/Pagination/Pagination.vue';
 import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
@@ -18,7 +19,7 @@ const isLoading = ref(false);
 const isTableLoading = ref(false);
 
 // Composable: pagination
-const itemsPerPage = ref<number>(100);
+const itemsPerPage = ref<number>(10);
 const totalColumns = ref<number>(3);
 
 const { currentPage, perPage, totalRow, totalPages, nextPage, prevPage, pageNow, pages } =
@@ -50,6 +51,31 @@ interface Data {
 
 const datas = ref<Data[]>([]);
 
+// Ringkasan
+const totalPengumpulan = ref(0);
+const totalDistribusi = ref(0);
+const persentase = ref(0);
+
+// Chart State
+const seriesPengumpulan = ref<any[]>([]);
+const seriesDistribusi = ref<any[]>([]);
+const chartOptionsPengumpulan = ref<any>({});
+const chartOptionsDistribusi = ref<any>({});
+
+// Helper format angka jadi Miliar (contoh: 120000000 → 120M)
+const formatMiliar = (val: number) => {
+  if (val >= 1000000000) {
+    return (val / 1000000000).toFixed(2) + ' M';
+  } else if (val >= 1000000) {
+    return (val / 1000000).toFixed(0) + ' JT';
+  }
+  return val.toString();
+};
+
+// Helper format Rupiah detail
+const formatRupiah = (val: number) =>
+  new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(val);
+
 // Function: Fetch Data
 const search = ref('');
 
@@ -64,7 +90,93 @@ async function fetchData() {
 
     datas.value = response.data;
     totalRow.value = response.total;
-    console.log('Datas:', datas.value);
+
+    // Hitung total
+    totalPengumpulan.value = datas.value.reduce((acc, d) => acc + Number(d.pengumpulan.total), 0);
+    totalDistribusi.value = datas.value.reduce((acc, d) => acc + Number(d.distribusi.total), 0);
+    persentase.value =
+      totalPengumpulan.value > 0 ? (totalDistribusi.value / totalPengumpulan.value) * 100 : 0;
+
+    // Chart Pengumpulan
+    seriesPengumpulan.value = [
+      { name: 'Zakat', data: datas.value.map((d) => Number(d.pengumpulan.zakat)) },
+      { name: 'Infaq', data: datas.value.map((d) => Number(d.pengumpulan.infaq)) },
+      { name: 'Donasi', data: datas.value.map((d) => Number(d.pengumpulan.donasi)) },
+    ];
+
+    // Chart Distribusi
+    seriesDistribusi.value = [
+      { name: 'Zakat', data: datas.value.map((d) => Number(d.distribusi.zakat)) },
+      { name: 'Infaq', data: datas.value.map((d) => Number(d.distribusi.infaq)) },
+    ];
+
+    // Options Chart (biar sama style)
+    const baseOptions = {
+      chart: {
+        type: 'bar',
+        foreColor: '#000', // ini ngerubah default warna semua teks chart jadi hitam
+        toolbar: { show: true },
+      },
+      plotOptions: {
+        bar: {
+          horizontal: false,
+          columnWidth: '45%',
+          borderRadius: 6,
+        },
+      },
+      dataLabels: { enabled: false },
+      xaxis: {
+        categories: datas.value.map((d) => d.tahun),
+        title: {
+          text: 'Tahun',
+          style: { color: '#000' },
+        },
+        labels: {
+          style: {
+            colors: Array(datas.value.length).fill('#000'), // semua label paksa hitam
+            fontSize: '12px',
+          },
+        },
+      },
+      yaxis: {
+        title: {
+          text: 'Nominal (Rp)',
+          style: { color: '#000' },
+        },
+        labels: {
+          formatter: (val: number) => formatMiliar(val),
+          style: {
+            colors: ['#000'],
+            fontSize: '12px',
+          },
+        },
+      },
+      legend: {
+        position: 'top',
+        horizontalAlign: 'center',
+        labels: {
+          colors: ['#000'],
+        },
+      },
+      tooltip: {
+        y: {
+          formatter: (val: number) => formatRupiah(val),
+        },
+      },
+    };
+
+    chartOptionsPengumpulan.value = {
+      ...baseOptions,
+      title: { text: 'Pengumpulan per Tahun' },
+    };
+
+    chartOptionsDistribusi.value = {
+      ...baseOptions,
+      title: { text: 'Distribusi per Tahun' },
+    };
+
+    chartOptionsPengumpulan.value = { ...baseOptions, title: { text: 'Pengumpulan per Tahun' } };
+    chartOptionsDistribusi.value = { ...baseOptions, title: { text: 'Distribusi per Tahun' } };
   } catch (error) {
     console.error(error);
     displayNotification('Gagal mengambil data laporan tahunan', 'error');
@@ -83,6 +195,22 @@ onMounted(async () => {
     <!-- Header -->
     <LoadingSpinner v-if="isLoading" label="Memuat halaman..." />
     <div v-else class="space-y-4">
+      <!-- Ringkasan -->
+      <div class="grid grid-cols-3 gap-4 my-6">
+        <div class="p-4 rounded-xl bg-green-50 text-center shadow">
+          <h3 class="font-semibold text-gray-700">Total Pengumpulan</h3>
+          <p class="text-lg font-bold text-gray-900">{{ formatRupiah(totalPengumpulan) }}</p>
+        </div>
+        <div class="p-4 rounded-xl bg-blue-50 text-center shadow">
+          <h3 class="font-semibold text-gray-700">Total Distribusi</h3>
+          <p class="text-lg font-bold text-gray-900">{{ formatRupiah(totalDistribusi) }}</p>
+        </div>
+        <div class="p-4 rounded-xl bg-yellow-50 text-center shadow">
+          <h3 class="font-semibold text-gray-700">Persentase</h3>
+          <p class="text-lg font-bold text-gray-900">{{ persentase.toFixed(2) }} %</p>
+        </div>
+      </div>
+
       <!-- Table -->
       <div class="overflow-hidden rounded-xl border border-gray-200 shadow">
         <SkeletonTable v-if="isTableLoading" :columns="totalColumns" :rows="itemsPerPage" />
@@ -94,55 +222,45 @@ onMounted(async () => {
               <th colspan="3" class="w-[40%] px-6 py-3 font-medium">Distribusi</th>
             </tr>
             <tr>
-              <!-- Subhead Pengumpulan -->
               <th class="px-4 py-2 font-medium">Zakat</th>
               <th class="px-4 py-2 font-medium">Infaq</th>
               <th class="px-4 py-2 font-medium">Donasi</th>
               <th class="px-4 py-2 font-medium">Total</th>
-
-              <!-- Subhead Distribusi -->
               <th class="px-4 py-2 font-medium">Zakat</th>
               <th class="px-4 py-2 font-medium">Infaq</th>
               <th class="px-4 py-2 font-medium">Total</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
-            <template v-if="datas.length > 0">
-              <tr
-                v-for="(data, index) in datas"
-                :key="index"
-                class="hover:bg-gray-50 transition-colors text-center"
-              >
-                <!-- Tahun -->
-                <td class="px-6 py-4 font-medium text-gray-800">{{ data.tahun }}</td>
-
-                <!-- Pengumpulan -->
-                <td class="px-4 py-2 text-gray-700">{{ data.pengumpulan.zakat }}</td>
-                <td class="px-4 py-2 text-gray-700">{{ data.pengumpulan.infaq }}</td>
-                <td class="px-4 py-2 text-gray-700">{{ data.pengumpulan.donasi }}</td>
-                <td class="px-4 py-2 font-semibold text-gray-900">{{ data.pengumpulan.total }}</td>
-
-                <!-- Distribusi -->
-                <td class="px-4 py-2 text-gray-700">{{ data.distribusi.zakat }}</td>
-                <td class="px-4 py-2 text-gray-700">{{ data.distribusi.infaq }}</td>
-                <td class="px-4 py-2 font-semibold text-gray-900">{{ data.distribusi.total }}</td>
-              </tr>
-            </template>
-
-            <!-- Empty State -->
-            <tr v-else>
-              <td :colspan="8" class="px-6 py-8 text-center text-gray-500">
-                <font-awesome-icon
-                  icon="fa-solid fa-calendar-check"
-                  class="text-4xl mb-2 text-gray-400"
-                />
-                <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ada data</h3>
-                <p class="text-sm">Belum ada laporan tahunan.</p>
+            <tr
+              v-for="(data, index) in datas"
+              :key="index"
+              class="hover:bg-gray-50 transition-colors text-center"
+            >
+              <td class="px-6 py-4 font-medium text-gray-800">{{ data.tahun }}</td>
+              <td class="px-4 py-2 text-gray-700">
+                {{ formatRupiah(Number(data.pengumpulan.zakat)) }}
+              </td>
+              <td class="px-4 py-2 text-gray-700">
+                {{ formatRupiah(Number(data.pengumpulan.infaq)) }}
+              </td>
+              <td class="px-4 py-2 text-gray-700">
+                {{ formatRupiah(Number(data.pengumpulan.donasi)) }}
+              </td>
+              <td class="px-4 py-2 font-semibold text-gray-900">
+                {{ formatRupiah(Number(data.pengumpulan.total)) }}
+              </td>
+              <td class="px-4 py-2 text-gray-700">
+                {{ formatRupiah(Number(data.distribusi.zakat)) }}
+              </td>
+              <td class="px-4 py-2 text-gray-700">
+                {{ formatRupiah(Number(data.distribusi.infaq)) }}
+              </td>
+              <td class="px-4 py-2 font-semibold text-gray-900">
+                {{ formatRupiah(Number(data.distribusi.total)) }}
               </td>
             </tr>
           </tbody>
-
-          <!-- Pagination -->
           <tfoot class="bg-gray-100 font-bold">
             <Pagination
               :current-page="currentPage"
@@ -157,6 +275,28 @@ onMounted(async () => {
           </tfoot>
         </table>
       </div>
+
+      <!-- Chart -->
+      <div class="grid grid-cols-2 gap-6 mt-8">
+        <div class="p-4 rounded-xl border shadow bg-white">
+          <h3 class="font-bold mb-2">Pengumpulan</h3>
+          <VueApexCharts
+            type="bar"
+            height="300"
+            :options="chartOptionsPengumpulan"
+            :series="seriesPengumpulan"
+          />
+        </div>
+        <div class="p-4 rounded-xl border shadow bg-white">
+          <h3 class="font-bold mb-2">Distribusi</h3>
+          <VueApexCharts
+            type="bar"
+            height="300"
+            :options="chartOptionsDistribusi"
+            :series="seriesDistribusi"
+          />
+        </div>
+      </div>
     </div>
 
     <!-- Notification -->
@@ -168,3 +308,14 @@ onMounted(async () => {
     />
   </div>
 </template>
+
+<style scoped>
+:deep(.apexcharts-text),
+:deep(.apexcharts-legend-text),
+:deep(.apexcharts-xaxis-label),
+:deep(.apexcharts-yaxis-label) {
+  fill: #000 !important;
+  color: #000 !important;
+  font-size: 12px !important;
+}
+</style>
