@@ -473,6 +473,24 @@ module.exports = {
           createdAt: new Date(),
           updatedAt: new Date(),
         },
+        {
+          name: "Target Distribusi",
+          title: "Target Distribusi",
+          icon: "fa-solid fa-bullseye",
+          path: "target_distribusi",
+          desc: "Target distribusi bantuan.",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          name: "Target Pengumpulan",
+          title: "Target Pengumpulan",
+          icon: "fa-solid fa-bullseye",
+          path: "target_pengumpulan",
+          desc: "Target pengumpulan dana.",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
       ],
       {}
     );
