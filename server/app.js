@@ -82,6 +82,7 @@ const arr_router = [
   "penetapan",
   "riwayat_infaq",
   "laporan_tahunan",
+  "pertanyaan_monev",
 ];
 
 const arr = {};
