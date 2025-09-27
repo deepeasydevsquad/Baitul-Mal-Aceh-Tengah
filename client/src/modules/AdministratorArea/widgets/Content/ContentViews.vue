@@ -5,7 +5,7 @@ import {
   useGlobalTab,
   useGlobalActiveTab,
   useTabTerpilih,
-  } from '../../../../stores/sidebar';
+} from '../../../../stores/sidebar';
 import { initTooltips } from 'flowbite';
 import Surveyor from '@/modules/Surveyor/Surveyor.vue';
 import syarat from '@/modules/Syarat/syarat.vue';
@@ -40,8 +40,9 @@ import LaporanAsnafIbnuSabil from '@/modules/LaporanAsnaf/LaporanAsnafIbnuSabil.
 import RiwayatZakat from '@/modules/RiwayatZakat/RiwayatZakat.vue';
 import UrutanBagianMonev from '@/modules/UrutanBagianMonev/UrutanBagianMonev.vue';
 import RiwayatInfaq from '@/modules/RiwayatInfaq/RiwayatInfaq.vue';
+import Penetapan from '@/modules/Penetapan/Penetapan.vue';
+import LaporanTahunan from '@/modules/LaporanTahunan/LaporanTahunan.vue';
 import PertanyaanMonev from '@/modules/PertanyaanMonev/PertanyaanMonev.vue';
-import Penetapan from '@/modules/Penetapan/Penetapan.vue'  
 
 const tabComponents = {
   pengaturan_whatsapp: PengaturanWhatsapp,
@@ -79,6 +80,7 @@ const tabComponents = {
   riwayat_infaq: RiwayatInfaq,
   pertanyaan_monev: PertanyaanMonev,
   penetapan_kriteria_syarat_surveyor: Penetapan,
+  laporan_tahunan: LaporanTahunan,
 };
 
 const selectedTab = useSelectedTab();
