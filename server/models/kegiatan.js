@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Kegiatan extends Model {
     /**
@@ -42,27 +40,36 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
   }
-  Kegiatan.init({
-    asnaf_id: DataTypes.INTEGER,
-    program_id: DataTypes.INTEGER,
-    kode: DataTypes.STRING,
-    nama_kegiatan: DataTypes.TEXT,
-    slug: DataTypes.TEXT,
-    status_tampil: DataTypes.ENUM(['tampil', 'tidak_tampil']),
-    jumlah_dana: DataTypes.INTEGER,
-    jumlah_maksimal_nominal_bantuan: DataTypes.INTEGER,
-    jumlah_target_penerima: DataTypes.INTEGER,
-    sumber_dana: DataTypes.ENUM(['infaq', 'zakat']),
-    area_penyaluran: DataTypes.ENUM(["semua_pemohon", "kabupaten", "instansi", "kecamatan", "desa"]),
-    jenis_penyaluran: DataTypes.ENUM(["langsung", "volume"]),
-    status_kegiatan: DataTypes.ENUM(["sedang_berlangsung", "selesai"]),
-    tahun: DataTypes.INTEGER,
-    banner: DataTypes.STRING,
-    periode_bantuan: DataTypes.ENUM(["tahunan", "bulanan"]),
-    desc: DataTypes.TEXT
-  }, {
-    sequelize,
-    modelName: 'Kegiatan',
-  });
+  Kegiatan.init(
+    {
+      asnaf_id: DataTypes.INTEGER,
+      program_id: DataTypes.INTEGER,
+      kode: DataTypes.STRING,
+      nama_kegiatan: DataTypes.TEXT,
+      slug: DataTypes.TEXT,
+      status_tampil: DataTypes.ENUM(["tampil", "tidak_tampil"]),
+      jumlah_dana: DataTypes.INTEGER,
+      jumlah_maksimal_nominal_bantuan: DataTypes.INTEGER,
+      jumlah_target_penerima: DataTypes.INTEGER,
+      sumber_dana: DataTypes.ENUM(["infaq", "zakat"]),
+      area_penyaluran: DataTypes.ENUM([
+        "semua_pemohon",
+        "kabupaten",
+        "instansi",
+        "kecamatan",
+        "desa",
+      ]),
+      jenis_penyaluran: DataTypes.ENUM(["langsung", "volume"]),
+      status_kegiatan: DataTypes.ENUM(["sedang_berlangsung", "selesai"]),
+      tahun: DataTypes.INTEGER,
+      banner: DataTypes.STRING,
+      periode_bantuan: DataTypes.ENUM(["tahunan", "bulanan"]),
+      desc: DataTypes.TEXT,
+    },
+    {
+      sequelize,
+      modelName: "Kegiatan",
+    }
+  );
   return Kegiatan;
 };
