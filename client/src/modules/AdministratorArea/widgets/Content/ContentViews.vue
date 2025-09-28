@@ -43,6 +43,7 @@ import RiwayatInfaq from '@/modules/RiwayatInfaq/RiwayatInfaq.vue';
 import Penetapan from '@/modules/Penetapan/Penetapan.vue';
 import LaporanTahunan from '@/modules/LaporanTahunan/LaporanTahunan.vue';
 import PertanyaanMonev from '@/modules/PertanyaanMonev/PertanyaanMonev.vue';
+import LaporanPerencanaan from '@/modules/LaporanPerencanaan/LaporanPerencanaan.vue';
 
 const tabComponents = {
   pengaturan_whatsapp: PengaturanWhatsapp,
@@ -81,6 +82,7 @@ const tabComponents = {
   pertanyaan_monev: PertanyaanMonev,
   penetapan_kriteria_syarat_surveyor: Penetapan,
   laporan_tahunan: LaporanTahunan,
+  laporan_perencanaan: LaporanPerencanaan
 };
 
 const selectedTab = useSelectedTab();

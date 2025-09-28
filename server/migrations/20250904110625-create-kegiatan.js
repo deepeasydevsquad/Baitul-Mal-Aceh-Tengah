@@ -28,6 +28,9 @@ module.exports = {
       kode: {
         type: Sequelize.STRING
       },
+       satuan: {
+        type: Sequelize.STRING
+      },
       nama_kegiatan: {
         type: Sequelize.TEXT
       },
