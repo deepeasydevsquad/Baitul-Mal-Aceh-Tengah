@@ -81,12 +81,23 @@ function openModalEdit(target: any) {
 
 const searchYear = ref('');
 const availableYears = ref<number[]>([]);
+
 async function fetchAvailableYears() {
   try {
     const response = await get_tahun();
     availableYears.value = response.data;
-  } catch (error) {
-    displayNotification('Gagal memuat opsi filter tahun', 'error');
+  } catch (error: any) {
+    console.error('Fetch years error:', error);
+
+    let errorMessage = 'Gagal memuat opsi filter tahun';
+
+    if (error.response && error.response.data) {
+      errorMessage = error.response.data.error_msg || error.response.data.message || errorMessage;
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+
+    displayNotification(errorMessage, 'error');
   }
 }
 
@@ -107,8 +118,18 @@ async function fetchData() {
 
     target_pengumpulan.value = response.data;
     totalRow.value = response.total;
-  } catch (error) {
-    displayNotification('Gagal mengambil data target pengumpulan', 'error');
+  } catch (error: any) {
+    console.error('Fetch data error:', error);
+
+    let errorMessage = 'Gagal mengambil data target pengumpulan';
+
+    if (error.response && error.response.data) {
+      errorMessage = error.response.data.error_msg || error.response.data.message || errorMessage;
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+
+    displayNotification(errorMessage, 'error');
   } finally {
     isTableLoading.value = false;
   }
@@ -129,8 +150,20 @@ async function deleteData(id: number) {
         await delete_target_pengumpulan({ id: id });
         displayNotification('Data target pengumpulan berhasil dihapus', 'success');
         await Promise.all([fetchData(), fetchAvailableYears()]);
-      } catch (error) {
-        displayNotification('Gagal menghapus data target pengumpulan', 'error');
+      } catch (error: any) {
+        console.error('Delete error:', error);
+        
+        let errorMessage = 'Gagal menghapus data target pengumpulan';
+        
+        if (error.response && error.response.data) {
+          errorMessage = error.response.data.error_msg || 
+                        error.response.data.message || 
+                        errorMessage;
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+        
+        displayNotification(errorMessage, 'error');
       } finally {
         isLoading.value = false;
       }

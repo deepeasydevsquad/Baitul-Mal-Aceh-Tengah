@@ -37,10 +37,22 @@ controllers.add_target_pengumpulan = async (req, res) => {
     } else {
       res.status(400).json({
         error: true,
-        error_msg: "Target pengumpulan gagal ditambahkan.",
+        error_msg: model_cud.message || "Target pengumpulan gagal ditambahkan.",
       });
     }
   } catch (error) {
+    if (error.name === 'SequelizeValidationError') {
+      return res.status(400).json({
+        error: true,
+        error_msg: error.errors[0].message,
+      });
+    } else if (error.name === 'SequelizeUniqueConstraintError') {
+      return res.status(400).json({
+        error: true,
+        error_msg: 'Target pengumpulan untuk tahun ini sudah ada',
+      });
+    }
+    
     handleServerError(res, error);
   }
 };
@@ -58,7 +70,10 @@ controllers.get_info_edit_target_pengumpulan = async (req, res) => {
       total: 1,
     });
   } catch (error) {
-    handleServerError(res, error);
+    res.status(500).json({
+      error: true,
+      error_msg: "Gagal mengambil data target pengumpulan.",
+    });
   }
 };
 
@@ -77,10 +92,22 @@ controllers.edit_target_pengumpulan = async (req, res) => {
     } else {
       res.status(400).json({
         error: true,
-        error_msg: "Target pengumpulan gagal diperbaharui.",
+        error_msg: model_cud.message || "Target pengumpulan gagal diperbaharui.",
       });
     }
   } catch (error) {
+    if (error.name === 'SequelizeValidationError') {
+      return res.status(400).json({
+        error: true,
+        error_msg: error.errors[0].message,
+      });
+    } else if (error.name === 'SequelizeUniqueConstraintError') {
+      return res.status(400).json({
+        error: true,
+        error_msg: 'Target pengumpulan untuk tahun ini sudah ada',
+      });
+    }
+    
     handleServerError(res, error);
   }
 };
@@ -100,11 +127,14 @@ controllers.delete = async (req, res) => {
     } else {
       res.status(400).json({
         error: true,
-        error_msg: "Target pengumpulan gagal dihapus.",
+        error_msg: model_cud.message || "Target pengumpulan gagal dihapus.",
       });
     }
   } catch (error) {
-    handleServerError(res, error);
+    res.status(500).json({
+      error: true,
+      error_msg: "Terjadi kesalahan saat menghapus data.",
+    });
   }
 };
 
@@ -118,7 +148,10 @@ controllers.get_tahun = async (req, res) => {
       data: feedBack.data,
     });
   } catch (error) {
-    handleServerError(res, error);
+    res.status(500).json({
+      error: true,
+      error_msg: "Gagal mengambil data tahun.",
+    });
   }
 };
 

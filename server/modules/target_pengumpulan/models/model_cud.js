@@ -35,6 +35,18 @@ class Model_cud {
       this.message = `Menambahkan Target Pengumpulan Baru dengan ID Target Pengumpulan: ${insert.id}`;
     } catch (error) {
       this.state = false;
+      if (error.name === 'SequelizeValidationError') {
+        this.message = error.errors[0].message;
+      } else if (error.name === 'SequelizeUniqueConstraintError') {
+        this.message = 'Target pengumpulan untuk tahun ini sudah ada';
+      } else if (error.original && error.original.code === 'ER_DUP_ENTRY') {
+        this.message = 'Target pengumpulan untuk tahun ini sudah ada';
+      } else if (error.message) {
+        this.message = error.message;
+      } else {
+        this.message = 'Terjadi kesalahan saat menambahkan data';
+      }
+      console.error('Error in add_target_pengumpulan:', error);
     }
   }
 
@@ -61,7 +73,18 @@ class Model_cud {
       this.message = `Memperbarui Target Pengumpulan dengan ID: ${body.id}`;
     } catch (error) {
       this.state = false;
-      this.message = error.message;
+      if (error.name === 'SequelizeValidationError') {
+        this.message = error.errors[0].message;
+      } else if (error.name === 'SequelizeUniqueConstraintError') {
+        this.message = 'Target pengumpulan untuk tahun ini sudah ada';
+      } else if (error.original && error.original.code === 'ER_DUP_ENTRY') {
+        this.message = 'Target pengumpulan untuk tahun ini sudah ada';
+      } else if (error.message) {
+        this.message = error.message;
+      } else {
+        this.message = 'Terjadi kesalahan saat memperbarui data';
+      }
+      console.error('Error in edit_target_pengumpulan:', error);
     }
   }
 
@@ -70,14 +93,25 @@ class Model_cud {
     const body = this.req.body;
 
     try {
-      await Target_pengumpulan.destroy({
+      const result = await Target_pengumpulan.destroy({
         where: { id: body.id },
         transaction: this.t,
       });
 
-      this.message = `Menghapus Target Pengumpulan dengan ID: ${body.id}`;
+      if (result === 0) {
+        this.state = false;
+        this.message = 'Data tidak ditemukan atau sudah dihapus';
+      } else {
+        this.message = `Menghapus Target Pengumpulan dengan ID: ${body.id}`;
+      }
     } catch (error) {
       this.state = false;
+      if (error.message) {
+        this.message = error.message;
+      } else {
+        this.message = 'Terjadi kesalahan saat menghapus data';
+      }
+      console.error('Error in delete:', error);
     }
   }
 

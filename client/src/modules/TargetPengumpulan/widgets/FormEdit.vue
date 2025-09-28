@@ -39,7 +39,7 @@ const errors = reactive({
 const currentYear = new Date().getFullYear();
 const yearOptions = computed(() => {
   const years = [];
-  for (let i = currentYear - 5; i <= currentYear + 20; i++) {
+  for (let i = currentYear - 5; i <= currentYear + 2; i++) {
     years.push(i);
   }
   return years;
@@ -232,9 +232,20 @@ async function handleSubmit() {
 
     emit('status', { error: false, error_msg: 'Target pengumpulan berhasil diperbarui!' });
     emit('close');
-  } catch (error) {
+  } catch (error: any) {
     console.error('Submit error:', error);
-    emit('status', { error: true, error_msg: 'Gagal memperbarui target pengumpulan.' });
+    
+    let errorMessage = 'Gagal memperbarui target pengumpulan.';
+    
+    if (error.response && error.response.data) {
+      errorMessage = error.response.data.error_msg || 
+                    error.response.data.message || 
+                    errorMessage;
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+    
+    emit('status', { error: true, error_msg: errorMessage });
     isSubmitting.value = false;
   }
 }
