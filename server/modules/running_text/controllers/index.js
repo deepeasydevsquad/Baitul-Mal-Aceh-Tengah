@@ -37,16 +37,15 @@ controllers.add_running_text = async (req, res) => {
     if (await model_cud.response()) {
       res.status(200).json({
         error: false,
-        error_msg: 'Running text berhasil ditambahkan.',
+        error_msg: "Running text berhasil ditambahkan.",
       });
     } else {
       res.status(400).json({
         error: true,
-        error_msg: 'Running text gagal ditambahkan.',
+        error_msg: "Running text gagal ditambahkan.",
       });
     }
   } catch (error) {
-
     handleServerError(res, error);
   }
 };
@@ -61,12 +60,12 @@ controllers.edit_running_text = async (req, res) => {
     if (await model_cud.response()) {
       res.status(200).json({
         error: false,
-        error_msg: 'Running text berhasil diperbaharui.',
+        error_msg: "Running text berhasil diperbaharui.",
       });
     } else {
       res.status(400).json({
         error: true,
-        error_msg: 'Running text gagal diperbaharui.',
+        error_msg: "Running text gagal diperbaharui.",
       });
     }
   } catch (error) {
@@ -84,12 +83,12 @@ controllers.delete_running_text = async (req, res) => {
     if (await model_cud.response()) {
       res.status(200).json({
         error: false,
-        error_msg: 'Running text berhasil dihapus.',
+        error_msg: "Running text berhasil dihapus.",
       });
     } else {
       res.status(400).json({
         error: true,
-        error_msg: 'Running text gagal dihapus.',
+        error_msg: "Running text gagal dihapus.",
       });
     }
   } catch (error) {
@@ -107,12 +106,12 @@ controllers.toggle_status_running_text = async (req, res) => {
     if (await model_cud.response()) {
       res.status(200).json({
         error: false,
-        error_msg: 'Status Running text berhasil diperbaharui.',
+        error_msg: "Status Running text berhasil diperbaharui.",
       });
     } else {
       res.status(400).json({
         error: true,
-        error_msg: 'Status Running text gagal diperbaharui.',
+        error_msg: "Status Running text gagal diperbaharui.",
       });
     }
   } catch (error) {
@@ -130,12 +129,12 @@ controllers.update_order_running_text = async (req, res) => {
     if (await model_cud.response()) {
       res.status(200).json({
         error: false,
-        error_msg: 'Order Running text berhasil diperbaharui.',
+        error_msg: "Order Running text berhasil diperbaharui.",
       });
     } else {
       res.status(400).json({
         error: true,
-        error_msg: 'Order Running text berhasil diperbaharui.',
+        error_msg: "Order Running text berhasil diperbaharui.",
       });
     }
   } catch (error) {
@@ -146,12 +145,12 @@ controllers.update_order_running_text = async (req, res) => {
 controllers.getActiveRunningText = async (req, res) => {
   try {
     const model_r = new Model_r(req);
-    
+
     req.body = {
       search: null,
       perpage: 1000,
       pageNumber: 1,
-      activeOnly: true
+      activeOnly: true,
     };
 
     const { data } = await model_r.content_text();
@@ -159,15 +158,17 @@ controllers.getActiveRunningText = async (req, res) => {
     res.status(200).json({
       error: false,
       message: "Data running text aktif berhasil diambil.",
-      data: data
+      data: data,
     });
-
   } catch (error) {
-    console.error('Error in getActiveRunningText:', error);
+    console.log("_-----------------------------XX");
+    console.log("_-----------------------------XX");
+    console.log("_-----------------------------XX");
+    console.error("Error in getActiveRunningText:", error);
     res.status(500).json({
       error: true,
       message: "Terjadi kesalahan saat mengambil running text aktif.",
-      details: error.message
+      details: error.message,
     });
   }
 };
