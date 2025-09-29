@@ -47,10 +47,16 @@ controllers.get_info_edit = async (req, res) => {
 controllers.create_pertanyaan = async (req, res) => {
   try {
     const model = new Model_cud(req);
-    const data = await model.createPertanyaan();
-    res
-      .status(201)
-      .json({ error: false, data, message: "Pertanyaan berhasil dibuat" });
+    await model.createPertanyaan();
+    const result = await model.response();
+
+    if (result.success) {
+      res
+        .status(201)
+        .json({ error: false, data: result.data, message: result.message });
+    } else {
+      res.status(400).json({ error: true, message: result.message });
+    }
   } catch (error) {
     handleServerError(res, error);
   }
@@ -59,10 +65,17 @@ controllers.create_pertanyaan = async (req, res) => {
 controllers.update_pertanyaan = async (req, res) => {
   try {
     const model = new Model_cud(req);
-    const data = await model.updatePertanyaan();
-    res
-      .status(200)
-      .json({ error: false, data, message: "Pertanyaan berhasil diperbarui" });
+    await model.updatePertanyaan();
+    const result = await model.response();
+
+    if (result.success) {
+      res
+        .status(200)
+        .json({ error: false, data: result.data, message: result.message });
+    } else {
+      const statusCode = result.message.includes("tidak ditemukan") ? 404 : 400;
+      res.status(statusCode).json({ error: true, message: result.message });
+    }
   } catch (error) {
     handleServerError(res, error);
   }
@@ -71,8 +84,15 @@ controllers.update_pertanyaan = async (req, res) => {
 controllers.delete_pertanyaan = async (req, res) => {
   try {
     const model = new Model_cud(req);
-    const data = await model.deletePertanyaan();
-    res.status(200).json({ error: false, ...data });
+    await model.deletePertanyaan();
+    const result = await model.response();
+
+    if (result.success) {
+      res.status(200).json({ error: false, message: result.message });
+    } else {
+      const statusCode = result.message.includes("tidak ditemukan") ? 404 : 400;
+      res.status(statusCode).json({ error: true, message: result.message });
+    }
   } catch (error) {
     handleServerError(res, error);
   }
