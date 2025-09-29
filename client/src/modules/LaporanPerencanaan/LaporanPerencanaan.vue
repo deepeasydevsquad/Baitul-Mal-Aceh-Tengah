@@ -86,21 +86,25 @@ onMounted(fetchData);
           <!-- Header -->
           <thead class="bg-gray-50 text-gray-700 text-center border-b border-gray-300">
             <tr>
-              <th rowspan="2" class="w-[20%] px-6 py-3 font-medium">Program</th>
-              <th colspan="2" class="w-[20%] px-6 py-3 font-medium">Rencana</th>
-              <th colspan="4" class="w-[40%] px-6 py-3 font-medium">
+              <th rowspan="2" class="w-[20%] px-6 py-3 font-medium border border-gray-300">
+                Asnaf
+              </th>
+              <th colspan="2" class="w-[20%] px-6 py-3 font-medium border border-gray-300">
+                Rencana
+              </th>
+              <th colspan="4" class="w-[40%] px-6 py-3 font-medium border border-gray-300">
                 Rincihan Perhitungan (Murni)
               </th>
-              <th rowspan="2" class="w-[10%] px-6 py-3 font-medium">%</th>
-              <th rowspan="2" class="w-[10%] px-6 py-3 font-medium">Ket</th>
+              <th rowspan="2" class="w-[10%] px-6 py-3 font-medium border border-gray-300">%</th>
+              <th rowspan="2" class="w-[10%] px-6 py-3 font-medium border border-gray-300">Ket</th>
             </tr>
             <tr>
-              <th class="px-6 py-3 font-medium">Jumlah</th>
-              <th class="px-6 py-3 font-medium">Satuan</th>
-              <th class="px-6 py-3 font-medium">Vol</th>
-              <th class="px-6 py-3 font-medium">Satuan</th>
-              <th class="px-6 py-3 font-medium">Jumlah Satuan</th>
-              <th class="px-6 py-3 font-medium">Jumlah</th>
+              <th class="px-6 py-3 font-medium border border-gray-300">Jumlah</th>
+              <th class="px-6 py-3 font-medium border border-gray-300">Satuan</th>
+              <th class="px-6 py-3 font-medium border border-gray-300">Vol</th>
+              <th class="px-6 py-3 font-medium border border-gray-300">Satuan</th>
+              <th class="px-6 py-3 font-medium border border-gray-300">Jumlah Satuan</th>
+              <th class="px-6 py-3 font-medium border border-gray-300">Jumlah</th>
             </tr>
           </thead>
 
