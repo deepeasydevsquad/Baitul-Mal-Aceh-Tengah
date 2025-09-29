@@ -175,7 +175,6 @@ async function deleteData(tahun: number) {
                   :key="data.id"
                   class="hover:bg-gray-50 transition-colors"
                 >
-                  <!-- Tahun (cuma muncul sekali per tahun, rowspan) -->
                   <td
                     v-if="idx === 0"
                     :rowspan="items.length"
@@ -183,23 +182,15 @@ async function deleteData(tahun: number) {
                   >
                     {{ tahun }}
                   </td>
-
-                  <!-- Nama Asnaf -->
-                  <td class="px-6 py-4 text-center font-medium text-gray-800">
+                  <td class="px-6 py-4 text-left font-medium text-gray-800">
                     {{ data.asnaf_name }}
                   </td>
-
-                  <!-- Target Orang -->
                   <td class="px-6 py-4 text-center font-medium text-gray-800">
                     {{ data.target_orang }}
                   </td>
-
-                  <!-- Target Rupiah -->
                   <td class="px-6 py-4 text-center font-medium text-gray-800">
                     Rp {{ data.target_rupiah.toLocaleString('id-ID') }}
                   </td>
-
-                  <!-- Aksi -->
                   <td v-if="idx === 0" :rowspan="items.length" class="px-6 py-4">
                     <div class="flex justify-center gap-2">
                       <LightButton @click="openModalEdit(tahun)">

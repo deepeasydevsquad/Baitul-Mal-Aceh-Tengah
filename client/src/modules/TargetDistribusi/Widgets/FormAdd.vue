@@ -174,43 +174,58 @@ onBeforeUnmount(() => document.removeEventListener('keydown', handleEscape));
             <font-awesome-icon icon="fa-solid fa-xmark" />
           </button>
         </div>
-
         <!-- Tahun -->
-        <div class="max-w-xs">
+        <div class="max-w-full">
           <InputText
             v-model="tahun"
             label="Tahun"
-            type="text"
             placeholder="Masukkan tahun"
             :error="errors.tahun"
             class="w-32"
           />
         </div>
-
         <!-- Daftar Asnaf -->
         <div class="space-y-4">
-          <div
-            v-for="(a, idx) in asnafList"
-            :key="a.id"
-            class="grid grid-cols-3 gap-3 items-center"
-          >
-            <div class="font-medium text-gray-700">{{ a.name }}</div>
-            <InputText
-              v-model="a.target_orang"
-              label="Target Orang"
-              type="number"
-              placeholder="0"
-            />
-            <InputText
-              :modelValue="formatRupiah(a.target_rupiah)"
-              label="Target Rupiah"
-              type="text"
-              placeholder="Rp 0"
-              @input="handleRupiahInput(a, $event)"
-            />
-          </div>
+          <table class="w-full rounded-lg">
+            <thead class="divide-y divide-gray-300">
+              <tr>
+                <th class="px-4 py-2 text-center font-medium border border-gray-300">Asnaf</th>
+                <th class="w-[25%] px-4 py-2 text-center font-medium border border-gray-300">
+                  Target Orang
+                </th>
+                <th class="w-[40%] px-4 py-2 text-center font-medium border border-gray-300">
+                  Target Rupiah
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-300">
+              <tr v-for="(a, idx) in asnafList" :key="a.id">
+                <td class="px-4 py-2 text-left font-normal">
+                  {{ a.name }}
+                </td>
+                <td class="px-4 py-2 text-center font-normal">
+                  <InputText
+                    v-model="a.target_orang"
+                    label="Target Orang"
+                    type="number"
+                    placeholder="0"
+                    :label_status="false"
+                  />
+                </td>
+                <td class="px-4 py-2 text-center font-normal">
+                  <InputText
+                    :modelValue="formatRupiah(a.target_rupiah)"
+                    label="Target Rupiah"
+                    type="text"
+                    placeholder="Rp 0"
+                    @input="handleRupiahInput(a, $event)"
+                    :label_status="false"
+                  />
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-
         <!-- Actions -->
         <div class="flex justify-end gap-3 mt-4">
           <BaseButton
