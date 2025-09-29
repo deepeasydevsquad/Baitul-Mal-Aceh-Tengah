@@ -83,6 +83,7 @@ const arr_router = [
   "riwayat_infaq",
   "laporan_tahunan",
   "pertanyaan_monev",
+  "target_pengumpulan",
   "target_distribusi",
 ];
 

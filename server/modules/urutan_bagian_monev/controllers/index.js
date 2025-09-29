@@ -14,7 +14,6 @@ controllers.get_jenis_monev_list = async (req, res) => {
   }
 };
 
-
 controllers.get_urutan_by_jenis = async (req, res) => {
   try {
     const model = new Model_r(req);
@@ -25,20 +24,28 @@ controllers.get_urutan_by_jenis = async (req, res) => {
   }
 };
 
-
 controllers.update_urutan = async (req, res) => {
   try {
     const { jenis_monev, urutan_bagian } = req.body;
     if (!jenis_monev || !Array.isArray(urutan_bagian)) {
-      return res.status(400).json({ error: true, message: "Input tidak valid." });
+      return res
+        .status(400)
+        .json({ error: true, message: "Input tidak valid." });
     }
+
     const model = new Model_cud(req);
-    const feedback = await model.updateUrutan();
-    res.status(200).json({ error: false, message: feedback.message });
+    await model.updateUrutan();
+    const result = await model.response();
+
+    if (result.success) {
+      res.status(200).json({ error: false, message: result.message });
+    } else {
+      const statusCode = result.message.includes("tidak ditemukan") ? 404 : 400;
+      res.status(statusCode).json({ error: true, message: result.message });
+    }
   } catch (error) {
     handleServerError(res, error);
   }
 };
 
 module.exports = controllers;
-
