@@ -23,7 +23,7 @@ const { showNotification, notificationType, notificationMessage } =
   useNotification();
 
 // Interfaces
-interface Program {
+interface LaporanPerencanaan {
   uraian: string;
   rencana: {
     jumlah: number;
@@ -39,14 +39,14 @@ interface Program {
   ket: string;
 }
 
-interface Kategori {
+interface asnaf {
   nama: string;
-  program: Program[];
+  program: LaporanPerencanaan[];
   total: number;
 }
 
-const datas = ref<Kategori[]>([]);
-const grandTotal = ref<string>(""); // simpan dari backend
+const datas = ref<asnaf[]>([]);
+const grandTotal = ref<string>("");
 
 // Helper Format
 const formatRupiah = (val: number) =>
@@ -60,11 +60,9 @@ async function fetchData() {
       perpage: perPage.value,
       pageNumber: currentPage.value,
     });
-
-    // backend return { data: [...kategori], total, grand_total, grand_total_format }
     datas.value = response.data;
     totalRow.value = response.total;
-    grandTotal.value = response.grand_total_format; // simpan string format total
+    grandTotal.value = response.grand_total_format;
   } catch (err) {
     console.error(err);
   } finally {
@@ -109,13 +107,13 @@ onMounted(fetchData);
           <tbody class="divide-y divide-gray-100">
             <template v-if="datas.length > 0">
               <!-- Kategori Row -->
-              <template v-for="kategori in datas" :key="kategori.nama">
+              <template v-for="asnaf in datas" :key="asnaf.nama">
                 <tr class="bg-gray-100 text-center">
                   <td colspan="6" class="px-6 py-2 font-semibold text-gray-700 text-left">
-                    Program: {{ kategori.nama }}
+                    {{ asnaf.nama }}
                   </td>
                   <td class="px-6 py-2 font-semibold text-gray-700">
-                    {{ formatRupiah(kategori.total) }}
+                    {{ formatRupiah(asnaf.total) }}
                   </td>
                   <td class="px-6 py-2 font-semibold text-gray-700">
                     {{100}} %
@@ -125,19 +123,19 @@ onMounted(fetchData);
 
                 <!-- Program Row -->
                 <tr
-                  v-for="(program, idx) in kategori.program"
+                  v-for="(laporanPerencanaan, idx) in asnaf.program"
                   :key="idx"
                   class="hover:bg-gray-50 transition-colors text-center"
                 >
-                  <td class="px-4 py-2 text-gray-600">{{ program.uraian }}</td>
-                  <td class="px-6 py-4 text-gray-600">{{ program.rencana.jumlah }}</td>
-                  <td class="px-6 py-4 text-gray-600">{{ program.rencana.satuan }}</td>
-                  <td class="px-6 py-4 text-gray-600">{{ program.rincian.vol }}</td>
-                  <td class="px-6 py-4 text-gray-600">{{ program.rincian.satuan }}</td>
-                  <td class="px-6 py-4 text-gray-600">{{ formatRupiah(program.rincian.jumlah_satuan) }}</td>
-                  <td class="px-6 py-4 text-gray-600">{{ formatRupiah(program.rincian.jumlah_satuan * program.rencana.jumlah) }}</td>
-                  <td class="px-6 py-4 text-gray-600">{{ program.persentase }}</td>
-                  <td class="px-6 py-4 text-gray-600">{{ program.ket }}</td>
+                  <td class="px-4 py-2 text-gray-600">{{ laporanPerencanaan.uraian }}</td>
+                  <td class="px-6 py-4 text-gray-600">{{ laporanPerencanaan.rencana.jumlah }}</td>
+                  <td class="px-6 py-4 text-gray-600">{{ laporanPerencanaan.rencana.satuan }}</td>
+                  <td class="px-6 py-4 text-gray-600">{{ laporanPerencanaan.rincian.vol }}</td>
+                  <td class="px-6 py-4 text-gray-600">{{ laporanPerencanaan.rincian.satuan }}</td>
+                  <td class="px-6 py-4 text-gray-600">{{ formatRupiah(laporanPerencanaan.rincian.jumlah_satuan) }}</td>
+                  <td class="px-6 py-4 text-gray-600">{{ formatRupiah(laporanPerencanaan.rincian.jumlah_satuan * laporanPerencanaan.rencana.jumlah) }}</td>
+                  <td class="px-6 py-4 text-gray-600">{{ laporanPerencanaan.persentase }}</td>
+                  <td class="px-6 py-4 text-gray-600">{{ laporanPerencanaan.ket }}</td>
                 </tr>
               </template>
 

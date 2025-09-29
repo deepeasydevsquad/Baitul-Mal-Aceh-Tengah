@@ -1,6 +1,5 @@
 // modules/laporan_perencanaan/models/model_r.js
-const { Kegiatan, Program } = require("../../../models");
-const moment = require("moment");
+const { Kegiatan, Asnaf } = require("../../../models");
 
 class Model_r {
   constructor(req) {
@@ -25,14 +24,14 @@ class Model_r {
           "nama_kegiatan",
           "satuan",
           "jumlah_target_penerima",
-          "jumlah_dana",
+          "jumlah_maksimal_nominal_bantuan",
           "periode_bantuan",
           "program_id",
           "sumber_dana",
         ],
         include: [
           {
-            model: Program,
+            model: Asnaf,
             attributes: ["id", "name"],
           },
         ],
@@ -41,21 +40,34 @@ class Model_r {
       });
 
       const kategoriMap = {};
+
       for (const k of kegiatanList) {
         const programId = k.program_id;
         if (!kategoriMap[programId]) {
           kategoriMap[programId] = {
-            nama: k.Program?.name || `Program ${programId}`,
+            nama: k.Asnaf?.name || `Program ${programId}`,
             program: [],
             total: 0,
           };
         }
 
         const jumlah = Number(k.jumlah_target_penerima || 0);
-        const jumlah_satuan = Number(k.jumlah_dana || 0);
-        const itemTotal = jumlah * jumlah_satuan;
+        const jumlahSatuan = Number(k.jumlah_maksimal_nominal_bantuan || 0);
 
-        // push item (tanpa persentase dulu)
+        let vol = 1;
+        let satuan = "tahun";
+        let totalBaris = 0;
+
+        if (k.periode_bantuan === "bulanan") {
+          vol = jumlah * 12;
+          satuan = "OB";
+          totalBaris = vol * jumlahSatuan;
+        } else {
+          vol = 1;
+          satuan = "tahun";
+          totalBaris = jumlah * jumlahSatuan;
+        }
+
         kategoriMap[programId].program.push({
           id: k.id,
           uraian: k.nama_kegiatan || "-",
@@ -64,19 +76,21 @@ class Model_r {
             satuan: k.satuan || "orang",
           },
           rincian: {
-            vol: 1,
-            satuan: k.periode_bantuan || "tahun",
-            jumlah_satuan,
-            jumlah_satuan_format: this.formatRupiah(jumlah_satuan),
+            vol,
+            satuan,
+            jumlah_satuan: jumlahSatuan,
+            jumlah_satuan_format: this.formatRupiah(jumlahSatuan),
           },
-          item_total: itemTotal,
-          item_total_format: this.formatRupiah(itemTotal),
+          item_total: totalBaris,
+          item_total_format: this.formatRupiah(totalBaris),
           persentase: null,
           ket: k.sumber_dana || "-",
         });
-        kategoriMap[programId].total += itemTotal;
+
+        kategoriMap[programId].total += totalBaris;
       }
 
+      // Hitung persentase per kategori
       for (const cat of Object.values(kategoriMap)) {
         const catTotal = cat.total;
         for (const prog of cat.program) {
