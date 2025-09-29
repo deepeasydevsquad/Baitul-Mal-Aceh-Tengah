@@ -98,6 +98,7 @@ const handleSubmit = async () => {
     emit('status', { error_msg: response.error_msg, error: response.error });
 
     closeModal(); // cuma close kalau sukses
+    emit('close');
   } catch (error: any) {
     const msg =
       error.response?.data?.error_msg || error.response?.data?.message || 'Terjadi kesalahan';

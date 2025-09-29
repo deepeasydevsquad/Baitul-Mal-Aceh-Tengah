@@ -101,6 +101,38 @@ class Model_cud {
     }
   }
 
+  async delete() {
+    await this.initialize();
+    const body = this.req.body;
+
+    try {
+      if (!body.tahun) {
+        this.state = false;
+        this.message =
+          "Tahun harus diisi untuk menghapus data target distribusi";
+        return;
+      }
+
+      // hapus semua data target distribusi berdasarkan tahun
+      const deleted = await Target_distribusi.destroy({
+        where: { tahun: body.tahun },
+        transaction: this.t,
+      });
+
+      if (deleted > 0) {
+        this.state = true;
+        this.message = `Berhasil menghapus ${deleted} target distribusi untuk tahun ${body.tahun}`;
+      } else {
+        this.state = false;
+        this.message = `Tidak ada data target distribusi untuk tahun ${body.tahun}`;
+      }
+    } catch (error) {
+      console.error("Error in delete method:", error);
+      this.state = false;
+      this.message = error.message;
+    }
+  }
+
   // response
   async response() {
     if (this.state) {

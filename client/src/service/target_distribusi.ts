@@ -51,3 +51,13 @@ export const daftar_asnaf = async() => {
         throw error
     }
 }
+
+export const delete_target = async (param: any) => {
+  try {
+    const response = await api.post('/target_distribusi/delete', param)
+    return response.data
+  } catch (error) {
+    console.error('Gagal menghapus target:', error)
+    throw error
+  }
+}

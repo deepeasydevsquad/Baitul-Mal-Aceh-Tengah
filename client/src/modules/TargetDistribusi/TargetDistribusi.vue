@@ -20,7 +20,7 @@ import { useConfirmation } from '@/composables/useConfirmation';
 import { useNotification } from '@/composables/useNotification';
 
 // Service API
-import { list } from '@/service/target_distribusi';
+import { delete_target, list } from '@/service/target_distribusi';
 
 // State: Loading
 const isLoading = ref(false);
@@ -82,7 +82,8 @@ async function fetchData() {
     });
 
     datas.value = response.data;
-    totalRow.value = response.total;
+    const tahunUnik = new Set(datas.value.map((d) => d.tahun));
+    totalRow.value = tahunUnik.size;
     console.log(datas.value);
   } catch (error) {
     displayNotification('Gagal mengambil data bank', 'error');
@@ -102,6 +103,25 @@ const groupByTahun = (arr: Data[]) => {
     return acc;
   }, {});
 };
+
+async function deleteData(tahun: number) {
+  displayConfirmation(
+    'Hapus Data Target',
+    'Apakah Anda yakin ingin menghapus data target ini?',
+    async () => {
+      try {
+        isLoading.value = true;
+        await delete_target({ tahun: tahun });
+        displayNotification('Data target berhasil dihapus', 'success');
+        await fetchData();
+      } catch (error) {
+        displayNotification('Gagal menghapus data target', 'error');
+      } finally {
+        isLoading.value = false;
+      }
+    },
+  );
+}
 </script>
 
 <template>
@@ -185,6 +205,9 @@ const groupByTahun = (arr: Data[]) => {
                       <LightButton @click="openModalEdit(tahun)">
                         <EditIcon />
                       </LightButton>
+                      <DangerButton @click="deleteData(tahun)">
+                        <DeleteIcon />
+                      </DangerButton>
                     </div>
                   </td>
                 </tr>
@@ -231,8 +254,6 @@ const groupByTahun = (arr: Data[]) => {
             payload.error_msg || 'Tambah/Update Target gagal',
             payload.error ? 'error' : 'success',
           );
-          console.log(payload);
-          if (!payload.error) isModalEditOpen = false;
         }
       "
     />

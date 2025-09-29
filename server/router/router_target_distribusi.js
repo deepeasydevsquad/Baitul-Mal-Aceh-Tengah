@@ -80,6 +80,13 @@ router.post(
   controllers.detail_target
 );
 
+router.post(
+  "/target_distribusi/delete",
+  authenticateTokenAdministrator,
+  [body("tahun").notEmpty().withMessage("tahun Tidak Boleh Kosong")],
+  controllers.delete
+);
+
 router.get(
   "/target_distribusi/list_asnaf",
   authenticateTokenAdministrator,

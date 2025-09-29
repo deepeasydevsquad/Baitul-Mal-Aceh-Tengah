@@ -96,6 +96,7 @@ const handleSubmit = async () => {
     const response = await add_target(payload);
     emit('status', { error_msg: response.error_msg, error: response.error });
     closeModal();
+    emit('close');
   } catch (error: any) {
     const msg =
       error.response?.data?.error_msg || error.response?.data?.message || 'Terjadi kesalahan';
