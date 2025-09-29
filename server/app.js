@@ -84,6 +84,7 @@ const arr_router = [
   "laporan_tahunan",
   "pertanyaan_monev",
   "target_pengumpulan",
+  "target_distribusi",
 ];
 
 const arr = {};
