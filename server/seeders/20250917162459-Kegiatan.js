@@ -24,7 +24,7 @@ module.exports = {
           status_kegiatan: "selesai",
           tahun: 2025,
           banner: "pendidikan-2023.png",
-          periode_bantuan: "tahunan",
+          periode_bantuan: "bulanan",
           desc: "Program bantuan biaya pendidikan untuk siswa/siswi yatim dan dhuafa di seluruh kabupaten (2023).",
           createdAt: new Date(),
           updatedAt: new Date(),

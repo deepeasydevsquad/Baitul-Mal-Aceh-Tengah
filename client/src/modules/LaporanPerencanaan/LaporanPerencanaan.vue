@@ -19,8 +19,7 @@ const totalColumns = ref<number>(10);
 const { currentPage, perPage, totalRow, totalPages, nextPage, prevPage, pageNow, pages } =
   usePagination(fetchData, { perPage: itemsPerPage.value });
 
-const { showNotification, notificationType, notificationMessage } =
-  useNotification();
+const { showNotification, notificationType, notificationMessage } = useNotification();
 
 // Interfaces
 interface LaporanPerencanaan {
@@ -46,11 +45,15 @@ interface asnaf {
 }
 
 const datas = ref<asnaf[]>([]);
-const grandTotal = ref<string>("");
+const grandTotal = ref<string>('');
 
 // Helper Format
 const formatRupiah = (val: number) =>
-  new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val);
+  new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+  }).format(val);
 
 // Fetch Data
 async function fetchData() {
@@ -78,18 +81,16 @@ onMounted(fetchData);
     <LoadingSpinner v-if="isLoading" label="Memuat halaman..." />
     <div v-else class="space-y-4">
       <div class="overflow-hidden rounded-xl border border-gray-200 shadow">
-        <SkeletonTable
-          v-if="isTableLoading"
-          :columns="totalColumns"
-          :rows="itemsPerPage"
-        />
+        <SkeletonTable v-if="isTableLoading" :columns="totalColumns" :rows="itemsPerPage" />
         <table v-else class="w-full border-collapse bg-white text-sm">
           <!-- Header -->
           <thead class="bg-gray-50 text-gray-700 text-center border-b border-gray-300">
             <tr>
               <th rowspan="2" class="w-[20%] px-6 py-3 font-medium">Program</th>
               <th colspan="2" class="w-[20%] px-6 py-3 font-medium">Rencana</th>
-              <th colspan="4" class="w-[40%] px-6 py-3 font-medium">Rincihan Perhitungan (Murni)</th>
+              <th colspan="4" class="w-[40%] px-6 py-3 font-medium">
+                Rincihan Perhitungan (Murni)
+              </th>
               <th rowspan="2" class="w-[10%] px-6 py-3 font-medium">%</th>
               <th rowspan="2" class="w-[10%] px-6 py-3 font-medium">Ket</th>
             </tr>
@@ -115,10 +116,8 @@ onMounted(fetchData);
                   <td class="px-6 py-2 font-semibold text-gray-700">
                     {{ formatRupiah(asnaf.total) }}
                   </td>
-                  <td class="px-6 py-2 font-semibold text-gray-700">
-                    {{100}} %
-                  </td>
-                <td colspan="2"></td>
+                  <td class="px-6 py-2 font-semibold text-gray-700">{{ 100 }} %</td>
+                  <td colspan="2"></td>
                 </tr>
 
                 <!-- Program Row -->
@@ -132,8 +131,20 @@ onMounted(fetchData);
                   <td class="px-6 py-4 text-gray-600">{{ laporanPerencanaan.rencana.satuan }}</td>
                   <td class="px-6 py-4 text-gray-600">{{ laporanPerencanaan.rincian.vol }}</td>
                   <td class="px-6 py-4 text-gray-600">{{ laporanPerencanaan.rincian.satuan }}</td>
-                  <td class="px-6 py-4 text-gray-600">{{ formatRupiah(laporanPerencanaan.rincian.jumlah_satuan) }}</td>
-                  <td class="px-6 py-4 text-gray-600">{{ formatRupiah(laporanPerencanaan.rincian.jumlah_satuan * laporanPerencanaan.rencana.jumlah) }}</td>
+                  <td class="px-6 py-4 text-gray-600">
+                    {{ formatRupiah(laporanPerencanaan.rincian.jumlah_satuan) }}
+                  </td>
+                  <td class="px-6 py-4 text-gray-600">
+                    {{
+                      formatRupiah(
+                        laporanPerencanaan.rincian.satuan == 'tahun'
+                          ? laporanPerencanaan.rincian.jumlah_satuan *
+                              laporanPerencanaan.rencana.jumlah
+                          : laporanPerencanaan.rincian.jumlah_satuan *
+                              laporanPerencanaan.rincian.vol,
+                      )
+                    }}
+                  </td>
                   <td class="px-6 py-4 text-gray-600">{{ laporanPerencanaan.persentase }}</td>
                   <td class="px-6 py-4 text-gray-600">{{ laporanPerencanaan.ket }}</td>
                 </tr>
