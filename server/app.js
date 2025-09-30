@@ -86,6 +86,7 @@ const arr_router = [
   "laporan_perencanaan",
   "target_pengumpulan",
   "target_distribusi",
+  "laporan_kesekretariatan",
 ];
 
 const arr = {};
