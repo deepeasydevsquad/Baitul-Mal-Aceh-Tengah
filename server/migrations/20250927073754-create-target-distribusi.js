@@ -14,11 +14,17 @@ module.exports = {
       },
       asnaf_id: {
         type: Sequelize.INTEGER,
+        allowNull: true,
         references: {
           model: "Asnafs",
           key: "id",
         },
         onDelete: "CASCADE",
+      },
+      tipe: {
+        type: Sequelize.ENUM,
+        values: ["zakat", "infaq", "donasi"],
+        allowNull: false,
       },
       target_orang: {
         type: Sequelize.INTEGER,
