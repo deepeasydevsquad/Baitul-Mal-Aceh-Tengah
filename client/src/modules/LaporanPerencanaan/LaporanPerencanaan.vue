@@ -114,7 +114,7 @@ onMounted(fetchData);
               <!-- Kategori Row -->
               <template v-for="asnaf in datas" :key="asnaf.nama">
                 <tr class="bg-gray-100 text-center">
-                  <td colspan="6" class="px-6 py-2 font-semibold text-gray-700 text-left">
+                  <td colspan="6" class="px-4 py-2 font-semibold text-gray-700 text-left">
                     {{ asnaf.nama }}
                   </td>
                   <td class="px-6 py-2 font-semibold text-gray-700">
@@ -130,7 +130,7 @@ onMounted(fetchData);
                   :key="idx"
                   class="hover:bg-gray-50 transition-colors text-center"
                 >
-                  <td class="px-4 py-2 text-gray-600">{{ laporanPerencanaan.uraian }}</td>
+                  <td class="px-6 py-2 text-gray-600 text-left">{{ laporanPerencanaan.uraian }}</td>
                   <td class="px-6 py-4 text-gray-600">{{ laporanPerencanaan.rencana.jumlah }}</td>
                   <td class="px-6 py-4 text-gray-600">{{ laporanPerencanaan.rencana.satuan }}</td>
                   <td class="px-6 py-4 text-gray-600">{{ laporanPerencanaan.rincian.vol }}</td>
