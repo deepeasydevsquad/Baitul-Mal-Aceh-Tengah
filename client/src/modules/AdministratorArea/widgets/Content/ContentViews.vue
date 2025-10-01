@@ -46,6 +46,7 @@ import PertanyaanMonev from '@/modules/PertanyaanMonev/PertanyaanMonev.vue';
 import LaporanPerencanaan from '@/modules/LaporanPerencanaan/LaporanPerencanaan.vue';
 import TargetPengumpulan from '@/modules/TargetPengumpulan/TargetPengumpulan.vue';
 import TargetDistribusi from '@/modules/TargetDistribusi/TargetDistribusi.vue';
+import LaporanKesekretariatan from '@/modules/LaporanKesekretariatan/LaporanKesekretariatan.vue';
 import Beranda from '@/modules/Beranda/Beranda.vue';
 
 const tabComponents = {
@@ -88,6 +89,7 @@ const tabComponents = {
   laporan_perencanaan: LaporanPerencanaan,
   target_pengumpulan: TargetPengumpulan,
   target_distribusi: TargetDistribusi,
+  laporan_sekretariatan: LaporanKesekretariatan,
   beranda_utama: Beranda,
 };
 
