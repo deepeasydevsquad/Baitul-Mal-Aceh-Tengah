@@ -10,7 +10,7 @@ import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
 import { useNotification } from '@/composables/useNotification';
 
 // Service
-import { update_target, daftar_asnaf, detail } from '@/service/target_distribusi';
+import { update_target, detail } from '@/service/target_distribusi';
 
 // Notification
 const { showNotification, notificationType, notificationMessage, displayNotification } =
@@ -35,36 +35,18 @@ const tahun = ref('');
 const asnafList = ref<{ id: number; name: string; target_orang: string; target_rupiah: string }[]>(
   [],
 );
+const infaq = ref({ orang: '', rupiah: '' });
+const donasi = ref({ orang: '', rupiah: '' });
 const errors = ref<Record<string, string>>({});
 
 // Reset form
 const resetForm = () => {
   tahun.value = '';
-  asnafList.value = asnafList.value.map((a) => ({
-    ...a,
-    target_orang: '',
-    target_rupiah: '',
-  }));
+  infaq.value = { orang: '', rupiah: '' };
+  donasi.value = { orang: '', rupiah: '' };
+  asnafList.value = [];
   errors.value = {};
 };
-
-const fetchData = async () => {
-  try {
-    const response = await daftar_asnaf();
-    asnafList.value = response.map((item: any) => ({
-      ...item,
-      target_orang: '',
-      target_rupiah: '',
-    }));
-  } catch (error) {
-    console.error(error);
-    displayNotification('Gagal mengambil data asnaf', 'error');
-  }
-};
-
-onMounted(() => {
-  fetchData();
-});
 
 // Validasi
 const validateForm = () => {
@@ -79,35 +61,7 @@ const validateForm = () => {
   return isValid;
 };
 
-// Submit
-const handleSubmit = async () => {
-  if (!validateForm()) return;
-
-  isSubmitting.value = true;
-  try {
-    const payload = {
-      tahun: tahun.value,
-      targets: asnafList.value.map((a) => ({
-        asnaf_id: a.id,
-        target_orang: parseInt(a.target_orang) || 0,
-        target_rupiah: parseInt(a.target_rupiah) || 0,
-      })),
-    };
-
-    const response = await update_target(payload);
-    emit('status', { error_msg: response.error_msg, error: response.error });
-
-    closeModal(); // cuma close kalau sukses
-    emit('close');
-  } catch (error: any) {
-    const msg =
-      error.response?.data?.error_msg || error.response?.data?.message || 'Terjadi kesalahan';
-    displayNotification(msg, 'error');
-  } finally {
-    isSubmitting.value = false;
-  }
-};
-
+// Format Rupiah
 const formatRupiah = (value: string | number) => {
   let numberString = value.toString().replace(/[^,\d]/g, '');
   let split = numberString.split(',');
@@ -126,18 +80,55 @@ const formatRupiah = (value: string | number) => {
 
 const handleRupiahInput = (a: any, e: Event) => {
   const rawValue = (e.target as HTMLInputElement).value;
-  // simpen versi angka mentah buat payload
   a.target_rupiah = rawValue.replace(/[^0-9]/g, '');
-  // tampilin versi format rupiah
+  (e.target as HTMLInputElement).value = formatRupiah(rawValue);
+};
+const handleRupiahInputInfaq = (e: Event) => {
+  const rawValue = (e.target as HTMLInputElement).value;
+  infaq.value.rupiah = rawValue.replace(/[^0-9]/g, '');
+  (e.target as HTMLInputElement).value = formatRupiah(rawValue);
+};
+const handleRupiahInputDonasi = (e: Event) => {
+  const rawValue = (e.target as HTMLInputElement).value;
+  donasi.value.rupiah = rawValue.replace(/[^0-9]/g, '');
   (e.target as HTMLInputElement).value = formatRupiah(rawValue);
 };
 
-// Close modal
-const closeModal = () => {
-  console.log('closeModal jalan');
-  if (isSubmitting.value) return;
-  resetForm();
-  emit('close');
+// Submit
+const handleSubmit = async () => {
+  if (!validateForm()) return;
+
+  isSubmitting.value = true;
+  try {
+    const payload = {
+      tahun: tahun.value,
+      infaq: {
+        target_orang: parseInt(infaq.value.orang) || 0,
+        target_rupiah: parseInt(infaq.value.rupiah) || 0,
+      },
+      donasi: {
+        target_orang: parseInt(donasi.value.orang) || 0,
+        target_rupiah: parseInt(donasi.value.rupiah) || 0,
+      },
+      targets: asnafList.value.map((a) => ({
+        asnaf_id: a.id,
+        target_orang: parseInt(a.target_orang) || 0,
+        target_rupiah: parseInt(a.target_rupiah) || 0,
+      })),
+    };
+
+    const response = await update_target(payload);
+    emit('status', { error_msg: response.error_msg, error: response.error });
+
+    closeModal();
+    emit('close');
+  } catch (error: any) {
+    const msg =
+      error.response?.data?.error_msg || error.response?.data?.message || 'Terjadi kesalahan';
+    displayNotification(msg, 'error');
+  } finally {
+    isSubmitting.value = false;
+  }
 };
 
 // Fetch detail data buat edit
@@ -146,21 +137,35 @@ const fetchDetail = async () => {
     if (!props.tahun) return;
     const response = await detail({ tahun: props.tahun });
 
-    // pastikan data ada
-    if (!response.data || !Array.isArray(response.data) || response.data.length === 0) {
+    if (!response.data) {
       displayNotification('Data target distribusi tidak ditemukan', 'error');
       return;
     }
 
-    // isi tahun dari entry pertama
-    tahun.value = response.data[0].tahun.toString();
+    tahun.value = props.tahun.toString();
 
-    // map asnaf list
-    asnafList.value = response.data.map((item: any) => ({
+    // Infaq
+    if (response.data.infaq) {
+      infaq.value = {
+        orang: response.data.infaq.target_orang?.toString() || '',
+        rupiah: response.data.infaq.target_rupiah?.toString() || '',
+      };
+    }
+
+    // Donasi
+    if (response.data.donasi) {
+      donasi.value = {
+        orang: response.data.donasi.target_orang?.toString() || '',
+        rupiah: response.data.donasi.target_rupiah?.toString() || '',
+      };
+    }
+
+    // Zakat (array of asnaf)
+    asnafList.value = (response.data.zakat || []).map((item: any) => ({
       id: item.asnaf_id,
       name: item.asnaf_name,
-      target_orang: item.target_orang.toString(),
-      target_rupiah: item.target_rupiah.toString(),
+      target_orang: item.target_orang?.toString() || '',
+      target_rupiah: item.target_rupiah?.toString() || '',
     }));
   } catch (error) {
     console.error(error);
@@ -168,17 +173,21 @@ const fetchDetail = async () => {
   }
 };
 
-// jalan pas modal dibuka
+// Reset/fetch ketika modal buka/tutup
 watch(
   () => props.isModalOpen,
   (val) => {
-    if (val) {
-      fetchDetail();
-    } else {
-      resetForm();
-    }
+    if (val) fetchDetail();
+    else resetForm();
   },
 );
+
+// Close modal
+const closeModal = () => {
+  if (isSubmitting.value) return;
+  resetForm();
+  emit('close');
+};
 
 // Escape key
 const handleEscape = (e: KeyboardEvent) => {
@@ -204,57 +213,121 @@ onBeforeUnmount(() => document.removeEventListener('keydown', handleEscape));
       aria-modal="true"
     >
       <LoadingSpinner v-if="isSubmitting" label="Menyimpan..." />
-      <div v-else class="relative max-w-2xl w-full bg-white shadow-2xl rounded-2xl p-6 space-y-6">
-        <!-- Header -->
-        <div class="flex items-center justify-between">
-          <h2 class="text-xl font-bold text-gray-800">EDIT TARGET DISTRIBUSI</h2>
-          <button
-            class="text-gray-400 text-lg hover:text-gray-600"
-            @click="closeModal"
-            aria-label="Tutup modal"
-          >
-            <font-awesome-icon icon="fa-solid fa-xmark" />
-          </button>
-        </div>
+      <div
+        v-else
+        class="relative max-w-2xl w-full bg-white shadow-2xl rounded-2xl p-6 flex flex-col"
+        style="max-height: 90vh"
+      >
+        <!-- Konten scrollable -->
+        <div class="overflow-y-auto pr-2 space-y-6">
+          <!-- Header -->
+          <div class="flex items-center justify-between">
+            <h2 class="text-xl font-bold text-gray-800">EDIT TARGET DISTRIBUSI</h2>
+            <button
+              class="text-gray-400 text-lg hover:text-gray-600"
+              @click="closeModal"
+              aria-label="Tutup modal"
+            >
+              <font-awesome-icon icon="fa-solid fa-xmark" />
+            </button>
+          </div>
 
-        <!-- Tahun -->
-        <div class="max-w-xs">
-          <InputText
-            v-model="tahun"
-            label="Tahun"
-            type="text"
-            placeholder="Masukkan tahun"
-            :error="errors.tahun"
-            class="w-32"
-          />
-        </div>
-
-        <!-- Daftar Asnaf -->
-        <div class="space-y-4">
-          <div
-            v-for="(a, idx) in asnafList"
-            :key="a.id"
-            class="grid grid-cols-3 gap-3 items-center"
-          >
-            <div class="font-medium text-gray-700">{{ a.name }}</div>
+          <!-- Tahun -->
+          <div class="max-w-xs">
             <InputText
-              v-model="a.target_orang"
-              label="Target Orang"
+              v-model="tahun"
+              label="Tahun"
+              type="text"
+              placeholder="Masukkan tahun"
+              :error="errors.tahun"
+              class="w-32"
+            />
+          </div>
+
+          <!-- Infaq -->
+          <div class="flex gap-4">
+            <InputText
+              v-model="infaq.orang"
+              label="Jumlah Orang (Infaq)"
               type="number"
               placeholder="0"
+              class="w-32"
             />
             <InputText
-              :modelValue="formatRupiah(a.target_rupiah)"
-              label="Target Rupiah"
+              :modelValue="formatRupiah(infaq.rupiah)"
+              label="Target Rupiah (Infaq)"
               type="text"
               placeholder="Rp 0"
-              @input="handleRupiahInput(a, $event)"
+              @input="handleRupiahInputInfaq"
+              class="w-56"
             />
+          </div>
+
+          <!-- Donasi -->
+          <div class="flex gap-4">
+            <InputText
+              v-model="donasi.orang"
+              label="Jumlah Orang (Donasi)"
+              type="number"
+              placeholder="0"
+              class="w-32"
+            />
+            <InputText
+              :modelValue="formatRupiah(donasi.rupiah)"
+              label="Target Rupiah (Donasi)"
+              type="text"
+              placeholder="Rp 0"
+              @input="handleRupiahInputDonasi"
+              class="w-56"
+            />
+          </div>
+
+          <!-- Daftar Asnaf (Zakat) -->
+          <div class="space-y-4">
+            <table class="w-full rounded-lg">
+              <thead class="divide-y divide-gray-300">
+                <tr>
+                  <th class="px-4 py-2 text-center font-medium border border-gray-300">Asnaf</th>
+                  <th class="w-[25%] px-4 py-2 text-center font-medium border border-gray-300">
+                    Target Orang
+                  </th>
+                  <th class="w-[40%] px-4 py-2 text-center font-medium border border-gray-300">
+                    Target Rupiah
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-300">
+                <tr v-for="(a, idx) in asnafList" :key="a.id">
+                  <td class="px-4 py-2 text-left font-normal">
+                    {{ a.name }}
+                  </td>
+                  <td class="px-4 py-2 text-center font-normal">
+                    <InputText
+                      v-model="a.target_orang"
+                      label="Target Orang"
+                      type="number"
+                      placeholder="0"
+                      :label_status="false"
+                    />
+                  </td>
+                  <td class="px-4 py-2 text-center font-normal">
+                    <InputText
+                      :modelValue="formatRupiah(a.target_rupiah)"
+                      label="Target Rupiah"
+                      type="text"
+                      placeholder="Rp 0"
+                      @input="handleRupiahInput(a, $event)"
+                      :label_status="false"
+                    />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
         <!-- Actions -->
-        <div class="flex justify-end gap-3 mt-4">
+        <div class="flex justify-end gap-3 mt-4 pt-4 border-t">
           <BaseButton
             @click="closeModal"
             type="button"

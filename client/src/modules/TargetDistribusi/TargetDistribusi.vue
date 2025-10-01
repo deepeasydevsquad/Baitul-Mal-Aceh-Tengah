@@ -161,7 +161,7 @@ async function deleteData(tahun: number) {
           <thead class="bg-gray-50 text-gray-700 text-center border-b border-gray-300">
             <tr>
               <th class="w-[20%] px-6 py-3 font-medium">Tahun</th>
-              <th class="w-[20%] px-6 py-3 font-medium">Nama Asnaf</th>
+              <th class="w-[20%] px-6 py-3 font-medium">Nama</th>
               <th class="w-[20%] px-6 py-3 font-medium">Target Orang</th>
               <th class="w-[30%] px-6 py-3 font-medium">Target Rupiah</th>
               <th class="w-[10%] px-6 py-3 font-medium">Aksi</th>
@@ -183,8 +183,12 @@ async function deleteData(tahun: number) {
                     {{ tahun }}
                   </td>
                   <td class="px-6 py-4 text-left font-medium text-gray-800">
-                    {{ data.asnaf_name }}
+                    <template v-if="data.asnaf_name"> {{ data.asnaf_name }} (zakat) </template>
+                    <template v-else>
+                      {{ data.tipe.charAt(0).toUpperCase() + data.tipe.slice(1) }}
+                    </template>
                   </td>
+
                   <td class="px-6 py-4 text-center font-medium text-gray-800">
                     {{ data.target_orang }}
                   </td>

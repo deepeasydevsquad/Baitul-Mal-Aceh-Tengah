@@ -1,7 +1,5 @@
-const { Asnaf, Target_distribusi, sequelize } = require("../../../models");
+const { Target_distribusi, sequelize } = require("../../../models");
 const { writeLog } = require("../../../helper/writeLogHelper");
-
-const { Op } = require("sequelize");
 const moment = require("moment");
 
 class Model_cud {
@@ -20,29 +18,59 @@ class Model_cud {
     const body = this.req.body;
 
     try {
-      // validasi minimal
-      if (
-        !body.tahun ||
-        !body.targets ||
-        !Array.isArray(body.targets) ||
-        body.targets.length === 0
-      ) {
+      if (!body.tahun) {
         this.state = false;
-        this.message = "Data target distribusi tidak valid";
+        this.message = "Tahun harus diisi";
         return;
       }
 
-      // mapping data dari frontend
-      const dataInsert = body.targets.map((t) => ({
-        tahun: body.tahun, // tahun dikirim sekali dari frontend
-        asnaf_id: t.asnaf_id,
-        target_orang: t.target_orang || 0,
-        target_rupiah: t.target_rupiah || 0,
-        createdAt: myDate,
-        updatedAt: myDate,
-      }));
+      const dataInsert = [];
 
-      // bulk insert
+      // --- Bulk insert untuk Zakat (dari daftar asnaf) ---
+      if (body.targets && Array.isArray(body.targets)) {
+        body.targets.forEach((t) => {
+          dataInsert.push({
+            tahun: body.tahun,
+            tipe: "zakat",
+            asnaf_id: t.asnaf_id,
+            target_orang: t.target_orang || 0,
+            target_rupiah: t.target_rupiah || 0,
+            createdAt: myDate,
+            updatedAt: myDate,
+          });
+        });
+      }
+
+      // --- Infaq (single row) ---
+      if (body.infaq) {
+        dataInsert.push({
+          tahun: body.tahun,
+          tipe: "infaq",
+          target_orang: body.infaq.target_orang || 0,
+          target_rupiah: body.infaq.target_rupiah || 0,
+          createdAt: myDate,
+          updatedAt: myDate,
+        });
+      }
+
+      // --- Donasi (single row) ---
+      if (body.donasi) {
+        dataInsert.push({
+          tahun: body.tahun,
+          tipe: "donasi",
+          target_orang: body.donasi.target_orang || 0,
+          target_rupiah: body.donasi.target_rupiah || 0,
+          createdAt: myDate,
+          updatedAt: myDate,
+        });
+      }
+
+      if (dataInsert.length === 0) {
+        this.state = false;
+        this.message = "Tidak ada data target distribusi yang dikirim";
+        return;
+      }
+
       const insert = await Target_distribusi.bulkCreate(dataInsert, {
         transaction: this.t,
       });
@@ -58,42 +86,69 @@ class Model_cud {
 
   async update() {
     await this.initialize();
+    const myDate = moment().format("YYYY-MM-DD HH:mm:ss");
     const body = this.req.body;
 
-    console.log("_____________Ddddddddddddddddddddd____________");
-    console.log(body);
-    console.log("_____________Ddddddddddddddddddddd____________");
-    const myDate = moment().format("YYYY-MM-DD HH:mm:ss");
-
     try {
-      if (
-        !body.tahun ||
-        !body.targets ||
-        !Array.isArray(body.targets) ||
-        body.targets.length === 0
-      ) {
+      if (!body.tahun) {
         this.state = false;
-        this.message = "Data target distribusi tidak valid";
+        this.message = "Tahun harus diisi";
         return;
       }
 
-      // loop update per target
-      for (const t of body.targets) {
+      // --- Update zakat per asnaf ---
+      if (body.targets && Array.isArray(body.targets)) {
+        for (const t of body.targets) {
+          await Target_distribusi.update(
+            {
+              target_orang: t.target_orang,
+              target_rupiah: t.target_rupiah,
+              updatedAt: myDate,
+            },
+            {
+              where: {
+                tahun: body.tahun,
+                tipe: "zakat",
+                asnaf_id: t.asnaf_id,
+              },
+              transaction: this.t,
+            }
+          );
+        }
+      }
+
+      // --- Update infaq ---
+      if (body.infaq) {
         await Target_distribusi.update(
           {
-            target_orang: t.target_orang,
-            target_rupiah: t.target_rupiah,
+            target_orang: body.infaq.target_orang,
+            target_rupiah: body.infaq.target_rupiah,
             updatedAt: myDate,
           },
           {
-            where: { tahun: body.tahun, asnaf_id: t.asnaf_id },
+            where: { tahun: body.tahun, tipe: "infaq" },
+            transaction: this.t,
+          }
+        );
+      }
+
+      // --- Update donasi ---
+      if (body.donasi) {
+        await Target_distribusi.update(
+          {
+            target_orang: body.donasi.target_orang,
+            target_rupiah: body.donasi.target_rupiah,
+            updatedAt: myDate,
+          },
+          {
+            where: { tahun: body.tahun, tipe: "donasi" },
             transaction: this.t,
           }
         );
       }
 
       this.state = true;
-      this.message = `Berhasil update ${body.targets.length} target distribusi untuk tahun ${body.tahun}`;
+      this.message = `Berhasil update target distribusi tahun ${body.tahun}`;
     } catch (error) {
       console.error("Error in update method:", error);
       this.state = false;
@@ -113,7 +168,6 @@ class Model_cud {
         return;
       }
 
-      // hapus semua data target distribusi berdasarkan tahun
       const deleted = await Target_distribusi.destroy({
         where: { tahun: body.tahun },
         transaction: this.t,
@@ -133,12 +187,9 @@ class Model_cud {
     }
   }
 
-  // response
   async response() {
     if (this.state) {
-      await writeLog(this.req, this.t, {
-        msg: this.message,
-      });
+      await writeLog(this.req, this.t, { msg: this.message });
       await this.t.commit();
       return true;
     } else {

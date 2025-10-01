@@ -36,9 +36,15 @@ const asnafList = ref<{ id: number; name: string; target_orang: string; target_r
 );
 const errors = ref<Record<string, string>>({});
 
+// Tambahan untuk Infaq & Donasi
+const infaq = ref({ orang: '', rupiah: '' });
+const donasi = ref({ orang: '', rupiah: '' });
+
 // Reset form
 const resetForm = () => {
   tahun.value = '';
+  infaq.value = { orang: '', rupiah: '' };
+  donasi.value = { orang: '', rupiah: '' };
   asnafList.value = asnafList.value.map((a) => ({
     ...a,
     target_orang: '',
@@ -78,34 +84,7 @@ const validateForm = () => {
   return isValid;
 };
 
-// Submit
-const handleSubmit = async () => {
-  if (!validateForm()) return;
-
-  isSubmitting.value = true;
-  try {
-    const payload = {
-      tahun: tahun.value,
-      targets: asnafList.value.map((a) => ({
-        asnaf_id: a.id,
-        target_orang: parseInt(a.target_orang) || 0,
-        target_rupiah: parseInt(a.target_rupiah) || 0,
-      })),
-    };
-
-    const response = await add_target(payload);
-    emit('status', { error_msg: response.error_msg, error: response.error });
-    closeModal();
-    emit('close');
-  } catch (error: any) {
-    const msg =
-      error.response?.data?.error_msg || error.response?.data?.message || 'Terjadi kesalahan';
-    displayNotification(msg, 'error');
-  } finally {
-    isSubmitting.value = false;
-  }
-};
-
+// Format Rupiah
 const formatRupiah = (value: string | number) => {
   let numberString = value.toString().replace(/[^,\d]/g, '');
   let split = numberString.split(',');
@@ -122,17 +101,65 @@ const formatRupiah = (value: string | number) => {
   return rupiah ? `Rp ${rupiah}` : '';
 };
 
+// Input format rupiah untuk Asnaf
 const handleRupiahInput = (a: any, e: Event) => {
   const rawValue = (e.target as HTMLInputElement).value;
-  // simpen versi angka mentah buat payload
   a.target_rupiah = rawValue.replace(/[^0-9]/g, '');
-  // tampilin versi format rupiah
   (e.target as HTMLInputElement).value = formatRupiah(rawValue);
+};
+
+// Input format rupiah untuk Infaq & Donasi
+const handleRupiahInputInfaq = (e: Event) => {
+  const rawValue = (e.target as HTMLInputElement).value;
+  infaq.value.rupiah = rawValue.replace(/[^0-9]/g, '');
+  (e.target as HTMLInputElement).value = formatRupiah(rawValue);
+};
+const handleRupiahInputDonasi = (e: Event) => {
+  const rawValue = (e.target as HTMLInputElement).value;
+  donasi.value.rupiah = rawValue.replace(/[^0-9]/g, '');
+  (e.target as HTMLInputElement).value = formatRupiah(rawValue);
+};
+
+// Submit
+const handleSubmit = async () => {
+  if (!validateForm()) return;
+
+  isSubmitting.value = true;
+  try {
+    const payload = {
+      tahun: tahun.value,
+      infaq: {
+        target_orang: parseInt(infaq.value.orang) || 0,
+        target_rupiah: parseInt(infaq.value.rupiah) || 0,
+      },
+      donasi: {
+        target_orang: parseInt(donasi.value.orang) || 0,
+        target_rupiah: parseInt(donasi.value.rupiah) || 0,
+      },
+      targets: asnafList.value.map((a) => ({
+        asnaf_id: a.id,
+        target_orang: parseInt(a.target_orang) || 0,
+        target_rupiah: parseInt(a.target_rupiah) || 0,
+      })),
+    };
+
+    console.log('Payload yang dikirim:', payload);
+
+    const response = await add_target(payload);
+    emit('status', { error_msg: response.error_msg, error: response.error });
+    closeModal();
+    emit('close');
+  } catch (error: any) {
+    const msg =
+      error.response?.data?.error_msg || error.response?.data?.message || 'Terjadi kesalahan';
+    displayNotification(msg, 'error');
+  } finally {
+    isSubmitting.value = false;
+  }
 };
 
 // Close modal
 const closeModal = () => {
-  console.log('closeModal jalan');
   if (isSubmitting.value) return;
   resetForm();
   emit('close');
@@ -162,72 +189,116 @@ onBeforeUnmount(() => document.removeEventListener('keydown', handleEscape));
       aria-modal="true"
     >
       <LoadingSpinner v-if="isSubmitting" label="Menyimpan..." />
-      <div v-else class="relative max-w-2xl w-full bg-white shadow-2xl rounded-2xl p-6 space-y-6">
-        <!-- Header -->
-        <div class="flex items-center justify-between">
-          <h2 class="text-xl font-bold text-gray-800">TAMBAH TARGET DISTRIBUSI</h2>
-          <button
-            class="text-gray-400 text-lg hover:text-gray-600"
-            @click="closeModal"
-            aria-label="Tutup modal"
-          >
-            <font-awesome-icon icon="fa-solid fa-xmark" />
-          </button>
+      <div
+        v-else
+        class="relative max-w-2xl w-full bg-white shadow-2xl rounded-2xl p-6 flex flex-col"
+        style="max-height: 90vh"
+      >
+        <!-- Konten scrollable -->
+        <div class="overflow-y-auto pr-2 space-y-6">
+          <!-- Header -->
+          <div class="flex items-center justify-between">
+            <h2 class="text-xl font-bold text-gray-800">TAMBAH TARGET DISTRIBUSI</h2>
+            <button
+              class="text-gray-400 text-lg hover:text-gray-600"
+              @click="closeModal"
+              aria-label="Tutup modal"
+            >
+              <font-awesome-icon icon="fa-solid fa-xmark" />
+            </button>
+          </div>
+          <!-- Tahun -->
+          <div class="max-w-full">
+            <InputText
+              v-model="tahun"
+              label="Tahun"
+              placeholder="Masukkan tahun"
+              :error="errors.tahun"
+              class="w-32"
+            />
+          </div>
+          <!-- Infaq -->
+          <div class="flex gap-4">
+            <InputText
+              v-model="infaq.orang"
+              label="Jumlah Orang (Infaq)"
+              type="number"
+              placeholder="0"
+              class="w-32"
+            />
+            <InputText
+              :modelValue="formatRupiah(infaq.rupiah)"
+              label="Target Rupiah (Infaq)"
+              type="text"
+              placeholder="Rp 0"
+              @input="handleRupiahInputInfaq"
+              class="w-56"
+            />
+          </div>
+          <!-- Donasi -->
+          <div class="flex gap-4">
+            <InputText
+              v-model="donasi.orang"
+              label="Jumlah Orang (Donasi)"
+              type="number"
+              placeholder="0"
+              class="w-32"
+            />
+            <InputText
+              :modelValue="formatRupiah(donasi.rupiah)"
+              label="Target Rupiah (Donasi)"
+              type="text"
+              placeholder="Rp 0"
+              @input="handleRupiahInputDonasi"
+              class="w-56"
+            />
+          </div>
+          <!-- Daftar Asnaf (Zakat) -->
+          <div class="space-y-4">
+            <table class="w-full rounded-lg">
+              <thead class="divide-y divide-gray-300">
+                <tr>
+                  <th class="px-4 py-2 text-center font-medium border border-gray-300">Asnaf</th>
+                  <th class="w-[25%] px-4 py-2 text-center font-medium border border-gray-300">
+                    Target Orang
+                  </th>
+                  <th class="w-[40%] px-4 py-2 text-center font-medium border border-gray-300">
+                    Target Rupiah
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-300">
+                <tr v-for="(a, idx) in asnafList" :key="a.id">
+                  <td class="px-4 py-2 text-left font-normal">
+                    {{ a.name }}
+                  </td>
+                  <td class="px-4 py-2 text-center font-normal">
+                    <InputText
+                      v-model="a.target_orang"
+                      label="Target Orang"
+                      type="number"
+                      placeholder="0"
+                      :label_status="false"
+                    />
+                  </td>
+                  <td class="px-4 py-2 text-center font-normal">
+                    <InputText
+                      :modelValue="formatRupiah(a.target_rupiah)"
+                      label="Target Rupiah"
+                      type="text"
+                      placeholder="Rp 0"
+                      @input="handleRupiahInput(a, $event)"
+                      :label_status="false"
+                    />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-        <!-- Tahun -->
-        <div class="max-w-full">
-          <InputText
-            v-model="tahun"
-            label="Tahun"
-            placeholder="Masukkan tahun"
-            :error="errors.tahun"
-            class="w-32"
-          />
-        </div>
-        <!-- Daftar Asnaf -->
-        <div class="space-y-4">
-          <table class="w-full rounded-lg">
-            <thead class="divide-y divide-gray-300">
-              <tr>
-                <th class="px-4 py-2 text-center font-medium border border-gray-300">Asnaf</th>
-                <th class="w-[25%] px-4 py-2 text-center font-medium border border-gray-300">
-                  Target Orang
-                </th>
-                <th class="w-[40%] px-4 py-2 text-center font-medium border border-gray-300">
-                  Target Rupiah
-                </th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-300">
-              <tr v-for="(a, idx) in asnafList" :key="a.id">
-                <td class="px-4 py-2 text-left font-normal">
-                  {{ a.name }}
-                </td>
-                <td class="px-4 py-2 text-center font-normal">
-                  <InputText
-                    v-model="a.target_orang"
-                    label="Target Orang"
-                    type="number"
-                    placeholder="0"
-                    :label_status="false"
-                  />
-                </td>
-                <td class="px-4 py-2 text-center font-normal">
-                  <InputText
-                    :modelValue="formatRupiah(a.target_rupiah)"
-                    label="Target Rupiah"
-                    type="text"
-                    placeholder="Rp 0"
-                    @input="handleRupiahInput(a, $event)"
-                    :label_status="false"
-                  />
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+
         <!-- Actions -->
-        <div class="flex justify-end gap-3 mt-4">
+        <div class="flex justify-end gap-3 mt-4 pt-4 border-t">
           <BaseButton
             @click="closeModal"
             type="button"
