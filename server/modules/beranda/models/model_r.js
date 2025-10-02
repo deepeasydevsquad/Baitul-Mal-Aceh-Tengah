@@ -8,6 +8,8 @@ const {
   Target_distribusi,
   Riwayat_donasi,
   Program_donasi,
+  Permohonan,
+  Realisasi_permohonan,
 } = require("../../../models");
 
 class Model_r {
@@ -73,16 +75,68 @@ class Model_r {
           where: { tahun, tipe: "donasi" },
         })) || 0;
 
-      // Realisasi distribusi per tipe, default 0
-      const realisasi_zakat_distribusi =
-        (await Kegiatan.sum("jumlah_dana", {
-          where: { tahun, sumber_dana: "zakat" },
-        })) || 0;
+      // ambil data zakat
+      const zakatData = await Kegiatan.findAll({
+        where: { tahun, sumber_dana: "zakat" },
+        include: [
+          {
+            model: Permohonan,
+            include: [
+              {
+                model: Realisasi_permohonan,
+                where: { status_realisasi: "sudah_direalisasi" },
+                attributes: ["biaya_disetujui"],
+              },
+            ],
+          },
+        ],
+      });
 
-      const realisasi_infaq_distribusi =
-        (await Kegiatan.sum("jumlah_dana", {
-          where: { tahun, sumber_dana: "infaq" },
-        })) || 0;
+      // ambil data infaq
+      const infaqData = await Kegiatan.findAll({
+        where: { tahun, sumber_dana: "infaq" },
+        include: [
+          {
+            model: Permohonan,
+            include: [
+              {
+                model: Realisasi_permohonan,
+                where: { status_realisasi: "sudah_direalisasi" },
+                attributes: ["biaya_disetujui"],
+              },
+            ],
+          },
+        ],
+      });
+
+      console.log("==========================");
+
+      console.log("Zakat:", zakatData);
+      console.log("Infaq:", infaqData);
+
+      console.log("==========================");
+
+      // function helper buat nge-sum biaya_disejutui
+      function sumDistribusi(data) {
+        return data.reduce((total, kegiatan) => {
+          if (kegiatan.Permohonans) {
+            kegiatan.Permohonans.forEach((perm) => {
+              if (perm.Realisasi_permohonans) {
+                perm.Realisasi_permohonans.forEach((real) => {
+                  total += real.biaya_disetujui || 0;
+                });
+              }
+            });
+          }
+          return total;
+        }, 0);
+      }
+
+      const realisasi_zakat_distribusi = sumDistribusi(zakatData);
+      const realisasi_infaq_distribusi = sumDistribusi(infaqData);
+
+      console.log("Zakat:", realisasi_zakat_distribusi);
+      console.log("Infaq:", realisasi_infaq_distribusi);
 
       const realisasi_donasi_distribusi =
         (await Program_donasi.sum("target_donasi_terkumpul", {
