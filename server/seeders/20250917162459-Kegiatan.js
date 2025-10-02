@@ -44,7 +44,7 @@ module.exports = {
           area_penyaluran: "desa",
           jenis_penyaluran: "langsung",
           status_kegiatan: "sedang_berlangsung",
-          tahun: 205,
+          tahun: 2025,
           banner: "pendidikan-2024.png",
           periode_bantuan: "tahunan",
           desc: "Program bantuan biaya pendidikan untuk anak dhuafa di tingkat desa (2024).",
