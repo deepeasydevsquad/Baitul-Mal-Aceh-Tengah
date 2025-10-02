@@ -57,6 +57,7 @@ class Model_r {
       const realisasi_donasi_pengumpulan =
         (await Riwayat_donasi.sum("nominal", {
           include: [{ model: Program_donasi, where: { tahun: tahun } }],
+          group: ["Program_donasi.id"],
         })) || 0;
 
       // Total target distribusi per tipe, default 0
