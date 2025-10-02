@@ -191,10 +191,10 @@ const formatText = (text: string) => {
 </script>
 
 <template>
-  <div class="p-4 sm:p-6 md:p-8">
+  <div class="mx-auto p-4">
     <!-- Header -->
     <LoadingSpinner v-if="isLoading" label="Memuat halaman..." />
-    <div v-else class="space-y-6">
+    <div v-else class="space-y-4">
       <div class="flex items-center justify-between">
         <BaseButton @click="openModalAdd()" variant="primary">
           <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" />
@@ -248,11 +248,15 @@ const formatText = (text: string) => {
                     <tr class="hover:bg-gray-50 transition-colors">
                       <td class="px-4 py-3 text-gray-700 text-center">{{ index + 1 }}</td>
                       <td class="px-4 py-3 text-gray-800">{{ pertanyaan.pertanyaan }}</td>
-                      <td class="px-4 py-3 text-gray-700 capitalize text-center">{{ pertanyaan.tipe }}</td>
+                      <td class="px-4 py-3 text-gray-700 capitalize text-center">
+                        {{ pertanyaan.tipe }}
+                      </td>
                       <td class="px-4 py-3 text-gray-700 text-center">
                         {{ formatText(pertanyaan.jenis_monev) }}
                       </td>
-                      <td class="px-4 py-3 text-gray-700 text-center">{{ formatText(pertanyaan.bagian) }}</td>
+                      <td class="px-4 py-3 text-gray-700 text-center">
+                        {{ formatText(pertanyaan.bagian) }}
+                      </td>
                       <td class="px-4 py-3 text-gray-700 capitalize text-center">
                         {{ pertanyaan.bentuk_pertanyaan }}
                       </td>
@@ -284,9 +288,15 @@ const formatText = (text: string) => {
                         <span class="mr-2 text-gray-400">└─</span>
                         {{ child.pertanyaan }}
                       </td>
-                      <td class="px-4 py-3 text-gray-700 capitalize text-center">{{ child.tipe }}</td>
-                      <td class="px-4 py-3 text-gray-700 text-center">{{ formatText(child.jenis_monev) }}</td>
-                      <td class="px-4 py-3 text-gray-700 text-center">{{ formatText(child.bagian) }}</td>
+                      <td class="px-4 py-3 text-gray-700 capitalize text-center">
+                        {{ child.tipe }}
+                      </td>
+                      <td class="px-4 py-3 text-gray-700 text-center">
+                        {{ formatText(child.jenis_monev) }}
+                      </td>
+                      <td class="px-4 py-3 text-gray-700 text-center">
+                        {{ formatText(child.bagian) }}
+                      </td>
                       <td class="px-4 py-3 text-gray-700 capitalize text-center">
                         {{ child.bentuk_pertanyaan }}
                       </td>

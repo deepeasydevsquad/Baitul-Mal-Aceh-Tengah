@@ -164,17 +164,14 @@ async function fetchData() {
         },
       },
     };
-
     chartOptionsPengumpulan.value = {
       ...baseOptions,
       title: { text: 'Pengumpulan per Tahun' },
     };
-
     chartOptionsDistribusi.value = {
       ...baseOptions,
       title: { text: 'Distribusi per Tahun' },
     };
-
     chartOptionsPengumpulan.value = { ...baseOptions, title: { text: 'Pengumpulan per Tahun' } };
     chartOptionsDistribusi.value = { ...baseOptions, title: { text: 'Distribusi per Tahun' } };
   } catch (error) {

@@ -83,6 +83,7 @@ module.exports = {
           createdAt: new Date(),
           updatedAt: new Date(),
         },
+
         {
           member_id: 1,
           kegiatan_id: 1,

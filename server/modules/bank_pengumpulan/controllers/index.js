@@ -14,14 +14,12 @@ controllers.daftar_bank_pengumpulan = async (req, res) => {
       pageNumber
     );
 
-    res
-      .status(200)
-      .json({
-        error: false,
-        message: "Data Berhasil Ditemukan.",
-        data: data,
-        total: total,
-      });
+    res.status(200).json({
+      error: false,
+      message: "Data Berhasil Ditemukan.",
+      data: data,
+      total: total,
+    });
   } catch (error) {
     handleServerError(res, error);
   }
@@ -48,8 +46,9 @@ controllers.daftar_bank = async (req, res) => {
 
 controllers.add_bank_pengumpulan_baru = async (req, res) => {
   try {
-    const model_cud = new Model_cud();
-    const result = await model_cud.add_bank_pengumpulan_baru(req);
+    const model_cud = new Model_cud(req);
+    await model_cud.add_bank_pengumpulan_baru();
+    const result = await model_cud.response();
 
     if (result.success) {
       res
@@ -65,8 +64,9 @@ controllers.add_bank_pengumpulan_baru = async (req, res) => {
 
 controllers.edit_bank_pengumpulan = async (req, res) => {
   try {
-    const model_cud = new Model_cud();
-    const result = await model_cud.edit_bank_pengumpulan(req);
+    const model_cud = new Model_cud(req);
+    await model_cud.edit_bank_pengumpulan();
+    const result = await model_cud.response();
 
     if (result.success) {
       res
@@ -83,8 +83,9 @@ controllers.edit_bank_pengumpulan = async (req, res) => {
 
 controllers.delete_bank_pengumpulan = async (req, res) => {
   try {
-    const model_cud = new Model_cud();
-    const result = await model_cud.delete_bank_pengumpulan(req);
+    const model_cud = new Model_cud(req);
+    await model_cud.delete_bank_pengumpulan();
+    const result = await model_cud.response();
 
     if (result.success) {
       res.status(200).json({ error: false, message: result.message });

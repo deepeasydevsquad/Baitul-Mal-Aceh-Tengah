@@ -1,38 +1,38 @@
 // Import Global Styles
-import './assets/css/satoshi.css'
-import './assets/css/style.css'
-import './assets/css_home_pages/baitulmal.css'
-import './assets/css_home_pages/input-login.css'
-import './assets/css_home_pages/input.css'
-import './assets/css_home_pages/login.css'
+import './assets/css/satoshi.css';
+import './assets/css/style.css';
+import './assets/css_home_pages/baitulmal.css';
+import './assets/css_home_pages/input-login.css';
+import './assets/css_home_pages/input.css';
+import './assets/css_home_pages/login.css';
 
-import 'flowbite'
+import 'flowbite';
 
 // Vue Core
-import { createApp } from 'vue'
-import App from './App.vue'
-import alertify from 'alertifyjs'
-import 'alertifyjs/build/css/alertify.min.css'
-import 'alertifyjs/build/css/themes/default.min.css' // atau theme lain seperti semantic.min.css
-import router from './router'
-import { createPinia } from 'pinia'
-import { createHead } from '@vueuse/head'
-import rupiahPlugin from '@/plugins/rupiahPlugin'
+import { createApp } from 'vue';
+import App from './App.vue';
+import alertify from 'alertifyjs';
+import 'alertifyjs/build/css/alertify.min.css';
+import 'alertifyjs/build/css/themes/default.min.css'; // atau theme lain seperti semantic.min.css
+import router from './router';
+import { createPinia } from 'pinia';
+import { createHead } from '@vueuse/head';
+import rupiahPlugin from '@/plugins/rupiahPlugin';
 
 // PrimeVue
-import PrimeVue from 'primevue/config'
-import Aura from '@primeuix/themes/aura'
-import 'primeicons/primeicons.css'
+import PrimeVue from 'primevue/config';
+import Aura from '@primeuix/themes/aura';
+import 'primeicons/primeicons.css';
 
 // Chart
-import VueApexCharts from 'vue3-apexcharts'
+import VueApexCharts from 'vue3-apexcharts';
 
 // FontAwesome Setup
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 // import Confirm from 'confirmjs'
-import rupiahPlugin from '@/plugins/rupiahPlugin'
+import rupiahPlugin from '@/plugins/rupiahPlugin';
 
 // <font-awesome-icon icon="fa-solid fa-cloud-arrow-up" />
 // FontAwesome Icons - Solid
@@ -142,13 +142,15 @@ import {
   faFileImport,
   faCalendarCheck,
   faTableCellsLarge,
-} from '@fortawesome/free-solid-svg-icons'
+  faMosque,
+  faGift,
+} from '@fortawesome/free-solid-svg-icons';
 
 // FontAwesome Icons - Regular
-import { faCircle, faClock, faUser as farUser, faEye } from '@fortawesome/free-regular-svg-icons'
+import { faCircle, faClock, faUser as farUser, faEye } from '@fortawesome/free-regular-svg-icons';
 
 // FontAwesome Icons - Brands
-import { faCcVisa, faWhatsapp } from '@fortawesome/free-brands-svg-icons'
+import { faCcVisa, faWhatsapp } from '@fortawesome/free-brands-svg-icons';
 
 // Tambahkan semua icon ke library FontAwesome
 library.add(
@@ -265,32 +267,35 @@ library.add(
   faFileImport,
   faCalendarCheck,
   faTableCellsLarge,
-)
+  faMosque,
+  faCoins,
+  faGift,
+);
 
 // Buat App Vue
-const app = createApp(App)
-const head = createHead()
+const app = createApp(App);
+const head = createHead();
 
 // Gunakan Plugin dan Komponen
-app.use(router)
-app.use(createPinia())
-app.use(VueApexCharts)
-app.use(head)
+app.use(router);
+app.use(createPinia());
+app.use(VueApexCharts);
+app.use(head);
 app.use(PrimeVue, {
   theme: {
     preset: Aura,
   },
-})
-app.use(rupiahPlugin)
+});
+app.use(rupiahPlugin);
 
 router.beforeEach((to, from, next) => {
-  const defaultTitle = 'Nama Aplikasi Anda'
-  document.title = to.meta.title || defaultTitle
-  next()
-})
+  const defaultTitle = 'Nama Aplikasi Anda';
+  document.title = to.meta.title || defaultTitle;
+  next();
+});
 
 // Register FontAwesome Component
-app.component('font-awesome-icon', FontAwesomeIcon)
-app.config.globalProperties.$alertify = alertify
+app.component('font-awesome-icon', FontAwesomeIcon);
+app.config.globalProperties.$alertify = alertify;
 // Mount ke DOM
-app.mount('#app')
+app.mount('#app');

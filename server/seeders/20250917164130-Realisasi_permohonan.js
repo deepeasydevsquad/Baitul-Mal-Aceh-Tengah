@@ -31,7 +31,7 @@ module.exports = {
           status: "approve",
           biaya_disetujui: 5000000,
           status_realisasi: "sudah_direalisasi",
-          tanggal_realisasi: getEndOfMonth(year, 9), // Oktober 2025
+           tanggal_realisasi: getEndOfMonth(year, 9), // Oktober 2025
           berita_acara: "path/to/berita_acara_2.pdf",
           tipe: "transfer",
           nominal_realisasi: 5000000,
