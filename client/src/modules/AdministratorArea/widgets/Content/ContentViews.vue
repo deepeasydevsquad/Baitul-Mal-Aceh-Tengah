@@ -43,6 +43,7 @@ import RiwayatInfaq from '@/modules/RiwayatInfaq/RiwayatInfaq.vue';
 import Penetapan from '@/modules/Penetapan/Penetapan.vue';
 import LaporanTahunan from '@/modules/LaporanTahunan/LaporanTahunan.vue';
 import PertanyaanMonev from '@/modules/PertanyaanMonev/PertanyaanMonev.vue';
+import RekapPengumpulan from '@/modules/RekapPengumpulan/RekapPengumpulan.vue';
 import LaporanPerencanaan from '@/modules/LaporanPerencanaan/LaporanPerencanaan.vue';
 import TargetPengumpulan from '@/modules/TargetPengumpulan/TargetPengumpulan.vue';
 import TargetDistribusi from '@/modules/TargetDistribusi/TargetDistribusi.vue';
@@ -86,6 +87,7 @@ const tabComponents = {
   pertanyaan_monev: PertanyaanMonev,
   penetapan_kriteria_syarat_surveyor: Penetapan,
   laporan_tahunan: LaporanTahunan,
+  rekap_pengumpulan: RekapPengumpulan,
   laporan_perencanaan: LaporanPerencanaan,
   target_pengumpulan: TargetPengumpulan,
   target_distribusi: TargetDistribusi,
