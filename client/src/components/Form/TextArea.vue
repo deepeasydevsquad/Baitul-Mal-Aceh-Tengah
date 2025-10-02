@@ -2,6 +2,7 @@
   <div>
     <label v-if="label_status" :for="id" class="block text-sm font-medium text-gray-700 mb-2">
       {{ label }}
+      <span v-if="required" class="text-red-500">*</span>
     </label>
     <textarea
       :id="id"
@@ -34,7 +35,8 @@ defineProps({
     default: 5,
   },
   note: String,
-  label_status : { type : Boolean, default : true }
+  label_status : { type : Boolean, default : true },
+  required: { type: Boolean, default: false },
 })
 
 const model = defineModel()

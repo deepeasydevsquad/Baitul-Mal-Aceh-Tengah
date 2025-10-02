@@ -8,7 +8,7 @@
       readonly
       class="text-gray-700 w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed focus:outline-none"
     />
-    <p v-if="note" class="text-xs text-gray-500 mt-2">{{ note }}</p>
+    <p v-if="note" class="text-xs text-gray-600 mt-2">{{ note }}</p>
   </div>
 </template>
 

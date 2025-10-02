@@ -52,6 +52,7 @@ module.exports = {
           desc: `Program bantuan biaya pendidikan untuk siswa/siswi yatim dan dhuafa di seluruh kabupaten ${
             Math.floor(Math.random() * 10) + 1
           }`,
+          periode_bantuan: "bulanan",
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -80,6 +81,7 @@ module.exports = {
           desc: `Program bantuan biaya pendidikan untuk siswa/siswi yatim dan dhuafa di seluruh kecamatan ${
             Math.floor(Math.random() * 10) + 1
           }`,
+          periode_bantuan: "bulanan",
           createdAt: new Date(),
           updatedAt: new Date(),
         },

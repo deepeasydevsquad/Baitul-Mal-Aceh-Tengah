@@ -142,6 +142,7 @@ import {
   faFileImport,
   faCalendarCheck,
   faTableCellsLarge,
+  faInfo,
 } from '@fortawesome/free-solid-svg-icons'
 
 // FontAwesome Icons - Regular
@@ -265,6 +266,7 @@ library.add(
   faFileImport,
   faCalendarCheck,
   faTableCellsLarge,
+  faInfo,
 )
 
 // Buat App Vue

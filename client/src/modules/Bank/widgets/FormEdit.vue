@@ -136,7 +136,6 @@ const handleSubmit = async () => {
     const response = await edit_bank(formData)
     console.log(response)
     emit('status', { error_msg: response.error_msg, error: response.error })
-    closeModal()
   } catch (error: any) {
     console.error(error)
     displayNotification(error.response.data.error_msg || error.response.data.message, 'error')
