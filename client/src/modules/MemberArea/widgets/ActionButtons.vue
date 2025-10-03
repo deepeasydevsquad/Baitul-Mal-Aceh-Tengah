@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { ref, onUnmounted, onMounted, nextTick } from 'vue';
+import { defineAsyncComponent } from 'vue';
 import Notification from '@/components/Modal/Notification.vue';
 import { initTooltips } from 'flowbite';
 
+// === State Notification ===
 const timeoutId = ref<number | null>(null);
 const showNotification = ref<boolean>(false);
 const notificationMessage = ref<string>('');
 const notificationType = ref<'success' | 'error'>('success');
+
 const displayNotification = (message: string, type: 'success' | 'error' = 'success') => {
   notificationMessage.value = message;
   notificationType.value = type;
@@ -17,51 +20,34 @@ const displayNotification = (message: string, type: 'success' | 'error' = 'succe
   }, 3000);
 };
 
+// === Window Resize untuk Label Dinamis ===
 const windowWidth = ref(window.innerWidth);
-
 const dynamicLabel = (val: string) => {
-  if (windowWidth.value < 640) {
-    // < sm → mobile
-    return '';
-  } else if (windowWidth.value < 1269) {
-    // sm
-    return val.slice(0, 8) + '...';
-  } else if (windowWidth.value < 1467) {
-    // md
-    return val.slice(0, 8) + '...';
-  } else if (windowWidth.value < 1611) {
-    // lg
-    return val.slice(0, 13) + '...';
-  } else if (windowWidth.value < 1707) {
-    // xl
-    return val.slice(0, 16) + '...';
-  } else {
-    // 2xl atau lebih
-    return val;
-  }
+  if (windowWidth.value < 640) return '';
+  else if (windowWidth.value < 1269) return val.slice(0, 8) + '...';
+  else if (windowWidth.value < 1467) return val.slice(0, 8) + '...';
+  else if (windowWidth.value < 1611) return val.slice(0, 13) + '...';
+  else if (windowWidth.value < 1707) return val.slice(0, 16) + '...';
+  return val;
 };
 
+// === Logout ===
 const logout = async () => {
   displayNotification('Proses logout berhasil dilakukan.', 'success');
   localStorage.removeItem('member_access_token');
   localStorage.removeItem('member_refresh_token');
-  setTimeout(() => {
-    window.location.href = '/';
-  }, 1200);
+  setTimeout(() => (window.location.href = '/'), 1200);
 };
 
+// === Lifecycle ===
 onMounted(() => {
-  const resizeHandler = () => {
-    windowWidth.value = window.innerWidth;
-  };
+  const resizeHandler = () => (windowWidth.value = window.innerWidth);
   window.addEventListener('resize', resizeHandler);
   nextTick(() => initTooltips());
-
-  onUnmounted(() => {
-    window.removeEventListener('resize', resizeHandler);
-  });
+  onUnmounted(() => window.removeEventListener('resize', resizeHandler));
 });
 
+// === Tab Config (sementara masih di sini, bisa dipindah ke tabConfig.ts) ===
 const menuItems = [
   {
     id: 'program-bantuan',
@@ -70,6 +56,9 @@ const menuItems = [
     bg: 'bg-green-900',
     rounded: 'rounded-tl-lg rounded-bl-lg',
     lgWidth: 'lg:w-46',
+    component: defineAsyncComponent(
+      () => import('@/modules/ProgramBantuanMember/ProgramBantuanMember.vue'),
+    ),
   },
   {
     id: 'zakat',
@@ -78,6 +67,7 @@ const menuItems = [
     bg: 'bg-green-800',
     rounded: '',
     lgWidth: 'lg:w-40',
+    // component: defineAsyncComponent(() => import('./widgets/Zakat.vue')),
   },
   {
     id: 'infaq',
@@ -86,6 +76,7 @@ const menuItems = [
     bg: 'bg-green-700',
     rounded: '',
     lgWidth: 'lg:w-40',
+    component: null, // fallback
   },
   {
     id: 'donasi',
@@ -94,6 +85,7 @@ const menuItems = [
     bg: 'bg-green-600',
     rounded: 'rounded-tr-lg rounded-br-lg',
     lgWidth: 'lg:w-40',
+    component: defineAsyncComponent(() => import('@/modules/DonasiMember/DonasiMember.vue')),
   },
 ];
 
@@ -105,8 +97,13 @@ const tooltips = [
   { id: 'edit-profil', label: 'Edit Profil' },
   { id: 'logout', label: 'Logout' },
 ];
+
+// === Active Tab ===
+const activeTab = ref(menuItems[0].id);
 </script>
+
 <template>
+  <!-- Tooltip -->
   <div
     v-for="tooltip in tooltips"
     :key="tooltip.id"
@@ -117,26 +114,31 @@ const tooltips = [
     {{ tooltip.label }}
     <div class="tooltip-arrow" data-popper-arrow></div>
   </div>
+
+  <!-- Navbar Tabs -->
   <div class="w-full flex flex-row items-center justify-between gap-8">
     <div class="flex-1 flex justify-start"></div>
     <div class="flex-1 flex justify-center items-center">
-      <a
+      <button
         v-for="item in menuItems"
         :key="item.id"
-        href="#"
+        @click="activeTab = item.id"
         class="w-12 h-10 md:w-32"
         :class="[
           item.lgWidth,
           item.bg,
           item.rounded,
           'px-4 py-2.5 hover:bg-green-950 focus:bg-green-950 flex justify-center items-center gap-2 font-semibold text-white text-sm sm:text-[14px]',
+          { 'ring-2 ring-white': activeTab === item.id },
         ]"
         :data-tooltip-target="`tooltip-default-${item.id}`"
       >
         <font-awesome-icon :icon="item.icon" />
         <span class="hidden md:inline">{{ dynamicLabel(item.label) }}</span>
-      </a>
+      </button>
     </div>
+
+    <!-- Edit Profil + Logout -->
     <div class="flex-1 flex justify-end items-center">
       <a
         href="#"
@@ -157,10 +159,20 @@ const tooltips = [
     </div>
   </div>
 
+  <!-- Konten Dinamis -->
+  <div class="mt-6">
+    <component
+      v-if="menuItems.find((i) => i.id === activeTab)?.component"
+      :is="menuItems.find((i) => i.id === activeTab)?.component"
+    />
+    <div v-else class="text-gray-400 italic">Halaman "{{ activeTab }}" belum tersedia.</div>
+  </div>
+
+  <!-- Notifikasi -->
   <Notification
     :showNotification="showNotification"
     :notificationType="notificationType"
     :notificationMessage="notificationMessage"
     @close="showNotification = false"
-  ></Notification>
+  />
 </template>
