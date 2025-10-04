@@ -49,6 +49,7 @@ import TargetPengumpulan from '@/modules/TargetPengumpulan/TargetPengumpulan.vue
 import TargetDistribusi from '@/modules/TargetDistribusi/TargetDistribusi.vue';
 import LaporanKesekretariatan from '@/modules/LaporanKesekretariatan/LaporanKesekretariatan.vue';
 import Beranda from '@/modules/Beranda/Beranda.vue';
+import RekapPerkecamatan from '@/modules/RekapPerkecamatan/RekapPerkecamatan.vue';
 
 const tabComponents = {
   pengaturan_whatsapp: PengaturanWhatsapp,
@@ -93,6 +94,7 @@ const tabComponents = {
   target_distribusi: TargetDistribusi,
   laporan_sekretariatan: LaporanKesekretariatan,
   beranda_utama: Beranda,
+  rekap_distribusi_kecamatan: RekapPerkecamatan,
 };
 
 const selectedTab = useSelectedTab();
