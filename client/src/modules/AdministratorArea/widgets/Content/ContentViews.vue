@@ -46,6 +46,7 @@ import PertanyaanMonev from '@/modules/PertanyaanMonev/PertanyaanMonev.vue';
 import LaporanPerencanaan from '@/modules/LaporanPerencanaan/LaporanPerencanaan.vue';
 import TargetPengumpulan from '@/modules/TargetPengumpulan/TargetPengumpulan.vue';
 import TargetDistribusi from '@/modules/TargetDistribusi/TargetDistribusi.vue';
+import RekapDistribusiPerAsnaf from '@/modules/RekapDistribusiPerAsnaf/RekapDistribusiPerAsnaf.vue';
 
 const tabComponents = {
   pengaturan_whatsapp: PengaturanWhatsapp,
@@ -87,6 +88,7 @@ const tabComponents = {
   laporan_perencanaan: LaporanPerencanaan,
   target_pengumpulan: TargetPengumpulan,
   target_distribusi: TargetDistribusi,
+  rekap_distribusi_asnaf: RekapDistribusiPerAsnaf,
 };
 
 const selectedTab = useSelectedTab();
