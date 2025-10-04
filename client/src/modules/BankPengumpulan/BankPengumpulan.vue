@@ -226,10 +226,10 @@ onMounted(fetchData);
             <tr>
               <th class="w-[15%] px-6 py-4 font-medium text-center">Nama Bank</th>
               <th class="w-[10%] px-6 py-4 font-medium text-center">Jenis Pemasukan</th>
-              <th class="w-[25%] px-6 py-4 font-medium text-center">Nomor Akun</th>
-              <th class="w-[25%] px-6 py-4 font-medium text-center">Atas Nama</th>
+              <th class="w-[20%] px-6 py-4 font-medium text-center">Nomor Akun</th>
+              <th class="w-[20%] px-6 py-4 font-medium text-center">Atas Nama</th>
               <th class="w-[15%] px-6 py-4 font-medium text-center">Tanggal</th>
-              <th class="w-[10%] px-6 py-4 font-medium text-center">Aksi</th>
+              <th class="w-[20%] px-6 py-4 font-medium text-center">Aksi</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">

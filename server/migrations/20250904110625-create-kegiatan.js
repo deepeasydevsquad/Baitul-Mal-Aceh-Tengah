@@ -10,6 +10,7 @@ module.exports = {
         type: Sequelize.INTEGER,
       },
       asnaf_id: {
+        allowNull: true,
         type: Sequelize.INTEGER,
         references: {
           model: "Asnafs",
