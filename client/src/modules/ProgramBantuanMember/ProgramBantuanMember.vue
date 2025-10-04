@@ -15,64 +15,25 @@ const programs = [
   >
     <div class="w-full flex flex-col lg:flex-row gap-6">
       <div
-        class="w-full lg:w-[30%] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6 overflow-hidden"
+        class="w-full lg:w-[35%] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6 overflow-hidden"
       >
+        <p class="text-green-900 text-3xl font-semibold mt-3">Program Bantuan</p>
+        <p class="text-gray-400 max-w-3xl">
+          Ayo, kita cari tahu bersama program-program bantuan apa saja yang sedang tersedia di
+          Baitul Mal Kabupaten Bener Meriah!
+        </p>
         <a
           v-for="(program, index) in programs"
           :key="index"
           :href="program.link"
-          class="self-stretch px-6 py-2.5 bg-yellow-400 hover:bg-yellow-500 focus:bg-yellow-500 rounded-lg inline-flex justify-start items-center gap-2.5 font-semibold text-[14px]"
+          class="w-full max-w-sm px-6 py-2.5 bg-yellow-400 hover:bg-yellow-500 focus:bg-yellow-500 rounded-lg inline-flex justify-start items-center gap-2.5 font-semibold text-[14px]"
         >
           <img :src="program.icon" />
           {{ program.name }}
         </a>
-        <!-- <a
-          href="#"
-          class="self-stretch px-6 py-2.5 bg-yellow-400 hover:bg-yellow-500 focus:bg-yellow-500 rounded-lg inline-flex justify-start items-center gap-2.5 font-semibold text-[14px]"
-        >
-          <img src="/images/icon_program2.svg" />
-          Program Bantuan Sosial
-        </a>
-        <a
-          href="#"
-          class="self-stretch px-6 py-2.5 bg-yellow-400 hover:bg-yellow-500 focus:bg-yellow-500 rounded-lg inline-flex justify-start items-center gap-2.5 font-semibold text-[14px]"
-        >
-          <img src="/images/icon_program2.svg" />
-          Program Pemberdayaan Ekonomi
-        </a>
-        <a
-          href="#"
-          class="self-stretch px-6 py-2.5 bg-yellow-400 hover:bg-yellow-500 focus:bg-yellow-500 rounded-lg inline-flex justify-start items-center gap-2.5 font-semibold text-[14px]"
-        >
-          <img src="/images/icon_program2.svg" />
-          Program Bantuan Kesehatan
-        </a>
-        <a
-          href="#"
-          class="self-stretch px-6 py-2.5 bg-yellow-400 hover:bg-yellow-500 focus:bg-yellow-500 rounded-lg inline-flex justify-start items-center gap-2.5 font-semibold text-[14px]"
-        >
-          <img src="/images/icon_program2.svg" />
-          Program Bantuan Pendidikan
-        </a>
-        <a
-          href="#"
-          class="self-stretch px-6 py-2.5 bg-yellow-400 hover:bg-yellow-500 focus:bg-yellow-500 rounded-lg inline-flex justify-start items-center gap-2.5 font-semibold text-[14px]"
-        >
-          <img src="/images/icon_program2.svg" />
-          Program Bantuan Keagamaan
-        </a>
-        <a
-          href="#"
-          class="self-stretch px-6 py-2.5 bg-yellow-400 hover:bg-yellow-500 focus:bg-yellow-500 rounded-lg inline-flex justify-start items-center gap-2.5 font-semibold text-[14px]"
-        >
-          <img src="/images/icon_program2.svg" />
-          Program Bantuan Infak
-        </a> -->
       </div>
-
-      <!-- Konten Utama (70%) -->
       <div
-        class="w-full lg:w-[70%] flex-1 gap-[30px] px-[24px] md:px-[32px] lg:px-[75px] py-6 bg-white rounded-lg outline outline-1 outline-offset-[-1px] outline-black/20 flex flex-col justify-start items-center overflow-hidden"
+        class="w-full lg:w-[65%] flex-1 gap-[30px] px-[24px] md:px-[32px] lg:px-[75px] py-6 bg-white rounded-lg outline outline-1 outline-offset-[-1px] outline-black/20 flex flex-col justify-start items-center overflow-hidden"
       >
         <div class="flex flex-col md:flex-row justify-between w-full relative gap-6">
           <div class="flex gap-4">
