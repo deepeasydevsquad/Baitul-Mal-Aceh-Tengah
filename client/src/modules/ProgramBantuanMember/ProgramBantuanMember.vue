@@ -138,6 +138,13 @@ onMounted(() => {
           <img :src="program.icon" />
           {{ program.name }}
         </a>
+        <a
+          class="w-full max-w-sm px-6 py-2.5 bg-green-800 hover:bg-green-700 focus:bg-green-500 rounded-lg inline-flex justify-start items-center gap-2.5 font-semibold text-[14px] text-white"
+        >
+          <!-- <img src="/images/icon_program2.svg" /> -->
+          <font-awesome-icon icon="fa-solid fa-hand-holding-dollar" />
+          Riwayat Program Bantuan
+        </a>
       </div>
 
       <div
