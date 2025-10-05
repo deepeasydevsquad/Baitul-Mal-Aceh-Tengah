@@ -87,8 +87,11 @@ const arr_router = [
   "laporan_perencanaan",
   "target_pengumpulan",
   "target_distribusi",
+  "rekap_distribusi_per_asnaf",
   "laporan_kesekretariatan",
   "beranda",
+  "program_bantuan_member",
+  "rekap_perkecamatan",
 ];
 
 const arr = {};
