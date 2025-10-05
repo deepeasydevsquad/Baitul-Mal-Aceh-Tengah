@@ -83,10 +83,13 @@ const arr_router = [
   "riwayat_infaq",
   "laporan_tahunan",
   "pertanyaan_monev",
+  "rekap_pengumpulan",
   "laporan_perencanaan",
   "target_pengumpulan",
   "target_distribusi",
   "rekap_distribusi_per_asnaf",
+  "laporan_kesekretariatan",
+  "beranda",
 ];
 
 const arr = {};

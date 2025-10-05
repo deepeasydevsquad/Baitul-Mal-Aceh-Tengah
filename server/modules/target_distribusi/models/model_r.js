@@ -1,5 +1,4 @@
 const { Asnaf, Target_distribusi, sequelize } = require("../../../models");
-const { Op } = require("sequelize");
 
 class Model_r {
   constructor(req) {
@@ -11,7 +10,6 @@ class Model_r {
 
   async list() {
     const body = this.req.body;
-
     let where = {};
 
     if (body.tahun && body.tahun !== "") {
@@ -19,10 +17,13 @@ class Model_r {
     }
 
     try {
+      // ambil semua target distribusi (zakat per asnaf + infaq + donasi)
       const q = await Target_distribusi.findAll({
         attributes: [
           "id",
           "tahun",
+          "tipe",
+          "asnaf_id",
           "target_orang",
           "target_rupiah",
           "createdAt",
@@ -32,10 +33,14 @@ class Model_r {
           {
             model: Asnaf,
             attributes: ["id", "name"],
+            required: false, // biar infaq & donasi tetap bisa (asnaf_id null)
           },
         ],
         where,
-        order: [["asnaf_id", "ASC"]],
+        order: [
+          ["tipe", "ASC"],
+          ["asnaf_id", "ASC"],
+        ],
       });
 
       const data = q.map((item) => {
@@ -43,8 +48,9 @@ class Model_r {
         return {
           id: row.id,
           tahun: row.tahun,
-          asnaf_id: row.Asnaf.id,
-          asnaf_name: row.Asnaf.name,
+          tipe: row.tipe, // zakat / infaq / donasi
+          asnaf_id: row.asnaf_id || null,
+          asnaf_name: row.Asnaf ? row.Asnaf.name : null,
           target_orang: parseInt(row.target_orang) || 0,
           target_rupiah: parseInt(row.target_rupiah) || 0,
           createdAt: row.createdAt,
@@ -93,9 +99,6 @@ class Model_r {
 
   async detail_target_distribusi() {
     const body = this.req.body;
-    console.log("_____________Ddddddddddddddddddddd____________");
-    console.log(body);
-    console.log("_____________Ddddddddddddddddddddd____________");
 
     try {
       if (!body.tahun) {
@@ -110,6 +113,8 @@ class Model_r {
         attributes: [
           "id",
           "tahun",
+          "tipe",
+          "asnaf_id",
           "target_orang",
           "target_rupiah",
           "createdAt",
@@ -119,12 +124,14 @@ class Model_r {
           {
             model: Asnaf,
             attributes: ["id", "name"],
+            required: false,
           },
         ],
-        where: {
-          tahun: body.tahun,
-        },
-        order: [["asnaf_id", "ASC"]],
+        where: { tahun: body.tahun },
+        order: [
+          ["tipe", "ASC"],
+          ["asnaf_id", "ASC"],
+        ],
       });
 
       if (!data || data.length === 0) {
@@ -138,8 +145,9 @@ class Model_r {
       const result = data.map((row) => ({
         id: row.id,
         tahun: row.tahun,
-        asnaf_id: row.Asnaf.id,
-        asnaf_name: row.Asnaf.name,
+        tipe: row.tipe,
+        asnaf_id: row.asnaf_id || null,
+        asnaf_name: row.Asnaf ? row.Asnaf.name : null,
         target_orang: parseInt(row.target_orang) || 0,
         target_rupiah: parseInt(row.target_rupiah) || 0,
         createdAt: row.createdAt,
@@ -157,6 +165,90 @@ class Model_r {
         state: false,
         message: "Gagal ambil detail target distribusi",
         data: [],
+      };
+    }
+  }
+
+  async detail_target_distribusi() {
+    const body = this.req.body;
+
+    try {
+      if (!body.tahun) {
+        return {
+          state: false,
+          message: "Tahun harus dikirim",
+          data: { infaq: null, donasi: null, zakat: [] },
+        };
+      }
+
+      const data = await Target_distribusi.findAll({
+        attributes: [
+          "id",
+          "tahun",
+          "tipe",
+          "asnaf_id",
+          "target_orang",
+          "target_rupiah",
+          "createdAt",
+          "updatedAt",
+        ],
+        include: [
+          {
+            model: Asnaf,
+            attributes: ["id", "name"],
+            required: false,
+          },
+        ],
+        where: { tahun: body.tahun },
+        order: [
+          ["tipe", "ASC"],
+          ["asnaf_id", "ASC"],
+        ],
+      });
+
+      if (!data || data.length === 0) {
+        return {
+          state: false,
+          message: `Data target distribusi tahun ${body.tahun} tidak ditemukan`,
+          data: { infaq: null, donasi: null, zakat: [] },
+        };
+      }
+
+      // === Split per kategori ===
+      let infaq = null;
+      let donasi = null;
+      let zakat = [];
+
+      data.forEach((row) => {
+        const r = row.toJSON();
+        const base = {
+          id: r.id,
+          tahun: r.tahun,
+          tipe: r.tipe,
+          asnaf_id: r.asnaf_id || null,
+          asnaf_name: r.Asnaf ? r.Asnaf.name : null,
+          target_orang: parseInt(r.target_orang) || 0,
+          target_rupiah: parseInt(r.target_rupiah) || 0,
+          createdAt: r.createdAt,
+          updatedAt: r.updatedAt,
+        };
+
+        if (r.tipe === "infaq") infaq = base;
+        else if (r.tipe === "donasi") donasi = base;
+        else if (r.tipe === "zakat") zakat.push(base);
+      });
+
+      return {
+        state: true,
+        message: `Berhasil ambil detail target distribusi tahun ${body.tahun}`,
+        data: { infaq, donasi, zakat },
+      };
+    } catch (error) {
+      console.error("ERROR in detail_target_distribusi:", error);
+      return {
+        state: false,
+        message: "Gagal ambil detail target distribusi",
+        data: { infaq: null, donasi: null, zakat: [] },
       };
     }
   }
