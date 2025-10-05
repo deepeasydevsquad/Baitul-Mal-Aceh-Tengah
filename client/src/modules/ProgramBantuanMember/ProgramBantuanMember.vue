@@ -142,13 +142,13 @@ onMounted(() => {
           class="w-full max-w-sm px-6 py-2.5 bg-green-800 hover:bg-green-700 focus:bg-green-500 rounded-lg inline-flex justify-start items-center gap-2.5 font-semibold text-[14px] text-white"
         >
           <!-- <img src="/images/icon_program2.svg" /> -->
-          <font-awesome-icon icon="fa-solid fa-hand-holding-dollar" />
-          Riwayat Program Bantuan
+          <font-awesome-icon icon="fa-solid fa-hand-holding-dollar mr-3" size="xl" />
+          <span>Riwayat Program Bantuan</span>
         </a>
       </div>
 
       <div
-        class="w-full lg:w-[65%] flex-1 gap-[30px] px-[24px] md:px-[32px] lg:px-[75px] py-6 bg-white rounded-lg outline outline-1 outline-offset-[-1px] outline-black/20 flex flex-col justify-start items-center overflow-hidden"
+        class="w-full lg:w-[65%] flex-1 gap-[30px] px-[24px] md:px-[32px] lg:px-[75px] py-10 bg-white rounded-lg outline outline-1 outline-offset-[-1px] outline-black/20 flex flex-col justify-start items-center overflow-hidden"
       >
         <div class="flex flex-col md:flex-row justify-between w-full relative gap-6">
           <div class="flex gap-4">
