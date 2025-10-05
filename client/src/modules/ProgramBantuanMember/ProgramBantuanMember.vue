@@ -44,7 +44,7 @@ const { showNotification, notificationType, notificationMessage, displayNotifica
 const fetchData = async () => {
   try {
     isLoading.value = true;
-    const response = await get_laporan({ tahun: 2025 });
+    const response = await get_laporan({ tahun: tahun.value });
     const data = response?.data || [];
     total_bantuan.value = response.total.sudah_direalisasi;
     orang_terbantu.value = response.total.total_penerima;
