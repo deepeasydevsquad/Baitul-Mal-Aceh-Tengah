@@ -50,6 +50,7 @@ import TargetDistribusi from '@/modules/TargetDistribusi/TargetDistribusi.vue';
 import RekapDistribusiPerAsnaf from '@/modules/RekapDistribusiPerAsnaf/RekapDistribusiPerAsnaf.vue';
 import LaporanKesekretariatan from '@/modules/LaporanKesekretariatan/LaporanKesekretariatan.vue';
 import Beranda from '@/modules/Beranda/Beranda.vue';
+import RekapPerkecamatan from '@/modules/RekapPerkecamatan/RekapPerkecamatan.vue';
 
 const tabComponents = {
   pengaturan_whatsapp: PengaturanWhatsapp,
@@ -95,6 +96,7 @@ const tabComponents = {
   rekap_distribusi_asnaf: RekapDistribusiPerAsnaf,
   laporan_sekretariatan: LaporanKesekretariatan,
   beranda_utama: Beranda,
+  rekap_distribusi_kecamatan: RekapPerkecamatan,
 };
 
 const selectedTab = useSelectedTab();
