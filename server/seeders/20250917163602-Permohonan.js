@@ -41,7 +41,7 @@ module.exports = {
         },
         {
           member_id: 1,
-          kegiatan_id: 1,
+          kegiatan_id: 3,
           bank_id: 2,
           nomor_akun_bank: "4567890123",
           nama_akun_bank: "BUDI SUGIHARTO",
@@ -52,7 +52,7 @@ module.exports = {
         },
         {
           member_id: 1,
-          kegiatan_id: 1,
+          kegiatan_id: 3,
           bank_id: 1,
           nomor_akun_bank: "5678901234",
           nama_akun_bank: "BUDI NURMALA",
@@ -63,7 +63,7 @@ module.exports = {
         },
         {
           member_id: 1,
-          kegiatan_id: 1,
+          kegiatan_id: 4,
           bank_id: 2,
           nomor_akun_bank: "6789012345",
           nama_akun_bank: "BUDI BAMBANG",
@@ -74,7 +74,7 @@ module.exports = {
         },
         {
           member_id: 1,
-          kegiatan_id: 1,
+          kegiatan_id: 4,
           bank_id: 1,
           nomor_akun_bank: "7890123456",
           nama_akun_bank: "BUDI SRI REJEKI",
@@ -86,7 +86,7 @@ module.exports = {
 
         {
           member_id: 1,
-          kegiatan_id: 1,
+          kegiatan_id: 5,
           bank_id: 1,
           nomor_akun_bank: "8901234567",
           nama_akun_bank: "BUDI LINTANG PAGI",
@@ -97,7 +97,7 @@ module.exports = {
         },
         {
           member_id: 1,
-          kegiatan_id: 1,
+          kegiatan_id: 5,
           bank_id: 1,
           nomor_akun_bank: "9012345678",
           nama_akun_bank: "BUDI SUMBER JAYA",
@@ -138,7 +138,7 @@ module.exports = {
           alasan_penolakan: null,
           createdAt: new Date(),
           updatedAt: new Date(),
-        }
+        },
       ],
       {}
     );

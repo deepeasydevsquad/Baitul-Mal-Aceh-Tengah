@@ -7,6 +7,113 @@ const programs = [
   { name: 'Program Bantuan Keagamaan', icon: '/images/icon_program2.svg', link: '#' },
   { name: 'Program Bantuan Infak', icon: '/images/icon_program2.svg', link: '#' },
 ];
+
+// Library
+import { ref, onMounted } from 'vue';
+import VueApexCharts from 'vue3-apexcharts';
+import Notification from '@/components/Modal/Notification.vue';
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
+
+// Composable
+import { useNotification } from '@/composables/useNotification';
+
+// Service API
+import { get_laporan } from '@/service/program_bantuan_member';
+
+// State
+const isLoading = ref(false);
+const tahun = ref<number>(new Date().getFullYear());
+
+const chartSeries = ref<any[]>([]);
+const chartOptions = ref<any>({});
+const orang_terbantu = ref(0);
+const total_bantuan = ref(0);
+
+const formatRupiah = (angka: number) => {
+  if (!angka) return 'Rp 0';
+  return angka
+    .toString()
+    .replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+    .replace(/^/, 'Rp ');
+};
+
+// Notification
+const { showNotification, notificationType, notificationMessage, displayNotification } =
+  useNotification();
+
+const fetchData = async () => {
+  try {
+    isLoading.value = true;
+    const response = await get_laporan({ tahun: tahun.value });
+    const data = response?.data || [];
+    total_bantuan.value = response.total.sudah_direalisasi;
+    orang_terbantu.value = response.total.total_penerima;
+
+    const labels = data.map((d: any) => d.program);
+    const realisasiSeries = data.map((d: any) => d.persentase_realisasi || 0);
+    const belumSeries = data.map((d: any) => 100 - (d.persentase_realisasi || 0));
+
+    chartSeries.value = [
+      { name: 'Realisasi', data: realisasiSeries },
+      { name: 'Belum Terealisasi', data: belumSeries },
+    ];
+
+    chartOptions.value = {
+      chart: {
+        type: 'bar',
+        foreColor: '#000',
+        toolbar: { show: true },
+        stacked: true,
+        animations: { enabled: true, easing: 'easeinout', speed: 800 },
+        events: {
+          dataPointSelection: (event: any, chartContext: any, config: any) => {
+            const programName = labels[config.dataPointIndex];
+            const realisasi = realisasiSeries[config.dataPointIndex];
+          },
+        },
+      },
+      plotOptions: {
+        bar: { horizontal: false, columnWidth: '45%', borderRadius: 6 },
+      },
+      dataLabels: {
+        enabled: true,
+        formatter: (val: number) => `${val.toFixed(1)}%`,
+      },
+      xaxis: { categories: labels },
+      yaxis: {
+        labels: { formatter: (val: number) => `${val}%` },
+        max: 100,
+        title: { text: 'Persentase Realisasi' },
+      },
+      tooltip: {
+        y: {
+          formatter: (val: number) => `${val.toFixed(1)}%`,
+        },
+      },
+      title: { text: 'Persentase Realisasi Program', align: 'left' },
+      colors: ['#16a34a', '#facc15'], // hijau & kuning
+      legend: { position: 'bottom' },
+    };
+  } catch (error) {
+    console.log(error);
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const daftarTahun = ref<number[]>([]);
+
+const initTahun = () => {
+  const currentYear = new Date().getFullYear();
+  for (let i = currentYear; i >= 2020; i--) {
+    daftarTahun.value.push(i);
+  }
+};
+
+onMounted(() => {
+  initTahun();
+  fetchData();
+});
 </script>
 
 <template>
@@ -31,9 +138,17 @@ const programs = [
           <img :src="program.icon" />
           {{ program.name }}
         </a>
+        <a
+          class="w-full max-w-sm px-6 py-2.5 bg-green-800 hover:bg-green-700 focus:bg-green-500 rounded-lg inline-flex justify-start items-center gap-2.5 font-semibold text-[14px] text-white"
+        >
+          <!-- <img src="/images/icon_program2.svg" /> -->
+          <font-awesome-icon icon="fa-solid fa-hand-holding-dollar mr-3" size="xl" />
+          <span>Riwayat Program Bantuan</span>
+        </a>
       </div>
+
       <div
-        class="w-full lg:w-[65%] flex-1 gap-[30px] px-[24px] md:px-[32px] lg:px-[75px] py-6 bg-white rounded-lg outline outline-1 outline-offset-[-1px] outline-black/20 flex flex-col justify-start items-center overflow-hidden"
+        class="w-full lg:w-[65%] flex-1 gap-[30px] px-[24px] md:px-[32px] lg:px-[75px] py-10 bg-white rounded-lg outline outline-1 outline-offset-[-1px] outline-black/20 flex flex-col justify-start items-center overflow-hidden"
       >
         <div class="flex flex-col md:flex-row justify-between w-full relative gap-6">
           <div class="flex gap-4">
@@ -41,19 +156,20 @@ const programs = [
               Pilih Tahun Anggaran:
             </div>
             <select
+              v-model="tahun"
+              @change="fetchData"
               class="h-fit py-3 px-4 pe-9 block w-full border border-gray-200 rounded-lg text-sm focus:border-green-900 focus:ring-green-900 disabled:opacity-50 disabled:pointer-events-none"
             >
-              <option selected="">2025</option>
-              <option>2024</option>
-              <option>2023</option>
-              <option>2022</option>
+              <option v-for="(t, i) in daftarTahun" :key="i" :value="t">{{ t }}</option>
             </select>
           </div>
           <div class="flex">
             <div class="flex items-start gap-3">
               <img src="/images/icon_orang_terbantu.svg" />
               <div class="flex flex-col">
-                <div class="justify-center text-green-900 text-xl font-bold leading-loose">+0</div>
+                <div class="justify-center text-green-900 text-xl font-bold leading-loose">
+                  +{{ orang_terbantu }}
+                </div>
                 <div class="justify-center text-neutral-800 text-base font-normal leading-normal">
                   Orang<br />Terbantu
                 </div>
@@ -63,7 +179,9 @@ const programs = [
             <div class="flex items-start gap-3">
               <img src="/images/icon_bantuan_tersalurkan.svg" />
               <div class="flex flex-col">
-                <div class="justify-center text-green-900 text-xl font-bold leading-loose">+0</div>
+                <div class="justify-center text-green-900 text-xl font-bold leading-loose">
+                  +{{ formatRupiah(total_bantuan) }}
+                </div>
                 <div class="justify-center text-neutral-800 text-base font-normal leading-normal">
                   Bantuan<br />Disalurkan
                 </div>
@@ -71,8 +189,26 @@ const programs = [
             </div>
           </div>
         </div>
-        <img class="w-full h-96 relative" src="https://placehold.co/744x372" />
+
+        <!-- Chart -->
+        <div v-if="!isLoading" class="w-full mt-6">
+          <VueApexCharts type="bar" height="350" :options="chartOptions" :series="chartSeries" />
+        </div>
+        <div v-else class="flex justify-center items-center h-40">
+          <span class="text-gray-400">Loading chart...</span>
+        </div>
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+:deep(.apexcharts-text),
+:deep(.apexcharts-legend-text),
+:deep(.apexcharts-xaxis-label),
+:deep(.apexcharts-yaxis-label) {
+  fill: #000 !important;
+  color: #000 !important;
+  font-size: 12px !important;
+}
+</style>
