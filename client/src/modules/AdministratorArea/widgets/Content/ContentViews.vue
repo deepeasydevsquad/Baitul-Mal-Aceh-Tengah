@@ -50,6 +50,7 @@ import TargetDistribusi from '@/modules/TargetDistribusi/TargetDistribusi.vue';
 import RekapDistribusiPerAsnaf from '@/modules/RekapDistribusiPerAsnaf/RekapDistribusiPerAsnaf.vue';
 import LaporanKesekretariatan from '@/modules/LaporanKesekretariatan/LaporanKesekretariatan.vue';
 import Beranda from '@/modules/Beranda/Beranda.vue';
+import RekapPengumpulanPerKecamatan from '@/modules/RekapPengumpulanPerKecamatan/RekapPengumpulanPerKecamatan.vue';
 import RekapPerkecamatan from '@/modules/RekapPerkecamatan/RekapPerkecamatan.vue';
 
 const tabComponents = {
@@ -96,6 +97,7 @@ const tabComponents = {
   rekap_distribusi_asnaf: RekapDistribusiPerAsnaf,
   laporan_sekretariatan: LaporanKesekretariatan,
   beranda_utama: Beranda,
+  rekap_pengumpulan_per_kecamatan: RekapPengumpulanPerKecamatan,
   rekap_distribusi_kecamatan: RekapPerkecamatan,
 };
 

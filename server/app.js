@@ -90,6 +90,7 @@ const arr_router = [
   "rekap_distribusi_per_asnaf",
   "laporan_kesekretariatan",
   "beranda",
+  "rekap_pengumpulan_per_kecamatan",
   "program_bantuan_member",
   "rekap_perkecamatan",
 ];

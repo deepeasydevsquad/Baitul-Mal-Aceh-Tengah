@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue';
-import { list } from '@/service/rekap_pengumpulan';
+import { list } from '@/service/rekap_pengumpulan_per_kecamatan';
 import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
 import Notification from '@/components/Modal/Notification.vue';
 import { useNotification } from '@/composables/useNotification';
@@ -27,54 +27,47 @@ const months = [
 ];
 
 const rows = ref<any[]>([]);
-
 const { showNotification, notificationType, notificationMessage, displayNotification } =
   useNotification();
 
 async function fetchData() {
   isLoading.value = true;
   try {
-    const res = await list({ year: selectedYear.value }); // kirim param tahun ke backend
+    const res = await list({ year: selectedYear.value || new Date().getFullYear() }); // kirim param tahun ke backend
     const data = res.data || [];
+    
+    // === Format hasil berdasarkan kecamatan ===
+    // Asumsi backend return: { year, month, nama_kecamatan, total_pengumpulan, total_donasi, total_semua }
+    const groupedByKecamatan = data.reduce((acc, item) => {
+      if (!acc[item.nama_kecamatan]) {
+        acc[item.nama_kecamatan] = {
+          nama_kecamatan: item.nama_kecamatan,
+          year: item.year,
+          monthly: {},
+          total: 0,
+        };
+      }
+      acc[item.nama_kecamatan].monthly[item.month] = item.total_semua;
+      acc[item.nama_kecamatan].total += item.total_semua;
+      return acc;
+    }, {});
 
-    const tipe = [
-      { key: 'zakat_harta', label: 'Zakat Harta' },
-      { key: 'zakat_simpanan', label: 'Zakat Simpanan' },
-      { key: 'zakat_profesi', label: 'Zakat Profesi' },
-      { key: 'zakat_perdagangan', label: 'Zakat Perdagangan' },
-      { key: 'zakat_pertanian', label: 'Zakat Pertanian' },
-      { key: 'infaq', label: 'Infaq' },
-      { key: 'sum_riwayat_donasi', label: 'Donasi' },
-      { key: 'total_nominal_realisasi', label: 'Total' },
-    ];
-
-    rows.value = tipe.map((t) => {
-      const values: Record<string, number> = {};
-      let total = 0;
-
-      months.forEach((m) => {
-        let val = 0;
-        const bulan = data.find((d) => d.month === m.key);
-        if (bulan) {
-          if (t.key === 'total_realisasi') val = bulan.total_realisasi;
-          else if (t.key === 'total_nominal_realisasi') val = bulan.total_nominal_realisasi;
-          else if (t.key === 'sum_riwayat_donasi') val = bulan.sum_riwayat_donasi;
-          else val = bulan.sum_riwayat_pengumpulan[t.key] || 0;
-        }
-        values[m.key] = val;
-        total += val;
-      });
-      return { label: t.label, values, total };
-    });
+    rows.value = Object.values(groupedByKecamatan);
   } catch (e: any) {
-    displayNotification(e.response?.data?.message || 'Gagal memuat data', 'error');
+    displayNotification(e.response?.data?.message || "Gagal memuat data", "error");
   } finally {
     isLoading.value = false;
   }
 }
 
 onMounted(fetchData);
-watch(selectedYear, fetchData); // reload data setiap kali tahun diganti
+watch(selectedYear, fetchData);
+
+// ✅ Fallback rupiah formatter biar ga error lagi
+function formatRupiah(value: any) {
+  const safeValue = Number(value) || 0;
+  return "Rp " + safeValue.toLocaleString("id-ID");
+}
 </script>
 
 <template>
@@ -99,10 +92,9 @@ watch(selectedYear, fetchData); // reload data setiap kali tahun diganti
         <thead class="bg-gray-50 text-gray-700 text-center border-b border-gray-300">
           <tr>
             <th class="w-[5%] text-center px-6 py-4 font-medium font-bold text-gray-900">No</th>
-            <th class="w-[15%] text-center px-10 py-6 font-medium font-bold text-gray-900 whitespace-nowrap">
-            Tipe Pengumpulan
+            <th class="w-[15%] text-center px-10 py-6 font-medium font-bold text-gray-900">
+              Kecamatan
             </th>
-
             <th
               v-for="m in months"
               :key="m.key"
@@ -119,15 +111,13 @@ watch(selectedYear, fetchData); // reload data setiap kali tahun diganti
         <tbody>
           <tr
             v-for="(r, i) in rows"
-            :key="r.label"
+            :key="r.nama_kecamatan"
             class="even:bg-gray-50 hover:bg-indigo-50 transition-colors"
           >
-            <td class="px-6 py-3 text-center font-medium">
-              <span v-if="r.label !== 'Total'">{{ i + 1 }}</span>
-            </td>
+            <td class="px-6 py-3 text-center font-medium">{{ i + 1 }}</td>
 
             <td class="px-6 py-3 text-left font-medium text-gray-700">
-              {{ r.label }}
+              {{ r.nama_kecamatan }}
             </td>
 
             <td
@@ -135,11 +125,11 @@ watch(selectedYear, fetchData); // reload data setiap kali tahun diganti
               :key="m.key"
               class="px-6 py-3 text-right tabular-nums whitespace-nowrap"
             >
-              {{ $formatToRupiah(r.values[m.key]) || '-' }}
+              {{ formatRupiah(r.monthly[m.key] ?? 0) }}
             </td>
 
             <td class="px-6 py-3 text-right font-semibold text-indigo-600 whitespace-nowrap">
-              {{ $formatToRupiah(r.total) || '-' }}
+              {{ formatRupiah(r.total ?? 0) }}
             </td>
           </tr>
         </tbody>
