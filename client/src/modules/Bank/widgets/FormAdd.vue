@@ -1,137 +1,136 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted, onBeforeUnmount } from 'vue'
-import Notification from '@/components/Modal/Notification.vue'
-import BaseButton from '@/components/Button/BaseButton.vue'
-import InputFile from '@/components/Form/InputFile.vue'
-import InputText from '@/components/Form/InputText.vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue';
+import Notification from '@/components/Modal/Notification.vue';
+import BaseButton from '@/components/Button/BaseButton.vue';
+import InputFile from '@/components/Form/InputFile.vue';
+import InputText from '@/components/Form/InputText.vue';
 
 // Composable
-import { useNotification } from '@/composables/useNotification'
+import { useNotification } from '@/composables/useNotification';
 
 // Service
-import { add_bank } from '@/service/bank'
+import { add_bank } from '@/service/bank';
 
 // Composable: notification
 const { showNotification, notificationType, notificationMessage, displayNotification } =
-  useNotification()
+  useNotification();
 
 interface Props {
-  isModalOpen: boolean
+  isModalOpen: boolean;
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 
 const emit = defineEmits<{
-  (e: 'close'): void
-  (e: 'status', payload: { error_msg?: string; error?: boolean }): void
-}>()
+  (e: 'close'): void;
+  (e: 'status', payload: { error_msg?: string; error?: boolean }): void;
+}>();
 
 // Function: Close modal
 const closeModal = () => {
-  if (isSubmitting.value) return
-  resetForm()
-  emit('close')
-}
-
+  if (isSubmitting.value) return;
+  resetForm();
+  emit('close');
+};
 
 // Function: Reset form
 const resetForm = () => {
-  form.value.name = ''
-  form.value.img = null
+  form.value.name = '';
+  form.value.img = null;
 
   // Reset errors
-  errors.value = {}
-}
+  errors.value = {};
+};
 
 // Function:
 const errors = ref<Record<string, string>>({
   name: '',
   img: '',
-})
+});
 
 const validateForm = () => {
-  let isValid = true
+  let isValid = true;
 
   // Reset errors
-  errors.value = {}
+  errors.value = {};
 
   if (form.value.name === '') {
-    errors.value.name = 'Nama bank tidak boleh kosong.'
-    isValid = false
+    errors.value.name = 'Nama bank tidak boleh kosong.';
+    isValid = false;
   }
 
   if (!form.value.img) {
-    errors.value.img = 'Logo bank wajib diisi.'
-    isValid = false
+    errors.value.img = 'Logo bank wajib diisi.';
+    isValid = false;
   }
 
-  console.log(errors.value)
+  console.log(errors.value);
 
-  return isValid
-}
+  return isValid;
+};
 
 // Function: Handle file
 const handleFile = (file: File | null) => {
   if (!file) {
-    form.value.img = null
-    return
+    form.value.img = null;
+    return;
   }
 
   // Validasi ukuran file
-  const fileSizeKB = Math.round(file.size / 1024)
+  const fileSizeKB = Math.round(file.size / 1024);
   if (fileSizeKB > 1000) {
-    errors.value.img = 'Ukuran file maksimal 1000 KB'
-    return
+    errors.value.img = 'Ukuran file maksimal 1000 KB';
+    return;
   }
 
-  form.value.img = file
-}
+  form.value.img = file;
+};
 
 // Function: Handle submit
-const isSubmitting = ref(false)
+const isSubmitting = ref(false);
 const form = ref<{ name: string; img: File | null }>({
   name: '',
   img: null,
-})
+});
 
 const handleSubmit = async () => {
-  if (!validateForm()) return
+  if (!validateForm()) return;
 
-  const formData = new FormData()
-  formData.append('name', form.value.name)
-  if (form.value.img) formData.append('img', form.value.img)
+  const formData = new FormData();
+  formData.append('name', form.value.name);
+  if (form.value.img) formData.append('img', form.value.img);
 
-  isSubmitting.value = true
+  isSubmitting.value = true;
 
-  console.log(formData.get('name'))
-  console.log(formData.get('img'))
+  console.log(formData.get('name'));
+  console.log(formData.get('img'));
 
   try {
-    const response = await add_bank(formData)
-    console.log(response)
-    emit('status', { error_msg: response.error_msg || response, error: response.error })
-    closeModal()
+    const response = await add_bank(formData);
+    console.log(response);
+    emit('status', { error_msg: response.error_msg || response, error: response.error });
+    closeModal();
   } catch (error: any) {
-    console.error(error)
-    displayNotification(error.response.data.error_msg || error.response.data.message, 'error')
+    console.error(error);
+    displayNotification(error.response.data.error_msg || error.response.data.message, 'error');
   } finally {
-    isSubmitting.value = false
-    closeModal()
+    isSubmitting.value = false;
+    closeModal();
   }
-}
+};
 
 // Function: Handle escape
 const handleEscape = (e: KeyboardEvent) => {
-  if (e.key === 'Escape' && props.isModalOpen) closeModal()
-}
+  if (e.key === 'Escape' && props.isModalOpen) closeModal();
+};
 onMounted(async () => {
-  document.addEventListener('keydown', handleEscape)
-})
+  document.addEventListener('keydown', handleEscape);
+});
 
 onBeforeUnmount(async () => {
-  document.removeEventListener('keydown', handleEscape)
-})
+  document.removeEventListener('keydown', handleEscape);
+});
 </script>
 
 <template>
@@ -202,7 +201,7 @@ onBeforeUnmount(async () => {
           <BaseButton
             type="submit"
             variant="primary"
-            :disabled="!(form.name.trim() || form.img && !isSubmitting)"
+            :disabled="!(form.name.trim() || (form.img && !isSubmitting))"
             @click="handleSubmit"
           >
             <span v-if="isSubmitting">Menyimpan...</span>

@@ -1,28 +1,65 @@
 const express = require("express");
-const router = express.Router();
-const { body } = require("express-validator");
-const controller = require("../modules/monev/controllers/index"); // Pastikan ini benar
+const { validationResult } = require("express-validator");
+const controller = require("../modules/monev/controllers/index");
+const validation = require("../validation/monev");
 const {
   authenticateTokenAdministrator,
 } = require("../middleware/authenticateToken");
 
+const router = express.Router();
+
 router.post(
   "/monev/list",
   authenticateTokenAdministrator,
-  [
-    body("perpage")
-      .notEmpty()
-      .withMessage("Perpage Tidak Boleh Kosong")
-      .isInt()
-      .withMessage("Perpage Harus Angka"),
-    body("pageNumber")
-      .notEmpty()
-      .withMessage("Page Number Tidak Boleh Kosong")
-      .isInt()
-      .withMessage("Page Number Harus Angka"),
-    body("search").optional().isString().withMessage("Search Harus String"),
-  ],
-  controller.list_monev
+  controller.get_monev_list
+);
+
+router.get(
+  "/monev/pertanyaan_evaluasi",
+  authenticateTokenAdministrator,
+  controller.pertanyaan_evaluasi
+);
+
+router.get(
+  "/monev/pertanyaan_monitoring",
+  authenticateTokenAdministrator,
+  controller.pertanyaan_monitoring
+);
+
+router.get(
+  "/monev/gabung_status_monev",
+  authenticateTokenAdministrator,
+  controller.gabung_status_monev
+);
+
+// Kirim jawaban evaluasi
+router.post(
+  "/monev/kirim_jawaban_evaluasi",
+  authenticateTokenAdministrator,
+  validation.kirim_jawaban_evaluasi, // validasi dari validation/monev.js
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ error: true, message: errors.array() });
+    }
+    next();
+  },
+  controller.kirim_jawaban_evaluasi
+);
+
+// Kirim jawaban monitoring
+router.post(
+  "/monev/kirim_jawaban_monitoring",
+  authenticateTokenAdministrator,
+  validation.kirim_jawaban_monitoring, //  validasi dari validation/monev.js
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ error: true, message: errors.array() });
+    }
+    next();
+  },
+  controller.kirim_jawaban_monitoring
 );
 
 module.exports = router;

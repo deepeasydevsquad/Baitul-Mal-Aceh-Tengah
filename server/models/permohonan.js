@@ -26,6 +26,10 @@ module.exports = (sequelize, DataTypes) => {
       Permohonan.hasMany(models.Survey_permohonan, {
         foreignKey: "permohonan_id",
       });
+      Permohonan.hasMany(models.Monev, {
+      foreignKey: "permohonan_id",
+      });
+
 
     //      Survey_permohonan.belongsTo(models.Surveyor_kegiatan, {
     //     foreignKey: "surveyor_kegiatan_id",

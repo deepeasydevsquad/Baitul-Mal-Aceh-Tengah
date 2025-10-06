@@ -1,52 +1,92 @@
-const { 
-  Op, 
-  Pertanyaan_monev, 
-  Permohonan, 
-  Member, 
-  Kegiatan, 
-  Realisasi_permohonan, 
-  Urutan_bagian_monev 
+"use strict";
+
+const { where } = require("sequelize");
+const {
+  Monev,
+  sequelize,
+  Member,
+  Op,
+  Kegiatan,
+  Permohonan,
+  Realisasi_permohonan,
+  Pertanyaan_monev,
+  Jawaban_monev,
 } = require("../../../models");
+const moment = require("moment");
 
 class Model_r {
   constructor(req) {
     this.req = req;
   }
 
-  async monev() {
-    const body = this.req.body;
-    const limit = parseInt(body.perpage, 10) || 10;
-    const page = body.pageNumber && body.pageNumber !== "0"
-      ? parseInt(body.pageNumber, 10)
-      : 1;
-
-    const where = body.search
-      ? {
-          [Op.or]: [
-            { name: { [Op.like]: `%${body.search}%` } },
-          ],
-        }
-      : {};
-
+  async gabung_status_monev() {
     try {
-      const result = await Permohonan.findAndCountAll({
-        attributes: [
-          "id",
-          "nomor_akun_bank",
-          "status",
-          "createdAt",
-          "updatedAt",
-        ],
-        where,
+      // Ambil semua data Monev
+      const monevData = await Monev.findAll({
+        attributes: ["id", "jenis_monev", "tipe"],
+      });
+
+      // Ambil semua jawaban (hanya id monev)
+      const jawabanData = await Jawaban_monev.findAll({
+        attributes: ["monev_id"],
+      });
+
+      // Buat set untuk percepatan pencarian
+      const sudahDijawab = new Set(jawabanData.map((j) => j.monev_id));
+
+      const hasilGabungan = [];
+
+      // Loop tiap record monev, langsung cek statusnya per tipe
+      for (const m of monevData) {
+        const baseJenis = m.jenis_monev
+          .replace("monitoring_", "")
+          .replace("evaluasi_", "");
+
+        // Cek status dari tipe monitoring & evaluasi
+        let entry = hasilGabungan.find((e) => e.jenis_monev === baseJenis);
+        if (!entry) {
+          entry = {
+            jenis_monev: baseJenis,
+            status_monitoring: "belum selesai",
+            status_evaluasi: "belum selesai",
+          };
+          hasilGabungan.push(entry);
+        }
+
+        if (m.tipe === "monitoring" && sudahDijawab.has(m.id)) {
+          entry.status_monitoring = "selesai";
+        }
+        if (m.tipe === "evaluasi" && sudahDijawab.has(m.id)) {
+          entry.status_evaluasi = "selesai";
+        }
+      }
+      console.log("_____DDDDDDDDD______:");
+      console.log(hasilGabungan);
+      console.log("_____DDDDDDDDD______:");
+
+      return hasilGabungan;
+    } catch (error) {
+      console.error("Error gabung_status_monev:", error);
+      return [];
+    }
+  }
+  //  Daftar Monev (status ditentukan per record Monev)
+  async daftar_monev() {
+    try {
+      let { page = 1, limit = 10 } = this.req.query;
+      page = parseInt(page);
+      limit = parseInt(limit);
+      const offset = (page - 1) * limit;
+
+      const totalData = await Permohonan.count();
+
+      const data = await Permohonan.findAll({
+        limit,
+        offset,
+        order: [["id", "ASC"]],
         include: [
-          {
-            model: Member,
-            attributes: ["id", "no_ktp", "fullname"],
-          },
-          {
-            model: Kegiatan,
-            attributes: ["id", "nama_kegiatan"],
-          },
+          { model: Member, attributes: ["id", "fullname", "nomor_ktp"] },
+          { model: Kegiatan, attributes: ["id", "nama_kegiatan"] },
           {
             model: Realisasi_permohonan,
             attributes: [
@@ -57,37 +97,106 @@ class Model_r {
             ],
           },
           {
-            model: Pertanyaan_monev,
-            attributes: ["id", "jenis_monev",],
+            model: Monev,
+            attributes: ["id", "jenis_monev", "tipe", "nama_petugas_monev"],
+            include: [
+              {
+                model: Jawaban_monev,
+                attributes: ["id", "jawaban", "pertanyaan_id"],
+                required: false, // biar tetap muncul walau belum ada jawaban
+              },
+            ],
           },
-
         ],
-        order: [["createdAt", "DESC"]],
-        limit,
-        offset: (page - 1) * limit,
       });
 
+      const result = data.map((item) => ({
+        id: item.id,
+        fullname: item.Member?.fullname || null,
+        nomor_akun_bank: item.nomor_akun_bank || null,
+        nomor_ktp: item.Member?.nomor_ktp || null,
+        kegiatan: item.Kegiatan?.nama_kegiatan || null,
+        realisasi:
+          item.Realisasi_permohonans?.map((r) => ({
+            id: r.id,
+            biaya_disetujui: r.biaya_disetujui,
+            status_realisasi: r.status_realisasi,
+            tanggal_realisasi: moment(r.tanggal_realisasi).format("YYYY-MM-DD"),
+          })) || [],
+        monev:
+          item.Monevs?.map((m) => {
+            const adaJawaban =
+              Array.isArray(m.Jawaban_monevs) && m.Jawaban_monevs.length > 0;
+
+            // Tentukan status per record monev
+            const status_monitoring =
+              m.tipe === "monitoring"
+                ? adaJawaban
+                  ? "selesai"
+                  : "belum selesai"
+                : "tidak berlaku";
+
+            const status_evaluasi =
+              m.tipe === "evaluasi"
+                ? adaJawaban
+                  ? "selesai"
+                  : "belum selesai"
+                : "tidak berlaku";
+
+            return {
+              id: m.id,
+              jenis_monev: m.jenis_monev,
+              tipe: m.tipe,
+              petugas: m.nama_petugas_monev,
+              status_monitoring,
+              status_evaluasi,
+            };
+          }) || [],
+      }));
+
+      const totalPages = Math.ceil(totalData / limit);
+
       return {
-        data: result.rows.map((e) => ({
-          id: e.id,
-          nama_pemohon: e.Member?.fullname || null,
-          no_ktp: e.Member?.no_ktp || null,
-          nomor_rekening: e.nomor_akun_bank,
-          nama_kegiatan: e.Kegiatan?.nama_kegiatan || null,
-          biaya_disetujui: e.Realisasi_permohonan?.biaya_disetujui || 0,
-          status_realisasi: e.Realisasi_permohonan?.status_realisasi || null,
-          tanggal_realisasi: e.Realisasi_permohonan?.tanggal_realisasi || null,
-          jenis_monev: e.Urutan_bagian_monev?.jenis_monev || null,
-          status_monitoring: e.Urutan_bagian_monev?.status_monitoring || null,
-          status_evaluasi: e.Urutan_bagian_monev?.status_evaluasi || null,
-          createdAt: e.createdAt,
-        })),
-        total: result.count,
+        success: true,
+        message: "Daftar monev berhasil diambil",
+        pagination: {
+          total_data: totalData,
+          total_pages: totalPages,
+          current_page: page,
+          per_page: limit,
+        },
+        data: result,
       };
     } catch (error) {
-      console.error("Error fetching monev data:", error);
-      return { data: [], total: 0 };
+      console.error("Terjadi error saat mengambil daftar monev:", error);
+      return {
+        success: false,
+        message: "Terjadi error saat mengambil daftar monev",
+        error: error.message,
+      };
     }
+  }
+
+  //  Pertanyaan Evaluasi
+  async pertanyaan_evaluasi() {
+    const pertanyaan_evaluasi = await Pertanyaan_monev.findAll({
+      where: { tipe: "evaluasi" },
+    });
+    return pertanyaan_evaluasi.map((item) => ({
+      id: item.id,
+      pertanyaan: item.pertanyaan,
+    }));
+  }
+
+  //  Pertanyaan Monitoring
+  async pertanyaan_monitoring() {
+    const pertanyaan_monitoring = await Pertanyaan_monev.findAll({
+      where: { tipe: "monitoring" },
+    });
+    return pertanyaan_monitoring.map((item) => ({
+      id: item.id,
+      pertanyaan: item.pertanyaan,
+    }));
   }
 }
 
