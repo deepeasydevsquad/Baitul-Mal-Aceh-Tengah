@@ -14,4 +14,11 @@ router.post(
   controllers.list
 );
 
+router.post(
+  "/program_bantuan_member/list_program",
+  body("name").optional().isString().withMessage("tahun Harus String"),
+  authenticateTokenAdministrator,
+  controllers.list_bantuan
+);
+
 module.exports = router;

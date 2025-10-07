@@ -36,6 +36,12 @@ module.exports = {
           createdAt: new Date(),
           updatedAt: new Date(),
         },
+        {
+          name: "Bantuan Infaq",
+          desc: "Program bantuan infaq untuk membantu masyarakat kurang mampu, mendukung kegiatan sosial, dan peningkatan kesejahteraan umat.",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
       ],
       {}
     );
