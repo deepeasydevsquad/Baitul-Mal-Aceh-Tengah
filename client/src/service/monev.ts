@@ -1,8 +1,18 @@
 import api from '@/service/api_administrator';
 
-export const monev_list = async (params: { page?: number; limit?: number }) => {
+export const get_filter_type = async () => {
   try {
-    const response = await api.post('/monev/list', { params });
+    const response = await api.get('/monev/get_filter_type');
+    return response.data;
+  } catch (error) {
+    console.error('Gagal mengambil daftar monev:', error);
+    throw error;
+  }
+}
+
+export const monev_list = async (param: any) => {
+  try {
+    const response = await api.post('/monev/list', param);
     return response.data;
   } catch (error) {
     console.error('Gagal mengambil daftar monev:', error);
@@ -31,12 +41,9 @@ export const pertanyaan_monitoring = async () => {
 };
 
 // Kirim Jawaban Evaluasi
-export const kirim_jawaban_evaluasi = async (payload: {
-  monev_id: number;
-  jawaban: { pertanyaan_id: number; jawaban: string }[];
-}) => {
+export const kirim_jawaban_evaluasi = async (param: any) => {
   try {
-    const response = await api.post('/monev/kirim_jawaban_evaluasi', payload);
+    const response = await api.post('/monev/kirim_jawaban_evaluasi', param);
     return response.data;
   } catch (error) {
     console.error('Gagal mengirim jawaban evaluasi:', error);
@@ -45,12 +52,10 @@ export const kirim_jawaban_evaluasi = async (payload: {
 };
 
 // Kirim Jawaban Monitoring
-export const kirim_jawaban_monitoring = async (payload: {
-  monev_id: number;
-  jawaban: { pertanyaan_id: number; jawaban: string }[];
-}) => {
+export const kirim_jawaban_monitoring = async (param: any) => {
+
   try {
-    const response = await api.post('/monev/kirim_jawaban_monitoring', payload);
+    const response = await api.post('/monev/kirim_jawaban_monitoring', param);
     return response.data;
   } catch (error) {
     console.error('Gagal mengirim jawaban monitoring:', error);

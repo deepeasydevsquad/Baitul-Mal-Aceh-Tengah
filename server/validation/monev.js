@@ -61,16 +61,12 @@ validation.kirim_jawaban_evaluasi = [
     .isInt()
     .withMessage("monev_id harus berupa angka"),
   body("jawaban")
-    .isArray({ min: 1 })
-    .withMessage("jawaban harus berupa array dan tidak boleh kosong"),
+    .isObject()
+    .withMessage("jawaban harus berupa object"),
   body("jawaban.*.pertanyaan_id")
-    .notEmpty()
-    .withMessage("pertanyaan_id tidak boleh kosong")
     .isInt()
-    .withMessage("pertanyaan_id harus angka"),
+    .withMessage("pertanyaan_id harus berupa angka"),
   body("jawaban.*.jawaban")
-    .notEmpty()
-    .withMessage("jawaban tidak boleh kosong")
     .isString()
     .withMessage("jawaban harus berupa teks"),
 ];
@@ -83,18 +79,15 @@ validation.kirim_jawaban_monitoring = [
     .isInt()
     .withMessage("monev_id harus berupa angka"),
   body("jawaban")
-    .isArray({ min: 1 })
-    .withMessage("jawaban harus berupa array dan tidak boleh kosong"),
+    .isObject()
+    .withMessage("jawaban harus berupa object"),
   body("jawaban.*.pertanyaan_id")
-    .notEmpty()
-    .withMessage("pertanyaan_id tidak boleh kosong")
     .isInt()
-    .withMessage("pertanyaan_id harus angka"),
+    .withMessage("pertanyaan_id harus berupa angka"),
   body("jawaban.*.jawaban")
-    .notEmpty()
-    .withMessage("jawaban tidak boleh kosong")
     .isString()
     .withMessage("jawaban harus berupa teks"),
 ];
+
 
 module.exports = validation;

@@ -11,7 +11,7 @@ import InputCheckbox from '@/components/Form/InputCheckbox.vue';
 import { useNotification } from '@/composables/useNotification';
 
 // Service
-import { pertanyaan_monitoring, kirim_jawaban_monitoring } from '@/service/monev';
+import { pertanyaan_evaluasi, kirim_jawaban_evaluasi } from '@/service/monev';
 
 // Composable: notification
 const { showNotification, notificationType, notificationMessage, displayNotification } =
@@ -111,7 +111,7 @@ const validateForm = () => {
 // Fetch data pertanyaan
 const fetchPertanyaan = async () => {
   try {
-    const res = await pertanyaan_monitoring();
+    const res = await pertanyaan_evaluasi();
     dataPertanyaan.value = res.data || [];
     console.log()
 
@@ -161,7 +161,7 @@ const handleSubmit = async () => {
       })),
     };
     console.log('Payload dikirim ke backend:', payload);
-    await kirim_jawaban_monitoring(payload);
+    await kirim_jawaban_evaluasi(payload);
   } catch (error: any) {
     emit('status', { error: true, error_msg: error.response?.data?.error_msg });
     displayNotification(error.response?.data?.error_msg || 'Gagal mengirim jawaban', 'error');
@@ -200,7 +200,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', handleEscape));
       >
         <!-- Header -->
         <div class="flex items-center justify-between border-b pb-3">
-          <h2 class="text-xl font-bold text-gray-800">Monitoring Monev</h2>
+          <h2 class="text-xl font-bold text-gray-800">Evaluasi Monev</h2>
           <button @click="closeModal" class="text-gray-400 hover:text-gray-600 text-lg">
             <font-awesome-icon icon="fa-solid fa-xmark" />
           </button>

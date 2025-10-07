@@ -8,6 +8,12 @@ const {
 
 const router = express.Router();
 
+router.get(
+  "/monev/get_filter_type",
+  authenticateTokenAdministrator,
+  controller.get_filter_type
+);
+
 router.post(
   "/monev/list",
   authenticateTokenAdministrator,

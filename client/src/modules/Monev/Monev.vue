@@ -10,7 +10,9 @@ import DeleteIcon from '@/components/Icons/DeleteIcon.vue';
 import Pagination from '@/components/Pagination/Pagination.vue';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
 import SelectField from '@/components/Form/SelectField.vue';
-import FormAdd from '@/modules/Monev/widgets/FormAdd.vue';
+import BaseSelect from '@/components/Form/BaseSelect.vue';
+import FormEvaluasi from '@/modules/Monev/widgets/FormEvaluasi.vue';
+import FormMonitoring from './widgets/FormMonitoring.vue';
 
 // Composables
 import { usePagination } from '@/composables/usePaginations';
@@ -18,89 +20,48 @@ import { useConfirmation } from '@/composables/useConfirmation';
 import { useNotification } from '@/composables/useNotification';
 
 // Service API
-import {
-  monev_list,
-  kirim_jawaban_evaluasi,
-  kirim_jawaban_monitoring,
-  gabung_status_monev,
-} from '@/service/monev';
+import { get_filter_type, monev_list } from '@/service/monev';
 import ButtonGreen from '@/components/Button/ButtonGreen.vue';
 import IconDocumentation from '@/components/Icons/IconDocumentation.vue';
-import FormMonitoring from './widgets/FormMonitoring.vue';
-
-// Interface untuk realisasi
-export interface Realisasi {
-  biaya_disetujui: number;
-  status_realisasi: string;
-  tanggal_realisasi: string;
-}
 
 // Interface untuk Monev
 export interface Monev {
-  fullname: any;
-  nomor_ktp: any;
   id: number;
+  fullname: string;
+  nomor_ktp: string;
   nomor_akun_bank: string;
-  kegiatan: string;
-  jenis_monev: string;
-  status_monitoring: string;
-  status_evaluasi: string;
-  createdAt: string;
-  realisasi?: Realisasi[];
-  monev: statusMonev;
-}
-
-interface statusMonev {
-  jenis_monev: string;
+  nama_kegiatan: string;
+  biaya_disetujui: number;
+  tanggal_realisasi: string;
+  status_realisasi: string;
+  datetimes: string;
+  jenis_monev: string[];
   status_monitoring: string;
   status_evaluasi: string;
 }
 
 const selectedPermohonan = ref();
-function openModalAdd(id: number) {
-  isModalAddOpen.value = true;
+function openModalEvaluasi(id: number) {
   selectedPermohonan.value = id;
+  isModalAddOpen.value = true;
 }
 
 function openModalMonitoring(id: number) {
-  isModalMonitoringOpen.value = true;
   selectedPermohonan.value = id;
-}
-// Interface untuk member
-export interface Member {
-  id: number;
-  fullname: string;
-  nomor_ktp: string;
+  isModalMonitoringOpen.value = true;
 }
 
 // Function: Modal
 const isModalAddOpen = ref(false);
 const isModalMonitoringOpen = ref(false);
 
-// Interface untuk pertanyaan Monev
-export interface PertanyaanMonev {
-  id: number;
-  pertanyaan: string;
-  monev_id: number;
-  jenis_monev: 'monitoring' | 'evaluasi';
-}
-
 // State
 const dataMonev = ref<Monev[]>([]);
 const selectedKegiatan = ref('');
 const selectedYear = ref('');
-const kegiatanOptions = ref<string[]>([]);
+const kegiatanOptions = ref<{ value: string; label: string }[]>([]);
+const yearOptions = ref<{ value: string; label: string }[]>([]);
 const isTableLoading = ref(false);
-
-// State evaluasi
-const jawabanEvaluasi = ref<Record<number, string>>({});
-
-// Tahun otomatis (3 tahun sebelum & 3 tahun sesudah)
-const currentYear = new Date().getFullYear();
-const years = Array.from({ length: 7 }, (_, i) => {
-  const year = currentYear - 3 + i;
-  return { id: year.toString(), name: year.toString() };
-});
 
 // Pagination
 const itemsPerPage = ref<number>(100);
@@ -113,73 +74,35 @@ const { showNotification, notificationType, notificationMessage, displayNotifica
   useNotification();
 const { showConfirmDialog, confirmTitle, confirmMessage, confirm, cancel } = useConfirmation();
 
-// Modal Monitoring & Evaluasi
-const showMonitoringModal = ref(false);
-const showEvaluasiModal = ref(false);
-const pertanyaanMonitoring = ref<PertanyaanMonev[]>([]);
-const pertanyaanEvaluasi = ref<PertanyaanMonev[]>([]);
-
 async function fetchData() {
   isTableLoading.value = true;
   try {
     //Ambil daftar monev
-    const res = await monev_list({ page: currentPage.value, limit: perPage.value });
+    const [res, filterRes] = await Promise.all([
+      monev_list({
+        perPage: perPage.value,
+        pageNumber: currentPage.value,
+        type_kegiatan: selectedKegiatan.value,
+        type_year: selectedYear.value,
+      }),
+      get_filter_type(),
+    ]);
 
-    let listData: any[] = [];
-    let total = 0;
-
-    //Cek struktur API
-    if (Array.isArray(res)) {
-      listData = res;
-      total = res.length;
-    } else if (Array.isArray(res?.data?.data?.data)) {
-      listData = res.data.data.data;
-      total = res.data.data.pagination?.total_data || listData.length;
-    } else if (Array.isArray(res?.data?.data)) {
-      listData = res.data.data;
-      total = res.data.pagination?.total_data || listData.length;
-    } else {
-      console.warn('Data format tidak dikenali:', res);
-      listData = [];
-    }
-
-    //Mapping dengan status dari backend
-    // Mapping data dari backend (ambil status dari monev[0])
-    dataMonev.value = listData.map((item) => {
-      const firstMonev = Array.isArray(item.monev) ? item.monev[0] : null;
-
-      return {
-        ...item,
-        jenis_monev: firstMonev?.jenis_monev || '-',
-        status_monitoring: firstMonev?.status_monitoring || 'belum selesai',
-        status_evaluasi: firstMonev?.status_evaluasi || 'belum selesai',
-        createdAt: item.realisasi?.[0]?.tanggal_realisasi || new Date().toISOString(),
-      };
-    });
-
-    kegiatanOptions.value = [...new Set(dataMonev.value.map((d) => d.kegiatan))];
-    totalRow.value = total;
+    dataMonev.value = res.data;
+    totalRow.value = res.total;
+    kegiatanOptions.value = filterRes.data.type_kegiatan;
+    yearOptions.value = filterRes.data.type_year;
+    console.log(filterRes.data);
+    console.log(dataMonev.value);
   } catch (err) {
     console.error('Fetch error:', err);
-    showNotification.value = true;
-    notificationType.value = 'error';
-    notificationMessage.value = 'Gagal memuat data Monev';
   } finally {
     isTableLoading.value = false;
   }
 }
 
-onMounted(fetchData);
-
-// Filter gabungan Kegiatan & Tahun
-const filteredMonev = computed(() => {
-  return dataMonev.value.filter((item) => {
-    const kegiatanMatch = selectedKegiatan.value ? item.kegiatan === selectedKegiatan.value : true;
-    const yearMatch = selectedYear.value
-      ? new Date(item.createdAt).getFullYear().toString() === selectedYear.value
-      : true;
-    return kegiatanMatch && yearMatch;
-  });
+onMounted(async () => {
+  await fetchData();
 });
 </script>
 
@@ -187,21 +110,18 @@ const filteredMonev = computed(() => {
   <div class="p-4 bg-gray-100 rounded">
     <!-- Filter Kegiatan & Tahun -->
     <div class="flex gap-4 mb-4 justify-end">
-      <div class="w-48">
-        <SelectField
-          v-model="selectedKegiatan"
-          :options="[
-            { id: '', name: 'Semua Kegiatan' },
-            ...kegiatanOptions.map((k) => ({ id: k, name: k })),
-          ]"
-        />
-      </div>
-      <div class="w-48">
-        <SelectField
-          v-model="selectedYear"
-          :options="[{ id: '', name: 'Pilih Semua Tahun' }, ...years]"
-        />
-      </div>
+      <BaseSelect
+        v-model="selectedKegiatan"
+        :options="kegiatanOptions"
+        placeholder="Semua Kegiatan"
+        @change="fetchData"
+      />
+      <BaseSelect
+        v-model="selectedYear"
+        :options="yearOptions"
+        placeholder="Semua Tahun"
+        @change="fetchData"
+      />
     </div>
 
     <!-- Loader -->
@@ -214,9 +134,9 @@ const filteredMonev = computed(() => {
           <tr>
             <th class="px-6 py-3 font-medium w-[30%]">Info Pemohon</th>
             <th class="px-6 py-3 font-medium w-[30%]">Info Program Bantuan</th>
-            <th class="px-6 py-3 font-medium w-[25%]">Info Monev</th>
+            <th class="px-6 py-3 font-medium w-[20%]">Info Monev</th>
             <th class="px-6 py-3 font-medium w-[10%]">DateTimes</th>
-            <th class="px-6 py-3 font-medium w-[5%]">Aksi</th>
+            <th class="px-6 py-3 font-medium w-[10%]">Aksi</th>
           </tr>
         </thead>
 
@@ -256,23 +176,25 @@ const filteredMonev = computed(() => {
                     <th class="bg-gray-200 px-3 py-2 text-left font-semibold w-[40%]">
                       NAMA KEGIATAN
                     </th>
-                    <td class="px-3 py-2">{{ item.kegiatan }}</td>
+                    <td class="px-3 py-2">{{ item.nama_kegiatan }}</td>
                   </tr>
-                  <tr
-                    v-for="(r, i) in item.realisasi"
-                    :key="i"
-                    class="border-b border-gray-300 last:border-b-0"
-                  >
+                  <tr class="border-b border-gray-300 last:border-b-0">
                     <th class="bg-gray-200 px-3 py-2 text-left font-semibold">BIAYA DISETUJUI</th>
-                    <td class="px-3 py-2">Rp {{ Number(r.biaya_disetujui).toLocaleString() }}</td>
+                    <td class="px-3 py-2">{{ $formatToRupiah(item.biaya_disetujui) }}</td>
                   </tr>
-                  <tr v-if="item.realisasi?.length">
+                  <tr>
                     <th class="bg-gray-200 px-3 py-2 text-left font-semibold">STATUS REALISASI</th>
-                    <td class="px-3 py-2">{{ item.realisasi[0].status_realisasi }}</td>
+                    <td class="px-3 py-2">
+                      {{
+                        item.status_realisasi === 'sudah_direalisasi'
+                          ? 'SUDAH DIREALISASI'
+                          : 'BELUM DIREALISASI'
+                      }}
+                    </td>
                   </tr>
-                  <tr v-if="item.realisasi?.length">
+                  <tr>
                     <th class="bg-gray-200 px-3 py-2 text-left font-semibold">TANGGAL REALISASI</th>
-                    <td class="px-3 py-2">{{ item.realisasi[0].tanggal_realisasi }}</td>
+                    <td class="px-3 py-2">{{ item.tanggal_realisasi }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -300,17 +222,13 @@ const filteredMonev = computed(() => {
 
             <!-- Datetimes -->
             <td class="px-6 py-4 text-center font-medium text-gray-800">
-              {{
-                item.realisasi?.[0]?.tanggal_realisasi
-                  ? new Date(item.realisasi[0].tanggal_realisasi).toLocaleString('id-ID')
-                  : new Date(item.createdAt).toLocaleString('id-ID')
-              }}
+              {{ item.datetimes }}
             </td>
 
             <!-- Aksi -->
             <td class="align-top text-center px-3 py-3">
               <div class="flex flex-row justify-center gap-2">
-                <ButtonGreen @click="openModalAdd(item.id)">
+                <ButtonGreen @click="openModalEvaluasi(item.id)">
                   <IconDocumentation />
                 </ButtonGreen>
                 <DangerButton
@@ -336,6 +254,7 @@ const filteredMonev = computed(() => {
       <Pagination
         :current-page="currentPage"
         :total-pages="totalPages"
+        :total-columns="totalColumns"
         :next-page="nextPage"
         :prev-page="prevPage"
         :pages="pages"
@@ -347,30 +266,30 @@ const filteredMonev = computed(() => {
     <FormMonitoring
       :is-modal-open="isModalMonitoringOpen"
       :monev_id="selectedPermohonan"
-      @close="isModalMonitoringOpen = false"
+      @close="((isModalMonitoringOpen = false), fetchData())"
       @status="
         async (payload) => {
-          if (!payload.error) await fetchData(); // 🔹 auto refresh data setelah kirim jawaban
-          displayNotification(
-            payload.error_msg || 'Jawaban Monitoring Berhasil Dikirim',
-            payload.error ? 'error' : 'success',
-          );
+          if (!payload.error)
+            displayNotification(
+              payload.error_msg || 'Jawaban Monitoring Berhasil Dikirim',
+              payload.error ? 'error' : 'success',
+            );
         }
       "
     />
 
-    <!-- Modal FormAdd -->
-    <FormAdd
+    <!-- Modal FormEvaluasi -->
+    <FormEvaluasi
       :is-modal-open="isModalAddOpen"
       :monev_id="selectedPermohonan"
-      @close="isModalAddOpen = false"
+      @close="((isModalAddOpen = false), fetchData())"
       @status="
         async (payload) => {
-          if (!payload.error) await fetchData(); // 🔹 auto refresh data setelah kirim jawaban
-          displayNotification(
-            payload.error_msg || 'Jawaban Evaluasi Berhasil Dikirim',
-            payload.error ? 'error' : 'success',
-          );
+          if (!payload.error)
+            displayNotification(
+              payload.error_msg || 'Jawaban Evaluasi Berhasil Dikirim',
+              payload.error ? 'error' : 'success',
+            );
         }
       "
     />

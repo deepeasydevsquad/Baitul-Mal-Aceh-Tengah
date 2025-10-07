@@ -1,16 +1,36 @@
 const Model_r = require("../models/model_r");
 const Model_cud = require("../models/model_cud");
-const { handleServerError } = require("../../../helper/handleError");
+const { handleValidationErrors, handleServerError } = require("../../../helper/handleError");
 
 const controllers = {};
+
+controllers.get_filter_type = async (req, res) => {
+  if (!(await handleValidationErrors(req, res))) return;
+
+  try {
+    const model = new Model_r(req);
+    const feedBack = await model.get_filter_type();
+    res.status(200).json({
+      error: false,
+      data: feedBack,
+      total: 1,
+    });
+  } catch (error) {
+    handleServerError(res, error);
+  }
+};
 
 // READ Controllers
 controllers.get_monev_list = async (req, res) => {
   try {
     const model = new Model_r(req);
-    // memanggil method yang benar (daftar_monev)
-    const data = await model.daftar_monev();
-    res.status(200).json({ error: false, data });
+    const feedBack = await model.daftar_monev();
+
+    res.status(200).json({
+      error: false,
+      data: feedBack.data,
+      total: feedBack.total,
+    });
   } catch (error) {
     handleServerError(res, error);
   }
