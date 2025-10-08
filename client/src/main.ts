@@ -289,7 +289,7 @@ app.use(PrimeVue, {
 app.use(rupiahPlugin);
 
 router.beforeEach((to, from, next) => {
-  const defaultTitle = 'Nama Aplikasi Anda';
+  const defaultTitle = 'Aplikasi Muzakki dan Mustahik';
   document.title = to.meta.title || defaultTitle;
   next();
 });
