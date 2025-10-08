@@ -93,6 +93,7 @@ const arr_router = [
   "rekap_pengumpulan_per_kecamatan",
   "program_bantuan_member",
   "rekap_perkecamatan",
+  "infaq_member",
 ];
 
 const arr = {};

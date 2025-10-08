@@ -144,6 +144,9 @@ import {
   faTableCellsLarge,
   faMosque,
   faGift,
+  faCircleCheck,
+  faSpinner,
+  faPaperPlane,
 } from '@fortawesome/free-solid-svg-icons';
 
 // FontAwesome Icons - Regular
@@ -270,6 +273,9 @@ library.add(
   faMosque,
   faCoins,
   faGift,
+  faCircleCheck,
+  faSpinner,
+  faPaperPlane,
 );
 
 // Buat App Vue
