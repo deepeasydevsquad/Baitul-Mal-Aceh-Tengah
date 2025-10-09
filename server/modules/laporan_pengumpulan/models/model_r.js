@@ -12,6 +12,7 @@ class Model_r {
     this.req = req;
   }
 
+  // 🔹 Fungsi utama: hitung laporan pengumpulan
   async laporan_pengumpulan() {
     try {
       const tahun = this.req.query.tahun || this.req.body.tahun || new Date().getFullYear();
@@ -19,19 +20,22 @@ class Model_r {
 
       console.log("📊 Request params:", { tahun, search });
 
-      // 🔹 Ambil data target dari tabel Target_pengumpulan
+      // 🔸 Ambil data target dari tabel Target_pengumpulan
       const targetData = await Target_pengumpulan.findAll({
         where: { tahun },
         raw: true,
       });
 
+      console.log("🎯 Target data:", targetData);
+
+      // 🔹 Ambil target per kategori
       const targetItem = targetData[0] || {};
-      const targetZakat = Number(targetItem.zakat) || 0;
-      const targetInfaq = Number(targetItem.infaq) || 0;
-      const targetDonasi = Number(targetItem.donasi) || 0;
+      const targetZakat = targetItem.zakat || 0;
+      const targetInfaq = targetItem.infaq || 0;
+      const targetDonasi = targetItem.donasi || 0;
       const totalTarget = targetZakat + targetInfaq + targetDonasi;
 
-      // 🔹 Ambil realisasi
+      // 🔹 Hitung realisasi zakat
       const zakatRealisasi =
         (await Riwayat_pengumpulan.sum("nominal", {
           where: {
@@ -43,6 +47,7 @@ class Model_r {
           },
         })) || 0;
 
+      // 🔹 Hitung realisasi infaq
       const infaqRealisasi =
         (await Riwayat_pengumpulan.sum("nominal", {
           where: {
@@ -54,6 +59,7 @@ class Model_r {
           },
         })) || 0;
 
+      // 🔹 Hitung realisasi donasi
       const donasiRealisasi =
         (await Riwayat_donasi.sum("nominal", {
           where: {
@@ -64,25 +70,21 @@ class Model_r {
           },
         })) || 0;
 
+      // 🔸 Total realisasi
       const totalRealisasi = zakatRealisasi + infaqRealisasi + donasiRealisasi;
 
-      // 🧮 Fungsi aman pembulatan
-      const fix = (num) => Math.round(num * 100) / 100;
+      // 🔹 Helper aman untuk persentase
+      const hitungPersen = (realisasi, target) => {
+        if (!target || target <= 0) return 0;
+        const persen = (realisasi / target) * 100;
+        return Math.round(persen * 100) / 100; // dua desimal
+      };
 
-      // 🔸 Hitung bobot target (agar total 100%)
-      const bobotZakat = totalTarget ? targetZakat / totalTarget : 0;
-      const bobotInfaq = totalTarget ? targetInfaq / totalTarget : 0;
-      const bobotDonasi = totalTarget ? targetDonasi / totalTarget : 0;
-
-      // 🔸 Hitung persentase berdasarkan kontribusi per jenis
-      const persenZakat = fix((zakatRealisasi / targetZakat) * bobotZakat * 100 || 0);
-      const persenInfaq = fix((infaqRealisasi / targetInfaq) * bobotInfaq * 100 || 0);
-      const persenDonasi = fix((donasiRealisasi / targetDonasi) * bobotDonasi * 100 || 0);
-
-      // 🔸 Pastikan total persentase = 100 maksimal
-      let persenTotal = persenZakat + persenInfaq + persenDonasi;
-      if (persenTotal > 100) persenTotal = 100;
-      persenTotal = fix(persenTotal);
+      // 🔹 Hitung persentase
+      const persenZakat = hitungPersen(zakatRealisasi, targetZakat);
+      const persenInfaq = hitungPersen(infaqRealisasi, targetInfaq);
+      const persenDonasi = hitungPersen(donasiRealisasi, targetDonasi);
+      const persenTotal = hitungPersen(totalRealisasi, totalTarget);
 
       // 🔹 Susun hasil laporan
       const laporan = {
@@ -105,6 +107,7 @@ class Model_r {
     }
   }
 
+  // ✅ Alias agar tetap kompatibel dengan controller lama
   async list_laporan_pengumpulan() {
     return this.laporan_pengumpulan();
   }
