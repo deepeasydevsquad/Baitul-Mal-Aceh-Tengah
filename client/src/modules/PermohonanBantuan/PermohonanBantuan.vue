@@ -432,17 +432,13 @@ function formatAreaPenyaluran(area: string): string {
                 <!-- Kolom Aksi -->
                 <td class="px-4 py-4">
                   <div class="flex flex-col gap-2 items-center">
-                    <LightButton @click="openModalEdit(data)" title="Lihat Detail" class="w-full">
+                    <LightButton @click="openModalEdit(data)" title="Lihat Detail">
                       <font-awesome-icon icon="fa-solid fa-info" />
                     </LightButton>
-                    <YellowButton
-                      @click="openModalEditStatus(data)"
-                      title="Edit Status"
-                      class="w-full"
-                    >
+                    <YellowButton @click="openModalEditStatus(data)" title="Edit Status">
                       <font-awesome-icon icon="fa-solid fa-pen" />
                     </YellowButton>
-                    <DangerButton @click="deleteData(data.id)" title="Hapus" class="w-full">
+                    <DangerButton @click="deleteData(data.id)" title="Hapus">
                       <DeleteIcon />
                     </DangerButton>
                   </div>
