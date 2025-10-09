@@ -33,8 +33,8 @@ const isLoading = ref(false);
 const isTableLoading = ref(false);
 
 // Composable: pagination
-const itemsPerPage = ref<number>(25);
-const totalColumns = ref<number>(5);
+const itemsPerPage = ref<number>(10);
+const totalColumns = ref<number>(3);
 
 const { currentPage, perPage, totalRow, totalPages, nextPage, prevPage, pageNow, pages } =
   usePagination(fetchData, { perPage: itemsPerPage.value });
@@ -99,7 +99,7 @@ function openModalEditStatus(datas: any) {
 }
 
 // Function: Fetch Data
-const kegiatanOption = ref<{ value: string; label: string }[]>([]); // di fetch dari API
+const kegiatanOption = ref<{ value: string; label: string }[]>([]);
 const statusRealisasiOption = ref<{ value: string; label: string }[]>([
   { value: 'selesai', label: 'Selesai' },
   { value: 'sedang_berlangsung', label: 'Sedang Berlangsung' },
@@ -156,6 +156,18 @@ async function deleteData(id: number) {
     },
   );
 }
+
+// Function: Format Area Penyaluran
+function formatAreaPenyaluran(area: string): string {
+  const areaMap: Record<string, string> = {
+    semua_pemohon: 'SEMUA PEMOHON',
+    kabupaten: 'KABUPATEN',
+    instansi: 'INSTANSI',
+    kecamatan: 'KECAMATAN',
+    desa: 'DESA',
+  };
+  return areaMap[area] || '-';
+}
 </script>
 
 <template>
@@ -193,14 +205,15 @@ async function deleteData(id: number) {
             placeholder="Semua Status"
             @change="fetchData"
           />
+
           <!-- Search -->
           <input
             id="search"
             type="text"
             v-model="search"
             @change="fetchData"
-            placeholder="Cari Nama / NIK Pemohon . . ."
-            class="w-full sm:w-86 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:border-green-900 focus:ring-2 focus:ring-green-900 transition"
+            placeholder="Cari Nama / NIK Pemohon..."
+            class="w-full sm:w-64 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:border-green-900 focus:ring-2 focus:ring-green-900 transition"
           />
         </div>
       </div>
@@ -211,154 +224,225 @@ async function deleteData(id: number) {
         <table v-else class="w-full border-collapse bg-white text-sm">
           <thead class="bg-gray-50 text-gray-700 text-center border-b border-gray-300">
             <tr>
-              <th class="w-[30%] px-4 py-3 font-medium">Info Permohonan</th>
-              <th class="w-[30%] px-4 py-3 font-medium">Info Penyaluran</th>
-              <th class="w-[30%] px-4 py-3 font-medium">Kriteria</th>
+              <th class="w-[60%] px-4 py-3 font-medium">Info Permohonan & Kegiatan</th>
+              <th class="w-[40%] px-4 py-3 font-medium">Kriteria Persyaratan</th>
               <th class="w-[10%] px-4 py-3 font-medium">Aksi</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-100 text-sm align-top">
+          <tbody class="divide-y divide-gray-100 text-xs align-top">
             <template v-if="dataPermohonanBantuan.length > 0">
               <tr
                 v-for="data in dataPermohonanBantuan"
                 :key="data.id"
                 class="hover:bg-gray-50 transition-colors"
               >
-                <td class="px-4 py-4 text-start font-medium text-gray-800">
-                  <table class="w-full border border-gray-300 rounded-lg">
-                    <tbody>
-                      <tr class="border-b border-gray-300">
-                        <td class="w-[40%] bg-gray-100 px-4 py-2 font-bold">NAMA PEMOHON</td>
-                        <td class="px-4 py-2 font-medium w-full text-right">
+                <!-- Kolom Info Permohonan & Kegiatan -->
+                <td class="px-4 py-4">
+                  <!-- Header Card -->
+                  <div
+                    class="bg-gradient-to-r from-green-800 to-green-700 rounded-lg px-4 py-3 mb-3"
+                  >
+                    <div class="flex justify-between items-start">
+                      <div>
+                        <h3 class="text-white font-bold text-base">
                           {{ data.Permohonan.member_name }}
-                        </td>
-                      </tr>
-                      <tr class="border border-gray-300">
-                        <td class="bg-gray-100 px-4 py-2 font-bold">TIPE PEMOHON</td>
-                        <td class="px-4 py-2 font-bold w-full text-right text-red-600">
-                          {{
-                            data.Permohonan.member_tipe == 'perorangan' ? 'PERORANGAN' : 'INSTANSI'
-                          }}
-                        </td>
-                      </tr>
-                      <tr class="border border-gray-300">
-                        <td class="bg-gray-100 px-4 py-2 font-bold">DESA PEMOHON</td>
-                        <td class="px-4 py-2 font-medium w-full text-right">
-                          {{ data.Permohonan.desa_name || '-' }}
-                        </td>
-                      </tr>
-                      <tr class="border border-gray-300">
-                        <td class="bg-gray-100 px-4 py-2 font-bold">KEC. PEMOHON</td>
-                        <td class="px-4 py-2 font-medium w-full text-right">
+                        </h3>
+                        <p class="text-green-100 text-xs mt-1">
+                          {{ data.Permohonan.desa_name || '-' }},
                           {{ data.Permohonan.kecamatan_name || '-' }}
-                        </td>
-                      </tr>
-                      <tr class="border border-gray-300">
-                        <td class="bg-gray-100 px-4 py-2 font-bold">INFO BANK</td>
-                        <td class="px-4 py-2 font-medium w-full text-right">
-                          <p>BANK: {{ data.Permohonan.bank_name }}</p>
-                          <p>REK: {{ data.Permohonan.nomor_akun_bank }}</p>
-                          <p>AN: {{ data.Permohonan.nama_akun_bank }}</p>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </td>
-                <td class="px-4 py-4 text-start font-medium text-gray-800">
-                  <table class="w-full border border-gray-300 rounded-lg">
-                    <tbody>
-                      <tr class="border-b border-gray-300">
-                        <td class="w-[40%] bg-gray-100 px-4 py-2 font-bold">NAMA KEGIATAN</td>
-                        <td class="px-4 py-2 font-medium w-full text-right">
-                          {{ data.Permohonan.Kegiatan.nama_kegiatan }}
-                        </td>
-                      </tr>
-                      <tr class="border border-gray-300">
-                        <td class="bg-gray-100 px-4 py-2 font-bold">JUMLAH DANA</td>
-                        <td class="px-4 py-2 font-medium w-full text-right">
+                        </p>
+                      </div>
+                      <div class="text-right">
+                        <span
+                          class="inline-block px-2 py-1 bg-white/20 text-white rounded text-xs font-semibold"
+                        >
                           {{
-                            data.Permohonan.Kegiatan.jumlah_dana
-                              ? $formatToRupiah(data.Permohonan.Kegiatan.jumlah_dana)
-                              : '-'
+                            data.Permohonan.member_tipe === 'perorangan' ? 'PERORANGAN' : 'INSTANSI'
                           }}
-                        </td>
-                      </tr>
-                      <tr class="border border-gray-300">
-                        <td class="bg-gray-100 px-4 py-2 font-bold">SISA DANA</td>
-                        <td class="px-4 py-2 font-bold w-full text-right text-red-600">
-                          {{
-                            data.Permohonan.Kegiatan.sisa_jumlah_dana
-                              ? $formatToRupiah(data.Permohonan.Kegiatan.sisa_jumlah_dana)
-                              : '-'
-                          }}
-                        </td>
-                      </tr>
-                      <tr class="border border-gray-300">
-                        <td class="bg-gray-100 px-4 py-2 font-bold">SUMBER DANA</td>
-                        <td class="px-4 py-2 font-medium w-full text-right">
-                          {{ data.Permohonan.Kegiatan.sumber_dana == 'zakat' ? 'ZAKAT' : 'INFAQ' }}
-                        </td>
-                      </tr>
-                      <tr class="border border-gray-300">
-                        <td class="bg-gray-100 px-4 py-2 font-bold">TAHUN KEGIATAN</td>
-                        <td class="px-4 py-2 font-medium w-full text-right">
-                          {{ data.Permohonan.Kegiatan.tahun }}
-                        </td>
-                      </tr>
-                      <tr class="border border-gray-300">
-                        <td class="bg-gray-100 px-4 py-2 font-bold">STATUS KEGIATAN</td>
-                        <td class="px-4 py-2 font-bold w-full text-right text-yellow-600">
-                          {{
-                            data.Permohonan.Kegiatan.status_kegiatan == 'sedang_berlansung'
-                              ? 'SELESAI'
-                              : 'SEDANG BERLANGSUNG'
-                          }}
-                        </td>
-                      </tr>
-                      <tr class="border border-gray-300">
-                        <td class="bg-gray-100 px-4 py-2 font-bold">AREA PENYALURAN</td>
-                        <td class="px-4 py-2 font-medium w-full text-right">
-                          <span v-if="data.Permohonan.Kegiatan.area_penyaluran === 'semua_pemohon'">
-                            SEMUA PEMOHON
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Info Grid -->
+                  <div class="grid grid-cols-2 gap-3">
+                    <!-- Info Kegiatan -->
+                    <div class="bg-gray-50 rounded-lg p-3 space-y-2">
+                      <h4 class="font-semibold text-gray-800 text-xs mb-2 flex items-center gap-2">
+                        <font-awesome-icon
+                          icon="fa-solid fa-calendar-days"
+                          class="text-green-600"
+                        />
+                        Info Kegiatan
+                      </h4>
+                      <div class="space-y-1 text-xs">
+                        <div class="flex justify-between gap-2">
+                          <span class="text-gray-600">Kegiatan:</span>
+                          <span class="font-semibold text-gray-800 text-right">{{
+                            data.Permohonan.Kegiatan.nama_kegiatan
+                          }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                          <span class="text-gray-600">Total Dana:</span>
+                          <span class="font-semibold text-gray-800">
+                            {{
+                              data.Permohonan.Kegiatan.jumlah_dana
+                                ? $formatToRupiah(data.Permohonan.Kegiatan.jumlah_dana)
+                                : '-'
+                            }}
                           </span>
-                          <span
-                            v-else-if="data.Permohonan.Kegiatan.area_penyaluran === 'kabupaten'"
-                          >
-                            KABUPATEN
+                        </div>
+                        <div class="flex justify-between">
+                          <span class="text-gray-600">Sisa Dana:</span>
+                          <span class="font-bold text-red-600">
+                            {{
+                              data.Permohonan.Kegiatan.sisa_jumlah_dana
+                                ? $formatToRupiah(data.Permohonan.Kegiatan.sisa_jumlah_dana)
+                                : '-'
+                            }}
                           </span>
-                          <span v-else-if="data.Permohonan.Kegiatan.area_penyaluran === 'instansi'">
-                            INSTANSI
+                        </div>
+                        <div class="flex justify-between">
+                          <span class="text-gray-600">Sumber:</span>
+                          <span class="font-semibold text-gray-800">
+                            {{
+                              data.Permohonan.Kegiatan.sumber_dana === 'zakat' ? 'ZAKAT' : 'INFAQ'
+                            }}
                           </span>
-                          <span
-                            v-else-if="data.Permohonan.Kegiatan.area_penyaluran === 'kecamatan'"
-                          >
-                            KECAMATAN
+                        </div>
+                        <div class="flex justify-between">
+                          <span class="text-gray-600">Tahun:</span>
+                          <span class="font-semibold text-gray-800">{{
+                            data.Permohonan.Kegiatan.tahun
+                          }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                          <span class="text-gray-600">Status:</span>
+                          <span class="font-bold text-yellow-600">
+                            {{
+                              data.Permohonan.Kegiatan.status_kegiatan === 'sedang_berlangsung'
+                                ? 'BERLANGSUNG'
+                                : 'SELESAI'
+                            }}
                           </span>
-                          <span v-else-if="data.Permohonan.Kegiatan.area_penyaluran === 'desa'">
-                            DESA
+                        </div>
+                        <div class="flex justify-between gap-2">
+                          <span class="text-gray-600">Area:</span>
+                          <span class="font-semibold text-gray-800 text-right">
+                            {{ formatAreaPenyaluran(data.Permohonan.Kegiatan.area_penyaluran) }}
                           </span>
-                          <span v-else> - </span>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Info Bank -->
+                    <div class="bg-gray-50 rounded-lg p-3 space-y-2">
+                      <h4 class="font-semibold text-gray-800 text-xs mb-2 flex items-center gap-2">
+                        <font-awesome-icon
+                          icon="fa-solid fa-building-columns"
+                          class="text-green-600"
+                        />
+                        Info Bank
+                      </h4>
+                      <div class="space-y-1 text-xs">
+                        <div class="flex justify-between">
+                          <span class="text-gray-600">Bank:</span>
+                          <span class="font-semibold text-gray-800">{{
+                            data.Permohonan.bank_name
+                          }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                          <span class="text-gray-600">No. Rek:</span>
+                          <span class="font-semibold text-gray-800">{{
+                            data.Permohonan.nomor_akun_bank
+                          }}</span>
+                        </div>
+                        <div class="flex justify-between gap-2">
+                          <span class="text-gray-600">A/N:</span>
+                          <span class="font-semibold text-gray-800 text-right">{{
+                            data.Permohonan.nama_akun_bank
+                          }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Info Realisasi -->
+                  <div class="mt-3 bg-green-50 border border-green-200 rounded-lg p-3">
+                    <div class="flex justify-between items-center text-xs">
+                      <div class="flex items-center gap-2">
+                        <font-awesome-icon
+                          icon="fa-solid fa-money-bill-wave"
+                          class="text-green-600"
+                        />
+                        <span class="font-semibold text-gray-700">Biaya Disetujui:</span>
+                      </div>
+                      <span class="font-bold text-green-700">
+                        {{
+                          data.biaya_disetujui
+                            ? $formatToRupiah(data.biaya_disetujui)
+                            : 'Belum disetujui'
+                        }}
+                      </span>
+                    </div>
+                    <div
+                      v-if="data.nominal_realisasi"
+                      class="flex justify-between items-center text-xs mt-2 pt-2 border-t border-green-200"
+                    >
+                      <div class="flex items-center gap-2">
+                        <font-awesome-icon icon="fa-solid fa-check-circle" class="text-green-600" />
+                        <span class="font-semibold text-gray-700">Nominal Realisasi:</span>
+                      </div>
+                      <span class="font-bold text-green-700">
+                        {{ $formatToRupiah(data.nominal_realisasi) }}
+                      </span>
+                    </div>
+                  </div>
                 </td>
-                <td class="px-4 py-4 font-medium text-gray-800">
-                  <ul class="list-disc list-outside">
-                    <li v-for="kriteria in data.Permohonan.Kegiatan.kriteria" :key="kriteria.id">
-                      {{ kriteria.name }}
-                    </li>
-                  </ul>
+
+                <!-- Kolom Kriteria -->
+                <td class="px-4 py-4">
+                  <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="font-semibold text-gray-800 text-xs mb-3 flex items-center gap-2">
+                      <font-awesome-icon icon="fa-solid fa-list-check" class="text-green-600" />
+                      Kriteria Persyaratan ({{ data.Permohonan.Kegiatan.kriteria.length }})
+                    </h4>
+                    <ul class="space-y-2">
+                      <li
+                        v-for="kriteria in data.Permohonan.Kegiatan.kriteria"
+                        :key="kriteria.id"
+                        class="flex items-start gap-2 text-xs"
+                      >
+                        <span
+                          class="inline-block w-2 h-2 bg-green-500 rounded-full mt-1 flex-shrink-0"
+                        ></span>
+                        <span class="text-gray-700">{{ kriteria.name }}</span>
+                      </li>
+                    </ul>
+                    <div
+                      v-if="data.Permohonan.Kegiatan.kriteria.length === 0"
+                      class="text-center text-gray-400 text-xs py-4"
+                    >
+                      <font-awesome-icon icon="fa-solid fa-inbox" class="text-2xl mb-2" />
+                      <p>Tidak ada kriteria</p>
+                    </div>
+                  </div>
                 </td>
+
+                <!-- Kolom Aksi -->
                 <td class="px-4 py-4">
                   <div class="flex flex-col gap-2 items-center">
-                    <LightButton @click="openModalEdit(data)">
+                    <LightButton @click="openModalEdit(data)" title="Lihat Detail" class="w-full">
                       <font-awesome-icon icon="fa-solid fa-info" />
                     </LightButton>
-                    <YellowButton @click="openModalEditStatus(data)">
-                      <font-awesome-icon icon="fa-solid fa-ban" />
+                    <YellowButton
+                      @click="openModalEditStatus(data)"
+                      title="Edit Status"
+                      class="w-full"
+                    >
+                      <font-awesome-icon icon="fa-solid fa-pen" />
                     </YellowButton>
-                    <DangerButton @click="deleteData(data.id)">
+                    <DangerButton @click="deleteData(data.id)" title="Hapus" class="w-full">
                       <DeleteIcon />
                     </DangerButton>
                   </div>
