@@ -1,5 +1,4 @@
 const {
-  Op,
   sequelize,
   Bank,
   Realisasi_permohonan,
@@ -221,24 +220,13 @@ class Model_cud {
       // bikin map existing dari DB
       const ids = allDocs.filter((f) => f.id).map((f) => f.id);
       const existingDocs = ids.length
-        ? await Validasi_syarat_permohonan.findAll({
-            where: { id: ids },
-            raw: true,
-            nest: true,
-            attributes: ["id"],
-          })
+        ? await Validasi_syarat_permohonan.findAll({ where: { id: ids } })
         : [];
       const docMap = Object.fromEntries(existingDocs.map((d) => [d.id, d]));
 
-      console.log("========== allDocs ==========");
-      console.log("allDocs: ", allDocs);
-      console.log("ids: ", ids);
-      console.log("docMap: ", docMap);
-      console.log("========== allDocs ==========");
-
       for (const fileObj of allDocs) {
         const {
-          id: id,
+          id,
           file: newPath,
           file_name: basename,
           status = "new",
@@ -260,7 +248,6 @@ class Model_cud {
             {
               file_name: basename, // fallback
               path: newPath,
-              status: "process",
               updatedAt: myDate,
             },
             { where: { id }, transaction: this.t }
@@ -308,7 +295,7 @@ class Model_cud {
     await this.initialize();
     const myDate = moment().format("YYYY-MM-DD HH:mm:ss");
     const body = this.req.body;
-    console.log("body: ", body);
+
     try {
       const model_r = new Model_r(this.req);
       const info_realisasi = await model_r.info_realisasi(body.id);
@@ -320,67 +307,54 @@ class Model_cud {
       );
       const info_member = await model_r.info_member(info_permohonan.member_id);
 
-      // Cek apakah bulanan atau tahunan
-      const isBulanan = info_realisasi.bulan !== null;
-      console.log("isBulanan: ", isBulanan);
-
-      if (isBulanan) {
-        const bulanSekarang = info_realisasi.bulan;
-
-        console.log("bulanSekarang: ", bulanSekarang);
-
-        // Ambil semua realisasi dari bulan sekarang sampai bulan 12
-        const realisasiList = await Realisasi_permohonan.findAll({
-          attributes: ["id", "permohonan_id", "bulan"],
-          where: {
-            bulan: {
-              [Op.between]: [bulanSekarang, 12], // Ambil semua realisasi dari bulan sekarang sampai bulan 12
-            },
-          },
-          include: [
-            {
-              model: Permohonan,
-              where: {
-                kegiatan_id: info_permohonan.kegiatan_id,
-                member_id: info_permohonan.member_id,
-              },
-              required: true,
-              attributes: [],
-            },
-          ],
-          raw: true,
-        });
-        console.log("realisasiList: ", realisasiList);
-
-        // Update setiap permohonan yang terkait
-        for (const realisasi of realisasiList) {
-          await Permohonan.update(
-            {
-              status: "terhenti",
-              alasan_penolakan: body.alasan_penolakan,
-              updatedAt: myDate,
-            },
-            {
-              where: { id: realisasi.permohonan_id },
-              transaction: this.t,
-            }
-          );
+      await Permohonan.update(
+        {
+          status: "terhenti",
+          alasan_penolakan: body.alasan_penolakan,
+          updatedAt: myDate,
+        },
+        {
+          where: { id: body.id },
+          transaction: this.t,
         }
-      } else {
-        await Permohonan.update(
-          {
-            status: "terhenti",
-            alasan_penolakan: body.alasan_penolakan,
-            updatedAt: myDate,
-          },
-          {
-            where: { id: info_realisasi.permohonan_id },
-            transaction: this.t,
-          }
-        );
-      }
+      );
 
-      this.message = `Menghentikan Permohonan Bantuan atas nama ${info_member.fullname} untuk Kegiatan ${info_kegiatan.nama_kegiatan} dengan ID Permohonan: ${info_realisasi.permohonan_id} dan Alasan Penolakan: ${body.alasan_penolakan}`;
+      this.message = `Menghentikan Permohonan Bantuan atas nama ${info_member.fullname} untuk Kegiatan ${info_kegiatan.nama_kegiatan} dengan ID Permohonan: ${body.id} dan Alasan Penolakan: ${body.alasan_penolakan}`;
+    } catch (error) {
+      this.state = false;
+      this.message = error.message;
+    }
+  }
+
+  async persetujuan() {
+    await this.initialize();
+    const myDate = moment().format("YYYY-MM-DD HH:mm:ss");
+    const body = this.req.body;
+
+    try {
+      const model_r = new Model_r(this.req);
+      const info_realisasi = await model_r.info_realisasi(body.id);
+      const info_permohonan = await model_r.info_permohonan(
+        info_realisasi.permohonan_id
+      );
+      const info_kegiatan = await model_r.info_kegiatan(
+        info_permohonan.kegiatan_id
+      );
+      const info_member = await model_r.info_member(info_permohonan.member_id);
+
+      await Realisasi_permohonan.update(
+        {
+          status: "approve",
+          biaya_disetujui: body.nominal_yang_disetujui,
+          updatedAt: myDate,
+        },
+        {
+          where: { id: body.id },
+          transaction: this.t,
+        }
+      );
+
+      this.message = `Menyetujui Permohonan Bantuan atas nama ${info_member.fullname} untuk Kegiatan ${info_kegiatan.nama_kegiatan} dengan ID Permohonan: ${body.id} dan Nominal Yang Disetujui: ${body.nominal_yang_disetujui}`;
     } catch (error) {
       this.state = false;
       this.message = error.message;

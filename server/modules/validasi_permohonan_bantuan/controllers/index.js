@@ -7,74 +7,6 @@ const {
 
 const controllers = {};
 
-controllers.list_kegiatan = async (req, res) => {
-  if (!(await handleValidationErrors(req, res))) return;
-
-  try {
-    const model_r = new Model_r(req);
-    const feedBack = await model_r.list_kegiatan();
-
-    res.status(200).json({
-      error: false,
-      data: feedBack.data,
-      total: feedBack.total,
-    });
-  } catch (error) {
-    handleServerError(res, error);
-  }
-};
-
-controllers.list_bank = async (req, res) => {
-  if (!(await handleValidationErrors(req, res))) return;
-
-  try {
-    const model_r = new Model_r(req);
-    const feedBack = await model_r.list_bank();
-
-    res.status(200).json({
-      error: false,
-      data: feedBack.data,
-      total: feedBack.total,
-    });
-  } catch (error) {
-    handleServerError(res, error);
-  }
-};
-
-controllers.list_member = async (req, res) => {
-  if (!(await handleValidationErrors(req, res))) return;
-
-  try {
-    const model_r = new Model_r(req);
-    const feedBack = await model_r.list_member();
-
-    res.status(200).json({
-      error: false,
-      data: feedBack.data,
-      total: feedBack.total,
-    });
-  } catch (error) {
-    handleServerError(res, error);
-  }
-};
-
-controllers.list_kriteria_syarat = async (req, res) => {
-  if (!(await handleValidationErrors(req, res))) return;
-
-  try {
-    const model_r = new Model_r(req);
-    const feedBack = await model_r.list_kriteria_syarat();
-
-    res.status(200).json({
-      error: false,
-      data: feedBack.data,
-      total: feedBack.total,
-    });
-  } catch (error) {
-    handleServerError(res, error);
-  }
-};
-
 controllers.get_filter_type = async (req, res) => {
   if (!(await handleValidationErrors(req, res))) return;
 
@@ -92,12 +24,12 @@ controllers.get_filter_type = async (req, res) => {
   }
 };
 
-controllers.list_permohonan_bantuan = async (req, res) => {
+controllers.list_validasi_permohonan_bantuan = async (req, res) => {
   if (!(await handleValidationErrors(req, res))) return;
 
   try {
     const model_r = new Model_r(req);
-    const feedBack = await model_r.permohonan_bantuan();
+    const feedBack = await model_r.validasi_permohonan_bantuan();
 
     res.status(200).json({
       error: false,
@@ -109,24 +41,18 @@ controllers.list_permohonan_bantuan = async (req, res) => {
   }
 };
 
-controllers.add = async (req, res) => {
+controllers.get_info_edit_file = async (req, res) => {
   if (!(await handleValidationErrors(req, res))) return;
 
   try {
-    const model_cud = new Model_cud(req);
-    await model_cud.add();
+    const model_r = new Model_r(req);
+    const feedBack = await model_r.get_info_edit_file();
 
-    if (await model_cud.response()) {
-      res.status(200).json({
-        error: false,
-        error_msg: "Permohonan bantuan berhasil ditambahkan.",
-      });
-    } else {
-      res.status(400).json({
-        error: true,
-        error_msg: "Permohonan bantuan gagal ditambahkan.",
-      });
-    }
+    res.status(200).json({
+      error: false,
+      data: feedBack,
+      total: 1,
+    });
   } catch (error) {
     handleServerError(res, error);
   }
@@ -188,6 +114,46 @@ controllers.edit_status = async (req, res) => {
       res.status(400).json({
         error: true,
         error_msg: "Status Permohonan bantuan gagal diperbaharui.",
+      });
+    }
+  } catch (error) {
+    handleServerError(res, error);
+  }
+};
+
+controllers.get_info_persetujuan = async (req, res) => {
+  if (!(await handleValidationErrors(req, res))) return;
+
+  try {
+    const model_r = new Model_r(req);
+    const feedBack = await model_r.get_info_persetujuan();
+
+    res.status(200).json({
+      error: false,
+      data: feedBack,
+      total: 1,
+    });
+  } catch (error) {
+    handleServerError(res, error);
+  }
+};
+
+controllers.persetujuan = async (req, res) => {
+  if (!(await handleValidationErrors(req, res))) return;
+
+  try {
+    const model_cud = new Model_cud(req);
+    await model_cud.persetujuan();
+
+    if (await model_cud.response()) {
+      res.status(200).json({
+        error: false,
+        error_msg: "Permohonan bantuan berhasil disetujui.",
+      });
+    } else {
+      res.status(400).json({
+        error: true,
+        error_msg: "Permohonan bantuan gagal disetujui.",
       });
     }
   } catch (error) {

@@ -136,7 +136,10 @@ validation.check_nominal_yang_disetujui = async (value, { req }) => {
 };
 
 // === UPLOAD HANDLER ===
-const uploadPath = path.join(__dirname, "../uploads/dokumen/permohonan_bantuan");
+const uploadPath = path.join(
+  __dirname,
+  "../uploads/dokumen/permohonan_bantuan"
+);
 
 if (!fs.existsSync(uploadPath)) {
   fs.mkdirSync(uploadPath, { recursive: true });

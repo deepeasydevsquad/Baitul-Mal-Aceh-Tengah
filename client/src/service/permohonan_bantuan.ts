@@ -112,28 +112,6 @@ export const edit_status_permohonan_bantuan = async (param: any) => {
   }
 };
 
-export const get_info_persetujuan_permohonan_bantuan = async (id: number) => {
-  try {
-    const response = await api.post('/permohonan_bantuan/get_info_persetujuan_permohonan_bantuan', {
-      id: id,
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching permohonan bantuan:', error);
-    throw error;
-  }
-};
-
-export const persetujuan_permohonan_bantuan = async (param: any) => {
-  try {
-    const response = await api.post('/permohonan_bantuan/persetujuan_permohonan_bantuan', param);
-    return response.data;
-  } catch (error) {
-    console.error('Error editing persetujuan permohonan bantuan:', error);
-    throw error;
-  }
-};
-
 export const delete_permohonan_bantuan = async (id: number) => {
   try {
     const response = await api.post('/permohonan_bantuan/delete', { id: id });

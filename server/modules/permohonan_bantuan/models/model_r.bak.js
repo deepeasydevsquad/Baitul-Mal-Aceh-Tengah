@@ -88,217 +88,6 @@ class Model_r {
     }
   }
 
-  // async permohonan_bantuan() {
-  //   const body = this.req.body;
-  //   const limit = parseInt(body.perpage, 10) || 10;
-  //   const page =
-  //     body.pageNumber && body.pageNumber !== "0"
-  //       ? parseInt(body.pageNumber, 10)
-  //       : 1;
-
-  //   const where = body.search
-  //     ? {
-  //         [Op.or]: [
-  //           { fullname: { [Op.like]: `%${body.search}%` } },
-  //           { nomor_ktp: { [Op.like]: `%${body.search}%` } },
-  //         ],
-  //       }
-  //     : {};
-
-  //   const typeFilterKegiatan = {};
-  //   if (body.type_kegiatan) {
-  //     typeFilterKegiatan.id = body.type_kegiatan;
-  //   }
-  //   if (body.type_status_kegiatan) {
-  //     typeFilterKegiatan.status_kegiatan = body.type_status_kegiatan;
-  //   }
-
-  //   try {
-  //     // STEP 1: Query utama
-  //     let result = await Realisasi_permohonan.findAll({
-  //       limit,
-  //       offset: (page - 1) * limit,
-  //       order: [["id", "ASC"]],
-  //       attributes: [
-  //         "id",
-  //         "status_realisasi",
-  //         "status",
-  //         "biaya_disetujui",
-  //         "nominal_realisasi",
-  //         "bulan",
-  //       ],
-  //       include: [
-  //         {
-  //           model: Permohonan,
-  //           required: true,
-  //           attributes: ["id", "nomor_akun_bank", "nama_akun_bank", "status"],
-  //           include: [
-  //             { model: Bank, attributes: ["name"], required: true },
-  //             {
-  //               model: Member,
-  //               attributes: ["fullname", "tipe", "desa_id"],
-  //               where,
-  //               required: true,
-  //             },
-  //             {
-  //               model: Kegiatan,
-  //               attributes: [
-  //                 "id",
-  //                 "nama_kegiatan",
-  //                 "jumlah_dana",
-  //                 "sumber_dana",
-  //                 "area_penyaluran",
-  //                 "status_kegiatan",
-  //                 "tahun",
-  //               ],
-  //               where: typeFilterKegiatan,
-  //               required: true,
-  //             },
-  //           ],
-  //         },
-  //       ],
-  //     });
-
-  //     // STEP 2: Kumpulin IDs
-  //     const kegiatanIds = result
-  //       .map((r) => r.Permohonan?.Kegiatan?.id)
-  //       .filter(Boolean);
-  //     const desaIds = result
-  //       .map((r) => r.Permohonan?.Member?.desa_id)
-  //       .filter(Boolean);
-
-  //     // STEP 3: Query tambahan
-  //     const [kriteria, desa] = await Promise.all([
-  //       Kriteria.findAll({
-  //         where: { kegiatan_id: kegiatanIds },
-  //         attributes: ["id", "kegiatan_id", "name"],
-  //         raw: true,
-  //       }),
-  //       get_info_lokasi_list(desaIds),
-  //     ]);
-
-  //     // STEP 3.5: Preload sisa_dana untuk semua kegiatan
-  //     const sisaDanaList = await Promise.all(
-  //       [...new Set(kegiatanIds)].map(async (id) => ({
-  //         id,
-  //         sisa: await this.sisa_dana(id),
-  //       }))
-  //     );
-  //     const sisaDanaMap = Object.fromEntries(
-  //       sisaDanaList.map((d) => [d.id, d.sisa])
-  //     );
-
-  //     // STEP 4: Mapping helper
-  //     const kriteriaByKegiatan = {};
-  //     kriteria.forEach((k) => {
-  //       if (!kriteriaByKegiatan[k.kegiatan_id])
-  //         kriteriaByKegiatan[k.kegiatan_id] = [];
-  //       kriteriaByKegiatan[k.kegiatan_id].push({
-  //         id: k.id,
-  //         name: k.name,
-  //       });
-  //     });
-
-  //     const desaById = {};
-  //     desa.forEach((d) => {
-  //       desaById[d.id] = {
-  //         desa_name: d.desa_name,
-  //         kecamatan_name: d.kecamatan_name,
-  //       };
-  //     });
-
-  //     // STEP TAMBAHAN: filter bulan dengan fallback
-  //     const currentYearMonth = moment().format("YYYY-MM");
-
-  //     // group by kegiatan_id
-  //     const grouped = {};
-  //     for (const r of result) {
-  //       const kegiatanId = r.Permohonan?.Kegiatan?.id;
-  //       if (!kegiatanId) continue;
-  //       if (!grouped[kegiatanId]) grouped[kegiatanId] = [];
-  //       grouped[kegiatanId].push(r);
-  //     }
-
-  //     let filtered = [];
-  //     Object.values(grouped).forEach((rows) => {
-  //       const sorted = rows.sort((a, b) =>
-  //         moment(a.bulan, "YYYY-MM").diff(moment(b.bulan, "YYYY-MM"))
-  //       );
-
-  //       const lastRow = sorted[sorted.length - 1];
-  //       const lastMonth = lastRow.bulan
-  //         ? moment(lastRow.bulan, "YYYY-MM").format("YYYY-MM")
-  //         : null;
-
-  //       const currentRow = sorted.find(
-  //         (r) =>
-  //           r.bulan &&
-  //           moment(r.bulan, "YYYY-MM").format("YYYY-MM") === currentYearMonth
-  //       );
-
-  //       if (currentRow) {
-  //         filtered.push(currentRow);
-  //       } else if (
-  //         lastMonth &&
-  //         moment(lastMonth, "YYYY-MM").isBefore(
-  //           moment(currentYearMonth, "YYYY-MM")
-  //         )
-  //       ) {
-  //         filtered.push(lastRow);
-  //       } else {
-  //         // kalau belum sampai → ambil yg terbaru aja
-  //         filtered.push(lastRow);
-  //       }
-  //     });
-  //     console.log("filtered: ", filtered);
-  //     result = filtered;
-
-  //     // STEP 5: Gabungkan ke setiap row
-  //     const finalData = result.map((r) => {
-  //       const kegiatanId = r.Permohonan?.Kegiatan?.id;
-  //       const desaId = r.Permohonan?.Member?.desa_id;
-  //       const sisa_jumlah_dana = sisaDanaMap[kegiatanId] || 0;
-
-  //       return {
-  //         id: r.id,
-  //         biaya_disetujui: r.biaya_disetujui,
-  //         nominal_realisasi: r.nominal_realisasi,
-  //         Permohonan: {
-  //           id: r.Permohonan?.id,
-  //           bank_name: r.Permohonan?.Bank?.name,
-  //           nomor_akun_bank: r.Permohonan?.nomor_akun_bank,
-  //           nama_akun_bank: r.Permohonan?.nama_akun_bank,
-  //           status: r.Permohonan?.status,
-  //           member_id: r.Permohonan?.Member?.id,
-  //           member_name: r.Permohonan?.Member?.fullname,
-  //           member_tipe: r.Permohonan?.Member?.tipe,
-  //           desa_name: desaById[desaId]?.desa_name || null,
-  //           kecamatan_name: desaById[desaId]?.kecamatan_name || null,
-  //           Kegiatan: {
-  //             id: r.Permohonan?.Kegiatan?.id,
-  //             nama_kegiatan: r.Permohonan?.Kegiatan?.nama_kegiatan,
-  //             sisa_jumlah_dana,
-  //             jumlah_dana: r.Permohonan?.Kegiatan?.jumlah_dana,
-  //             sumber_dana: r.Permohonan?.Kegiatan?.sumber_dana,
-  //             area_penyaluran: r.Permohonan?.Kegiatan?.area_penyaluran,
-  //             status_kegiatan: r.Permohonan?.Kegiatan?.status_kegiatan,
-  //             tahun: r.Permohonan?.Kegiatan?.tahun,
-  //             kriteria: kriteriaByKegiatan[kegiatanId] || [],
-  //           },
-  //         },
-  //       };
-  //     });
-
-  //     return {
-  //       data: finalData,
-  //       total: finalData.length,
-  //     };
-  //   } catch (error) {
-  //     console.error("Error fetching data:", error);
-  //     return { data: [], total: 0 };
-  //   }
-  // }
-
   async permohonan_bantuan() {
     const body = this.req.body;
     const limit = parseInt(body.perpage, 10) || 10;
@@ -317,19 +106,68 @@ class Model_r {
       : {};
 
     const typeFilterKegiatan = {};
-    if (body.type_kegiatan) {
-      typeFilterKegiatan.id = body.type_kegiatan;
+    const typeFilterPermohonan = {};
+
+    const validStatus = [
+      "process",
+      "process_lapangan",
+      "approve",
+      "reject_berkas",
+      "reject_tidak_layak",
+      "reject_sudah_pernah",
+      "reject_unkriteria",
+      "reject_administrasi",
+      "ditunda",
+      "sudah_direalisasi",
+      "belum_direalisasi",
+    ];
+
+    // Filter kegiatan
+    if (body.type_kegiatan_id) {
+      typeFilterKegiatan.id = body.type_kegiatan_id;
     }
-    if (body.type_status_kegiatan) {
-      typeFilterKegiatan.status_kegiatan = body.type_status_kegiatan;
+
+    // Filter kategori status_realisasi (proses / approve / reject)
+    if (body.type_status_realisasi) {
+      if (body.type_status_realisasi === "proses") {
+        typeFilterPermohonan.status = {
+          [Op.in]: ["process", "process_lapangan"],
+        };
+      } else if (body.type_status_realisasi === "approve") {
+        typeFilterPermohonan.status = "approve";
+      } else if (body.type_status_realisasi === "reject") {
+        typeFilterPermohonan.status = {
+          [Op.in]: validStatus.filter((status) => status.startsWith("reject")),
+        };
+      } else if (body.type_status_realisasi === "ditunda") {
+        typeFilterPermohonan.status = "ditunda";
+      }
+    }
+
+    // Filter high-level realisasi (sudah_direalisasi / belum_direalisasi)
+    if (body.type_realisasi) {
+      if (
+        !["sudah_direalisasi", "belum_direalisasi"].includes(
+          body.type_realisasi
+        )
+      )
+        if (typeFilterPermohonan.status_realisasi) {
+          // Combine jika ada filter lain
+          typeFilterPermohonan[Op.and] = [
+            { status_realisasi: typeFilterPermohonan.status_realisasi },
+            { status_realisasi: body.type_realisasi },
+          ];
+          delete typeFilterPermohonan.status_realisasi;
+        } else {
+          typeFilterPermohonan.status_realisasi = body.type_realisasi;
+        }
     }
 
     try {
-      const currentYear = moment().year();
-      const currentMonth = moment().month() + 1; // 1-12
-
       // STEP 1: Query utama
       let result = await Realisasi_permohonan.findAll({
+        limit,
+        offset: (page - 1) * limit,
         order: [["id", "ASC"]],
         attributes: [
           "id",
@@ -339,6 +177,7 @@ class Model_r {
           "nominal_realisasi",
           "bulan",
         ],
+        where: typeFilterPermohonan,
         include: [
           {
             model: Permohonan,
@@ -349,7 +188,7 @@ class Model_r {
               {
                 model: Member,
                 attributes: ["fullname", "tipe", "desa_id"],
-                where,
+                where: where,
                 required: true,
               },
               {
@@ -369,147 +208,132 @@ class Model_r {
             ],
           },
         ],
-        raw: true,
-        nest: true,
       });
 
-      // STEP 2: Filter dan group berdasarkan logika bulan
-      const grouped = {};
+      // STEP 2: Kumpulin IDs
+      const permohonanIds = result.map((r) => r.id).filter(Boolean);
+      const kegiatanIds = result
+        .map((r) => r.Permohonan?.Kegiatan?.id)
+        .filter(Boolean);
+      const desaIds = result
+        .map((r) => r.Permohonan?.Member?.desa_id)
+        .filter(Boolean);
 
-      for (const r of result) {
-        const kegiatanId = r.Permohonan?.Kegiatan?.id;
-        const tahunKegiatan = r.Permohonan?.Kegiatan?.tahun;
-        const bulan = r.bulan;
-
-        if (!kegiatanId) continue;
-
-        // Buat unique key: kegiatan_id + member_id (untuk handle multi member dalam 1 kegiatan)
-        const memberId = r.Permohonan?.Member?.id;
-        const groupKey = `${kegiatanId}_${memberId}`;
-
-        if (!grouped[groupKey]) {
-          grouped[groupKey] = {
-            tahunKegiatan,
-            rows: [],
-          };
-        }
-        grouped[groupKey].rows.push(r);
-      }
-
-      // STEP 3: Pilih data yang tepat berdasarkan bulan dan tahun
-      let filtered = [];
-
-      Object.values(grouped).forEach(({ tahunKegiatan, rows }) => {
-        // Cek apakah ada data bulanan
-        const hasBulanan = rows.some((r) => r.bulan !== null);
-
-        if (!hasBulanan) {
-          // Jika tahunan (bulan = null), ambil saja
-          filtered.push(rows[0]);
-        } else {
-          // Jika bulanan
-          const rowsBulanan = rows.filter((r) => r.bulan !== null);
-
-          if (currentYear === tahunKegiatan) {
-            // Tahun sama: tampilkan data bulan sekarang
-            const currentMonthRow = rowsBulanan.find(
-              (r) => r.bulan === currentMonth
-            );
-
-            if (currentMonthRow) {
-              filtered.push(currentMonthRow);
-            } else {
-              // Jika bulan sekarang belum ada, ambil bulan terakhir yang ada
-              const sortedRows = rowsBulanan.sort((a, b) => b.bulan - a.bulan);
-              const lastAvailableRow = sortedRows.find(
-                (r) => r.bulan <= currentMonth
-              );
-              filtered.push(
-                lastAvailableRow || sortedRows[sortedRows.length - 1]
-              );
-            }
-          } else if (currentYear > tahunKegiatan) {
-            // Tahun sudah lewat: tampilkan bulan 12 saja
-            const bulan12Row = rowsBulanan.find((r) => r.bulan === 12);
-            filtered.push(bulan12Row || rowsBulanan[rowsBulanan.length - 1]);
-          } else {
-            // Tahun belum sampai: ambil data pertama
-            const sortedRows = rowsBulanan.sort((a, b) => a.bulan - b.bulan);
-            filtered.push(sortedRows[0]);
-          }
-        }
-      });
-
-      // STEP 4: Apply pagination setelah filtering
-      const total = filtered.length;
-      const paginatedResult = filtered.slice((page - 1) * limit, page * limit);
-
-      // STEP 5: Kumpulin IDs dari data yang sudah di-paginate
-      const kegiatanIds = [
-        ...new Set(
-          paginatedResult.map((r) => r.Permohonan?.Kegiatan?.id).filter(Boolean)
-        ),
-      ];
-      const desaIds = [
-        ...new Set(
-          paginatedResult
-            .map((r) => r.Permohonan?.Member?.desa_id)
-            .filter(Boolean)
-        ),
-      ];
-
-      // STEP 6: Query tambahan (parallel)
-      const [kriteria, desa, sisaDanaList] = await Promise.all([
+      // STEP 3: Query tambahan
+      const [kriteria, syarat, validasi_syarat, desa] = await Promise.all([
         Kriteria.findAll({
           where: { kegiatan_id: kegiatanIds },
           attributes: ["id", "kegiatan_id", "name"],
           raw: true,
         }),
+        Syarat_kegiatan.findAll({
+          where: { kegiatan_id: kegiatanIds },
+          attributes: ["kegiatan_id"],
+          include: [{ model: Syarat, attributes: ["id", "name", "path"] }],
+          raw: true,
+          nest: true,
+        }),
+        Validasi_syarat_permohonan.findAll({
+          where: { realisasi_permohonan_id: permohonanIds },
+          attributes: [
+            "realisasi_permohonan_id",
+            "file_name",
+            "path",
+            "status",
+          ],
+          raw: true,
+          nest: true,
+        }),
         get_info_lokasi_list(desaIds),
-        Promise.all(
-          kegiatanIds.map(async (id) => ({
-            id,
-            sisa: await this.sisa_dana(id),
-          }))
-        ),
       ]);
 
-      // STEP 7: Mapping helper
+      // STEP 3.5: Preload sisa_dana untuk semua kegiatan
+      const sisaDanaList = await Promise.all(
+        [...new Set(kegiatanIds)].map(async (id) => ({
+          id,
+          sisa: await this.sisa_dana(id),
+        }))
+      );
       const sisaDanaMap = Object.fromEntries(
         sisaDanaList.map((d) => [d.id, d.sisa])
       );
 
-      const kriteriaByKegiatan = kriteria.reduce((acc, k) => {
-        if (!acc[k.kegiatan_id]) acc[k.kegiatan_id] = [];
-        acc[k.kegiatan_id].push({ id: k.id, name: k.name });
-        return acc;
-      }, {});
+      // STEP 4: Mapping helper
+      const kriteriaByKegiatan = {};
+      kriteria.forEach((k) => {
+        if (!kriteriaByKegiatan[k.kegiatan_id])
+          kriteriaByKegiatan[k.kegiatan_id] = [];
+        kriteriaByKegiatan[k.kegiatan_id].push({
+          id: k.id,
+          name: k.name,
+        });
+      });
 
-      const desaById = desa.reduce((acc, d) => {
-        acc[d.id] = {
+      const syaratByKegiatan = {};
+      syarat.forEach((s) => {
+        if (!syaratByKegiatan[s.kegiatan_id])
+          syaratByKegiatan[s.kegiatan_id] = [];
+        syaratByKegiatan[s.kegiatan_id].push({
+          id: s.Syarat.id,
+          name: s.Syarat.name,
+          path: s.Syarat.path,
+        });
+      });
+
+      const desaById = {};
+      desa.forEach((d) => {
+        desaById[d.id] = {
           desa_name: d.desa_name,
           kecamatan_name: d.kecamatan_name,
         };
-        return acc;
-      }, {});
+      });
 
-      // STEP 8: Gabungkan ke setiap row
-      const finalData = paginatedResult.map((r) => {
+      const validasiSyaratByRealisasi = {};
+      validasi_syarat.forEach((v) => {
+        if (!validasiSyaratByRealisasi[v.realisasi_permohonan_id])
+          validasiSyaratByRealisasi[v.realisasi_permohonan_id] = {};
+        validasiSyaratByRealisasi[v.realisasi_permohonan_id][v.file_name] =
+          v.status;
+      });
+
+      // STEP TAMBAHAN: filter hanya bulan saat ini
+      const currentMonth = moment().format("MM");
+
+      result = result.filter((r) => {
+        if (!r) return false;
+        const bulan = r.bulan ? moment(r.bulan, "MM").format("MM") : null;
+
+        if (!bulan) return true; // permohonan tahunan
+
+        if (bulan === currentMonth) return true;
+
+        if (
+          moment(bulan, "MM").isBefore(moment(currentMonth, "MM")) &&
+          r.status_realisasi === "belum_direalisasi" &&
+          r.status === "process"
+        ) {
+          return true;
+        }
+        return false;
+      });
+
+      // STEP 5: Gabungkan ke setiap row
+      const finalData = result.map((r) => {
         const kegiatanId = r.Permohonan?.Kegiatan?.id;
         const desaId = r.Permohonan?.Member?.desa_id;
         const sisa_jumlah_dana = sisaDanaMap[kegiatanId] || 0;
 
         return {
           id: r.id,
-          bulan: r.bulan,
-          status: r.status,
-          status_realisasi: r.status_realisasi,
+          biaya_disetujui: r.biaya_disetujui,
+          nominal_realisasi: r.nominal_realisasi,
           Permohonan: {
             id: r.Permohonan?.id,
             bank_name: r.Permohonan?.Bank?.name,
             nomor_akun_bank: r.Permohonan?.nomor_akun_bank,
             nama_akun_bank: r.Permohonan?.nama_akun_bank,
             status: r.Permohonan?.status,
+            member_id: r.Permohonan?.Member?.id,
             member_name: r.Permohonan?.Member?.fullname,
             member_tipe: r.Permohonan?.Member?.tipe,
             desa_name: desaById[desaId]?.desa_name || null,
@@ -524,6 +348,11 @@ class Model_r {
               status_kegiatan: r.Permohonan?.Kegiatan?.status_kegiatan,
               tahun: r.Permohonan?.Kegiatan?.tahun,
               kriteria: kriteriaByKegiatan[kegiatanId] || [],
+              syarat: (syaratByKegiatan[kegiatanId] || []).map((s) => ({
+                id: s.id,
+                name: s.name,
+                status: validasiSyaratByRealisasi[r.id]?.[s.path] || null,
+              })),
             },
           },
         };
@@ -531,7 +360,7 @@ class Model_r {
 
       return {
         data: finalData,
-        total,
+        total: finalData.length,
       };
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -731,10 +560,12 @@ class Model_r {
 
   async get_info_edit() {
     const body = this.req.body;
+
     try {
       const realisasi = await Realisasi_permohonan.findByPk(body.id, {
         attributes: ["id", "permohonan_id"],
       });
+
       const permohonan = await this.info_permohonan(realisasi.permohonan_id);
       const member = await this.info_member(permohonan.member_id);
 
@@ -753,28 +584,19 @@ class Model_r {
         attributes: ["id", "file_name", "path"],
         where: { realisasi_permohonan_id: body.id },
         raw: true,
-        nest: true,
       });
 
-      // --- Index validasi by file_name (path)
+      // --- Index validasi by syarat_id
       const validasiByPath = {};
       validasiData.forEach((v) => {
-        validasiByPath[v.file_name] = {
-          id: v.id,
-          path: v.path,
-        };
+        validasiByPath[v.file_name] = v; // asumsi: path unik untuk binding sesuai syaratfile
       });
-
-      console.log("===========================");
-      console.log(syaratData);
-      console.log(validasiByPath);
-      console.log("===========================");
 
       // --- Gabung syarat + validasi
       const syarat = syaratData.map((e) => {
         const v = validasiByPath[e.Syarat.path] || {}; // ambil validasi kalau ada
         return {
-          id: v.id || null,
+          id: v.id,
           name: e.Syarat.name,
           path: e.Syarat.path,
           file_path: v.path || null,

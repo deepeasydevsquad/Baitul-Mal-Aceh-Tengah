@@ -41,6 +41,7 @@ import RiwayatZakat from '@/modules/RiwayatZakat/RiwayatZakat.vue';
 import UrutanBagianMonev from '@/modules/UrutanBagianMonev/UrutanBagianMonev.vue';
 import RiwayatInfaq from '@/modules/RiwayatInfaq/RiwayatInfaq.vue';
 import PermohonanBantuan from '@/modules/PermohonanBantuan/PermohonanBantuan.vue';
+import ValidasiPermohonanBantuan from '@/modules/ValidasiPermohonanBantuan/ValidasiPermohonanBantuan.vue';
 
 const tabComponents = {
   pengaturan_whatsapp: PengaturanWhatsapp,
@@ -77,6 +78,7 @@ const tabComponents = {
   urutan_bagian_monev: UrutanBagianMonev,
   riwayat_infaq: RiwayatInfaq,
   permohonan_bantuan: PermohonanBantuan,
+  validasi_permohonan_bantuan: ValidasiPermohonanBantuan,
 };
 
 const selectedTab = useSelectedTab();

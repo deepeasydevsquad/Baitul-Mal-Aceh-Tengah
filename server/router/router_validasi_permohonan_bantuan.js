@@ -1,54 +1,22 @@
 const express = require("express");
 const { body } = require("express-validator");
-const controllers = require("../modules/permohonan_bantuan/controllers/index");
-const validation = require("../validation/permohonan_bantuan.js");
+const controllers = require("../modules/validasi_permohonan_bantuan/controllers/index");
+const validation = require("../validation/validasi_permohonan_bantuan");
 const {
   authenticateTokenAdministrator,
-} = require("../middleware/authenticateToken");
-const validationHelper = require("../helper/handleErrorFile");
+} = require("../middleware/authenticateToken.js");
+const validationHelper = require("../helper/handleErrorFile.js");
 
 const router = express.Router();
 
 router.get(
-  "/permohonan_bantuan/list_kegiatan",
-  authenticateTokenAdministrator,
-  controllers.list_kegiatan
-);
-
-router.get(
-  "/permohonan_bantuan/list_bank",
-  authenticateTokenAdministrator,
-  controllers.list_bank
-);
-
-router.get(
-  "/permohonan_bantuan/list_member",
-  authenticateTokenAdministrator,
-  controllers.list_member
-);
-
-router.post(
-  "/permohonan_bantuan/list_kriteria_syarat",
-  authenticateTokenAdministrator,
-  [
-    body("kegiatan_id")
-      .notEmpty()
-      .withMessage("Kegiatan Id Tidak Boleh Kosong")
-      .isInt()
-      .withMessage("Kegiatan Id Harus Angka")
-      .custom(validation.check_id_kegiatan),
-  ],
-  controllers.list_kriteria_syarat
-);
-
-router.get(
-  "/permohonan_bantuan/get_filter_type",
+  "/validasi_permohonan_bantuan/get_filter_type",
   authenticateTokenAdministrator,
   controllers.get_filter_type
-)
+);
 
 router.post(
-  "/permohonan_bantuan/list",
+  "/validasi_permohonan_bantuan/list",
   authenticateTokenAdministrator,
   [
     body("perpage")
@@ -63,51 +31,38 @@ router.post(
       .withMessage("Page Number Harus Angka"),
     body("search").optional().isString().withMessage("Search Harus String"),
     body("type_kegiatan").optional(),
-    body("type_status_kegiatan").optional(),
   ],
-  controllers.list_permohonan_bantuan
+  controllers.list_validasi_permohonan_bantuan
 );
 
 router.post(
-  "/permohonan_bantuan/add",
+  "/validasi_permohonan_bantuan/get_info_edit_file",
   authenticateTokenAdministrator,
-  validation.upload,
   [
-    body("kegiatan_id")
+    body("id")
       .notEmpty()
-      .withMessage("Kegiatan Tidak Boleh Kosong")
+      .withMessage("ID Tidak Boleh Kosong")
       .isInt()
-      .withMessage("Kegiatan Harus Angka")
-      .custom(validation.check_id_kegiatan),
-    body("member_id")
+      .withMessage("ID Harus Angka")
+      .custom(validation.check_id_permohonan_bantuan),
+    body("validasi_id")
       .notEmpty()
-      .withMessage("Member Tidak Boleh Kosong")
+      .withMessage("Validasi ID Tidak Boleh Kosong")
       .isInt()
-      .withMessage("Member Harus Angka")
-      .custom(validation.check_id_member),
-    body("bank_id")
-      .notEmpty()
-      .withMessage("Bank Tidak Boleh Kosong")
-      .isInt()
-      .withMessage("Bank Harus Angka")
-      .custom(validation.check_id_bank),
-    body("nomor_rekening")
-      .notEmpty()
-      .withMessage("Nomor Rekening Tidak Boleh Kosong")
-      .isString()
-      .withMessage("Nomor Rekening Harus String"),
-    body("atas_nama")
-      .notEmpty()
-      .withMessage("Atas Nama Tidak Boleh Kosong")
-      .isString()
-      .withMessage("Atas Nama Harus String"),
+      .withMessage("Validasi ID Harus Angka"),
   ],
-  validationHelper.handleFileErrors,
-  controllers.add
+  controllers.get_info_edit_file
 );
 
+// router.post(
+//   "/validasi_permohonan_bantuan/get_info_approve_permohonan_bantuan",
+//   authenticateTokenAdministrator,
+//   [],
+//   controllers.get_info_
+// );
+
 router.post(
-  "/permohonan_bantuan/get_info_edit_permohonan_bantuan",
+  "/validasi_permohonan_bantuan/get_info_edit_permohonan_bantuan",
   authenticateTokenAdministrator,
   [
     body("id")
@@ -121,7 +76,7 @@ router.post(
 );
 
 router.post(
-  "/permohonan_bantuan/edit",
+  "/validasi_permohonan_bantuan/edit",
   authenticateTokenAdministrator,
   validation.upload,
   validation.parseUploadMiddleware,
@@ -166,7 +121,7 @@ router.post(
 );
 
 router.post(
-  "/permohonan_bantuan/edit_status",
+  "/validasi_permohonan_bantuan/edit_status",
   authenticateTokenAdministrator,
   [
     body("id")
@@ -185,7 +140,41 @@ router.post(
 );
 
 router.post(
-  "/permohonan_bantuan/delete",
+  "/validasi_permohonan_bantuan/get_info_persetujuan_permohonan_bantuan",
+  authenticateTokenAdministrator,
+  [
+    body("id")
+      .notEmpty()
+      .withMessage("ID Tidak Boleh Kosong")
+      .isInt()
+      .withMessage("ID Harus Angka")
+      .custom(validation.check_id_permohonan_bantuan),
+  ],
+  controllers.get_info_persetujuan
+);
+
+router.post(
+  "/validasi_permohonan_bantuan/persetujuan_permohonan_bantuan",
+  authenticateTokenAdministrator,
+  [
+    body("id")
+      .notEmpty()
+      .withMessage("ID Tidak Boleh Kosong")
+      .isInt()
+      .withMessage("ID Harus Angka")
+      .custom(validation.check_id_permohonan_bantuan),
+    body("nominal_yang_disetujui")
+      .notEmpty()
+      .withMessage("Nominal Yang Disetujui Tidak Boleh Kosong")
+      .isInt()
+      .withMessage("Nominal Yang Disetujui Harus Angka")
+      .custom(validation.check_nominal_yang_disetujui),
+  ],
+  controllers.persetujuan
+);
+
+router.post(
+  "/validasi_permohonan_bantuan/delete",
   authenticateTokenAdministrator,
   [
     body("id")
