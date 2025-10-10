@@ -94,6 +94,7 @@ const arr_router = [
   "program_bantuan_member",
   "rekap_perkecamatan",
   "infaq_member",
+  "zakat_member",
 ];
 
 const arr = {};
