@@ -236,18 +236,22 @@ async function deleteData(id: number) {
                   </table>
                 </td>
                 <td class="px-6 py-4 text-start font-medium text-gray-800 align-top">
-                  <tr class="border border-gray-300">
-                    <td class="w-[40%] bg-gray-100 px-4 py-2 font-medium">Invoice</td>
-                    <td class="px-4 py-2 font-medium">
-                      {{ riwayat_infaq.invoice }}
-                    </td>
-                  </tr>
-                  <tr class="border border-gray-300">
-                    <td class="w-[40%] bg-gray-100 px-4 py-2 font-medium">Nominal</td>
-                    <td class="px-4 py-2 font-medium">
-                      {{ $formatToRupiah(riwayat_infaq.nominal) }}
-                    </td>
-                  </tr>
+                  <table class="w-full border border-gray-300 rounded-lg">
+                    <tbody>
+                      <tr class="border border-gray-300">
+                        <td class="w-[40%] bg-gray-100 px-4 py-2 font-medium">Invoice</td>
+                        <td class="px-4 py-2 font-medium">
+                          {{ riwayat_infaq.invoice }}
+                        </td>
+                      </tr>
+                      <tr class="border border-gray-300">
+                        <td class="w-[40%] bg-gray-100 px-4 py-2 font-medium">Nominal</td>
+                        <td class="px-4 py-2 font-medium">
+                          {{ $formatToRupiah(riwayat_infaq.nominal) }}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </td>
                 <td class="px-6 py-4 text-center font-bold text-gray-800">
                   <span
