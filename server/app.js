@@ -97,6 +97,7 @@ const arr_router = [
   "rekap_perkecamatan",
   "laporan_pengumpulan",
   "infaq_member",
+  "permohonan_bantuan_member",
   "kriteria",
 ];
 
