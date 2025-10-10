@@ -30,7 +30,8 @@ module.exports = (sequelize, DataTypes) => {
     tipe: DataTypes.ENUM(["transfer", "bantuan_langsung"]),
     nominal_realisasi: DataTypes.INTEGER,
     bukti_transfer: DataTypes.STRING,
-    mou: DataTypes.STRING
+    mou: DataTypes.STRING,
+    bulan: DataTypes.INTEGER,
   }, {
     sequelize,
     modelName: 'Realisasi_permohonan',

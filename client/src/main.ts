@@ -142,12 +142,16 @@ import {
   faFileImport,
   faCalendarCheck,
   faTableCellsLarge,
+  faInfo,
+  faCalendarDays,
+  faPen,
+  faCheck,
   faMosque,
   faGift,
   faCircleCheck,
   faSpinner,
   faPaperPlane,
-} from '@fortawesome/free-solid-svg-icons';
+} from '@fortawesome/free-solid-svg-icons'  
 
 // FontAwesome Icons - Regular
 import { faCircle, faClock, faUser as farUser, faEye } from '@fortawesome/free-regular-svg-icons';
@@ -270,6 +274,10 @@ library.add(
   faFileImport,
   faCalendarCheck,
   faTableCellsLarge,
+  faInfo,
+  faCalendarDays,
+  faPen,
+  faCheck,
   faMosque,
   faCoins,
   faGift,

@@ -53,17 +53,29 @@ class Model_cud {
       if (body.photoPath) {
         // === CASE 1: Upload baru ===
         if (info_bank.img) {
-          const oldFile = path.join(__dirname, "../../../uploads/img/bank/", info_bank.img);
+          const oldFile = path.join(
+            __dirname,
+            "../../../uploads/img/bank/",
+            info_bank.img
+          );
           if (fs.existsSync(oldFile)) fs.unlinkSync(oldFile);
         }
         newImg = body.photoPath;
       } else if (body.name && body.name !== info_bank.name && info_bank.img) {
         // === CASE 2: Hanya ganti nama ===
-        const oldPath = path.join(__dirname, "../../../uploads/img/bank/", info_bank.img);
+        const oldPath = path.join(
+          __dirname,
+          "../../../uploads/img/bank/",
+          info_bank.img
+        );
         const ext = path.extname(info_bank.img);
         const safeName = body.name.toLowerCase().replace(/\s+/g, "_");
         const newFilename = `${safeName}${ext}`;
-        const newPath = path.join(__dirname, "../../../uploads/img/bank/", newFilename);
+        const newPath = path.join(
+          __dirname,
+          "../../../uploads/img/bank/",
+          newFilename
+        );
 
         if (fs.existsSync(oldPath)) {
           fs.renameSync(oldPath, newPath);
@@ -104,7 +116,11 @@ class Model_cud {
       });
 
       if (info_bank.img) {
-        const filePath = path.join(__dirname, "../../../uploads/img/bank/", info_bank.img);
+        const filePath = path.join(
+          __dirname,
+          "../../../uploads/img/bank/",
+          info_bank.img
+        );
         if (fs.existsSync(filePath)) {
           fs.unlinkSync(filePath);
         }
