@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { defineProps, defineEmits, ref, onMounted } from 'vue';
 import { list_program } from '@/service/program_bantuan_member';
+import PermohonanMember from '@/modules/PermohonanMember/PermohonanMember.vue';
 
 const props = defineProps({
   programName: {
@@ -24,8 +25,13 @@ const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 const data = ref<Program[]>([]);
 const totalEntries = ref(0);
 const currentPage = ref(1);
-const perPage = ref(10);
+const perPage = ref(8);
 const totalPages = ref(1);
+const imageErrors = ref<Set<number>>(new Set());
+
+// State untuk menampilkan PermohonanMember
+const showPermohonan = ref(false);
+const selectedIdKegiatan = ref<number | null>(null);
 
 const normalizeResponseData = (respData: any): Program[] => {
   if (!respData) return [];
@@ -60,6 +66,7 @@ const fetchData = async () => {
     }
 
     data.value = normalized;
+    imageErrors.value.clear();
   } catch (error) {
     console.error('Error fetching data:', error);
     data.value = [];
@@ -91,6 +98,22 @@ const goToPage = (page: number) => {
   }
 };
 
+const handleImageError = (index: number) => {
+  imageErrors.value.add(index);
+};
+
+// Handler untuk tombol Detail Program
+const openDetailProgram = (idKegiatan: number) => {
+  selectedIdKegiatan.value = idKegiatan;
+  showPermohonan.value = true;
+};
+
+// Handler untuk kembali dari PermohonanMember
+const handleBackFromPermohonan = () => {
+  showPermohonan.value = false;
+  selectedIdKegiatan.value = null;
+};
+
 const formatRupiah = (value: number) =>
   new Intl.NumberFormat('id-ID', {
     style: 'currency',
@@ -99,7 +122,15 @@ const formatRupiah = (value: number) =>
 </script>
 
 <template>
-  <div class="p-6 bg-white rounded-lg shadow-lg">
+  <!-- Tampilkan PermohonanMember jika showPermohonan true -->
+  <PermohonanMember
+    v-if="showPermohonan"
+    :id-kegiatan="selectedIdKegiatan!"
+    @back="handleBackFromPermohonan"
+  />
+
+  <!-- Tampilkan list program jika showPermohonan false -->
+  <div v-else class="p-6 bg-white rounded-lg shadow-lg">
     <!-- Tombol kembali -->
     <button
       @click="emit('back')"
@@ -113,11 +144,8 @@ const formatRupiah = (value: number) =>
       {{ programName }}
     </h2>
 
-    <!-- Card List -->
-    <div
-      v-if="data.length > 0"
-      class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
-    >
+    <!-- Card List - Grid 4 kolom x 2 baris -->
+    <div v-if="data.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
       <div
         v-for="(item, index) in data"
         :key="index"
@@ -126,12 +154,16 @@ const formatRupiah = (value: number) =>
         <!-- Banner -->
         <div class="w-full h-44 bg-gray-100 flex items-center justify-center relative">
           <img
-            v-if="item.banner"
+            v-if="item.banner && !imageErrors.has(index)"
             :src="`${BASE_URL}/uploads/img/program_kegiatan_bantuan/${item.banner}`"
             alt="Banner Program"
             class="w-full h-full object-cover"
+            @error="handleImageError(index)"
           />
-          <div v-else class="flex flex-col items-center justify-center text-gray-400">
+          <div
+            v-else
+            class="w-full h-full bg-gray-300 flex flex-col items-center justify-center text-gray-600"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               class="w-12 h-12 mb-2"
@@ -147,7 +179,7 @@ const formatRupiah = (value: number) =>
               />
               <path stroke-linecap="round" stroke-linejoin="round" d="M3 16l5-5 4 4 5-5 4 4" />
             </svg>
-            <span class="text-sm">Tidak ada gambar</span>
+            <span class="text-sm font-medium">Gambar tidak ditemukan</span>
           </div>
         </div>
 
@@ -176,7 +208,7 @@ const formatRupiah = (value: number) =>
           </div>
 
           <button
-            @click=""
+            @click="openDetailProgram(item.id_kegiatan)"
             class="mt-5 bg-green-600 text-white font-medium text-sm py-2.5 rounded-lg hover:bg-green-700 transition-all duration-200"
           >
             Detail Program
