@@ -34,7 +34,7 @@
 
     <!-- Note -->
     <transition name="fade">
-      <p v-if="note" class="text-xs text-gray-500 mt-2">{{ note }}</p>
+      <p v-if="note" class="text-xs text-gray-600 mt-2">{{ note }}</p>
     </transition>
   </div>
 </template>

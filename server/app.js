@@ -81,6 +81,8 @@ const arr_router = [
   "urutan_bagian_monev",
   "penetapan",
   "riwayat_infaq",
+  "permohonan_bantuan",
+  "validasi_permohonan_bantuan",
   "laporan_tahunan",
   "pertanyaan_monev",
   "rekap_pengumpulan",
