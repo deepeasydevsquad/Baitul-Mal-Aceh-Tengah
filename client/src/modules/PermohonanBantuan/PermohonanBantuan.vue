@@ -239,15 +239,13 @@ function formatAreaPenyaluran(area: string): string {
                 <!-- Kolom Info Permohonan & Kegiatan -->
                 <td class="px-4 py-4">
                   <!-- Header Card -->
-                  <div
-                    class="bg-gradient-to-r from-green-800 to-green-700 rounded-lg px-4 py-3 mb-3"
-                  >
+                  <div class="bg-gradient-to-r from-gray-800 to-gray-500 rounded-lg px-4 py-3 mb-3">
                     <div class="flex justify-between items-start">
                       <div>
                         <h3 class="text-white font-bold text-base">
                           {{ data.Permohonan.member_name }}
                         </h3>
-                        <p class="text-green-100 text-xs mt-1">
+                        <p class="text-white text-xs mt-1">
                           {{ data.Permohonan.desa_name || '-' }},
                           {{ data.Permohonan.kecamatan_name || '-' }}
                         </p>
@@ -267,7 +265,7 @@ function formatAreaPenyaluran(area: string): string {
                   <!-- Info Grid -->
                   <div class="grid grid-cols-2 gap-3">
                     <!-- Info Kegiatan -->
-                    <div class="bg-gray-50 rounded-lg p-3 space-y-2">
+                    <div class="bg-white rounded-lg p-3 space-y-2 shadow-md">
                       <h4 class="font-semibold text-gray-800 text-xs mb-2 flex items-center gap-2">
                         <font-awesome-icon
                           icon="fa-solid fa-calendar-days"
@@ -336,7 +334,7 @@ function formatAreaPenyaluran(area: string): string {
                     </div>
 
                     <!-- Info Bank -->
-                    <div class="bg-gray-50 rounded-lg p-3 space-y-2">
+                    <div class="bg-white rounded-lg p-3 space-y-2 shadow-md">
                       <h4 class="font-semibold text-gray-800 text-xs mb-2 flex items-center gap-2">
                         <font-awesome-icon
                           icon="fa-solid fa-building-columns"
@@ -368,7 +366,7 @@ function formatAreaPenyaluran(area: string): string {
                   </div>
 
                   <!-- Info Realisasi -->
-                  <div class="mt-3 bg-green-50 border border-green-200 rounded-lg p-3">
+                  <div class="mt-3 bg-white border border-gray-100 rounded-lg p-3 shadow-md">
                     <div class="flex justify-between items-center text-xs">
                       <div class="flex items-center gap-2">
                         <font-awesome-icon
@@ -377,12 +375,11 @@ function formatAreaPenyaluran(area: string): string {
                         />
                         <span class="font-semibold text-gray-700">Biaya Disetujui:</span>
                       </div>
-                      <span class="font-bold text-green-700">
-                        {{
-                          data.biaya_disetujui
-                            ? $formatToRupiah(data.biaya_disetujui)
-                            : 'Belum disetujui'
-                        }}
+                      <span v-if="data.biaya_disetujui" class="font-bold text-green-700">
+                        {{ $formatToRupiah(data.biaya_disetujui) }}
+                      </span>
+                      <span v-else class="font-bold text-red-700">
+                        {{ 'Belum disetujui' }}
                       </span>
                     </div>
                     <div
@@ -435,9 +432,9 @@ function formatAreaPenyaluran(area: string): string {
                     <LightButton @click="openModalEdit(data)" title="Lihat Detail">
                       <font-awesome-icon icon="fa-solid fa-info" />
                     </LightButton>
-                    <YellowButton @click="openModalEditStatus(data)" title="Edit Status">
+                    <LightButton @click="openModalEditStatus(data)" title="Edit Status">
                       <font-awesome-icon icon="fa-solid fa-pen" />
-                    </YellowButton>
+                    </LightButton>
                     <DangerButton @click="deleteData(data.id)" title="Hapus">
                       <DeleteIcon />
                     </DangerButton>
