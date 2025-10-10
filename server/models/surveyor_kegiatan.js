@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Surveyor_kegiatan extends Model {
     /**
@@ -25,14 +23,18 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
   }
-  Surveyor_kegiatan.init({
-    kegiatan_id: DataTypes.INTEGER,
-    surveyor_id: DataTypes.INTEGER,
-    access_code: DataTypes.TEXT,
-    status: DataTypes.ENUM(["active", "non_active"])
-  }, {
-    sequelize,
-    modelName: 'Surveyor_kegiatan',
-  });
+  Surveyor_kegiatan.init(
+    {
+      kegiatan_id: DataTypes.INTEGER,
+      sk: DataTypes.STRING,
+      surveyor_id: DataTypes.INTEGER,
+      access_code: DataTypes.TEXT,
+      status: DataTypes.ENUM(["active", "non_active"]),
+    },
+    {
+      sequelize,
+      modelName: "Surveyor_kegiatan",
+    }
+  );
   return Surveyor_kegiatan;
 };

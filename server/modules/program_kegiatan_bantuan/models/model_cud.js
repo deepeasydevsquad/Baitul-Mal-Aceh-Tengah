@@ -30,14 +30,14 @@ class Model_cud {
     const myDate = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
     const body = this.req.body;
 
-    console.log("_____________Ddddddddddddddddddddd____________");
-    console.log(body);
-    console.log("_____________Ddddddddddddddddddddd____________");
+    // console.log("_____________Ddddddddddddddddddddd____________");
+    // console.log(body);
+    // console.log("_____________Ddddddddddddddddddddd____________");
 
     try {
       const insert = await Kegiatan.create(
         {
-          asnaf_id: body.asnaf_id,
+          asnaf_id: body.sumber_dana == "zakat" ? body.asnaf_id : null,
           program_id: body.program_id,
           kode: result_kode,
           nama_kegiatan: body.nama_kegiatan,
@@ -63,10 +63,10 @@ class Model_cud {
       );
       const promises = [];
 
-      console.log("_____________SEBELUM Ddddddddddddddddddddd____________");
-      console.log(body.kecamatan_penyaluran);
-      console.log(body.desa_penyaluran);
-      console.log("_____________Ddddddddddddddddddddd____________");
+      // console.log("_____________SEBELUM Ddddddddddddddddddddd____________");
+      // console.log(body.kecamatan_penyaluran);
+      // console.log(body.desa_penyaluran);
+      // console.log("_____________Ddddddddddddddddddddd____________");
 
       if (
         typeof body.desa_penyaluran === "string" &&
@@ -82,10 +82,10 @@ class Model_cud {
         body.kecamatan_penyaluran = JSON.parse(body.kecamatan_penyaluran);
       }
 
-      console.log("_____________SAEUDAH Ddddddddddddddddddddd____________");
-      console.log(body.kecamatan_penyaluran);
-      console.log(body.desa_penyaluran);
-      console.log("_____________Ddddddddddddddddddddd____________");
+      // console.log("_____________SAEUDAH Ddddddddddddddddddddd____________");
+      // console.log(body.kecamatan_penyaluran);
+      // console.log(body.desa_penyaluran);
+      // console.log("_____________Ddddddddddddddddddddd____________");
 
       // Desa
       if (body.desa_penyaluran && Array.isArray(body.desa_penyaluran)) {
@@ -190,7 +190,7 @@ class Model_cud {
       // === UPDATE Kegiatan ===
       await Kegiatan.update(
         {
-          asnaf_id: body.asnaf_id,
+          asnaf_id: body.sumber_dana == "zakat" ? body.asnaf_id : null,
           program_id: body.program_id,
           nama_kegiatan: body.nama_kegiatan,
           slug: body.slug,

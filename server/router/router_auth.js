@@ -70,6 +70,8 @@ router.post(
   controllersAdministrator.refreshToken
 );
 
+router.post("/auth/member/refresh", controllersMember.refreshToken);
+
 router.post(
   "/auth/administrator/logout",
   controllersAdministrator.logout_administrator_process

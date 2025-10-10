@@ -23,6 +23,7 @@ module.exports = {
           bank_id: 1,
           nomor_akun_bank: "1234567890",
           nama_akun_bank: "BUDI YANTO",
+
           status: "sedang_berlangsung",
           alasan_penolakan: null,
           createdAt: new Date(),

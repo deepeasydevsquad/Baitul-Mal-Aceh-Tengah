@@ -152,8 +152,8 @@ async function deleteData(id: number) {
             <tr>
               <th class="w-[25%] px-6 py-4 font-medium font-bold text-gray-900">Daftar Program</th>
               <th class="w-[40%] px-6 py-4 font-medium font-bold text-gray-900">Deskripsi</th>
-              <th class="w-[25%] px-6 py-4 font-medium font-bold text-gray-900">Datetimes</th>
-              <th class="w-[15%] px-6 py-4 font-medium font-bold text-gray-900">Aksi</th>
+              <th class="w-[20%] px-6 py-4 font-medium font-bold text-gray-900">Datetimes</th>
+              <th class="w-[20%] px-6 py-4 font-medium font-bold text-gray-900">Aksi</th>
             </tr>
           </thead>
 

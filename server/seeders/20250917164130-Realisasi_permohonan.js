@@ -3,6 +3,12 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
+    const year = 2025; // biar jelas tahun 2025 semua
+
+    function getEndOfMonth(year, month) {
+      return new Date(year, month + 1, 0);
+    }
+
     await queryInterface.bulkInsert(
       "Realisasi_permohonans",
       [
@@ -11,7 +17,7 @@ module.exports = {
           status: "approve",
           biaya_disetujui: 5000000,
           status_realisasi: "sudah_direalisasi",
-          tanggal_realisasi: new Date(),
+          tanggal_realisasi: getEndOfMonth(year, 8), // September 2025
           berita_acara: "path/to/berita_acara_1.pdf",
           tipe: "transfer",
           nominal_realisasi: 5000000,

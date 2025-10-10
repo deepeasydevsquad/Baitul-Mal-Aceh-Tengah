@@ -1,0 +1,330 @@
+<script setup lang="ts">
+// Library
+import { ref, onMounted, computed } from 'vue'
+import Notification from '@/components/Modal/Notification.vue'
+import BaseButton from '@/components/Button/BaseButton.vue'
+import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue'
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
+
+// Composable
+import { useNotification } from '@/composables/useNotification'
+
+// Service API
+import { daftar_rekap_perkecamatan, } from '@/service/rekap_perkecamatan'
+
+// State: Loading
+const isLoading = ref(false)
+const isTableLoading = ref(false)
+
+// Composable: notification
+const { showNotification, notificationType, notificationMessage, displayNotification } =
+  useNotification()
+
+// State: Filter
+const selectedYear = ref<string>('0')
+const years = ref<string[]>([])
+const searchKecamatan = ref<string>('')
+
+// State: Data Rekap
+interface DetailBulan {
+  0: number
+  1: number
+  2: number
+  3: number
+  4: number
+  5: number
+  6: number
+  7: number
+  8: number
+  9: number
+  10: number
+  11: number
+}
+
+interface KecamatanData {
+  name: string
+  kode: string
+  detail_rupiah: DetailBulan
+  detail_pemohon: DetailBulan
+}
+
+interface RekapData {
+  [key: string]: KecamatanData
+}
+
+const rekapData = ref<RekapData>({})
+const kecamatanList = ref<Array<{ id: string; data: KecamatanData }>>([])
+
+// Computed: Filtered Kecamatan List
+const filteredKecamatanList = computed(() => {
+  if (!searchKecamatan.value.trim()) {
+    return kecamatanList.value
+  }
+  
+  const searchLower = searchKecamatan.value.toLowerCase().trim()
+  return kecamatanList.value.filter(item => 
+    item.data.name.toLowerCase().includes(searchLower) ||
+    item.data.kode.toLowerCase().includes(searchLower)
+  )
+})
+
+// Nama bulan
+const bulanNames = ['JAN', 'FEB', 'MAR', 'APR', 'MEI', 'JUN', 'JUL', 'AGS', 'SEP', 'OKT', 'NOV', 'DES']
+
+// Function: Generate Years
+function generateYears() {
+  const currentYear = new Date().getFullYear()
+  const startYear = 2020
+  const yearList = ['0'] // 0 untuk "Pilih Semua Tahun"
+  
+  for (let year = currentYear; year >= startYear; year--) {
+    yearList.push(year.toString())
+  }
+  
+  years.value = yearList
+}
+
+// Function: Format Currency
+function formatRupiah(amount: number): string {
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount)
+}
+
+// Function: Calculate Total per Kecamatan
+function calculateTotal(detail: DetailBulan): number {
+  return Object.values(detail).reduce((sum, val) => sum + val, 0)
+}
+
+// Function: Calculate Grand Total per Bulan
+function calculateGrandTotalBulan(bulanIndex: number): number {
+  let total = 0
+  filteredKecamatanList.value.forEach(item => {
+    total += item.data.detail_rupiah[bulanIndex as keyof DetailBulan] || 0
+  })
+  return total
+}
+
+// Function: Calculate Grand Total All
+function calculateGrandTotal(): number {
+  let total = 0
+  for (let i = 0; i < 12; i++) {
+    total += calculateGrandTotalBulan(i)
+  }
+  return total
+}
+
+// Function: Fetch Data
+async function fetchData() {
+  isTableLoading.value = true
+  try {
+    const params = selectedYear.value !== '0' ? { tahun: parseInt(selectedYear.value) } : { tahun: '0' }
+    
+    const response = await daftar_rekap_perkecamatan(params)
+    
+    if (response.error) {
+      displayNotification(response.error_msg || 'Gagal mengambil data rekap', 'error')
+      rekapData.value = {}
+      kecamatanList.value = []
+      return
+    }
+
+    rekapData.value = response.data.feedBack || {}
+    
+    // Convert object to array untuk sorting
+    kecamatanList.value = Object.entries(rekapData.value)
+      .map(([id, data]) => ({ id, data }))
+      .sort((a, b) => {
+        if (a.data.kode === 'KAT') return -1
+        if (b.data.kode === 'KAT') return 1
+        if (a.data.kode === 'INS') return 1
+        if (b.data.kode === 'INS') return -1
+        // Sort kecamatan by name
+        return a.data.name.localeCompare(b.data.name, 'id')
+      })
+
+    console.log('Rekap Data:', rekapData.value)
+  } catch (error) {
+    console.error('Error fetching data:', error)
+    displayNotification('Gagal mengambil data rekap perkecamatan', 'error')
+    rekapData.value = {}
+    kecamatanList.value = []
+  } finally {
+    isTableLoading.value = false
+  }
+}
+
+// Lifecycle
+onMounted(async () => {
+  generateYears()
+  await fetchData()
+})
+</script>
+
+<template>
+  <div class="mx-auto p-4">
+    <!-- Header -->
+    <LoadingSpinner v-if="isLoading" label="Memuat halaman..." />
+    <div v-else class="space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-end gap-4">
+        <!-- Filters -->
+        <div class="flex flex-col sm:flex-row gap-3">
+          <div class="flex items-center">
+            <label for="search-kecamatan" class="mr-2 text-sm font-medium text-gray-600 whitespace-nowrap">
+              Cari Kecamatan
+            </label>
+            <input
+              id="search-kecamatan"
+              type="text"
+              v-model="searchKecamatan"
+              placeholder="Nama kecamatan..."
+              class="w-full sm:w-64 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:border-green-900 focus:ring-2 focus:ring-green-900 transition"
+            />
+          </div>
+
+          <!-- Filter Tahun -->
+          <div class="flex items-center">
+            <label for="year-filter" class="mr-2 text-sm font-medium text-gray-600 whitespace-nowrap">
+              Tahun
+            </label>
+            <select
+              id="year-filter"
+              v-model="selectedYear"
+              @change="fetchData"
+              class="w-full sm:w-48 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:border-green-900 focus:ring-2 focus:ring-green-900 transition"
+            >
+              <option value="0">Semua Tahun</option>
+              <option v-for="year in years.slice(1)" :key="year" :value="year">
+                {{ year }}
+              </option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Info Message -->
+      <div v-if="filteredKecamatanList.length === 0 && !isTableLoading" 
+           class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
+        <p class="text-sm text-yellow-700">
+          {{ searchKecamatan ? `Kecamatan "${searchKecamatan}" tidak ditemukan` : 'Rekap Penyaluran Per Kecamatan Tidak Ditemukan' }}
+        </p>
+      </div>
+
+      <!-- Table -->
+      <div class="overflow-x-auto rounded-xl border border-gray-200 shadow">
+        <SkeletonTable v-if="isTableLoading" :columns="15" :rows="10" />
+        <table v-else class="w-full border-collapse bg-white text-sm">
+          <!-- Header -->
+          <thead class="bg-gray-50 text-gray-700 text-center border-b border-gray-300">
+            <tr>
+              <th rowspan="2" class="px-4 py-3 font-medium border-r border-gray-300 sticky left-0 bg-gray-50 z-10">
+                KECAMATAN
+              </th>
+              <th v-for="bulan in bulanNames" :key="bulan" 
+                  class="px-4 py-3 font-medium border-r border-gray-300 min-w-[100px]">
+                {{ bulan }}
+              </th>
+              <th rowspan="2" class="px-4 py-3 font-medium bg-gray-100 min-w-[120px]">
+                JUMLAH
+              </th>
+            </tr>
+          </thead>
+
+          <!-- Body -->
+          <tbody v-if="filteredKecamatanList.length > 0">
+            <!-- Data per Kecamatan -->
+            <tr v-for="item in filteredKecamatanList" :key="item.id" 
+                class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+              <td class="px-4 py-3 font-semibold text-gray-800 border-r border-gray-300 sticky left-0 bg-white z-10">
+                {{ item.data.name }}
+              </td>
+              <td v-for="(bulan, index) in 12" :key="`rupiah-${index}`"
+                  class="px-4 py-3 text-right border-r border-gray-100">
+                {{ formatRupiah(item.data.detail_rupiah[index as keyof DetailBulan]) }}
+              </td>
+              <td class="px-4 py-3 text-right font-bold bg-gray-50">
+                {{ formatRupiah(calculateTotal(item.data.detail_rupiah)) }}
+              </td>
+            </tr>
+
+            <!-- Grand Total -->
+            <tr class="bg-green-50 border-t-2 border-green-300">
+              <td class="px-4 py-3 font-bold text-gray-800 border-r border-gray-300 sticky left-0 bg-green-50 z-10">
+                TOTAL KESELURUHAN
+              </td>
+              <td v-for="(bulan, index) in 12" :key="`total-${index}`"
+                  class="px-4 py-3 text-right font-bold border-r border-gray-100">
+                {{ formatRupiah(calculateGrandTotalBulan(index)) }}
+              </td>
+              <td class="px-4 py-3 text-right font-bold bg-green-100">
+                {{ formatRupiah(calculateGrandTotal()) }}
+              </td>
+            </tr>
+          </tbody>
+
+          <!-- Empty State -->
+          <tbody v-else>
+            <tr>
+              <td colspan="14" class="px-6 py-8 text-center text-gray-500">
+                <font-awesome-icon
+                  icon="fa-solid fa-database"
+                  class="text-4xl mb-2 text-gray-400"
+                />
+                <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ada data</h3>
+                <p class="text-sm">Belum ada data rekap penyaluran.</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Notification -->
+    <Notification
+      :showNotification="showNotification"
+      :notificationType="notificationType"
+      :notificationMessage="notificationMessage"
+      @close="showNotification = false"
+    />
+  </div>
+</template>
+
+<style scoped>
+/* Sticky column styling */
+.sticky {
+  position: sticky;
+  left: 0;
+  z-index: 10;
+}
+
+/* Improve table readability */
+table {
+  border-spacing: 0;
+}
+
+/* Smooth scrolling */
+.overflow-x-auto {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e0 #f7fafc;
+}
+
+.overflow-x-auto::-webkit-scrollbar {
+  height: 8px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: #f7fafc;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background: #a0aec0;
+}
+</style>

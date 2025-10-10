@@ -1,21 +1,22 @@
-'use strict';
+"use strict";
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Kegiatans', {
+    await queryInterface.createTable("Kegiatans", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       asnaf_id: {
+        allowNull: true,
         type: Sequelize.INTEGER,
         references: {
           model: "Asnafs",
           key: "id",
         },
-        onDelete: 'CASCADE',
+        onDelete: "CASCADE",
       },
       program_id: {
         type: Sequelize.INTEGER,
@@ -23,76 +24,79 @@ module.exports = {
           model: "Programs",
           key: "id",
         },
-        onDelete: 'CASCADE',
+        onDelete: "CASCADE",
       },
       kode: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+      },
+      satuan: {
+        type: Sequelize.STRING,
       },
       nama_kegiatan: {
-        type: Sequelize.TEXT
+        type: Sequelize.TEXT,
       },
       slug: {
-        type: Sequelize.TEXT
+        type: Sequelize.TEXT,
       },
       status_tampil: {
         type: Sequelize.ENUM,
-        values: ['tampil', 'tidak_tampil'],
-        defaultValue : "tidak_tampil"
+        values: ["tampil", "tidak_tampil"],
+        defaultValue: "tidak_tampil",
       },
       jumlah_dana: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       jumlah_maksimal_nominal_bantuan: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       jumlah_target_penerima: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       sumber_dana: {
         type: Sequelize.ENUM,
-        values: ['infaq', 'zakat'],
-        defaultValue : "zakat"
+        values: ["infaq", "zakat"],
+        defaultValue: "zakat",
       },
       area_penyaluran: {
         type: Sequelize.ENUM,
         values: ["semua_pemohon", "kabupaten", "instansi", "kecamatan", "desa"],
-        defaultValue : "semua_pemohon"
+        defaultValue: "semua_pemohon",
       },
       jenis_penyaluran: {
         type: Sequelize.ENUM,
         values: ["langsung", "volume"],
-        defaultValue : "langsung"
+        defaultValue: "langsung",
       },
       status_kegiatan: {
         type: Sequelize.ENUM,
         values: ["sedang_berlangsung", "selesai"],
-        defaultValue : "sedang_berlangsung"
+        defaultValue: "sedang_berlangsung",
       },
       tahun: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       banner: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       periode_bantuan: {
         type: Sequelize.ENUM,
         values: ["tahunan", "bulanan"],
-        defaultValue : "tahunan"
+        defaultValue: "tahunan",
       },
       desc: {
-        type: Sequelize.TEXT
+        type: Sequelize.TEXT,
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE
-      }
+        type: Sequelize.DATE,
+      },
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Kegiatans');
-  }
+    await queryInterface.dropTable("Kegiatans");
+  },
 };

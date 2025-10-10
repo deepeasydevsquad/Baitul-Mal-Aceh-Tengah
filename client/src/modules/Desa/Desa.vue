@@ -91,7 +91,6 @@ async function fetchData() {
 
 onMounted(async () => {
   await fetchData();
-  totalColumns.value = document.querySelectorAll('thead th').length;
 });
 
 // Function: Delete Data
@@ -150,8 +149,8 @@ async function deleteData(id: number) {
         <table v-else class="w-full border-collapse bg-white text-sm">
           <thead class="bg-gray-50 text-gray-700 text-center border-b border-gray-300">
             <tr>
-              <th class="w-[50%] px-6 py-3 font-medium">Nama Desa</th>
-              <th class="w-[30%] px-6 py-3 font-medium">Nama Kecamatan</th>
+              <th class="w-[40%] px-6 py-3 font-medium">Nama Desa</th>
+              <th class="w-[20%] px-6 py-3 font-medium">Nama Kecamatan</th>
               <th class="w-[20%] px-6 py-3 font-medium">Datetime</th>
               <th class="w-[20%] px-6 py-3 font-medium">Aksi</th>
             </tr>

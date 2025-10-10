@@ -79,9 +79,25 @@ const arr_router = [
   "monev",
   "riwayat_zakat",
   "urutan_bagian_monev",
+  "penetapan",
   "riwayat_infaq",
   "permohonan_bantuan",
-  "validasi_permohonan_bantuan"
+  "validasi_permohonan_bantuan",
+  "laporan_tahunan",
+  "pertanyaan_monev",
+  "rekap_pengumpulan",
+  "laporan_perencanaan",
+  "target_pengumpulan",
+  "target_distribusi",
+  "rekap_distribusi_per_asnaf",
+  "laporan_kesekretariatan",
+  "beranda",
+  "rekap_pengumpulan_per_kecamatan",
+  "program_bantuan_member",
+  "rekap_perkecamatan",
+  "laporan_pengumpulan",
+  "infaq_member",
+  "kriteria",
 ];
 
 const arr = {};
