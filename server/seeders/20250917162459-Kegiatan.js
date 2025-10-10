@@ -119,7 +119,7 @@ module.exports = {
 
         {
           asnaf_id: 3,
-          program_id: 5,
+          program_id: 6,
           kode: "PEND-005",
           satuan: "orang",
           nama_kegiatan: "Bantuan Infaq Kesehatan",
