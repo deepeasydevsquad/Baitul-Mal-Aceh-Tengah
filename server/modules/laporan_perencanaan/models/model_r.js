@@ -14,7 +14,8 @@ class Model_r {
 
   async laporan_pengumpulan() {
     try {
-      const tahun = this.req.query.tahun || this.req.body.tahun || new Date().getFullYear();
+      const tahun =
+        this.req.query.tahun || this.req.body.tahun || new Date().getFullYear();
       const search = this.req.query.search || this.req.body.search || "";
 
       console.log("📊 Request params:", { tahun, search });
@@ -38,7 +39,10 @@ class Model_r {
             status: "success",
             tipe: { [Op.ne]: "infaq" },
             createdAt: {
-              [Op.between]: [`${tahun}-01-01 00:00:00`, `${tahun}-12-31 23:59:59`],
+              [Op.between]: [
+                `${tahun}-01-01 00:00:00`,
+                `${tahun}-12-31 23:59:59`,
+              ],
             },
           },
         })) || 0;
@@ -49,7 +53,10 @@ class Model_r {
             status: "success",
             tipe: "infaq",
             createdAt: {
-              [Op.between]: [`${tahun}-01-01 00:00:00`, `${tahun}-12-31 23:59:59`],
+              [Op.between]: [
+                `${tahun}-01-01 00:00:00`,
+                `${tahun}-12-31 23:59:59`,
+              ],
             },
           },
         })) || 0;
@@ -59,7 +66,10 @@ class Model_r {
           where: {
             status: "success",
             createdAt: {
-              [Op.between]: [`${tahun}-01-01 00:00:00`, `${tahun}-12-31 23:59:59`],
+              [Op.between]: [
+                `${tahun}-01-01 00:00:00`,
+                `${tahun}-12-31 23:59:59`,
+              ],
             },
           },
         })) || 0;
@@ -75,9 +85,15 @@ class Model_r {
       const bobotDonasi = totalTarget ? targetDonasi / totalTarget : 0;
 
       // 🔸 Hitung persentase berdasarkan kontribusi per jenis
-      const persenZakat = fix((zakatRealisasi / targetZakat) * bobotZakat * 100 || 0);
-      const persenInfaq = fix((infaqRealisasi / targetInfaq) * bobotInfaq * 100 || 0);
-      const persenDonasi = fix((donasiRealisasi / targetDonasi) * bobotDonasi * 100 || 0);
+      const persenZakat = fix(
+        (zakatRealisasi / targetZakat) * bobotZakat * 100 || 0
+      );
+      const persenInfaq = fix(
+        (infaqRealisasi / targetInfaq) * bobotInfaq * 100 || 0
+      );
+      const persenDonasi = fix(
+        (donasiRealisasi / targetDonasi) * bobotDonasi * 100 || 0
+      );
 
       // 🔸 Pastikan total persentase = 100 maksimal
       let persenTotal = persenZakat + persenInfaq + persenDonasi;
@@ -91,9 +107,24 @@ class Model_r {
         totalRealisasi,
         persentaseTotal: persenTotal,
         dataPerJenis: [
-          { jenis: "Zakat", target: targetZakat, realisasi: zakatRealisasi, persentase: persenZakat },
-          { jenis: "Infaq", target: targetInfaq, realisasi: infaqRealisasi, persentase: persenInfaq },
-          { jenis: "Donasi", target: targetDonasi, realisasi: donasiRealisasi, persentase: persenDonasi },
+          {
+            jenis: "Zakat",
+            target: targetZakat,
+            realisasi: zakatRealisasi,
+            persentase: persenZakat,
+          },
+          {
+            jenis: "Infaq",
+            target: targetInfaq,
+            realisasi: infaqRealisasi,
+            persentase: persenInfaq,
+          },
+          {
+            jenis: "Donasi",
+            target: targetDonasi,
+            realisasi: donasiRealisasi,
+            persentase: persenDonasi,
+          },
         ],
       };
 
@@ -105,7 +136,7 @@ class Model_r {
     }
   }
 
-  async list_laporan_pengumpulan() {
+  async list_laporan_perencanaan() {
     return this.laporan_pengumpulan();
   }
 }

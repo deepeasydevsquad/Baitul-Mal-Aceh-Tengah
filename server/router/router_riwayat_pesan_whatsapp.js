@@ -30,7 +30,7 @@ const router = express.Router();
 //       .withMessage("Page Number Harus Angka"),
 //     body("search").optional().isString().withMessage("Search Harus String"),
 //   ],
-//   controllers.get_info_pengaturan_whatsapp 
+//   controllers.get_info_pengaturan_whatsapp
 // );
 
 router.post(
@@ -48,7 +48,7 @@ router.post(
       .isInt()
       .withMessage("Page Number Harus Angka"),
   ],
-  controllers.get_noWa
+  controllers.list
 );
 
 router.get(
@@ -56,7 +56,6 @@ router.get(
   authenticateTokenAdministrator,
   controllers.get_jenis_pesan
 );
-
 
 // router.post(
 //   "/riwayat_infaq/add",

@@ -1,41 +1,39 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted, onBeforeUnmount, watch } from "vue";
-import Notification from "@/components/Modal/Notification.vue";
-import BaseButton from "@/components/Button/BaseButton.vue";
-import SelectField from "@/components/Form/SelectField.vue";
-import InputText from "@/components/Form/InputText.vue";
-import TextArea from "@/components/Form/TextArea.vue";
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
+import Notification from '@/components/Modal/Notification.vue';
+import BaseButton from '@/components/Button/BaseButton.vue';
+import SelectField from '@/components/Form/SelectField.vue';
+import InputText from '@/components/Form/InputText.vue';
+import TextArea from '@/components/Form/TextArea.vue';
 
 // Composable
-import { useNotification } from "@/composables/useNotification";
+import { useNotification } from '@/composables/useNotification';
 
 // Service
-import { get_info_Whatsapp_message } from "@/service/riwayat_pesan_whatsapp";
+import { get_info_Whatsapp_message } from '@/service/riwayat_pesan_whatsapp';
 
 // Composable: notification
-const {
-  showNotification,
-  notificationType,
-  notificationMessage,
-  displayNotification,
-} = useNotification();
+const { showNotification, notificationType, notificationMessage, displayNotification } =
+  useNotification();
 
 interface Props {
   isModalOpen: boolean;
 }
 const props = defineProps<Props>();
 const emit = defineEmits<{
-  (e: "close"): void;
-  (e: "status", payload: { error_msg?: string; error?: boolean }): void;
+  (e: 'close'): void;
+  (e: 'status', payload: { error_msg?: string; error?: boolean }): void;
 }>();
 
 // 🧱 ENUM: Jenis Pesan (statis)
 enum JenisPesanEnum {
-  muzakki_munfiq = "Pesan Biasa",
-  semua_member = "Semua Member",
-  surveyor = "Surveyor",
-  otp = "OTP",
+  pesan_biasa = 'Pesan Biasa',
+  munfiq = 'Munfiq',
+  muzakki = 'Muzakki',
+  semua_member = 'Semua Member',
+  surveyor = 'Surveyor',
+  otp = 'OTP',
 }
 
 // 🔄 Convert enum ke array untuk SelectField
@@ -43,7 +41,7 @@ const jenisPesanOption = ref<{ id: string; name: string }[]>(
   Object.entries(JenisPesanEnum).map(([key, value]) => ({
     id: key,
     name: value,
-  }))
+  })),
 );
 
 // 🧩 TEMPLATE PESAN (dinamis dari database)
@@ -56,10 +54,10 @@ async function fetchTemplatePesan() {
     // Asumsi response.data = [{ id: 1, name: "Template Ucapan" }, ...]
     templatePesanOption.value = response.data || [];
 
-    console.log("Template pesan berhasil diambil:", templatePesanOption.value);
+    console.log('Template pesan berhasil diambil:', templatePesanOption.value);
   } catch (error) {
-    console.error("Gagal mengambil data template pesan:", error);
-    displayNotification("Gagal mengambil data template pesan", "error");
+    console.error('Gagal mengambil data template pesan:', error);
+    displayNotification('Gagal mengambil data template pesan', 'error');
   }
 }
 
@@ -67,13 +65,12 @@ async function fetchTemplatePesan() {
 const form = ref<{
   name: string;
   jenis_pesan: string | null;
-  template_pesan: number | null;
+  nomor_tujuan?: string;
   isi_pesan: string;
 }>({
-  name: "",
-  jenis_pesan: null,
-  template_pesan: null,
-  isi_pesan: "",
+  name: '',
+  jenis_pesan: 'pesan_biasa',
+  isi_pesan: '',
 });
 
 // Error state
@@ -81,7 +78,7 @@ const errors = ref<Record<string, string>>({});
 
 // 🔁 Reset form
 const resetForm = () => {
-  form.value = { name: "", jenis_pesan: null, template_pesan: null, isi_pesan: "" };
+  form.value = { name: '', jenis_pesan: null, template_pesan: null, isi_pesan: '' };
   errors.value = {};
 };
 
@@ -91,22 +88,21 @@ const validateForm = () => {
   errors.value = {};
 
   if (!form.value.name) {
-    errors.value.name = "Nomor asal tidak boleh kosong.";
+    errors.value.name = 'Nomor asal tidak boleh kosong.';
     isValid = false;
   }
   if (!form.value.jenis_pesan) {
-    errors.value.jenis_pesan = "Jenis pesan harus dipilih.";
+    errors.value.jenis_pesan = 'Jenis pesan harus dipilih.';
     isValid = false;
   }
-  if (
-    form.value.jenis_pesan === "PESAN_TEMPLATE" &&
-    !form.value.template_pesan
-  ) {
-    errors.value.template_pesan = "Template pesan harus dipilih.";
-    isValid = false;
-  }
+
+  // if (form.value.jenis_pesan === 'PESAN_TEMPLATE' && !form.value.template_pesan) {
+  //   errors.value.template_pesan = 'Template pesan harus dipilih.';
+  //   isValid = false;
+  // }
+
   if (!form.value.isi_pesan) {
-    errors.value.isi_pesan = "Isi pesan tidak boleh kosong.";
+    errors.value.isi_pesan = 'Isi pesan tidak boleh kosong.';
     isValid = false;
   }
 
@@ -127,21 +123,21 @@ const handleSubmit = async () => {
       isi_pesan: form.value.isi_pesan,
     };
 
-    console.log("Payload dikirim:", payload);
+    console.log('Payload dikirim:', payload);
 
     // const response = await add_desa(payload);
-    const response = { error: false, error_msg: "" }; // dummy
+    const response = { error: false, error_msg: '' }; // dummy
 
-    emit("status", {
-      error_msg: response?.error_msg || "",
+    emit('status', {
+      error_msg: response?.error_msg || '',
       error: response?.error || false,
     });
 
     resetForm();
-    emit("close");
+    emit('close');
   } catch (error: any) {
-    console.error("Error saat tambah pesan:", error);
-    displayNotification("Terjadi kesalahan saat menyimpan data", "error");
+    console.error('Error saat tambah pesan:', error);
+    displayNotification('Terjadi kesalahan saat menyimpan data', 'error');
   } finally {
     isSubmitting.value = false;
   }
@@ -150,12 +146,12 @@ const handleSubmit = async () => {
 // 🔒 Tutup modal
 const closeModal = () => {
   resetForm();
-  emit("close");
+  emit('close');
 };
 
 // ⌨️ Escape untuk close modal
 const handleEscape = (e: KeyboardEvent) => {
-  if (e.key === "Escape" && props.isModalOpen) closeModal();
+  if (e.key === 'Escape' && props.isModalOpen) closeModal();
 };
 
 // 🚀 Fetch data saat modal dibuka
@@ -165,16 +161,15 @@ watch(
     if (val) {
       await fetchTemplatePesan();
     }
-  }
+  },
 );
 
 onMounted(() => {
-  document.addEventListener("keydown", handleEscape);
+  document.addEventListener('keydown', handleEscape);
 });
 onBeforeUnmount(() => {
-  document.removeEventListener("keydown", handleEscape);
+  document.removeEventListener('keydown', handleEscape);
 });
-
 </script>
 
 <template>
@@ -196,9 +191,7 @@ onBeforeUnmount(() => {
       <div class="relative max-w-md w-full bg-white shadow-2xl rounded-2xl p-6 space-y-6">
         <!-- Header -->
         <div class="flex items-center justify-between">
-          <h2 id="modal-title" class="text-xl font-semibold text-gray-800">
-            Tambah Pesan WhatsApp
-          </h2>
+          <h2 id="modal-title" class="text-xl font-semibold text-gray-800">Kirim Pesan WhatsApp</h2>
           <button
             class="text-gray-400 text-lg hover:text-gray-600"
             @click="closeModal"
@@ -209,14 +202,14 @@ onBeforeUnmount(() => {
         </div>
 
         <!-- Nomor Asal -->
-        <InputText
+        <!-- <InputText
           id="nomorAsal"
           readonly
           v-model="form.name"
           label="Nomor Asal"
           placeholder="Masukkan nomor asal"
           :error="errors.name"
-        />
+        /> -->
 
         <!-- Jenis Pesan -->
         <SelectField
@@ -228,15 +221,24 @@ onBeforeUnmount(() => {
           :error="errors.jenis_pesan"
         />
 
+        <InputText
+          v-if="form.jenis_pesan == 'pesan_biasa'"
+          id="nomor_tujuan"
+          v-model="form.nomor_tujuan"
+          label="Nomor Tujuan"
+          placeholder="Masukkan nomor tujuan anda"
+          :error="errors.nomor_tujuan"
+        />
+
         <!-- Template Pesan -->
-        <SelectField
+        <!-- <SelectField
           id="jenis_pesan"
           v-model="form.template_pesan"
           :options="templatePesanOption"
           label="Jenis Pesan"
           placeholder="--- Pilih Template Pesan ---"
           :error="errors.jenis_pesan"
-        />
+        /> -->
 
         <!-- Isi Pesan -->
         <TextArea
