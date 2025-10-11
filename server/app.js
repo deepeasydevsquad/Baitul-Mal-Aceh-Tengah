@@ -10,7 +10,7 @@ const cookieParser = require("cookie-parser");
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3003;
+const port = process.env.PORT || 3001;
 
 // CORS dinamis, izinkan semua origin yang datang
 app.use(
@@ -68,7 +68,9 @@ const arr_router = [
   "surveyor",
   "pengaturan_umum",
   "pengaturan_whatsapp",
+  "pertanyaan_monev",
   "laporan_umum",
+  "laporan_tahunan",
   "program_kegiatan_bantuan",
   "daftar_program",
   "laporan_asnaf",
@@ -81,26 +83,24 @@ const arr_router = [
   "urutan_bagian_monev",
   "penetapan",
   "riwayat_infaq",
+  "riwayat_pesan_whatsapp",
+  "zakat_member",
+  "infaq_member",
+  "program_bantuan_member",
+  "permohonan_bantuan_member",
+  "beranda",
+  "target_distribusi",
+  "target_pengumpulan",
   "permohonan_bantuan",
   "validasi_permohonan_bantuan",
-  "laporan_tahunan",
-  "pertanyaan_monev",
-  "rekap_pengumpulan",
-  "laporan_perencanaan",
-  "target_pengumpulan",
-  "target_distribusi",
-  "rekap_distribusi_per_asnaf",
-  "laporan_kesekretariatan",
-  "beranda",
-  "rekap_pengumpulan_per_kecamatan",
-  "program_bantuan_member",
-  "rekap_perkecamatan",
-  "rekap_distribusi_per_kode_asnaf",
-  "laporan_pengumpulan",
-  "infaq_member",
-  "zakat_member",
-  "permohonan_bantuan_member",
   "kriteria",
+  "permohonan_bantuan",
+  "laporan_pengumpulan",
+  "laporan_kesekretariatan",
+  "rekap_pengumpulan",
+  "rekap_pengumpulan_per_kecamatan",
+  "rekap_distribusi_per_asnaf",
+  "rekap_distribusi_per_kode_asnaf",
 ];
 
 const arr = {};

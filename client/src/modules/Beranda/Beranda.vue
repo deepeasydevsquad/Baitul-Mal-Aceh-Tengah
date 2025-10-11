@@ -81,6 +81,9 @@ const chartOptionsDistribusi = ref<any>({});
 
 // Fetch API
 async function fetchData() {
+  console.log('xxx');
+  console.log('Beranda');
+  console.log('xxx');
   isTableLoading.value = true;
   try {
     const response = await get_beranda({ tahun: tahun.value });
