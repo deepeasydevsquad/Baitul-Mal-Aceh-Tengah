@@ -9,12 +9,19 @@ module.exports = {
         destination_number: "085262802141",
         message: "Tes",
         status: "success",
-        type: "muzakki_munfiq",
+        type: "munfiq",
         createdAt: new Date(),
         updatedAt: new Date(),
       },
     ]);
   },
+
+  // "surveyor",
+  //       "pemohon",
+  //       "otp",
+  //       "munfiq",
+  //       "muzakki",
+  //       "pesan_biasa",
 
   async down(queryInterface, Sequelize) {
     await queryInterface.bulkDelete("Whatsapp_templates", null, {});

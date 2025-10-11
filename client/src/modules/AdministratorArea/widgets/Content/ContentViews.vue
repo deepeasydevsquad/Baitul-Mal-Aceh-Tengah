@@ -224,12 +224,12 @@ watch(
     <div
       v-for="(item, key) in selectedTab.sharedArray"
       :key="key"
-      class="p-4 rounded-lg bg-gray-50 dark:bg-gray-800 min-h-[500px]"
+      class="p-4 bg-white dark:bg-gray-800 min-h-[500px] rounded-lg"
       :class="
         (activeTab.sharedString === tab.sharedObject[item.id].path ||
         (tabTerpilih.sharedNumber === 0 && key === 0)
           ? ''
-          : 'hidden') + (key === 0 ? ' rounded-tl-none' : '')
+          : 'hidden') + (key === 0 ? ' [border-top-left-radius:0px]' : '')
       "
       :id="tab.sharedObject[item.id].path"
       role="tabpanel"
