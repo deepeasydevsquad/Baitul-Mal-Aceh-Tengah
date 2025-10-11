@@ -1,19 +1,74 @@
 const Model_r = require("../models/model_r");
+const Model_cud = require("../models/model_cud");
 const {
   handleValidationErrors,
   handleServerError,
 } = require("../../../helper/handleError");
 
-exports.list_monev = async (req, res) => {
+const controllers = {};
+
+controllers.get_filter_type = async (req, res) => {
   if (!(await handleValidationErrors(req, res))) return;
+
   try {
     const model = new Model_r(req);
-    const data = await model.monev();
-    return res.status(200).json(data); // pake return
+    const feedBack = await model.get_filter_type();
+    res.status(200).json({
+      error: false,
+      data: feedBack,
+      total: 1,
+    });
   } catch (error) {
-    console.error("_____DDDDD_______");
-    console.error(error);
-    console.error("_____DDDDD_______");
-    return handleServerError(res, error); // kasih full error object
+    handleServerError(res, error);
   }
 };
+
+// READ Controllers
+controllers.get_monev_list = async (req, res) => {
+  try {
+    const model = new Model_r(req);
+    const feedBack = await model.daftar_monev();
+
+    res.status(200).json({
+      error: false,
+      data: feedBack.data,
+      total: feedBack.total,
+    });
+  } catch (error) {
+    handleServerError(res, error);
+  }
+};
+
+controllers.pertanyaan = async (req, res) => {
+  try {
+    const model = new Model_r(req);
+    // memanggil method yang benar (daftar_monev)
+    const data = await model.pertanyaan();
+    res.status(200).json({ error: false, data, total: 1 });
+  } catch (error) {
+    handleServerError(res, error);
+  }
+};
+
+controllers.kirim_jawaban = async (req, res) => {
+  try {
+    const model = new Model_cud(req);
+    const data = await model.kirim_jawaban();
+
+    if (await model.response()) {
+      res.status(200).json({
+        error: false,
+        error_msg: "Jawaban berhasil disimpan.",
+      });
+    } else {
+      res.status(400).json({
+        error: true,
+        error_msg: "Jawaban gagal disimpan.",
+      });
+    }
+  } catch (error) {
+    handleServerError(res, error);
+  }
+};
+
+module.exports = controllers;

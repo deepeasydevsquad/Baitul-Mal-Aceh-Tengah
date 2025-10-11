@@ -13,13 +13,13 @@ export function useConfirmation() {
     showConfirmDialog.value = true
   }
 
-  function confirm() {
+  function confirm(p0: () => Promise<void>) {
     if (confirmAction.value) confirmAction.value()
     showConfirmDialog.value = false
     confirmAction.value = null
   }
 
-  function cancel() {
+  function cancel(p0: () => void) {
     showConfirmDialog.value = false
     confirmAction.value = null
   }
@@ -36,4 +36,4 @@ export function useConfirmation() {
     confirm,
     cancel,
   }
-}  
+}
