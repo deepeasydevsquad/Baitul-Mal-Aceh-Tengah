@@ -14,6 +14,7 @@ import VueApexCharts from 'vue3-apexcharts';
 import Notification from '@/components/Modal/Notification.vue';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
 import DaftarProgram from './widgets/DaftarProgram.vue';
+import RiwayatPermohonanMember from '@/modules/RiwayatPermohonanMember/RiwayatPermohonanMember.vue';
 
 // Composable
 import { useNotification } from '@/composables/useNotification';
@@ -25,6 +26,7 @@ import { get_laporan } from '@/service/program_bantuan_member';
 const isLoading = ref(false);
 const tahun = ref<number>(new Date().getFullYear());
 const selectedProgram = ref<string | null>(null);
+const showRiwayat = ref(false);
 
 const chartSeries = ref<any[]>([]);
 const chartOptions = ref<any>({});
@@ -118,6 +120,16 @@ const handleProgramClick = (programName: string) => {
   selectedProgram.value = programName;
 };
 
+// handle klik riwayat
+const handleRiwayatClick = () => {
+  showRiwayat.value = true;
+};
+
+// handle back dari riwayat
+const handleBackFromRiwayat = () => {
+  showRiwayat.value = false;
+};
+
 onMounted(() => {
   initTahun();
   fetchData();
@@ -125,8 +137,18 @@ onMounted(() => {
 </script>
 
 <template>
-  <!-- Kondisi tampilan -->
-  <div v-if="!selectedProgram">
+  <!-- Tampilkan RiwayatPermohonanMember jika showRiwayat true -->
+  <div v-if="showRiwayat">
+    <RiwayatPermohonanMember @back="handleBackFromRiwayat" />
+  </div>
+
+  <!-- Tampilkan DaftarProgram jika selectedProgram ada -->
+  <div v-else-if="selectedProgram">
+    <DaftarProgram :program-name="selectedProgram" @back="selectedProgram = null" />
+  </div>
+
+  <!-- Tampilkan halaman utama jika tidak ada yang dipilih -->
+  <div v-else>
     <div
       class="w-full p-6 md:p-10 bg-white rounded-[10px] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] flex flex-col lg:flex-row justify-start items-start gap-10 overflow-hidden"
     >
@@ -153,6 +175,8 @@ onMounted(() => {
           </a>
 
           <a
+            href="#"
+            @click.prevent="handleRiwayatClick"
             class="w-full max-w-sm px-6 py-2.5 bg-green-800 hover:bg-green-700 focus:bg-green-500 rounded-lg inline-flex justify-start items-center gap-2.5 font-semibold text-[14px] text-white"
           >
             <font-awesome-icon icon="fa-solid fa-hand-holding-dollar mr-3" size="xl" />
@@ -214,11 +238,6 @@ onMounted(() => {
         </div>
       </div>
     </div>
-  </div>
-
-  <!-- Kalau udah pilih program -->
-  <div v-else>
-    <DaftarProgram :program-name="selectedProgram" @back="selectedProgram = null" />
   </div>
 </template>
 
