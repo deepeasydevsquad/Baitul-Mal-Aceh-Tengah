@@ -27,7 +27,7 @@ const isTableLoading = ref(false);
 
 // Composable: pagination
 const itemsPerPage = ref<number>(100);
-const totalColumns = ref<number>(6);
+const totalColumns = ref<number>(7);
 
 const { currentPage, perPage, totalRow, totalPages, nextPage, prevPage, pageNow, pages } =
   usePagination(fetchData, { perPage: itemsPerPage.value });
@@ -41,11 +41,13 @@ const { showConfirmDialog, confirmTitle, confirmMessage, displayConfirmation, co
   useConfirmation();
 
 interface Data {
-  nomor_asal: number;
-  jenis_pesan: string;
-  template_pesan: string;
+  id: number;
+  sender_number: string;
+  destination_number: string;
+  message: string;
   status: string;
-  tanggal_pengiriman: string;
+  type: string;
+  updatedAt: string;
 }
 
 const datas = ref<Data[]>([]);
@@ -128,8 +130,8 @@ async function deleteData(id: number) {
           :loading="isModalAddOpen"
           type="button"
         >
-          <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" />
-          Tambah Pesan
+          <font-awesome-icon icon="fa-solid fa-comments" class="mr-2" />
+          Kirim Pesan
         </BaseButton>
 
         <!-- Search -->
@@ -152,11 +154,12 @@ async function deleteData(id: number) {
         <table v-else class="w-full border-collapse bg-white text-sm">
           <thead class="bg-gray-50 text-gray-700 text-center border-b border-gray-300">
             <tr>
-              <th class="w-[20%] px-6 py-3 font-medium">Nomor Asal</th>
-              <th class="w-[20%] px-6 py-3 font-medium">Jenis Pesan</th>
-              <th class="w-[35%] px-6 py-3 font-medium">Template Pesan</th>
-              <th class="w-[15%] px-6 py-3 font-medium">status</th>
-              <th class="w-[20%] px-6 py-3 font-medium">Tanggal Pengiriman</th>
+              <th class="w-[15%] px-6 py-3 font-medium">Nomor Asal</th>
+              <th class="w-[15%] px-6 py-3 font-medium">Nomor Tujuan</th>
+              <th class="w-[10%] px-6 py-3 font-medium">Jenis Pesan</th>
+              <th class="w-[25%] px-6 py-3 font-medium">Pesan</th>
+              <th class="w-[10%] px-6 py-3 font-medium">status</th>
+              <th class="w-[15%] px-6 py-3 font-medium">Tanggal Pengiriman</th>
               <th class="w-[10%] px-6 py-3 font-medium">Aksi</th>
             </tr>
           </thead>
@@ -165,19 +168,22 @@ async function deleteData(id: number) {
             <template v-if="datas && datas.length">
               <tr v-for="data in datas" :key="data.id" class="hover:bg-gray-50 transition-colors">
                 <td class="px-6 py-4 text-center font-medium text-gray-800">
-                  {{ data.nomor_asal }}
+                  {{ data.sender_number }}
                 </td>
                 <td class="px-6 py-4 text-center font-medium text-gray-800">
-                  {{ data.jenis_pesan }}
+                  {{ data.destination_number }}
                 </td>
-                <td class="px-6 py-4 text-left font-medium text-gray-800">
-                  {{ data.template_pesan }}
+                <td class="px-6 py-4 text-center font-medium text-gray-800">
+                  {{ data.type }}
                 </td>
-                <td class="px-6 py-4 text-left font-medium text-gray-800">
+                <td class="px-6 py-4 text-center font-medium text-gray-800">
+                  {{ data.message }}
+                </td>
+                <td class="px-6 py-4 text-center font-medium text-gray-800">
                   {{ data.status }}
                 </td>
-                <td class="px-6 py-4 text-left font-medium text-gray-800">
-                  {{ data.tanggal_pengiriman }}
+                <td class="px-6 py-4 text-center font-medium text-gray-800">
+                  {{ data.updatedAt }}
                 </td>
                 <td class="px-6 py-4">
                   <div class="flex justify-center gap-2">
@@ -188,19 +194,14 @@ async function deleteData(id: number) {
                 </td>
               </tr>
             </template>
-
             <!-- Empty State -->
             <tr v-else>
               <td :colspan="totalColumns" class="px-6 py-8 text-center text-gray-500">
-                <!-- <font-awesome-icon
-                icon="fa-solid fa-database"
-                class="text-2xl mb-2 text-gray-400"
-                /> -->
-                <p class="text-sm">Belum ada data.</p>
+                <font-awesome-icon icon="fa-solid fa-message" class="text-2xl mb-2 text-gray-400" />
+                <p class="text-sm">Pesan whatsapp tidak ditemukan.</p>
               </td>
             </tr>
           </tbody>
-
           <!-- Pagination -->
           <tfoot>
             <Pagination
@@ -217,10 +218,8 @@ async function deleteData(id: number) {
         </table>
       </div>
     </div>
-
     <!-- Modal FormAdd -->
     <FormAdd :is-modal-open="isModalAddOpen" @close="handleClose" @status="handleStatus" />
-
     <!-- Notification -->
     <Notification
       :showNotification="showNotification"

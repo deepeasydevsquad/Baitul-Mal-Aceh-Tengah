@@ -96,6 +96,7 @@ const arr_router = [
   "kriteria",
   "permohonan_bantuan",
   "laporan_pengumpulan",
+  "laporan_perencanaan",
   "laporan_kesekretariatan",
   "rekap_pengumpulan",
   "rekap_pengumpulan_per_kecamatan",
