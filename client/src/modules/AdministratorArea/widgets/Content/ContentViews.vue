@@ -40,6 +40,7 @@ import LaporanAsnafIbnuSabil from '@/modules/LaporanAsnaf/LaporanAsnafIbnuSabil.
 import RiwayatZakat from '@/modules/RiwayatZakat/RiwayatZakat.vue';
 import UrutanBagianMonev from '@/modules/UrutanBagianMonev/UrutanBagianMonev.vue';
 import RiwayatInfaq from '@/modules/RiwayatInfaq/RiwayatInfaq.vue';
+import RiwayatPesanWhatsapp from '@/modules/RiwayatPesanWhatsapp/RiwayatPesanWhatsapp.vue'
 
 const tabComponents = {
   pengaturan_whatsapp: PengaturanWhatsapp,
@@ -75,6 +76,7 @@ const tabComponents = {
   riwayat_zakat: RiwayatZakat,
   urutan_bagian_monev: UrutanBagianMonev,
   riwayat_infaq: RiwayatInfaq,
+  riwayat_pesan_whatsapp: RiwayatPesanWhatsapp
 };
 
 const selectedTab = useSelectedTab();
