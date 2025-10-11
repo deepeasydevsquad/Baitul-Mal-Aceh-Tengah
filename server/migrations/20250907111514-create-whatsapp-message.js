@@ -25,7 +25,14 @@ module.exports = {
       },
       type: {
         type: Sequelize.ENUM,
-        values: ["surveyor", "pemohon", "otp", "muzakki_munfiq"],
+        values: [
+          "surveyor",
+          "pemohon",
+          "otp",
+          "munfiq",
+          "muzakki",
+          "pesan_biasa",
+        ],
         allowNull: true,
       },
       createdAt: {

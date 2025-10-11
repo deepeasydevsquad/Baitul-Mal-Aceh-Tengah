@@ -28,7 +28,9 @@ const emit = defineEmits<{
 
 // 🧱 ENUM: Jenis Pesan (statis)
 enum JenisPesanEnum {
-  muzakki_munfiq = 'Pesan Biasa',
+  pesan_biasa = 'Pesan Biasa',
+  munfiq = 'Munfiq',
+  muzakki = 'Muzakki',
   semua_member = 'Semua Member',
   surveyor = 'Surveyor',
   otp = 'OTP',
@@ -63,12 +65,11 @@ async function fetchTemplatePesan() {
 const form = ref<{
   name: string;
   jenis_pesan: string | null;
-  template_pesan: number | null;
+  nomor_tujuan?: string;
   isi_pesan: string;
 }>({
   name: '',
-  jenis_pesan: null,
-  template_pesan: null,
+  jenis_pesan: 'pesan_biasa',
   isi_pesan: '',
 });
 
@@ -94,10 +95,12 @@ const validateForm = () => {
     errors.value.jenis_pesan = 'Jenis pesan harus dipilih.';
     isValid = false;
   }
-  if (form.value.jenis_pesan === 'PESAN_TEMPLATE' && !form.value.template_pesan) {
-    errors.value.template_pesan = 'Template pesan harus dipilih.';
-    isValid = false;
-  }
+
+  // if (form.value.jenis_pesan === 'PESAN_TEMPLATE' && !form.value.template_pesan) {
+  //   errors.value.template_pesan = 'Template pesan harus dipilih.';
+  //   isValid = false;
+  // }
+
   if (!form.value.isi_pesan) {
     errors.value.isi_pesan = 'Isi pesan tidak boleh kosong.';
     isValid = false;
@@ -188,9 +191,7 @@ onBeforeUnmount(() => {
       <div class="relative max-w-md w-full bg-white shadow-2xl rounded-2xl p-6 space-y-6">
         <!-- Header -->
         <div class="flex items-center justify-between">
-          <h2 id="modal-title" class="text-xl font-semibold text-gray-800">
-            Tambah Pesan WhatsApp
-          </h2>
+          <h2 id="modal-title" class="text-xl font-semibold text-gray-800">Kirim Pesan WhatsApp</h2>
           <button
             class="text-gray-400 text-lg hover:text-gray-600"
             @click="closeModal"
@@ -218,6 +219,15 @@ onBeforeUnmount(() => {
           label="Jenis Pesan"
           placeholder="--- Pilih Jenis Pesan ---"
           :error="errors.jenis_pesan"
+        />
+
+        <InputText
+          v-if="form.jenis_pesan == 'pesan_biasa'"
+          id="nomor_tujuan"
+          v-model="form.nomor_tujuan"
+          label="Nomor Tujuan"
+          placeholder="Masukkan nomor tujuan anda"
+          :error="errors.nomor_tujuan"
         />
 
         <!-- Template Pesan -->

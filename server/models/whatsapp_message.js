@@ -17,7 +17,14 @@ module.exports = (sequelize, DataTypes) => {
       destination_number: DataTypes.STRING,
       message: DataTypes.TEXT,
       status: DataTypes.ENUM(["process", "success", "failed"]),
-      type: DataTypes.ENUM(["surveyor", "pemohon", "otp", "muzakki_munfiq"]),
+      type: DataTypes.ENUM([
+        "surveyor",
+        "pemohon",
+        "otp",
+        "munfiq",
+        "muzakki",
+        "pesan_biasa",
+      ]),
     },
     {
       sequelize,
