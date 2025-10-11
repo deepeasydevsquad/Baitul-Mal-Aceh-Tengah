@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Permohonan extends Model {
     /**
@@ -27,26 +25,24 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "permohonan_id",
       });
       Permohonan.hasMany(models.Monev, {
-      foreignKey: "permohonan_id",
+        foreignKey: "permohonan_id",
       });
-
-
-    //      Survey_permohonan.belongsTo(models.Surveyor_kegiatan, {
-    //     foreignKey: "surveyor_kegiatan_id",
-    //   });
     }
   }
-  Permohonan.init({
-    member_id: DataTypes.INTEGER,
-    kegiatan_id: DataTypes.INTEGER,
-    bank_id: DataTypes.INTEGER,
-    nomor_akun_bank: DataTypes.STRING,
-    nama_akun_bank: DataTypes.STRING,
-    status: DataTypes.ENUM(['sedang_berlangsung', 'terhenti']),
-    alasan_penolakan: DataTypes.TEXT
-  }, {
-    sequelize,
-    modelName: 'Permohonan',
-  });
+  Permohonan.init(
+    {
+      member_id: DataTypes.INTEGER,
+      kegiatan_id: DataTypes.INTEGER,
+      bank_id: DataTypes.INTEGER,
+      nomor_akun_bank: DataTypes.STRING,
+      nama_akun_bank: DataTypes.STRING,
+      status: DataTypes.ENUM(["sedang_berlangsung", "terhenti"]),
+      alasan_penolakan: DataTypes.TEXT,
+    },
+    {
+      sequelize,
+      modelName: "Permohonan",
+    }
+  );
   return Permohonan;
 };

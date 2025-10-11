@@ -1,19 +1,19 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
-import Notification from '@/components/Modal/Notification.vue'
-import DangerButton from '@/components/Button/DangerButton.vue'
-import BaseButton from '@/components/Button/BaseButton.vue'
-import InputFile from '@/components/Form/InputFile.vue'
-import InputText from '@/components/Form/InputText.vue'
-import InputCurrency from '@/components/Form/InputCurrency.vue'
-import InputCKEditor from '@/components/Form/InputCKEditor.vue'
-import SelectField from '@/components/Form/SelectField.vue'
-import DeleteIcon from '@/components/Icons/DeleteIcon.vue'
-import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
+import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue';
+import Notification from '@/components/Modal/Notification.vue';
+import DangerButton from '@/components/Button/DangerButton.vue';
+import BaseButton from '@/components/Button/BaseButton.vue';
+import InputFile from '@/components/Form/InputFile.vue';
+import InputText from '@/components/Form/InputText.vue';
+import InputCurrency from '@/components/Form/InputCurrency.vue';
+import InputCKEditor from '@/components/Form/InputCKEditor.vue';
+import SelectField from '@/components/Form/SelectField.vue';
+import DeleteIcon from '@/components/Icons/DeleteIcon.vue';
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
 
 // Composable
-import { useNotification } from '@/composables/useNotification'
+import { useNotification } from '@/composables/useNotification';
 
 // Service
 import {
@@ -22,73 +22,75 @@ import {
   get_daftar_desa,
   get_info_edit_program_bantuan,
   edit_program_bantuan,
-} from '@/service/program_kegiatan_bantuan'
+} from '@/service/program_kegiatan_bantuan';
 
 // State: loading
-const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL
-const isLoading = ref(false)
+const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
+const isLoading = ref(false);
 
 // Composable: notification
 const { showNotification, notificationType, notificationMessage, displayNotification } =
-  useNotification()
+  useNotification();
 
 interface Props {
-  isModalOpen: boolean
-  selectedProgram: any
+  isModalOpen: boolean;
+  selectedProgram: any;
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 
 const emit = defineEmits<{
-  (e: 'close'): void
-  (e: 'status', payload: { error_msg?: string; error?: boolean }): void
-}>()
+  (e: 'close'): void;
+  (e: 'status', payload: { error_msg?: string; error?: boolean }): void;
+}>();
 
 // Function: Close modal
 const closeModal = () => {
-  if (isSubmitting.value) return
-  resetForm()
-  emit('close')
-}
+  if (isSubmitting.value) return;
+  resetForm();
+  emit('close');
+};
 
 // Function: Fetch data
-const asnafOption = ref<{ id: number; name: string }[]>([])
-const programOption = ref<{ id: number; name: string }[]>([])
+const asnafOption = ref<{ id: number; name: string }[]>([]);
+const programOption = ref<{ id: number; name: string }[]>([]);
 
 interface Option {
-  value: number
-  label: string
+  value: number;
+  label: string;
 }
 
 function mapOptions(options?: Option[]) {
-  return options?.map((o) => ({ id: o.value, name: o.label })) ?? []
+  return options?.map((o) => ({ id: o.value, name: o.label })) ?? [];
 }
 
-const dataDesa = ref<{ id: number; nama: string }[]>([])
-const dataKecamatan = ref<{ id: number; nama: string }[]>([])
+const dataDesa = ref<{ id: number; nama: string }[]>([]);
+const dataKecamatan = ref<{ id: number; nama: string }[]>([]);
 
 // Function: Fetch data
 async function fetchData() {
-  if (!props.selectedProgram || !props.selectedProgram.id) return
-  isLoading.value = true
+  if (!props.selectedProgram || !props.selectedProgram.id) return;
+  isLoading.value = true;
   try {
-    const responseEditInfo = await get_info_edit_program_bantuan(props.selectedProgram.id as number)
-    const response = await get_filter_type()
-    const responseKecamatan = await get_daftar_kecamatan()
-    const responseDesa = await get_daftar_desa()
+    const responseEditInfo = await get_info_edit_program_bantuan(
+      props.selectedProgram.id as number,
+    );
+    const response = await get_filter_type();
+    const responseKecamatan = await get_daftar_kecamatan();
+    const responseDesa = await get_daftar_desa();
 
-    console.log(responseEditInfo)
-    form.value = responseEditInfo.data
+    console.log(responseEditInfo);
+    form.value = responseEditInfo.data;
 
-    asnafOption.value = mapOptions(response.data.type_asnaf_id)
-    programOption.value = mapOptions(response.data.type_program_id)
+    asnafOption.value = mapOptions(response.data.type_asnaf_id);
+    programOption.value = mapOptions(response.data.type_program_id);
 
-    dataKecamatan.value = responseKecamatan.data
-    dataDesa.value = responseDesa.data
+    dataKecamatan.value = responseKecamatan.data;
+    dataDesa.value = responseDesa.data;
   } catch (error) {
-    console.error(error)
+    console.error(error);
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
 }
 
@@ -111,13 +113,13 @@ const resetForm = () => {
     tahun: 0,
     banner: null,
     desc: '',
-  }
+  };
 
   // Reset errors
-  errors.value = {}
+  errors.value = {};
 
-  previewUrl.value = null
-}
+  previewUrl.value = null;
+};
 
 // Function:
 const errors = ref<Record<string, string>>({
@@ -134,160 +136,160 @@ const errors = ref<Record<string, string>>({
   tahun: '',
   banner: '',
   desc: '',
-})
+});
 
 const validateForm = () => {
-  let isValid = true
+  let isValid = true;
 
   // Reset errors
-  errors.value = {}
+  errors.value = {};
 
   if (!props.selectedProgram?.id) {
-    displayNotification('Form Invalid, Silahkan keluar dan isi form kembali.', 'error')
-    isValid = false
+    displayNotification('Form Invalid, Silahkan keluar dan isi form kembali.', 'error');
+    isValid = false;
   }
 
   if (!form.value.banner) {
-    errors.value.banner = 'Banner  wajib diisi.'
-    isValid = false
+    errors.value.banner = 'Banner  wajib diisi.';
+    isValid = false;
   }
 
   if (!form.value.nama_kegiatan) {
-    errors.value.nama_kegiatan = 'Nama kegiatan wajib diisi.'
-    isValid = false
+    errors.value.nama_kegiatan = 'Nama kegiatan wajib diisi.';
+    isValid = false;
   }
 
   if (!form.value.tahun) {
-    errors.value.tahun = 'Tahun wajib diisi.'
-    isValid = false
+    errors.value.tahun = 'Tahun wajib diisi.';
+    isValid = false;
   }
 
   if (!form.value.sumber_dana) {
-    errors.value.sumber_dana = 'Sumber dana wajib diisi.'
-    isValid = false
+    errors.value.sumber_dana = 'Sumber dana wajib diisi.';
+    isValid = false;
   }
 
-  if (!form.value.asnaf_id) {
-    errors.value.asnaf_id = 'Kategori wajib diisi.'
-    isValid = false
+  if (form.value.sumber_dana == 'zakat' && !form.value.asnaf_id) {
+    errors.value.asnaf_id = 'Asnaf wajib diisi.';
+    isValid = false;
   }
 
   if (!form.value.program_id) {
-    errors.value.program_id = 'Program wajib diisi.'
-    isValid = false
+    errors.value.program_id = 'Program wajib diisi.';
+    isValid = false;
   }
 
   if (!form.value.jumlah_dana) {
-    errors.value.jumlah_dana = 'Jumlah dana wajib diisi.'
-    isValid = false
+    errors.value.jumlah_dana = 'Jumlah dana wajib diisi.';
+    isValid = false;
   }
 
   if (!form.value.jenis_penyaluran) {
-    errors.value.jenis_penyaluran = 'Jenis penyaluran wajib diisi.'
-    isValid = false
+    errors.value.jenis_penyaluran = 'Jenis penyaluran wajib diisi.';
+    isValid = false;
   }
 
   if (!form.value.jumlah_maksimal_nominal_bantuan) {
-    errors.value.jumlah_maksimal_nominal_bantuan = 'Jumlah maksimal nominal bantuan wajib diisi.'
-    isValid = false
+    errors.value.jumlah_maksimal_nominal_bantuan = 'Jumlah maksimal nominal bantuan wajib diisi.';
+    isValid = false;
   }
 
   if (!form.value.area_penyaluran) {
-    errors.value.area_penyaluran = 'Area penyaluran wajib diisi.'
-    isValid = false
+    errors.value.area_penyaluran = 'Area penyaluran wajib diisi.';
+    isValid = false;
   }
 
   if (form.value.area_penyaluran === 'kecamatan' && form.value.jenis_penyaluran === 'volume') {
     if (!form.value.kecamatan_penyaluran || form.value.kecamatan_penyaluran.length === 0) {
-      errors.value.kecamatan_penyaluran = 'Kecamatan penyaluran wajib diisi.'
-      isValid = false
+      errors.value.kecamatan_penyaluran = 'Kecamatan penyaluran wajib diisi.';
+      isValid = false;
     } else {
       // Hitung total kuota
       const totalKuota = form.value.kecamatan_penyaluran.reduce(
         (total, current) => total + (Number(current.kuota) || 0),
         0,
-      )
+      );
 
       if (form.value.jumlah_target_penerima && totalKuota > form.value.jumlah_target_penerima) {
-        errors.value.area_penyaluran = 'Jumlah kuota kecamatan melebihi jumlah target penerima.'
-        isValid = false
+        errors.value.area_penyaluran = 'Jumlah kuota kecamatan melebihi jumlah target penerima.';
+        isValid = false;
       }
     }
   }
 
   if (form.value.area_penyaluran === 'desa' && form.value.jenis_penyaluran === 'volume') {
     if (!form.value.desa_penyaluran || form.value.desa_penyaluran.length === 0) {
-      errors.value.desa_penyaluran = 'Desa penyaluran wajib diisi.'
-      isValid = false
+      errors.value.desa_penyaluran = 'Desa penyaluran wajib diisi.';
+      isValid = false;
     } else {
       // Hitung total kuota
       const totalKuota = form.value.desa_penyaluran.reduce(
         (total, current) => total + (Number(current.kuota) || 0),
         0,
-      )
+      );
 
       if (form.value.jumlah_target_penerima && totalKuota > form.value.jumlah_target_penerima) {
-        errors.value.area_penyaluran = 'Jumlah kuota desa melebihi jumlah target penerima.'
-        isValid = false
+        errors.value.area_penyaluran = 'Jumlah kuota desa melebihi jumlah target penerima.';
+        isValid = false;
       }
     }
   }
 
   if (form.value.jenis_penyaluran === 'volume' && !form.value.jumlah_target_penerima) {
-    errors.value.jumlah_target_penerima = 'Jumlah target penerima wajib diisi.'
-    isValid = false
+    errors.value.jumlah_target_penerima = 'Jumlah target penerima wajib diisi.';
+    isValid = false;
   }
 
-  console.log(errors.value)
+  console.log(errors.value);
 
-  return isValid
-}
+  return isValid;
+};
 
 // Function: Handle file
-const previewUrl = ref<string | null>(null)
+const previewUrl = ref<string | null>(null);
 
 const handleFile = (file: File | null) => {
   if (!file) {
     if (props.selectedProgram?.banner) {
-      previewUrl.value = `${BASE_URL}/uploads/img/program_kegiatan_bantuan/${props.selectedProgram.banner}`
+      previewUrl.value = `${BASE_URL}/uploads/img/program_kegiatan_bantuan/${props.selectedProgram.banner}`;
     } else {
-      previewUrl.value = null
+      previewUrl.value = null;
     }
-    form.value.banner = null
-    return
+    form.value.banner = null;
+    return;
   }
 
-  const fileSizeMB = Math.round(file.size / (1024 * 1024))
+  const fileSizeMB = Math.round(file.size / (1024 * 1024));
   if (fileSizeMB > 2) {
-    errors.value.banner = 'Ukuran file maksimal 2 MB'
-    return
+    errors.value.banner = 'Ukuran file maksimal 2 MB';
+    return;
   }
 
-  errors.value.banner = ''
+  errors.value.banner = '';
 
-  previewUrl.value = URL.createObjectURL(file)
-  form.value.banner = file
-}
+  previewUrl.value = URL.createObjectURL(file);
+  form.value.banner = file;
+};
 
 // Function: Handle submit
-const isSubmitting = ref(false)
+const isSubmitting = ref(false);
 const form = ref<{
-  id: number
-  asnaf_id: string
-  program_id: string
-  nama_kegiatan: string
-  status_tampil: boolean
-  jumlah_dana: number
-  jumlah_maksimal_nominal_bantuan: number
-  jumlah_target_penerima: number
-  sumber_dana: string
-  area_penyaluran: string
-  desa_penyaluran: { desa_id: string | number; kuota: number }[]
-  kecamatan_penyaluran: { kecamatan_id: string | number; kuota: number }[]
-  jenis_penyaluran: string
-  tahun: number
-  banner: File | null
-  desc: string
+  id: number;
+  asnaf_id: string;
+  program_id: string;
+  nama_kegiatan: string;
+  status_tampil: boolean;
+  jumlah_dana: number;
+  jumlah_maksimal_nominal_bantuan: number;
+  jumlah_target_penerima: number;
+  sumber_dana: string;
+  area_penyaluran: string;
+  desa_penyaluran: { desa_id: string | number; kuota: number }[];
+  kecamatan_penyaluran: { kecamatan_id: string | number; kuota: number }[];
+  jenis_penyaluran: string;
+  tahun: number;
+  banner: File | null;
+  desc: string;
 }>({
   id: 0,
   asnaf_id: '',
@@ -305,77 +307,77 @@ const form = ref<{
   tahun: 0,
   banner: null,
   desc: '',
-})
+});
 
 const handleSubmit = async () => {
-  if (!validateForm()) return
-  isSubmitting.value = true
+  if (!validateForm()) return;
+  isSubmitting.value = true;
 
-  const formData = new FormData()
-  formData.append('id', form.value.id || Number(props.selectedProgram.id))
+  const formData = new FormData();
+  formData.append('id', form.value.id || Number(props.selectedProgram.id));
   Object.entries(form.value).forEach(([key, value]) => {
-    if (key === 'banner' && !value) return
+    if (key === 'banner' && !value) return;
 
     if (key === 'desa_penyaluran') {
       if (form.value.area_penyaluran === 'desa') {
-        formData.append('desa_penyaluran', JSON.stringify(value))
+        formData.append('desa_penyaluran', JSON.stringify(value));
       } else {
-        formData.append('desa_penyaluran', JSON.stringify([]))
+        formData.append('desa_penyaluran', JSON.stringify([]));
       }
     } else if (key === 'kecamatan_penyaluran') {
       if (form.value.area_penyaluran === 'kecamatan') {
-        formData.append('kecamatan_penyaluran', JSON.stringify(value))
+        formData.append('kecamatan_penyaluran', JSON.stringify(value));
       } else {
-        formData.append('kecamatan_penyaluran', JSON.stringify([]))
+        formData.append('kecamatan_penyaluran', JSON.stringify([]));
       }
     } else if (key === 'jumlah_target_penerima') {
       if (form.value.jenis_penyaluran === 'volume') {
-        formData.append('jumlah_target_penerima', value)
+        formData.append('jumlah_target_penerima', value);
       } else {
-        formData.append('jumlah_target_penerima', 0)
+        formData.append('jumlah_target_penerima', 0);
       }
     } else {
-      formData.append(key, value)
+      formData.append(key, value);
     }
-  })
+  });
 
-  console.log(Object.fromEntries(formData.entries()))
+  console.log(Object.fromEntries(formData.entries()));
   try {
-    const response = await edit_program_bantuan(formData)
-    console.log(response)
-    emit('status', { error_msg: response.error_msg || response, error: response.error })
+    const response = await edit_program_bantuan(formData);
+    console.log(response);
+    emit('status', { error_msg: response.error_msg || response, error: response.error });
   } catch (error: any) {
-    console.error(error)
-    displayNotification(error.response.data.error_msg || error.response.data.message, 'error')
+    console.error(error);
+    displayNotification(error.response.data.error_msg || error.response.data.message, 'error');
   } finally {
-    isSubmitting.value = false
-    closeModal()
+    isSubmitting.value = false;
+    closeModal();
   }
-}
+};
 
 // Function: Handle escape
 const handleEscape = (e: KeyboardEvent) => {
-  if (e.key === 'Escape' && props.isModalOpen) closeModal()
-}
+  if (e.key === 'Escape' && props.isModalOpen) closeModal();
+};
 onMounted(async () => {
-  document.addEventListener('keydown', handleEscape)
-})
+  document.addEventListener('keydown', handleEscape);
+});
 
 onBeforeUnmount(async () => {
-  document.removeEventListener('keydown', handleEscape)
-})
+  document.removeEventListener('keydown', handleEscape);
+});
 
 watch(
   () => [props.isModalOpen, props.selectedProgram],
   ([isModalOpen, selectedProgram]) => {
     if (isModalOpen && selectedProgram) {
-      fetchData()
+      fetchData();
       if (selectedProgram?.banner) {
-        previewUrl.value = `${BASE_URL}/uploads/img/program_kegiatan_bantuan/${selectedProgram.banner}`
+        previewUrl.value = `${BASE_URL}/uploads/img/program_kegiatan_bantuan/${selectedProgram.banner}`;
       }
     }
   },
-)
+);
 
 watch(
   () => form.value.area_penyaluran,
@@ -383,23 +385,31 @@ watch(
     if (val === 'desa') {
       // hanya inisialisasi kalau belum ada data
       if (!form.value.desa_penyaluran?.length) {
-        form.value.desa_penyaluran = [{ desa_id: '', kuota: 0 }]
+        form.value.desa_penyaluran = [{ desa_id: '', kuota: 0 }];
       }
     } else if (val === 'kecamatan') {
       if (!form.value.kecamatan_penyaluran?.length) {
-        form.value.kecamatan_penyaluran = [{ kecamatan_id: '', kuota: 0 }]
+        form.value.kecamatan_penyaluran = [{ kecamatan_id: '', kuota: 0 }];
       }
     } else {
-      form.value.desa_penyaluran = []
-      form.value.kecamatan_penyaluran = []
+      form.value.desa_penyaluran = [];
+      form.value.kecamatan_penyaluran = [];
     }
   },
-)
+);
+
+const filteredAsnafOptions = computed(() => {
+  if (form.value.sumber_dana === 'zakat') {
+    return [{ id: '', name: '-- Pilih Asnaf --' }, ...asnafOption.value];
+  } else {
+    return [{ id: '', name: '-- Pilih Asnaf --' }];
+  }
+});
 
 function openImageInNewTab() {
-  const url = new URL(previewUrl.value)
-  const win = window.open(url.toString(), '_blank')
-  win?.focus()
+  const url = new URL(previewUrl.value);
+  const win = window.open(url.toString(), '_blank');
+  win?.focus();
 }
 </script>
 
@@ -512,7 +522,7 @@ function openImageInNewTab() {
                 id="asnaf_id"
                 v-model="form.asnaf_id"
                 label="Kategori Asnaf"
-                :options="[{ id: '', name: '-- Pilih Kategori Asnaf --' }, ...asnafOption]"
+                :options="filteredAsnafOptions"
                 required
                 :error="errors.asnaf_id"
               />

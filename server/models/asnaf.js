@@ -17,6 +17,9 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "asnaf_id",
         onDelete: "CASCADE",
       });
+      // Asnaf.hasMany(models.Permohonan, {
+      //   foreignKey: "asnaf_id",
+      // });
     }
   }
   Asnaf.init(

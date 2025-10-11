@@ -67,7 +67,7 @@ const menuItems = [
     bg: 'bg-green-800',
     rounded: '',
     lgWidth: 'lg:w-40',
-    // component: defineAsyncComponent(() => import('./widgets/Zakat.vue')),
+    component: defineAsyncComponent(() => import('@/modules/ZakatMember/ZakatMember.vue')),
   },
   {
     id: 'infaq',
@@ -76,7 +76,7 @@ const menuItems = [
     bg: 'bg-green-700',
     rounded: '',
     lgWidth: 'lg:w-40',
-    component: null, // fallback
+    component: defineAsyncComponent(() => import('@/modules/InfaqMember/InfaqMember.vue')),
   },
   {
     id: 'donasi',

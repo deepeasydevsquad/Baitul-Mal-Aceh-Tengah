@@ -7,7 +7,9 @@ import { useNotification } from '@/composables/useNotification';
 
 const isLoading = ref(false);
 const selectedYear = ref(new Date().getFullYear()); // default tahun sekarang
-const years = [2023, 2024, 2025, 2026]; // bisa kamu generate dinamis
+const years = ref(
+  Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i)
+);
 
 const months = [
   { key: '01', label: 'JAN' },
@@ -97,9 +99,10 @@ watch(selectedYear, fetchData); // reload data setiap kali tahun diganti
         <thead class="bg-gray-50 text-gray-700 text-center border-b border-gray-300">
           <tr>
             <th class="w-[5%] text-center px-6 py-4 font-medium font-bold text-gray-900">No</th>
-            <th class="w-[15%] text-center px-6 py-4 font-medium font-bold text-gray-900">
-              Tipe Pengumpulan
+            <th class="w-[15%] text-center px-10 py-6 font-medium font-bold text-gray-900 whitespace-nowrap">
+            Tipe Pengumpulan
             </th>
+
             <th
               v-for="m in months"
               :key="m.key"
