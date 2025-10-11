@@ -1,120 +1,112 @@
-// modules/laporan_perencanaan/models/model_r.js
-const { Kegiatan, Asnaf } = require("../../../models");
+const moment = require("moment");
+const {
+  Sequelize,
+  Op,
+  Target_pengumpulan,
+  Riwayat_pengumpulan,
+  Riwayat_donasi,
+} = require("../../../models");
 
 class Model_r {
   constructor(req) {
     this.req = req;
   }
 
-  // Helper format Rupiah tanpa ,00
-  formatRupiah(val) {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(val);
-  }
-
-  async list_laporan_perencanaan() {
+  async laporan_pengumpulan() {
     try {
-      const kegiatanList = await Kegiatan.findAll({
-        attributes: [
-          "id",
-          "nama_kegiatan",
-          "satuan",
-          "jumlah_target_penerima",
-          "jumlah_maksimal_nominal_bantuan",
-          "periode_bantuan",
-          "program_id",
-          "sumber_dana",
-        ],
-        include: [
-          {
-            model: Asnaf,
-            attributes: ["id", "name"],
-          },
-        ],
+      const tahun = this.req.query.tahun || this.req.body.tahun || new Date().getFullYear();
+      const search = this.req.query.search || this.req.body.search || "";
+
+      console.log("📊 Request params:", { tahun, search });
+
+      // 🔹 Ambil data target dari tabel Target_pengumpulan
+      const targetData = await Target_pengumpulan.findAll({
+        where: { tahun },
         raw: true,
-        nest: true,
       });
 
-      const kategoriMap = {};
+      const targetItem = targetData[0] || {};
+      const targetZakat = Number(targetItem.zakat) || 0;
+      const targetInfaq = Number(targetItem.infaq) || 0;
+      const targetDonasi = Number(targetItem.donasi) || 0;
+      const totalTarget = targetZakat + targetInfaq + targetDonasi;
 
-      for (const k of kegiatanList) {
-        const programId = k.program_id;
-        if (!kategoriMap[programId]) {
-          kategoriMap[programId] = {
-            nama: k.Asnaf?.name || `Program ${programId}`,
-            program: [],
-            total: 0,
-          };
-        }
-
-        const jumlah = Number(k.jumlah_target_penerima || 0);
-        const jumlahSatuan = Number(k.jumlah_maksimal_nominal_bantuan || 0);
-
-        let vol = 1;
-        let satuan = "tahun";
-        let totalBaris = 0;
-
-        if (k.periode_bantuan === "bulanan") {
-          vol = jumlah * 12;
-          satuan = "OB";
-          totalBaris = vol * jumlahSatuan;
-        } else {
-          vol = 1;
-          satuan = "tahun";
-          totalBaris = jumlah * jumlahSatuan;
-        }
-
-        kategoriMap[programId].program.push({
-          id: k.id,
-          uraian: k.nama_kegiatan || "-",
-          rencana: {
-            jumlah,
-            satuan: k.satuan || "orang",
+      // 🔹 Ambil realisasi
+      const zakatRealisasi =
+        (await Riwayat_pengumpulan.sum("nominal", {
+          where: {
+            status: "success",
+            tipe: { [Op.ne]: "infaq" },
+            createdAt: {
+              [Op.between]: [`${tahun}-01-01 00:00:00`, `${tahun}-12-31 23:59:59`],
+            },
           },
-          rincian: {
-            vol,
-            satuan,
-            jumlah_satuan: jumlahSatuan,
-            jumlah_satuan_format: this.formatRupiah(jumlahSatuan),
+        })) || 0;
+
+      const infaqRealisasi =
+        (await Riwayat_pengumpulan.sum("nominal", {
+          where: {
+            status: "success",
+            tipe: "infaq",
+            createdAt: {
+              [Op.between]: [`${tahun}-01-01 00:00:00`, `${tahun}-12-31 23:59:59`],
+            },
           },
-          item_total: totalBaris,
-          item_total_format: this.formatRupiah(totalBaris),
-          persentase: null,
-          ket: k.sumber_dana || "-",
-        });
+        })) || 0;
 
-        kategoriMap[programId].total += totalBaris;
-      }
+      const donasiRealisasi =
+        (await Riwayat_donasi.sum("nominal", {
+          where: {
+            status: "success",
+            createdAt: {
+              [Op.between]: [`${tahun}-01-01 00:00:00`, `${tahun}-12-31 23:59:59`],
+            },
+          },
+        })) || 0;
 
-      // Hitung persentase per kategori
-      for (const cat of Object.values(kategoriMap)) {
-        const catTotal = cat.total;
-        for (const prog of cat.program) {
-          prog.persentase =
-            catTotal > 0
-              ? ((prog.item_total / catTotal) * 100).toFixed(2) + "%"
-              : "0%";
-        }
-        cat.total_format = this.formatRupiah(cat.total);
-      }
+      const totalRealisasi = zakatRealisasi + infaqRealisasi + donasiRealisasi;
 
-      const data = Object.values(kategoriMap);
-      const grand_total = data.reduce((s, c) => s + c.total, 0);
+      // 🧮 Fungsi aman pembulatan
+      const fix = (num) => Math.round(num * 100) / 100;
 
-      return {
-        data,
-        total: data.length,
-        grand_total,
-        grand_total_format: this.formatRupiah(grand_total),
+      // 🔸 Hitung bobot target (agar total 100%)
+      const bobotZakat = totalTarget ? targetZakat / totalTarget : 0;
+      const bobotInfaq = totalTarget ? targetInfaq / totalTarget : 0;
+      const bobotDonasi = totalTarget ? targetDonasi / totalTarget : 0;
+
+      // 🔸 Hitung persentase berdasarkan kontribusi per jenis
+      const persenZakat = fix((zakatRealisasi / targetZakat) * bobotZakat * 100 || 0);
+      const persenInfaq = fix((infaqRealisasi / targetInfaq) * bobotInfaq * 100 || 0);
+      const persenDonasi = fix((donasiRealisasi / targetDonasi) * bobotDonasi * 100 || 0);
+
+      // 🔸 Pastikan total persentase = 100 maksimal
+      let persenTotal = persenZakat + persenInfaq + persenDonasi;
+      if (persenTotal > 100) persenTotal = 100;
+      persenTotal = fix(persenTotal);
+
+      // 🔹 Susun hasil laporan
+      const laporan = {
+        tahun: parseInt(tahun),
+        totalTarget,
+        totalRealisasi,
+        persentaseTotal: persenTotal,
+        dataPerJenis: [
+          { jenis: "Zakat", target: targetZakat, realisasi: zakatRealisasi, persentase: persenZakat },
+          { jenis: "Infaq", target: targetInfaq, realisasi: infaqRealisasi, persentase: persenInfaq },
+          { jenis: "Donasi", target: targetDonasi, realisasi: donasiRealisasi, persentase: persenDonasi },
+        ],
       };
+
+      console.log("✅ Laporan final:", JSON.stringify(laporan, null, 2));
+      return [laporan];
     } catch (error) {
-      console.error("[Model_r] laporan_perencanaan error:", error);
+      console.error("❌ Error laporan_pengumpulan:", error);
       throw error;
     }
+  }
+
+  async list_laporan_pengumpulan() {
+    return this.laporan_pengumpulan();
   }
 }
 
