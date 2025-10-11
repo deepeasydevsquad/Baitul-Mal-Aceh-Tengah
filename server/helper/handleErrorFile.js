@@ -1,6 +1,8 @@
 const { validationResult } = require("express-validator");
 const fs = require("fs");
 
+const helper = {};
+
 function deleteUploadedFiles(req) {
   // Kalau single upload
   if (req.file && req.file.path) {
@@ -35,16 +37,14 @@ function deleteUploadedFiles(req) {
   }
 }
 
-const helper = {
-  handleFileErrors: (req, res, next) => {
-    const errors = validationResult(req);
+helper.handleFileErrors = (req, res, next) => {
+  const errors = validationResult(req);
 
-    if (!errors.isEmpty()) {
-      deleteUploadedFiles(req); // hapus semua file kalau ada error
-    }
+  if (!errors.isEmpty()) {
+    deleteUploadedFiles(req); // hapus semua file kalau ada error
+  }
 
-    next();
-  },
+  next();
 };
 
 module.exports = helper;

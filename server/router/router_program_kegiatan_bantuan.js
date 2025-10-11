@@ -15,7 +15,6 @@ router.get(
   controllers.get_filter_type
 );
 
-
 router.get(
   "/program_kegiatan_bantuan/daftar_kecamatan",
   authenticateTokenAdministrator,
@@ -42,17 +41,11 @@ router.post(
       .withMessage("Page Number Tidak Boleh Kosong")
       .isInt()
       .withMessage("Page Number Harus Angka"),
-    body("search")
-      .optional()
-      .isString().withMessage("Search Harus String"),
-    body("type_status_kegiatan")
-      .optional(),
-    body("type_asnaf_id")
-      .optional(),
-    body("type_program_id")
-      .optional(),
-    body("type_year")
-      .optional(),
+    body("search").optional().isString().withMessage("Search Harus String"),
+    body("type_status_kegiatan").optional(),
+    body("type_asnaf_id").optional(),
+    body("type_program_id").optional(),
+    body("type_year").optional(),
   ],
   controllers.daftar_list
 );
@@ -64,46 +57,65 @@ router.post(
   validation.check_dimensions(true),
   [
     body("asnaf_id")
-      .notEmpty().withMessage("Asnaf Tidak Boleh Kosong")
-      .isInt().withMessage("Asnaf Harus Angka"),
+      .if(body("sumber_dana").equals("zakat")) // hanya wajib kalau sumber_dana = zakat
+      .notEmpty()
+      .withMessage("Asnaf Tidak Boleh Kosong")
+      .isInt()
+      .withMessage("Asnaf Harus Angka"),
     body("program_id")
-      .notEmpty().withMessage("Program Tidak Boleh Kosong")
-      .isInt().withMessage("Program Harus Angka"),
+      .notEmpty()
+      .withMessage("Program Tidak Boleh Kosong")
+      .isInt()
+      .withMessage("Program Harus Angka"),
     body("nama_kegiatan")
-      .notEmpty().withMessage("Name Tidak Boleh Kosong")
-      .isString().withMessage("Name Harus String"),
+      .notEmpty()
+      .withMessage("Name Tidak Boleh Kosong")
+      .isString()
+      .withMessage("Name Harus String"),
     body("status_tampil")
       .optional()
-      .isIn(["true", "false"]).withMessage("Status Tampil Harus diantara Tampil dan Tidak Tampil"),
+      .isIn(["true", "false"])
+      .withMessage("Status Tampil Harus diantara Tampil dan Tidak Tampil"),
     body("jumlah_dana")
-      .notEmpty().withMessage("Jumlah Dana Tidak Boleh Kosong")
-      .isInt().withMessage("Jumlah Dana Harus Angka"),
+      .notEmpty()
+      .withMessage("Jumlah Dana Tidak Boleh Kosong")
+      .isInt()
+      .withMessage("Jumlah Dana Harus Angka"),
     body("jumlah_maksimal_nominal_bantuan")
-      .notEmpty().withMessage("Jumlah Maksimal Nominal Bantuan Tidak Boleh Kosong")
-      .isInt().withMessage("Jumlah Maksimal Nominal Bantuan Harus Angka"),
+      .notEmpty()
+      .withMessage("Jumlah Maksimal Nominal Bantuan Tidak Boleh Kosong")
+      .isInt()
+      .withMessage("Jumlah Maksimal Nominal Bantuan Harus Angka"),
     body("jumlah_target_penerima")
       .optional()
-      .isInt().withMessage("Jumlah Target Penerima Harus Angka"),
+      .isInt()
+      .withMessage("Jumlah Target Penerima Harus Angka"),
     body("sumber_dana")
-      .notEmpty().withMessage("Sumber Dana Tidak Boleh Kosong")
-      .isIn(["infaq", "zakat"]).withMessage("Sumber Dana Harus Infaq atau Zakat"),
+      .notEmpty()
+      .withMessage("Sumber Dana Tidak Boleh Kosong")
+      .isIn(["infaq", "zakat"])
+      .withMessage("Sumber Dana Harus Infaq atau Zakat"),
     body("area_penyaluran")
-      .notEmpty().withMessage("Area Penyaluran Tidak Boleh Kosong")
-      .isIn(['semua_pemohon', 'kabupaten', 'instansi', 'kecamatan', 'desa']).withMessage("Area Penyaluran Harus diantara Semua Pemohon, Kabupaten, Instansi, Kecamatan, atau Desa"),
-    body("desa_penyaluran")
-      .optional(),
-    body("kecamatan_penyaluran")
-      .optional(),
+      .notEmpty()
+      .withMessage("Area Penyaluran Tidak Boleh Kosong")
+      .isIn(["semua_pemohon", "kabupaten", "instansi", "kecamatan", "desa"])
+      .withMessage(
+        "Area Penyaluran Harus diantara Semua Pemohon, Kabupaten, Instansi, Kecamatan, atau Desa"
+      ),
+    body("desa_penyaluran").optional(),
+    body("kecamatan_penyaluran").optional(),
     body("jenis_penyaluran")
-      .notEmpty().withMessage("Jenis Penyaluran Tidak Boleh Kosong")
-      .isIn(['langsung', 'volume']).withMessage("Jenis Penyaluran Harus Langsung atau Volume"),
+      .notEmpty()
+      .withMessage("Jenis Penyaluran Tidak Boleh Kosong")
+      .isIn(["langsung", "volume"])
+      .withMessage("Jenis Penyaluran Harus Langsung atau Volume"),
     body("tahun")
-      .notEmpty().withMessage("Tahun Tidak Boleh Kosong")
-      .isInt().withMessage("Tahun Harus Angka"),
-    body("name")
-      .optional(),
-    body("desc")
-      .optional(),
+      .notEmpty()
+      .withMessage("Tahun Tidak Boleh Kosong")
+      .isInt()
+      .withMessage("Tahun Harus Angka"),
+    body("name").optional(),
+    body("desc").optional(),
   ],
   validationHelper.handleFileErrors,
   controllers.add
@@ -114,36 +126,42 @@ router.post(
   authenticateTokenAdministrator,
   [
     body("id")
-      .notEmpty().withMessage("ID Tidak Boleh Kosong")
-      .isInt().withMessage("ID Harus Angka")
+      .notEmpty()
+      .withMessage("ID Tidak Boleh Kosong")
+      .isInt()
+      .withMessage("ID Harus Angka")
       .custom(validation.check_id_program_kegiatan_bantuan),
   ],
   controllers.get_edit_status_program_bantuan
-)
+);
 
 router.post(
   "/program_kegiatan_bantuan/edit_status_program_bantuan",
   authenticateTokenAdministrator,
   [
     body("id")
-      .notEmpty().withMessage("ID Tidak Boleh Kosong")
-      .isInt().withMessage("ID Harus Angka")
+      .notEmpty()
+      .withMessage("ID Tidak Boleh Kosong")
+      .isInt()
+      .withMessage("ID Harus Angka")
       .custom(validation.check_id_program_kegiatan_bantuan),
   ],
   controllers.edit_status_program_bantuan
-)
+);
 
 router.post(
   "/program_kegiatan_bantuan/get_info_edit_program_bantuan",
   authenticateTokenAdministrator,
   [
     body("id")
-      .notEmpty().withMessage("ID Tidak Boleh Kosong")
-      .isInt().withMessage("ID Harus Angka")
+      .notEmpty()
+      .withMessage("ID Tidak Boleh Kosong")
+      .isInt()
+      .withMessage("ID Harus Angka")
       .custom(validation.check_id_program_kegiatan_bantuan),
   ],
   controllers.get_info_edit_program_kegiatan_bantuan
-)
+);
 
 router.post(
   "/program_kegiatan_bantuan/edit",
@@ -152,58 +170,83 @@ router.post(
   validation.check_dimensions(false),
   [
     body("id")
-      .notEmpty().withMessage("ID Tidak Boleh Kosong")
-      .isInt().withMessage("ID Harus Angka")
+      .notEmpty()
+      .withMessage("ID Tidak Boleh Kosong")
+      .isInt()
+      .withMessage("ID Harus Angka")
       .custom(validation.check_id_program_kegiatan_bantuan),
     body("asnaf_id")
-      .notEmpty().withMessage("Asnaf Tidak Boleh Kosong")
-      .isInt().withMessage("Asnaf Harus Angka"),
+      .if(body("sumber_dana").equals("zakat")) // hanya wajib kalau sumber_dana = zakat
+      .notEmpty()
+      .withMessage("Asnaf Tidak Boleh Kosong")
+      .isInt()
+      .withMessage("Asnaf Harus Angka"),
     body("program_id")
-      .notEmpty().withMessage("Program Tidak Boleh Kosong")
-      .isInt().withMessage("Program Harus Angka"),
+      .notEmpty()
+      .withMessage("Program Tidak Boleh Kosong")
+      .isInt()
+      .withMessage("Program Harus Angka"),
     body("nama_kegiatan")
-      .notEmpty().withMessage("Name Tidak Boleh Kosong")
-      .isString().withMessage("Name Harus String"),
+      .notEmpty()
+      .withMessage("Name Tidak Boleh Kosong")
+      .isString()
+      .withMessage("Name Harus String"),
     body("status_tampil")
       .optional()
-      .isBoolean().withMessage("Status Tampil Harus diantara Tampil dan Tidak Tampil"),
+      .isBoolean()
+      .withMessage("Status Tampil Harus diantara Tampil dan Tidak Tampil"),
     body("jumlah_dana")
-      .notEmpty().withMessage("Jumlah Dana Tidak Boleh Kosong")
-      .isInt().withMessage("Jumlah Dana Harus Angka"),
+      .notEmpty()
+      .withMessage("Jumlah Dana Tidak Boleh Kosong")
+      .isInt()
+      .withMessage("Jumlah Dana Harus Angka"),
     body("jumlah_maksimal_nominal_bantuan")
-      .notEmpty().withMessage("Jumlah Maksimal Nominal Bantuan Tidak Boleh Kosong")
-      .isInt().withMessage("Jumlah Maksimal Nominal Bantuan Harus Angka"),
+      .notEmpty()
+      .withMessage("Jumlah Maksimal Nominal Bantuan Tidak Boleh Kosong")
+      .isInt()
+      .withMessage("Jumlah Maksimal Nominal Bantuan Harus Angka"),
     body("jumlah_target_penerima")
       .optional()
-      .isInt().withMessage("Jumlah Target Penerima Harus Angka"),
+      .isInt()
+      .withMessage("Jumlah Target Penerima Harus Angka"),
     body("sumber_dana")
-      .notEmpty().withMessage("Sumber Dana Tidak Boleh Kosong")
-      .isIn(["infaq", "zakat"]).withMessage("Sumber Dana Harus Infaq atau Zakat"),
+      .notEmpty()
+      .withMessage("Sumber Dana Tidak Boleh Kosong")
+      .isIn(["infaq", "zakat"])
+      .withMessage("Sumber Dana Harus Infaq atau Zakat"),
     body("area_penyaluran")
-      .notEmpty().withMessage("Area Penyaluran Tidak Boleh Kosong")
-      .isIn(['semua_pemohon', 'kabupaten', 'instansi', 'kecamatan', 'desa']).withMessage("Area Penyaluran Harus diantara Semua Pemohon, Kabupaten, Instansi, Kecamatan, atau Desa"),
+      .notEmpty()
+      .withMessage("Area Penyaluran Tidak Boleh Kosong")
+      .isIn(["semua_pemohon", "kabupaten", "instansi", "kecamatan", "desa"])
+      .withMessage(
+        "Area Penyaluran Harus diantara Semua Pemohon, Kabupaten, Instansi, Kecamatan, atau Desa"
+      ),
     body("jenis_penyaluran")
-      .notEmpty().withMessage("Jenis Penyaluran Tidak Boleh Kosong")
-      .isIn(['langsung', 'volume']).withMessage("Jenis Penyaluran Harus Langsung atau Volume"),
+      .notEmpty()
+      .withMessage("Jenis Penyaluran Tidak Boleh Kosong")
+      .isIn(["langsung", "volume"])
+      .withMessage("Jenis Penyaluran Harus Langsung atau Volume"),
     body("tahun")
-      .notEmpty().withMessage("Tahun Tidak Boleh Kosong")
-      .isInt().withMessage("Tahun Harus Angka"),
-    body("name")
-      .optional(),
-    body("desc")
-      .optional(),
+      .notEmpty()
+      .withMessage("Tahun Tidak Boleh Kosong")
+      .isInt()
+      .withMessage("Tahun Harus Angka"),
+    body("name").optional(),
+    body("desc").optional(),
   ],
   validationHelper.handleFileErrors,
   controllers.edit
-)
+);
 
 router.post(
   "/program_kegiatan_bantuan/delete",
   authenticateTokenAdministrator,
   [
     body("id")
-      .notEmpty().withMessage("ID Tidak Boleh Kosong")
-      .isInt().withMessage("ID Harus Angka")
+      .notEmpty()
+      .withMessage("ID Tidak Boleh Kosong")
+      .isInt()
+      .withMessage("ID Harus Angka")
       .custom(validation.check_id_program_kegiatan_bantuan),
   ],
   controllers.delete

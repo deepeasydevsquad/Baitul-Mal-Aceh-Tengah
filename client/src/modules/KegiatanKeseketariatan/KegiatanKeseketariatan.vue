@@ -1,103 +1,103 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted, computed } from 'vue'
-import Notification from '@/components/Modal/Notification.vue'
-import Confirmation from '@/components/Modal/Confirmation.vue'
-import BaseButton from '@/components/Button/BaseButton.vue'
-import LightButton from '@/components/Button/LightButton.vue'
-import EditIcon from '@/components/Icons/EditIcon.vue'
-import DangerButton from '@/components/Button/DangerButton.vue'
-import DeleteIcon from '@/components/Icons/DeleteIcon.vue'
-import Pagination from '@/components/Pagination/Pagination.vue'
-import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue'
-import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
-import FormAdd from '@/modules/KegiatanKeseketariatan/widgets/FormAdd.vue'
+import { ref, onMounted, computed } from 'vue';
+import Notification from '@/components/Modal/Notification.vue';
+import Confirmation from '@/components/Modal/Confirmation.vue';
+import BaseButton from '@/components/Button/BaseButton.vue';
+import LightButton from '@/components/Button/LightButton.vue';
+import EditIcon from '@/components/Icons/EditIcon.vue';
+import DangerButton from '@/components/Button/DangerButton.vue';
+import DeleteIcon from '@/components/Icons/DeleteIcon.vue';
+import Pagination from '@/components/Pagination/Pagination.vue';
+import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
+import FormAdd from '@/modules/KegiatanKeseketariatan/widgets/FormAdd.vue';
 
 // Composable
-import { usePagination } from '@/composables/usePagination'
-import { useConfirmation } from '@/composables/useConfirmation'
-import { useNotification } from '@/composables/useNotification'
+import { usePagination } from '@/composables/usePaginations';
+import { useConfirmation } from '@/composables/useConfirmation';
+import { useNotification } from '@/composables/useNotification';
 
 // Service API
-import { list } from '@/service/kegiatan_keseketariatan'
+import { list } from '@/service/kegiatan_keseketariatan';
 
 // State: Loading
-const isLoading = ref(false)
-const isTableLoading = ref(false)
+const isLoading = ref(false);
+const isTableLoading = ref(false);
 
 // Composable: pagination
-const itemsPerPage = ref<number>(100)
-const totalColumns = ref<number>(3)
+const itemsPerPage = ref<number>(100);
+const totalColumns = ref<number>(3);
 
 const { currentPage, perPage, totalRow, totalPages, nextPage, prevPage, pageNow, pages } =
-  usePagination(fetchData, { perPage: itemsPerPage.value })
+  usePagination(fetchData, { perPage: itemsPerPage.value });
 
 // Composable: notification
 const { showNotification, notificationType, notificationMessage, displayNotification } =
-  useNotification()
+  useNotification();
 
 // Composable: confirmation
 const { showConfirmDialog, confirmTitle, confirmMessage, displayConfirmation, confirm, cancel } =
-  useConfirmation()
+  useConfirmation();
 
 interface Data {
-  id: number
-  kode: string
-  nama_kegiatan: string
-  penerima: string
-  jenis_penerima: string
-  area_penyaluran: string
-  nama_desa: string
-  nominal_kegiatan: number
-  tanggal_penyaluran: string
+  id: number;
+  kode: string;
+  nama_kegiatan: string;
+  penerima: string;
+  jenis_penerima: string;
+  area_penyaluran: string;
+  nama_desa: string;
+  nominal_kegiatan: number;
+  tanggal_penyaluran: string;
 }
 
-const datas = ref<Data[]>([])
+const datas = ref<Data[]>([]);
 
 // Function: Modal
-const isModalAddOpen = ref(false)
+const isModalAddOpen = ref(false);
 
 function openModalAdd() {
-  isModalAddOpen.value = true
+  isModalAddOpen.value = true;
 }
 
 // Function: Fetch Data
-const search = ref('')
+const search = ref('');
 
 async function fetchData() {
-  isTableLoading.value = true
+  isTableLoading.value = true;
   try {
     const response = await list({
       search: search.value,
       perpage: perPage.value,
       pageNumber: currentPage.value,
-    })
+    });
 
-    datas.value = response.data
-    totalRow.value = response.total
-    console.log(datas.value)
+    datas.value = response.data;
+    totalRow.value = response.total;
+    console.log(datas.value);
   } catch (error) {
-    displayNotification('Gagal mengambil data kegiatan', 'error')
+    displayNotification('Gagal mengambil data kegiatan', 'error');
   } finally {
-    isTableLoading.value = false
+    isTableLoading.value = false;
   }
 }
 
 onMounted(async () => {
-  await fetchData()
-})
+  await fetchData();
+});
 
 const handleClose = () => {
-  isModalAddOpen.value = false
-  fetchData()
-}
+  isModalAddOpen.value = false;
+  fetchData();
+};
 
 const handleStatus = (payload: any) => {
   displayNotification(
     payload.error_msg || 'Tambah Program Berhasil',
     payload.error ? 'error' : 'success',
-  )
-}
+  );
+};
 </script>
 
 <template>

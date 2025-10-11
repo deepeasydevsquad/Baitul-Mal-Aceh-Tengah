@@ -1,98 +1,97 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted, computed } from 'vue'
-import Notification from '@/components/Modal/Notification.vue'
-import Confirmation from '@/components/Modal/Confirmation.vue'
-import BaseButton from '@/components/Button/BaseButton.vue'
-import LightButton from '@/components/Button/LightButton.vue'
-import EditIcon from '@/components/Icons/EditIcon.vue'
-import DangerButton from '@/components/Button/DangerButton.vue'
-import DeleteIcon from '@/components/Icons/DeleteIcon.vue'
-import Pagination from '@/components/Pagination/Pagination.vue'
-import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue'
-import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
-import FormAdd from '@/modules/Kecamatan/widgets/FormAdd.vue'
-import FormEdit from '@/modules/Kecamatan/widgets/FormEdit.vue'
+import { ref, onMounted, computed } from 'vue';
+import Notification from '@/components/Modal/Notification.vue';
+import Confirmation from '@/components/Modal/Confirmation.vue';
+import BaseButton from '@/components/Button/BaseButton.vue';
+import LightButton from '@/components/Button/LightButton.vue';
+import EditIcon from '@/components/Icons/EditIcon.vue';
+import DangerButton from '@/components/Button/DangerButton.vue';
+import DeleteIcon from '@/components/Icons/DeleteIcon.vue';
+import Pagination from '@/components/Pagination/Pagination.vue';
+import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
+import FormAdd from '@/modules/Kecamatan/widgets/FormAdd.vue';
+import FormEdit from '@/modules/Kecamatan/widgets/FormEdit.vue';
 
 // Composable
-import { usePagination } from '@/composables/usePagination'
-import { useConfirmation } from '@/composables/useConfirmation'
-import { useNotification } from '@/composables/useNotification'
+import { usePagination } from '@/composables/usePaginations';
+import { useConfirmation } from '@/composables/useConfirmation';
+import { useNotification } from '@/composables/useNotification';
 
 // Service API
-import { get_kecamatan, delete_kecamatan } from '@/service/kecamatan'
+import { get_kecamatan, delete_kecamatan } from '@/service/kecamatan';
 
 // State: Loading
-const isLoading = ref(false)
-const isTableLoading = ref(false)
+const isLoading = ref(false);
+const isTableLoading = ref(false);
 
 // Composable: pagination
-const itemsPerPage = ref<number>(10)
-const totalColumns = ref<number>(4)
+const itemsPerPage = ref<number>(10);
+const totalColumns = ref<number>(4);
 
 const { currentPage, perPage, totalRow, totalPages, nextPage, prevPage, pageNow, pages } =
-  usePagination(fetchData, { perPage: itemsPerPage.value })
+  usePagination(fetchData, { perPage: itemsPerPage.value });
 
 // Composable: notification
 const { showNotification, notificationType, notificationMessage, displayNotification } =
-  useNotification()
+  useNotification();
 
 // Composable: confirmation
 const { showConfirmDialog, confirmTitle, confirmMessage, displayConfirmation, confirm, cancel } =
-  useConfirmation()
+  useConfirmation();
 
 interface Data {
-  id: number
-  kode: string
-  updatedAt: string
-  name: string
+  id: number;
+  kode: string;
+  updatedAt: string;
+  name: string;
 }
 
-const dataKecamatan = ref<Data[]>([])
+const dataKecamatan = ref<Data[]>([]);
 
 // Function: Modal
-const isModalAddOpen = ref(false)
-const isModalEditOpen = ref(false)
-const selectedKecamatan = ref<any>(null)
+const isModalAddOpen = ref(false);
+const isModalEditOpen = ref(false);
+const selectedKecamatan = ref<any>(null);
 
 function openModalAdd() {
-  isModalAddOpen.value = true
+  isModalAddOpen.value = true;
 }
 
 function openModalEdit(kecamatan: any) {
-  selectedKecamatan.value = kecamatan
-  console.log('selectedKecamatan Parent', selectedKecamatan.value)
-  isModalEditOpen.value = true
+  selectedKecamatan.value = kecamatan;
+  console.log('selectedKecamatan Parent', selectedKecamatan.value);
+  isModalEditOpen.value = true;
 }
 
 // Function: Fetch Data
-const search = ref('')
+const search = ref('');
 
 async function fetchData() {
-  isTableLoading.value = true
+  isTableLoading.value = true;
   try {
     const response = await get_kecamatan({
       search: search.value,
       perpage: perPage.value,
       pageNumber: currentPage.value,
-    })
+    });
 
-    dataKecamatan.value = response.data
-    totalRow.value = response.total
-    console.log(dataKecamatan.value)
+    dataKecamatan.value = response.data;
+    totalRow.value = response.total;
+    console.log(dataKecamatan.value);
 
-    console.log('Total Row:', totalRow.value)
+    console.log('Total Row:', totalRow.value);
   } catch (error) {
-    displayNotification('Gagal mengambil data kecamatan', 'error')
+    displayNotification('Gagal mengambil data kecamatan', 'error');
   } finally {
-    isTableLoading.value = false
+    isTableLoading.value = false;
   }
 }
 
 onMounted(async () => {
-  await fetchData()
-  totalColumns.value = document.querySelectorAll('thead th').length
-})
+  await fetchData();
+});
 
 // Function: Delete Data
 async function deleteData(id: number) {
@@ -101,17 +100,17 @@ async function deleteData(id: number) {
     'Apakah Anda yakin ingin menghapus data kecamatan ini?',
     async () => {
       try {
-        isLoading.value = true
-        await delete_kecamatan(id)
-        displayNotification('Data kecamatan berhasil dihapus', 'success')
-        await fetchData()
+        isLoading.value = true;
+        await delete_kecamatan(id);
+        displayNotification('Data kecamatan berhasil dihapus', 'success');
+        await fetchData();
       } catch (error) {
-        displayNotification('Gagal menghapus data kecamatan', 'error')
+        displayNotification('Gagal menghapus data kecamatan', 'error');
       } finally {
-        isLoading.value = false
+        isLoading.value = false;
       }
     },
-  )
+  );
 }
 </script>
 
@@ -151,7 +150,7 @@ async function deleteData(id: number) {
         <table v-else class="w-full border-collapse bg-white text-sm">
           <thead class="bg-gray-50 text-gray-700 text-center border-b border-gray-300">
             <tr>
-              <th class="w-[30%] px-6 py-3 font-medium">Kode</th>
+              <th class="w-[10%] px-6 py-3 font-medium">Kode</th>
               <th class="w-[50%] px-6 py-3 font-medium">Nama Kecamatan</th>
               <th class="w-[20%] px-6 py-3 font-medium">Datetime</th>
               <th class="w-[20%] px-6 py-3 font-medium">Aksi</th>
@@ -221,7 +220,10 @@ async function deleteData(id: number) {
     <!-- Modal FormAdd -->
     <FormAdd
       :is-modal-open="isModalAddOpen"
-      @close="isModalAddOpen = false;fetchData();"
+      @close="
+        isModalAddOpen = false;
+        fetchData();
+      "
       @status="
         (payload: any) =>
           displayNotification(
@@ -234,7 +236,10 @@ async function deleteData(id: number) {
     <FormEdit
       :is-modal-open="isModalEditOpen"
       :selected-kecamatan="selectedKecamatan"
-      @close="isModalEditOpen = false;fetchData()"
+      @close="
+        isModalEditOpen = false;
+        fetchData();
+      "
       @status="
         (payload: any) =>
           displayNotification(

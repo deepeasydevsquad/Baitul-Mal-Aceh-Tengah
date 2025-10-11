@@ -6,6 +6,7 @@ const {
 } = require("../../../helper/handleError");
 
 exports.list = async (req, res) => {
+  if (!(await handleValidationErrors(req, res))) return;
   console.log("controller item");
   try {
     const model = new Model_r(req);

@@ -1,114 +1,114 @@
 <script setup lang="ts">
-import Pagination from '@/components/Pagination/Pagination.vue'
-import requestKeanggotaanService from '@/service/request_keanggotaan'
-import DangerButton from '@/components/Button/DangerButton.vue'
-import SuccessButton from '@/components/Button/SuccessButton.vue'
-import { computed, onMounted, ref } from 'vue'
-import ButtonReject from '@/components/Button/ButtonReject.vue'
-import Notification from '@/components/Modal/Notification.vue'
-import Confirmation from '@/components/Modal/Confirmation.vue'
-import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue'
-import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
+import Pagination from '@/components/Pagination/Pagination.vue';
+import requestKeanggotaanService from '@/service/request_keanggotaan';
+import DangerButton from '@/components/Button/DangerButton.vue';
+import SuccessButton from '@/components/Button/SuccessButton.vue';
+import { computed, onMounted, ref } from 'vue';
+import ButtonReject from '@/components/Button/ButtonReject.vue';
+import Notification from '@/components/Modal/Notification.vue';
+import Confirmation from '@/components/Modal/Confirmation.vue';
+import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
 
 // Composable
-import { usePagination } from '@/composables/usePagination'
-import { useNotification } from '@/composables/useNotification'
-import { useConfirmation } from '@/composables/useConfirmation'
+import { usePagination } from '@/composables/usePaginations';
+import { useNotification } from '@/composables/useNotification';
+import { useConfirmation } from '@/composables/useConfirmation';
 
 // State: Loading
-const isLoading = ref(false)
-const isTableLoading = ref(false)
+const isLoading = ref(false);
+const isTableLoading = ref(false);
 
 // Composable: pagination
-const itemsPerPage = ref<number>(100)
-const totalColumns = ref<number>(7)
+const itemsPerPage = ref<number>(100);
+const totalColumns = ref<number>(7);
 
 const { currentPage, perPage, totalRow, totalPages, nextPage, prevPage, pageNow, pages } =
-  usePagination(fetchData, { perPage: itemsPerPage.value })
+  usePagination(fetchData, { perPage: itemsPerPage.value });
 
 // Composable: notification
 const { showNotification, notificationType, notificationMessage, displayNotification } =
-  useNotification()
+  useNotification();
 
 // Composable: confirmation
 const { showConfirmDialog, confirmTitle, confirmMessage, displayConfirmation, confirm, cancel } =
-  useConfirmation()
+  useConfirmation();
 
 // Interface
 interface RequestKeanggotaan {
-  id: number
-  status: 'verified' | 'unverified' | string
-  tipe: 'perorangan' | 'kelompok' | string
-  fullname: string
-  nomor_ktp: string
-  nomor_kk: string
-  whatsapp_number: string
-  birth_date: string
-  alamat: string
-  username: string
-  nama_desa: string
-  createdAt: string
-  updatedAt: string
+  id: number;
+  status: 'verified' | 'unverified' | string;
+  tipe: 'perorangan' | 'kelompok' | string;
+  fullname: string;
+  nomor_ktp: string;
+  nomor_kk: string;
+  whatsapp_number: string;
+  birth_date: string;
+  alamat: string;
+  username: string;
+  nama_desa: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Function: Fetch data
-const search = ref('')
-const data = ref<RequestKeanggotaan[]>([])
+const search = ref('');
+const data = ref<RequestKeanggotaan[]>([]);
 
 async function fetchData() {
-  isTableLoading.value = true
+  isTableLoading.value = true;
   try {
     const response = await requestKeanggotaanService.list({
       search: search.value,
       perpage: itemsPerPage.value,
       pageNumber: currentPage.value,
       status: filterStatus.value,
-    })
-    data.value = response.data
-    totalRow.value = response.total || response.data.length || 0
+    });
+    data.value = response.data;
+    totalRow.value = response.total || response.data.length || 0;
   } catch (error) {
-    console.error('Error fetching data:', error)
+    console.error('Error fetching data:', error);
   } finally {
-    isTableLoading.value = false
+    isTableLoading.value = false;
   }
 }
 
 onMounted(() => {
-  fetchData()
-})
+  fetchData();
+});
 
-const filterStatus = ref('')
+const filterStatus = ref('');
 const OptionFilter = [
   { id: 'verified', name: 'Approve' },
   { id: 'unverified', name: 'Reject' },
   { id: '', name: 'Semua' },
-]
+];
 
 const handleApprove = async (id: number) => {
-  isLoading.value = true
+  isLoading.value = true;
   try {
-    await requestKeanggotaanService.verifikasi({ id, action: 'approve' })
-    displayNotification('Berhasil approve data!', 'success')
-    fetchData()
+    await requestKeanggotaanService.verifikasi({ id, action: 'approve' });
+    displayNotification('Berhasil approve data!', 'success');
+    fetchData();
   } catch (e) {
-    displayNotification('Gagal approve data!', 'error')
+    displayNotification('Gagal approve data!', 'error');
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
-}
+};
 
 const handleReject = async (id: number) => {
-  isLoading.value = true
+  isLoading.value = true;
   try {
-    await requestKeanggotaanService.verifikasi({ id, action: 'reject' })
-    displayNotification('Berhasil reject data!', 'success')
-    fetchData()
+    await requestKeanggotaanService.verifikasi({ id, action: 'reject' });
+    displayNotification('Berhasil reject data!', 'success');
+    fetchData();
   } catch (e) {
-    displayNotification('Gagal reject data!', 'error')
+    displayNotification('Gagal reject data!', 'error');
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
-}
+};
 </script>
 
 <template>

@@ -140,7 +140,7 @@ class Model_r {
               include: [
                 {
                   model: Asnaf,
-                  required: true,
+                  required: false,
                 },
               ],
             },
@@ -778,258 +778,389 @@ class Model_r {
 
   async fn_get_data_laporan_rekap_per_asnaf(tahun) {
     try {
-        const allAsnaf = await Asnaf.findAll();
-        const list = {};
-        for (const asnaf of allAsnaf) {
-            list[asnaf.id] = {
-                name: asnaf.name,
-                total_rupiah: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0 },
-                total_pemohon: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0 }
-            };
-        }
-        list["7"] = {
-          name: "Amil", 
-          total_rupiah: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0 },
-          total_pemohon: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0 }
+      const allAsnaf = await Asnaf.findAll();
+      const list = {};
+      for (const asnaf of allAsnaf) {
+        list[asnaf.id] = {
+          name: asnaf.name,
+          total_rupiah: {
+            0: 0,
+            1: 0,
+            2: 0,
+            3: 0,
+            4: 0,
+            5: 0,
+            6: 0,
+            7: 0,
+            8: 0,
+            9: 0,
+            10: 0,
+            11: 0,
+          },
+          total_pemohon: {
+            0: 0,
+            1: 0,
+            2: 0,
+            3: 0,
+            4: 0,
+            5: 0,
+            6: 0,
+            7: 0,
+            8: 0,
+            9: 0,
+            10: 0,
+            11: 0,
+          },
         };
+      }
+      list["7"] = {
+        name: "Amil",
+        total_rupiah: {
+          0: 0,
+          1: 0,
+          2: 0,
+          3: 0,
+          4: 0,
+          5: 0,
+          6: 0,
+          7: 0,
+          8: 0,
+          9: 0,
+          10: 0,
+          11: 0,
+        },
+        total_pemohon: {
+          0: 0,
+          1: 0,
+          2: 0,
+          3: 0,
+          4: 0,
+          5: 0,
+          6: 0,
+          7: 0,
+          8: 0,
+          9: 0,
+          10: 0,
+          11: 0,
+        },
+      };
 
-        let where = { status: "approve", status_realisasi: "sudah_direalisasi" };
-        let where_penyaluran_amil = {};
+      let where = { status: "approve", status_realisasi: "sudah_direalisasi" };
+      let where_penyaluran_amil = {};
 
-        if (tahun && tahun !== "0") {
-            const yearCondition = Sequelize.where(
-                Sequelize.fn("YEAR", Sequelize.col("tanggal_realisasi")),
-                tahun
-            );
-            where[Sequelize.Op.and] = yearCondition;
+      if (tahun && tahun !== "0") {
+        const yearCondition = Sequelize.where(
+          Sequelize.fn("YEAR", Sequelize.col("tanggal_realisasi")),
+          tahun
+        );
+        where[Sequelize.Op.and] = yearCondition;
 
-            const yearConditionAmil = Sequelize.where(
-                Sequelize.fn("YEAR", Sequelize.col("tanggal_penyaluran")),
-                tahun
-            );
-            where_penyaluran_amil[Sequelize.Op.and] = yearConditionAmil;
-        }
+        const yearConditionAmil = Sequelize.where(
+          Sequelize.fn("YEAR", Sequelize.col("tanggal_penyaluran")),
+          tahun
+        );
+        where_penyaluran_amil[Sequelize.Op.and] = yearConditionAmil;
+      }
 
-        const realisasiPermohonan = await Realisasi_permohonan.findAll({
-            where: where,
-            include: [{
-                model: Permohonan,
+      const realisasiPermohonan = await Realisasi_permohonan.findAll({
+        where: where,
+        include: [
+          {
+            model: Permohonan,
+            required: true,
+            include: [
+              {
+                model: Kegiatan,
                 required: true,
-                include: [{
-                    model: Kegiatan,
-                    required: true,
-                    include: [{ model: Asnaf, required: true }]
-                }]
-            }]
-        });
+                include: [{ model: Asnaf, required: true }],
+              },
+            ],
+          },
+        ],
+      });
 
-        for (const e of realisasiPermohonan) {
-            const index_bulan = moment(e.tanggal_realisasi).month();
-            const asnafId = e.Permohonan.Kegiatan.asnaf_id;
+      for (const e of realisasiPermohonan) {
+        const index_bulan = moment(e.tanggal_realisasi).month();
+        const asnafId = e.Permohonan.Kegiatan.asnaf_id;
 
-            if (list[asnafId] && list[asnafId].total_rupiah[index_bulan] !== undefined) {
-                list[asnafId].total_rupiah[index_bulan] += e.biaya_disetujui;
-                list[asnafId].total_pemohon[index_bulan] += 1;
-            }
+        if (
+          list[asnafId] &&
+          list[asnafId].total_rupiah[index_bulan] !== undefined
+        ) {
+          list[asnafId].total_rupiah[index_bulan] += e.biaya_disetujui;
+          list[asnafId].total_pemohon[index_bulan] += 1;
         }
+      }
 
-        const kegiatanKesekretariatan = await Kegiatan_keseketariatan.findAll({
-            where: where_penyaluran_amil,
-            order: [["tanggal_penyaluran", "DESC"]],
-        });
+      const kegiatanKesekretariatan = await Kegiatan_keseketariatan.findAll({
+        where: where_penyaluran_amil,
+        order: [["tanggal_penyaluran", "DESC"]],
+      });
 
-        for (const e of kegiatanKesekretariatan) {
-            const index_bulan = moment(e.tanggal_penyaluran).month();
-            if (list["7"]) { // Asnaf Amil (ID 7)
-                list["7"].total_rupiah[index_bulan] += e.nominal_kegiatan;
-                list["7"].total_pemohon[index_bulan] += 1;
-            }
+      for (const e of kegiatanKesekretariatan) {
+        const index_bulan = moment(e.tanggal_penyaluran).month();
+        if (list["7"]) {
+          // Asnaf Amil (ID 7)
+          list["7"].total_rupiah[index_bulan] += e.nominal_kegiatan;
+          list["7"].total_pemohon[index_bulan] += 1;
         }
+      }
 
-        return { error: false, feedBack: list };
-
+      return { error: false, feedBack: list };
     } catch (error) {
-        console.error("Error di fn_get_data_laporan_rekap_per_asnaf:", error);
-        return { error: true };
+      console.error("Error di fn_get_data_laporan_rekap_per_asnaf:", error);
+      return { error: true };
     }
-}
+  }
 
-async fn_get_data_laporan_rekap_per_kode_asnaf(tahun) {
-  try {
-    var list = {};
-    await Asnaf.findAll().then(async (value) => {
-      await Promise.all(
-        await value.map(async (e) => {
-          list = {
-            ...list,
-            ...{
-              [e.id]: {
-                id: e.id,
-                name: e.name,
-                rows: 0,
-                detail: {},
-                total_rupiah: {
-                  0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0,
-                  6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0
-                },
-                total_pemohon: {
-                  0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0,
-                  6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0
-                }
-              },
-            },
-          };
-          
-          if (!list["7"]) {
-            list["7"] = {
-              id: 7,
-              name: "Amil",
-              rows: 0,
-              detail: {},
-              total_rupiah: {
-                0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0,
-                6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0
-              },
-              total_pemohon: {
-                0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0,
-                6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0
-              }
-            };
-          }
-        })
-      );
-    });
-
-    console.log("list pertama", list)
-
-    await Kegiatan.findAll({ order: [["asnaf_id", "ASC"]] }).then(
-      async (value) => {
+  async fn_get_data_laporan_rekap_per_kode_asnaf(tahun) {
+    try {
+      var list = {};
+      await Asnaf.findAll().then(async (value) => {
         await Promise.all(
           await value.map(async (e) => {
-            list[e.asnaf_id].detail = {
-              ...list[e.asnaf_id].detail,
+            list = {
+              ...list,
               ...{
                 [e.id]: {
                   id: e.id,
-                  name: e.nama_kegiatan,
-                  kode: e.kode !== "" ? e.kode : "00",
-                  detail_penyaluran: {
-                    0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0,
-                    6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0
+                  name: e.name,
+                  rows: 0,
+                  detail: {},
+                  total_rupiah: {
+                    0: 0,
+                    1: 0,
+                    2: 0,
+                    3: 0,
+                    4: 0,
+                    5: 0,
+                    6: 0,
+                    7: 0,
+                    8: 0,
+                    9: 0,
+                    10: 0,
+                    11: 0,
+                  },
+                  total_pemohon: {
+                    0: 0,
+                    1: 0,
+                    2: 0,
+                    3: 0,
+                    4: 0,
+                    5: 0,
+                    6: 0,
+                    7: 0,
+                    8: 0,
+                    9: 0,
+                    10: 0,
+                    11: 0,
                   },
                 },
               },
             };
 
-            list[e.asnaf_id].rows = list[e.asnaf_id].rows + 1;
+            if (!list["7"]) {
+              list["7"] = {
+                id: 7,
+                name: "Amil",
+                rows: 0,
+                detail: {},
+                total_rupiah: {
+                  0: 0,
+                  1: 0,
+                  2: 0,
+                  3: 0,
+                  4: 0,
+                  5: 0,
+                  6: 0,
+                  7: 0,
+                  8: 0,
+                  9: 0,
+                  10: 0,
+                  11: 0,
+                },
+                total_pemohon: {
+                  0: 0,
+                  1: 0,
+                  2: 0,
+                  3: 0,
+                  4: 0,
+                  5: 0,
+                  6: 0,
+                  7: 0,
+                  8: 0,
+                  9: 0,
+                  10: 0,
+                  11: 0,
+                },
+              };
+            }
           })
         );
+      });
+
+      console.log("list pertama", list);
+
+      await Kegiatan.findAll({ order: [["asnaf_id", "ASC"]] }).then(
+        async (value) => {
+          await Promise.all(
+            await value.map(async (e) => {
+              list[e.asnaf_id].detail = {
+                ...list[e.asnaf_id].detail,
+                ...{
+                  [e.id]: {
+                    id: e.id,
+                    name: e.nama_kegiatan,
+                    kode: e.kode !== "" ? e.kode : "00",
+                    detail_penyaluran: {
+                      0: 0,
+                      1: 0,
+                      2: 0,
+                      3: 0,
+                      4: 0,
+                      5: 0,
+                      6: 0,
+                      7: 0,
+                      8: 0,
+                      9: 0,
+                      10: 0,
+                      11: 0,
+                    },
+                  },
+                },
+              };
+
+              list[e.asnaf_id].rows = list[e.asnaf_id].rows + 1;
+            })
+          );
+        }
+      );
+
+      console.log("list kedua", list);
+
+      var where = {};
+      var where_penyaluran_amil = {};
+      if (tahun !== undefined && tahun !== "0") {
+        where = {
+          [Sequelize.Op.and]: Sequelize.where(
+            Sequelize.fn("YEAR", Sequelize.col("tanggal_realisasi")),
+            tahun
+          ),
+        };
+        where_penyaluran_amil = {
+          [Sequelize.Op.and]: Sequelize.where(
+            Sequelize.fn("YEAR", Sequelize.col("tanggal_penyaluran")),
+            tahun
+          ),
+        };
       }
-    );
 
-    console.log("list kedua", list)
-
-    var where = {};
-    var where_penyaluran_amil = {};
-    if (tahun !== undefined && tahun !== "0") {
       where = {
-        [Sequelize.Op.and]: Sequelize.where(
-          Sequelize.fn("YEAR", Sequelize.col("tanggal_realisasi")),
-          tahun
-        ),
+        ...where,
+        ...{ status: "approve", status_realisasi: "sudah_direalisasi" },
       };
-      where_penyaluran_amil = {
-        [Sequelize.Op.and]: Sequelize.where(
-          Sequelize.fn("YEAR", Sequelize.col("tanggal_penyaluran")),
-          tahun
-        ),
-      };
-    }
 
-    where = {
-      ...where,
-      ...{ status: "approve", status_realisasi: "sudah_direalisasi" },
-    };
-
-    await Realisasi_permohonan.findAll({
-      where: where,
-      include: [{
-          model: Permohonan,
-          required: true,
-          include: [{
-              model: Kegiatan,
-              required: true,
-          }]
-      }]
-  }).then(async (value) => {
-      await Promise.all(
-        await value.map(async (e) => {
-          var index_bulan = moment(e.tanggal_realisasi).month();
-          var asnaf_id = e.Permohonan.Kegiatan.asnaf_id.toString();
-          var kegiatan_id = e.Permohonan.Kegiatan.id.toString();
-          
-          if (list[asnaf_id] && list[asnaf_id].detail[kegiatan_id]) {
-            list[asnaf_id].detail[kegiatan_id].detail_penyaluran[index_bulan.toString()] += e.biaya_disetujui;
-          }
-
-          if (list[asnaf_id]) {
-            list[asnaf_id].total_rupiah[index_bulan.toString()] += e.biaya_disetujui;
-            list[asnaf_id].total_pemohon[index_bulan.toString()] += 1;
-          }
-        })
-      );
-    });
-
-    console.log("list ketiga", list)
-
-    await Kegiatan_keseketariatan.findAll({
-      where: where_penyaluran_amil,
-      order: [["tanggal_penyaluran", "DESC"]],
-      include: [
+      await Realisasi_permohonan.findAll({
+        where: where,
+        include: [
           {
-              required: false,
-              model: Desa,
-              include: {
-                  required: false,
-                  model: Kecamatan,
+            model: Permohonan,
+            required: true,
+            include: [
+              {
+                model: Kegiatan,
+                required: true,
               },
+            ],
           },
-      ],
-  }).then(async (value) => {
-      await Promise.all(
-          value.map(async (e) => {
-              var index_bulan = moment(e.tanggal_penyaluran).month();
-              var kegiatanIdStr = e.id.toString();
+        ],
+      }).then(async (value) => {
+        await Promise.all(
+          await value.map(async (e) => {
+            var index_bulan = moment(e.tanggal_realisasi).month();
+            var asnaf_id = e.Permohonan.Kegiatan.asnaf_id.toString();
+            var kegiatan_id = e.Permohonan.Kegiatan.id.toString();
 
-              if (!list["7"].detail[kegiatanIdStr]) {
-                  list["7"].detail[kegiatanIdStr] = {
-                      id: e.id,
-                      name: e.uraian_kegiatan || e.nama_kegiatan,
-                      kode: "00",
-                      detail_penyaluran: { 
-                        0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 
-                        6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0 
-                      }
-                  };
-                  list["7"].rows = (list["7"].rows || 0) + 1;
-              }
-  
-              list["7"].detail[kegiatanIdStr]
-                  .detail_penyaluran[index_bulan.toString()] += (e.nominal_kegiatan || 0);
-              list["7"].total_rupiah[index_bulan.toString()] += (e.nominal_kegiatan || 0);
-              list["7"].total_pemohon[index_bulan.toString()] += 1;
+            if (list[asnaf_id] && list[asnaf_id].detail[kegiatan_id]) {
+              list[asnaf_id].detail[kegiatan_id].detail_penyaluran[
+                index_bulan.toString()
+              ] += e.biaya_disetujui;
+            }
+
+            if (list[asnaf_id]) {
+              list[asnaf_id].total_rupiah[index_bulan.toString()] +=
+                e.biaya_disetujui;
+              list[asnaf_id].total_pemohon[index_bulan.toString()] += 1;
+            }
           })
+        );
+      });
+
+      console.log("list ketiga", list);
+
+      await Kegiatan_keseketariatan.findAll({
+        where: where_penyaluran_amil,
+        order: [["tanggal_penyaluran", "DESC"]],
+        include: [
+          {
+            required: false,
+            model: Desa,
+            include: {
+              required: false,
+              model: Kecamatan,
+            },
+          },
+        ],
+      }).then(async (value) => {
+        await Promise.all(
+          value.map(async (e) => {
+            var index_bulan = moment(e.tanggal_penyaluran).month();
+            var kegiatanIdStr = e.id.toString();
+
+            if (!list["7"].detail[kegiatanIdStr]) {
+              list["7"].detail[kegiatanIdStr] = {
+                id: e.id,
+                name: e.uraian_kegiatan || e.nama_kegiatan,
+                kode: "00",
+                detail_penyaluran: {
+                  0: 0,
+                  1: 0,
+                  2: 0,
+                  3: 0,
+                  4: 0,
+                  5: 0,
+                  6: 0,
+                  7: 0,
+                  8: 0,
+                  9: 0,
+                  10: 0,
+                  11: 0,
+                },
+              };
+              list["7"].rows = (list["7"].rows || 0) + 1;
+            }
+
+            list["7"].detail[kegiatanIdStr].detail_penyaluran[
+              index_bulan.toString()
+            ] += e.nominal_kegiatan || 0;
+            list["7"].total_rupiah[index_bulan.toString()] +=
+              e.nominal_kegiatan || 0;
+            list["7"].total_pemohon[index_bulan.toString()] += 1;
+          })
+        );
+      });
+
+      console.log("list 4", list);
+
+      return { error: false, feedBack: list };
+    } catch (error) {
+      console.error(
+        "Error in fn_get_data_laporan_rekap_per_kode_asnaf:",
+        error
       );
-  });
-
-    console.log("list 4", list)
-
-    return { error: false, feedBack: list };
-  } catch (error) {
-    console.error("Error in fn_get_data_laporan_rekap_per_kode_asnaf:", error);
-    return { error: true, message: error.message };
+      return { error: true, message: error.message };
+    }
   }
-}
 
   async fn_get_data_laporan_rekap_per_kecamatan(tahun) {
     try {
@@ -1079,7 +1210,7 @@ async fn_get_data_laporan_rekap_per_kode_asnaf(tahun) {
         );
       });
 
-      console.log("list 1", list)
+      console.log("list 1", list);
 
       var kab = {
         name: await kabupatenKota(),
@@ -1149,7 +1280,7 @@ async fn_get_data_laporan_rekap_per_kode_asnaf(tahun) {
       list = { ...list, ...{ [0]: kab } };
       list = { ...list, ...{ [12]: instansi } };
 
-      console.log("list 2", list )
+      console.log("list 2", list);
 
       var where = {};
       if (tahun !== undefined && tahun !== "0") {
@@ -1183,10 +1314,10 @@ async fn_get_data_laporan_rekap_per_kode_asnaf(tahun) {
             include: {
               required: true,
               model: Member,
-              include:{
+              include: {
                 required: true,
                 model: Desa,
-              }
+              },
             },
           },
         ],
@@ -1194,43 +1325,42 @@ async fn_get_data_laporan_rekap_per_kode_asnaf(tahun) {
         await Promise.all(
           await value.map(async (e) => {
             var index_bulan = moment(e.tanggal_realisasi).month();
-            if (
-              e.Permohonan.Kegiatan.area_penyaluran ===
-              "kabupaten"
-            ) {
+            if (e.Permohonan.Kegiatan.area_penyaluran === "kabupaten") {
               list[0].detail_rupiah[index_bulan] =
                 list[0].detail_rupiah[index_bulan] + e.biaya_disetujui;
               list[0].detail_pemohon[index_bulan] =
                 list[0].detail_pemohon[index_bulan] + 1;
-            } else if (
-              e.Permohonan.Kegiatan.area_penyaluran ===
-              "instansi"
-            ) {
+            } else if (e.Permohonan.Kegiatan.area_penyaluran === "instansi") {
               list[12].detail_rupiah[index_bulan] =
                 list[12].detail_rupiah[index_bulan] + e.biaya_disetujui;
               list[12].detail_pemohon[index_bulan] =
                 list[12].detail_pemohon[index_bulan] + 1;
             } else if (
-              e.Permohonan.Kegiatan.area_penyaluran ===
-              "semua_pemohon"
+              e.Permohonan.Kegiatan.area_penyaluran === "semua_pemohon"
             ) {
               list[11].detail_rupiah[index_bulan] =
                 list[11].detail_rupiah[index_bulan] + e.biaya_disetujui;
               list[11].detail_pemohon[index_bulan] =
                 list[11].detail_pemohon[index_bulan] + 1;
             } else {
-              list[e.Permohonan.Member.Desa.kecamatan_id].detail_rupiah[index_bulan] =
-                list[e.Permohonan.Member.Desa.kecamatan_id].detail_rupiah[index_bulan] +
-                e.biaya_disetujui;
-              list[e.Permohonan.Member.Desa.kecamatan_id].detail_pemohon[index_bulan] =
-                list[e.Permohonan.Member.Desa.kecamatan_id].detail_pemohon[index_bulan] +
-                1;
+              list[e.Permohonan.Member.Desa.kecamatan_id].detail_rupiah[
+                index_bulan
+              ] =
+                list[e.Permohonan.Member.Desa.kecamatan_id].detail_rupiah[
+                  index_bulan
+                ] + e.biaya_disetujui;
+              list[e.Permohonan.Member.Desa.kecamatan_id].detail_pemohon[
+                index_bulan
+              ] =
+                list[e.Permohonan.Member.Desa.kecamatan_id].detail_pemohon[
+                  index_bulan
+                ] + 1;
             }
           })
         );
       });
 
-      console.log ("list 3", list)
+      console.log("list 3", list);
 
       return { error: false, feedBack: list };
     } catch (error) {

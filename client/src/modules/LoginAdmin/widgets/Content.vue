@@ -1,56 +1,56 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import axios from 'axios'
-import Notification from '@/components/Modal/Notification.vue'
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
+import Notification from '@/components/Modal/Notification.vue';
 
 interface FormData {
-  username: string
-  password: string
+  username: string;
+  password: string;
 }
 
-const form = ref<FormData>({ username: '', password: '' })
-const timeoutId = ref<number | null>(null)
-const showNotification = ref<boolean>(false)
-const notificationMessage = ref<string>('')
-const notificationType = ref<'success' | 'error'>('success')
+const form = ref<FormData>({ username: '', password: '' });
+const timeoutId = ref<number | null>(null);
+const showNotification = ref<boolean>(false);
+const notificationMessage = ref<string>('');
+const notificationType = ref<'success' | 'error'>('success');
 const displayNotification = (message: string, type: 'success' | 'error' = 'success') => {
-  notificationMessage.value = message
-  notificationType.value = type
-  showNotification.value = true
+  notificationMessage.value = message;
+  notificationType.value = type;
+  showNotification.value = true;
 
-  if (timeoutId.value) clearTimeout(timeoutId.value)
+  if (timeoutId.value) clearTimeout(timeoutId.value);
 
   timeoutId.value = window.setTimeout(() => {
-    showNotification.value = false
-  }, 3000)
-}
+    showNotification.value = false;
+  }, 3000);
+};
 
-const errors = ref<Record<string, string>>({})
+const errors = ref<Record<string, string>>({});
 
 const validateForm = (): boolean => {
-  let isValid = true
+  let isValid = true;
 
   // Reset errors
-  errors.value = {}
+  errors.value = {};
 
   if (form.value.username === '') {
-    errors.value.username = 'Username tidak boleh kosong.'
-    isValid = false
+    errors.value.username = 'Username tidak boleh kosong.';
+    isValid = false;
   }
 
   if (form.value.password === '') {
-    errors.value.password = 'Password tidak boleh kosong.'
-    isValid = false
+    errors.value.password = 'Password tidak boleh kosong.';
+    isValid = false;
   }
 
-  return isValid
-}
+  return isValid;
+};
 
 const LoginProcess = async () => {
   if (!validateForm()) {
-    const message = Object.values(errors.value).join('\n')
-    displayNotification(message, 'error')
-    return
+    const message = Object.values(errors.value).join('\n');
+    displayNotification(message, 'error');
+    return;
   }
 
   try {
@@ -58,27 +58,27 @@ const LoginProcess = async () => {
     const response = await axios.post(baseUrl + '/auth/login_administrator', {
       username: form.value.username,
       password: form.value.password,
-    })
+    });
     // filter
     if (response.status === 200) {
-      localStorage.setItem('administrator_access_token', response.data.access_token)
-      localStorage.setItem('administrator_refresh_token', response.data.refresh_token)
-      displayNotification(response.data.message, 'success')
+      localStorage.setItem('administrator_access_token', response.data.access_token);
+      localStorage.setItem('administrator_refresh_token', response.data.refresh_token);
+      displayNotification(response.data.message, 'success');
       setTimeout(() => {
-        window.location.href = '/administrator-area'
-      }, 1200)
+        window.location.href = '/administrator-area';
+      }, 1200);
     } else {
-      displayNotification(error.response.data.message, 'error')
+      displayNotification(error.response.data.message, 'error');
     }
   } catch (error) {
-    displayNotification(error.response.data.message, 'error')
+    displayNotification(error.response.data.message, 'error');
   }
-}
+};
 
 onMounted(() => {
-  localStorage.removeItem('administrator_access_token')
-  localStorage.removeItem('administrator_refresh_token')
-})
+  localStorage.removeItem('administrator_access_token');
+  localStorage.removeItem('administrator_refresh_token');
+});
 </script>
 <template>
   <div class="h-screen flex bg-white">

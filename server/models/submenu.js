@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Submenu extends Model {
     /**
@@ -16,14 +14,17 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
   }
-  Submenu.init({
-    menu_id: DataTypes.INTEGER,
-    name: DataTypes.STRING,
-    path: DataTypes.STRING,
-    tab: DataTypes.STRING
-  }, {
-    sequelize,
-    modelName: 'Submenu',
-  });
+  Submenu.init(
+    {
+      menu_id: DataTypes.INTEGER,
+      name: DataTypes.STRING,
+      path: DataTypes.STRING,
+      tab: DataTypes.STRING,
+    },
+    {
+      sequelize,
+      modelName: "Submenu",
+    }
+  );
   return Submenu;
 };

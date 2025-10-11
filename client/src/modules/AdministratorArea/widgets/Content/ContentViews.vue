@@ -41,6 +41,23 @@ import RiwayatZakat from '@/modules/RiwayatZakat/RiwayatZakat.vue';
 import UrutanBagianMonev from '@/modules/UrutanBagianMonev/UrutanBagianMonev.vue';
 import RiwayatInfaq from '@/modules/RiwayatInfaq/RiwayatInfaq.vue';
 import RiwayatPesanWhatsapp from '@/modules/RiwayatPesanWhatsapp/RiwayatPesanWhatsapp.vue'
+import PermohonanBantuan from '@/modules/PermohonanBantuan/PermohonanBantuan.vue';
+import ValidasiPermohonanBantuan from '@/modules/ValidasiPermohonanBantuan/ValidasiPermohonanBantuan.vue';
+import Penetapan from '@/modules/Penetapan/Penetapan.vue';
+import LaporanTahunan from '@/modules/LaporanTahunan/LaporanTahunan.vue';
+import PertanyaanMonev from '@/modules/PertanyaanMonev/PertanyaanMonev.vue';
+import RekapPengumpulan from '@/modules/RekapPengumpulan/RekapPengumpulan.vue';
+import LaporanPerencanaan from '@/modules/LaporanPerencanaan/LaporanPerencanaan.vue';
+import TargetPengumpulan from '@/modules/TargetPengumpulan/TargetPengumpulan.vue';
+import TargetDistribusi from '@/modules/TargetDistribusi/TargetDistribusi.vue';
+import RekapDistribusiPerAsnaf from '@/modules/RekapDistribusiPerAsnaf/RekapDistribusiPerAsnaf.vue';
+import LaporanKesekretariatan from '@/modules/LaporanKesekretariatan/LaporanKesekretariatan.vue';
+import Beranda from '@/modules/Beranda/Beranda.vue';
+import RekapPengumpulanPerKecamatan from '@/modules/RekapPengumpulanPerKecamatan/RekapPengumpulanPerKecamatan.vue';
+import RekapPerkecamatan from '@/modules/RekapPerkecamatan/RekapPerkecamatan.vue';
+import RekapDistribusiPerKodeAsnaf from '@/modules/RekapDistribusiPerKodeAsnaf/RekapDistribusiPerKodeAsnaf.vue';
+import LaporanPengumpulan from '@/modules/LaporanPengumpulan/LaporanPengumpulan.vue';
+import Kriteria from '@/modules/Kriteria/Kriteria.vue';
 
 const tabComponents = {
   pengaturan_whatsapp: PengaturanWhatsapp,

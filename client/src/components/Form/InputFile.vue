@@ -7,6 +7,7 @@
       class="block text-sm font-medium text-gray-700 mb-2"
     >
       {{ label }}
+      <span v-if="required" class="text-red-500">*</span>
     </label>
 
     <!-- Input File -->
@@ -40,7 +41,7 @@
     </p>
 
     <!-- Info -->
-    <p v-if="!hideInfo" class="text-xs text-gray-500 mt-2">
+    <p v-if="!hideInfo" class="text-xs text-gray-600 mt-2">
       Ukuran maksimum: {{ maxSize }} KB. Tipe file: {{ accept }}.
     </p>
     <p v-if="!hideInfo" class="text-xs text-gray-500">
@@ -71,6 +72,7 @@ const props = defineProps({
   label_status: { type: Boolean, default: true },
   maxSize: { type: Number, default: 600 }, // KB
   dimensionsInfo: { type: String, default: "-" },
+  required: { type: Boolean, default: false },
   hideInfo: { type: Boolean, default: false },
 
   // Support edit

@@ -11,7 +11,7 @@ import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
 
 // Composable
-import { usePagination } from '@/composables/usePagination';
+import { usePagination } from '@/composables/usePaginations';
 import { useConfirmation } from '@/composables/useConfirmation';
 import { useNotification } from '@/composables/useNotification';
 
@@ -160,9 +160,9 @@ async function deleteData(id: number) {
               <th class="w-[20%] px-6 py-3 font-medium">Info Donasi</th>
               <th class="w-[30%] px-6 py-3 font-medium">Info Pemasukan</th>
               <th class="w-[10%] px-6 py-3 font-medium">Status</th>
-              <th class="w-[10%] px-6 py-3 font-medium">Status Konfirmasi</th>
+              <th class="w-[20%] px-6 py-3 font-medium">Status Konfirmasi</th>
               <th class="w-[10%] px-6 py-3 font-medium">Datetimes</th>
-              <th class="w-[5%] px-6 py-3 font-medium">Aksi</th>
+              <th class="w-[10%] px-6 py-3 font-medium">Aksi</th>
             </tr>
           </thead>
 
