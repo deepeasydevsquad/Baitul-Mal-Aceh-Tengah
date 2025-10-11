@@ -417,13 +417,11 @@ onMounted(async () => {
       :tipe="selectedPermohonan.tipe"
       @close="((isModalPertanyaanOpen = false), fetchData())"
       @status="
-        async (payload) => {
-          if (!payload.error)
-            displayNotification(
-              payload.error_msg || 'Jawaban Monitoring Berhasil Dikirim',
-              payload.error ? 'error' : 'success',
-            );
-        }
+        (payload: any) =>
+          displayNotification(
+            payload.error_msg || 'Gagal mengirim jawaban',
+            payload.error ? 'error' : 'success',
+          )
       "
     />
 

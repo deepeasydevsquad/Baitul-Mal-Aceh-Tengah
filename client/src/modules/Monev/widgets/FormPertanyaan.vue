@@ -192,17 +192,19 @@ watch(
 );
 
 watch(
-  () => props.tipe,
-  (newVal) => {
+  () => [props.isModalOpen, props.tipe],
+  ([isModalOpen, type]) => {
+    if (!isModalOpen) return;
+
     jenisMonevOption.value = [{ id: null, name: '-- Pilih Jenis Monev --' }];
 
-    if (newVal === 'evaluasi') {
+    if (type === 'evaluasi') {
       jenisMonevOption.value.push(
         { id: 'evaluasi_konsumtif', name: 'Evaluasi Konsumtif' },
         { id: 'evaluasi_pemberdayaan_ekonomi', name: 'Evaluasi Pemberdayaan Ekonomi' },
         { id: 'evaluasi_pendidikan', name: 'Evaluasi Pendidikan' },
       );
-    } else if (newVal === 'monitoring') {
+    } else if (type === 'monitoring') {
       jenisMonevOption.value.push(
         { id: 'monitoring_konsumtif', name: 'Monitoring Konsumtif' },
         { id: 'monitoring_pemberdayaan_ekonomi', name: 'Monitoring Pemberdayaan Ekonomi' },
@@ -251,14 +253,14 @@ const handleSubmit = async () => {
     const response = await kirim_jawaban(payload);
     console.log(response);
 
-    emit('status', { error: false, error_msg: response.data.message });
+    emit('status', { error: false, error_msg: response.error_msg });
   } catch (error: any) {
-    const errorMsg = error.response?.data?.error_msg || 'Gagal mengirim jawaban monitoring';
+    const errorMsg = error.response?.data?.error_msg || 'Gagal mengirim jawaban ke backend';
     displayNotification(errorMsg, 'error');
     emit('status', { error: true, error_msg: errorMsg });
   } finally {
     isSubmitting.value = false;
-    // closeModal();
+    closeModal();
   }
 };
 
@@ -480,7 +482,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', handleEscape));
             variant="primary"
           >
             <span v-if="isSubmitting">Menyimpan...</span>
-            <span v-else>Simpan Monitoring</span>
+            <span v-else>Simpan {{ props.tipe }}</span>
           </BaseButton>
         </div>
       </div>
