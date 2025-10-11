@@ -40,6 +40,7 @@ import LaporanAsnafIbnuSabil from '@/modules/LaporanAsnaf/LaporanAsnafIbnuSabil.
 import RiwayatZakat from '@/modules/RiwayatZakat/RiwayatZakat.vue';
 import UrutanBagianMonev from '@/modules/UrutanBagianMonev/UrutanBagianMonev.vue';
 import RiwayatInfaq from '@/modules/RiwayatInfaq/RiwayatInfaq.vue';
+import RiwayatPesanWhatsapp from '@/modules/RiwayatPesanWhatsapp/RiwayatPesanWhatsapp.vue'
 import PermohonanBantuan from '@/modules/PermohonanBantuan/PermohonanBantuan.vue';
 import ValidasiPermohonanBantuan from '@/modules/ValidasiPermohonanBantuan/ValidasiPermohonanBantuan.vue';
 import Penetapan from '@/modules/Penetapan/Penetapan.vue';
@@ -92,23 +93,7 @@ const tabComponents = {
   riwayat_zakat: RiwayatZakat,
   urutan_bagian_monev: UrutanBagianMonev,
   riwayat_infaq: RiwayatInfaq,
-  permohonan_bantuan: PermohonanBantuan,
-  validasi_permohonan_bantuan: ValidasiPermohonanBantuan,
-  pertanyaan_monev: PertanyaanMonev,
-  penetapan_kriteria_syarat_surveyor: Penetapan,
-  laporan_tahunan: LaporanTahunan,
-  rekap_pengumpulan: RekapPengumpulan,
-  laporan_perencanaan: LaporanPerencanaan,
-  target_pengumpulan: TargetPengumpulan,
-  target_distribusi: TargetDistribusi,
-  rekap_distribusi_asnaf: RekapDistribusiPerAsnaf,
-  laporan_sekretariatan: LaporanKesekretariatan,
-  beranda_utama: Beranda,
-  rekap_pengumpulan_per_kecamatan: RekapPengumpulanPerKecamatan,
-  rekap_distribusi_kecamatan: RekapPerkecamatan,
-  rekap_distribusi_kode_asnaf: RekapDistribusiPerKodeAsnaf,
-  laporan_pengumpulan: LaporanPengumpulan,
-  kriteria: Kriteria,
+  riwayat_pesan_whatsapp: RiwayatPesanWhatsapp
 };
 
 const selectedTab = useSelectedTab();
