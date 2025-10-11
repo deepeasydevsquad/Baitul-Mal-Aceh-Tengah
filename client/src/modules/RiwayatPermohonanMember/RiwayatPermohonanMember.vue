@@ -26,7 +26,7 @@ const isTableLoading = ref(false);
 
 // Composable: pagination
 const itemsPerPage = ref<number>(100);
-const totalColumns = ref<number>(3);
+const totalColumns = ref<number>(4);
 
 const { currentPage, perPage, totalRow, totalPages, nextPage, prevPage, pageNow, pages } =
   usePagination(fetchData, { perPage: itemsPerPage.value });
@@ -89,6 +89,8 @@ async function fetchData() {
   }
 }
 
+const emit = defineEmits(['back']);
+
 onMounted(async () => {
   await fetchData();
 });
@@ -120,16 +122,24 @@ async function deleteData(id: number) {
     <!-- Header -->
     <LoadingSpinner v-if="isLoading" label="Memuat halaman..." />
     <div v-else class="space-y-4">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-end gap-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <!-- Tombol Kembali -->
+        <div>
+          <BaseButton @click="emit('back')" variant="primary" type="button">
+            <font-awesome-icon icon="fa-solid fa-arrow-left" class="mr-2" />
+            Kembali
+          </BaseButton>
+        </div>
+
         <!-- Search -->
-        <div class="flex items-center w-full sm:w-auto">
+        <div class="flex items-center">
           <label for="search" class="mr-2 text-sm font-medium text-gray-600">Cari</label>
           <input
             id="search"
             type="text"
             v-model="search"
             @change="fetchData"
-            placeholder="Cari bank..."
+            placeholder="Cari permohonan..."
             class="w-full sm:w-64 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:border-green-900 focus:ring-2 focus:ring-green-900 transition"
           />
         </div>
