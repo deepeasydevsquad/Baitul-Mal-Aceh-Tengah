@@ -111,7 +111,7 @@ const tabComponents = {
   rekap_distribusi_asnaf: RekapDistribusiPerAsnaf,
   laporan_kesekretariatan: LaporanKesekretariatan,
   rekap_pengumpulan_per_kecamatan: RekapPengumpulanPerKecamatan,
-  rekap_per_kecamatan: RekapPerkecamatan,
+  rekap_distribusi_kecamatan: RekapPerkecamatan,
   rekap_distribusi_kode_asnaf: RekapDistribusiPerKodeAsnaf,
   laporan_pengumpulan: LaporanPengumpulan,
   kriteria: Kriteria,

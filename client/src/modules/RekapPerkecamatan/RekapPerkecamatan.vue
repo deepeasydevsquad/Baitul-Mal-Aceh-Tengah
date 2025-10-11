@@ -1,87 +1,101 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted, computed } from 'vue'
-import Notification from '@/components/Modal/Notification.vue'
-import BaseButton from '@/components/Button/BaseButton.vue'
-import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue'
-import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
+import { ref, onMounted, computed } from 'vue';
+import Notification from '@/components/Modal/Notification.vue';
+import BaseButton from '@/components/Button/BaseButton.vue';
+import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
 
 // Composable
-import { useNotification } from '@/composables/useNotification'
+import { useNotification } from '@/composables/useNotification';
 
 // Service API
-import { daftar_rekap_perkecamatan, } from '@/service/rekap_perkecamatan'
+import { daftar_rekap_distribusi_kecamatan } from '@/service/rekap_distribusi_kecamatan';
 
 // State: Loading
-const isLoading = ref(false)
-const isTableLoading = ref(false)
+const isLoading = ref(false);
+const isTableLoading = ref(false);
 
 // Composable: notification
 const { showNotification, notificationType, notificationMessage, displayNotification } =
-  useNotification()
+  useNotification();
 
 // State: Filter
-const selectedYear = ref<string>('0')
-const years = ref<string[]>([])
-const searchKecamatan = ref<string>('')
+const selectedYear = ref<string>('0');
+const years = ref<string[]>([]);
+const searchKecamatan = ref<string>('');
 
 // State: Data Rekap
 interface DetailBulan {
-  0: number
-  1: number
-  2: number
-  3: number
-  4: number
-  5: number
-  6: number
-  7: number
-  8: number
-  9: number
-  10: number
-  11: number
+  0: number;
+  1: number;
+  2: number;
+  3: number;
+  4: number;
+  5: number;
+  6: number;
+  7: number;
+  8: number;
+  9: number;
+  10: number;
+  11: number;
 }
 
 interface KecamatanData {
-  name: string
-  kode: string
-  detail_rupiah: DetailBulan
-  detail_pemohon: DetailBulan
+  name: string;
+  kode: string;
+  detail_rupiah: DetailBulan;
+  detail_pemohon: DetailBulan;
 }
 
 interface RekapData {
-  [key: string]: KecamatanData
+  [key: string]: KecamatanData;
 }
 
-const rekapData = ref<RekapData>({})
-const kecamatanList = ref<Array<{ id: string; data: KecamatanData }>>([])
+const rekapData = ref<RekapData>({});
+const kecamatanList = ref<Array<{ id: string; data: KecamatanData }>>([]);
 
 // Computed: Filtered Kecamatan List
 const filteredKecamatanList = computed(() => {
   if (!searchKecamatan.value.trim()) {
-    return kecamatanList.value
+    return kecamatanList.value;
   }
-  
-  const searchLower = searchKecamatan.value.toLowerCase().trim()
-  return kecamatanList.value.filter(item => 
-    item.data.name.toLowerCase().includes(searchLower) ||
-    item.data.kode.toLowerCase().includes(searchLower)
-  )
-})
+
+  const searchLower = searchKecamatan.value.toLowerCase().trim();
+  return kecamatanList.value.filter(
+    (item) =>
+      item.data.name.toLowerCase().includes(searchLower) ||
+      item.data.kode.toLowerCase().includes(searchLower),
+  );
+});
 
 // Nama bulan
-const bulanNames = ['JAN', 'FEB', 'MAR', 'APR', 'MEI', 'JUN', 'JUL', 'AGS', 'SEP', 'OKT', 'NOV', 'DES']
+const bulanNames = [
+  'JAN',
+  'FEB',
+  'MAR',
+  'APR',
+  'MEI',
+  'JUN',
+  'JUL',
+  'AGS',
+  'SEP',
+  'OKT',
+  'NOV',
+  'DES',
+];
 
 // Function: Generate Years
 function generateYears() {
-  const currentYear = new Date().getFullYear()
-  const startYear = 2020
-  const yearList = ['0'] // 0 untuk "Pilih Semua Tahun"
-  
+  const currentYear = new Date().getFullYear();
+  const startYear = 2020;
+  const yearList = ['0']; // 0 untuk "Pilih Semua Tahun"
+
   for (let year = currentYear; year >= startYear; year--) {
-    yearList.push(year.toString())
+    yearList.push(year.toString());
   }
-  
-  years.value = yearList
+
+  years.value = yearList;
 }
 
 // Function: Format Currency
@@ -91,77 +105,78 @@ function formatRupiah(amount: number): string {
     currency: 'IDR',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
-  }).format(amount)
+  }).format(amount);
 }
 
 // Function: Calculate Total per Kecamatan
 function calculateTotal(detail: DetailBulan): number {
-  return Object.values(detail).reduce((sum, val) => sum + val, 0)
+  return Object.values(detail).reduce((sum, val) => sum + val, 0);
 }
 
 // Function: Calculate Grand Total per Bulan
 function calculateGrandTotalBulan(bulanIndex: number): number {
-  let total = 0
-  filteredKecamatanList.value.forEach(item => {
-    total += item.data.detail_rupiah[bulanIndex as keyof DetailBulan] || 0
-  })
-  return total
+  let total = 0;
+  filteredKecamatanList.value.forEach((item) => {
+    total += item.data.detail_rupiah[bulanIndex as keyof DetailBulan] || 0;
+  });
+  return total;
 }
 
 // Function: Calculate Grand Total All
 function calculateGrandTotal(): number {
-  let total = 0
+  let total = 0;
   for (let i = 0; i < 12; i++) {
-    total += calculateGrandTotalBulan(i)
+    total += calculateGrandTotalBulan(i);
   }
-  return total
+  return total;
 }
 
 // Function: Fetch Data
 async function fetchData() {
-  isTableLoading.value = true
+  isTableLoading.value = true;
   try {
-    const params = selectedYear.value !== '0' ? { tahun: parseInt(selectedYear.value) } : { tahun: '0' }
-    
-    const response = await daftar_rekap_perkecamatan(params)
-    
+    const params =
+      selectedYear.value !== '0' ? { tahun: parseInt(selectedYear.value) } : { tahun: '0' };
+
+    const response = await daftar_rekap_distribusi_kecamatan(params);
+
     if (response.error) {
-      displayNotification(response.error_msg || 'Gagal mengambil data rekap', 'error')
-      rekapData.value = {}
-      kecamatanList.value = []
-      return
+      displayNotification(response.error_msg || 'Gagal mengambil data rekap', 'error');
+      rekapData.value = {};
+      kecamatanList.value = [];
+      return;
     }
 
-    rekapData.value = response.data.feedBack || {}
-    
+    rekapData.value = response.data.feedBack || {};
+
     // Convert object to array untuk sorting
     kecamatanList.value = Object.entries(rekapData.value)
       .map(([id, data]) => ({ id, data }))
       .sort((a, b) => {
-        if (a.data.kode === 'KAT') return -1
-        if (b.data.kode === 'KAT') return 1
-        if (a.data.kode === 'INS') return 1
-        if (b.data.kode === 'INS') return -1
+        if (a.data.kode === 'KAT') return -1;
+        if (b.data.kode === 'KAT') return 1;
+        if (a.data.kode === 'INS') return 1;
+        if (b.data.kode === 'INS') return -1;
         // Sort kecamatan by name
-        return a.data.name.localeCompare(b.data.name, 'id')
-      })
+        return a.data.name.localeCompare(b.data.name, 'id');
+      });
 
-    console.log('Rekap Data:', rekapData.value)
+    console.log('Rekap Data:', rekapData.value);
   } catch (error) {
-    console.error('Error fetching data:', error)
-    displayNotification('Gagal mengambil data rekap perkecamatan', 'error')
-    rekapData.value = {}
-    kecamatanList.value = []
+    console.error('Error fetching data:', error);
+    displayNotification('Gagal mengambil data rekap perkecamatan', 'error');
+    rekapData.value = {};
+    kecamatanList.value = [];
   } finally {
-    isTableLoading.value = false
+    isTableLoading.value = false;
   }
 }
 
 // Lifecycle
 onMounted(async () => {
-  generateYears()
-  await fetchData()
-})
+  generateYears();
+  await fetchData();
+});
 </script>
 
 <template>
@@ -173,7 +188,10 @@ onMounted(async () => {
         <!-- Filters -->
         <div class="flex flex-col sm:flex-row gap-3">
           <div class="flex items-center">
-            <label for="search-kecamatan" class="mr-2 text-sm font-medium text-gray-600 whitespace-nowrap">
+            <label
+              for="search-kecamatan"
+              class="mr-2 text-sm font-medium text-gray-600 whitespace-nowrap"
+            >
               Cari Kecamatan
             </label>
             <input
@@ -187,7 +205,10 @@ onMounted(async () => {
 
           <!-- Filter Tahun -->
           <div class="flex items-center">
-            <label for="year-filter" class="mr-2 text-sm font-medium text-gray-600 whitespace-nowrap">
+            <label
+              for="year-filter"
+              class="mr-2 text-sm font-medium text-gray-600 whitespace-nowrap"
+            >
               Tahun
             </label>
             <select
@@ -206,10 +227,16 @@ onMounted(async () => {
       </div>
 
       <!-- Info Message -->
-      <div v-if="filteredKecamatanList.length === 0 && !isTableLoading" 
-           class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
+      <div
+        v-if="filteredKecamatanList.length === 0 && !isTableLoading"
+        class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4"
+      >
         <p class="text-sm text-yellow-700">
-          {{ searchKecamatan ? `Kecamatan "${searchKecamatan}" tidak ditemukan` : 'Rekap Penyaluran Per Kecamatan Tidak Ditemukan' }}
+          {{
+            searchKecamatan
+              ? `Kecamatan "${searchKecamatan}" tidak ditemukan`
+              : 'Rekap Penyaluran Per Kecamatan Tidak Ditemukan'
+          }}
         </p>
       </div>
 
@@ -220,29 +247,41 @@ onMounted(async () => {
           <!-- Header -->
           <thead class="bg-gray-50 text-gray-700 text-center border-b border-gray-300">
             <tr>
-              <th rowspan="2" class="px-4 py-3 font-medium border-r border-gray-300 sticky left-0 bg-gray-50 z-10">
+              <th
+                rowspan="2"
+                class="px-4 py-3 font-medium border-r border-gray-300 sticky left-0 bg-gray-50 z-10"
+              >
                 KECAMATAN
               </th>
-              <th v-for="bulan in bulanNames" :key="bulan" 
-                  class="px-4 py-3 font-medium border-r border-gray-300 min-w-[100px]">
+              <th
+                v-for="bulan in bulanNames"
+                :key="bulan"
+                class="px-4 py-3 font-medium border-r border-gray-300 min-w-[100px]"
+              >
                 {{ bulan }}
               </th>
-              <th rowspan="2" class="px-4 py-3 font-medium bg-gray-100 min-w-[120px]">
-                JUMLAH
-              </th>
+              <th rowspan="2" class="px-4 py-3 font-medium bg-gray-100 min-w-[120px]">JUMLAH</th>
             </tr>
           </thead>
 
           <!-- Body -->
           <tbody v-if="filteredKecamatanList.length > 0">
             <!-- Data per Kecamatan -->
-            <tr v-for="item in filteredKecamatanList" :key="item.id" 
-                class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-              <td class="px-4 py-3 font-semibold text-gray-800 border-r border-gray-300 sticky left-0 bg-white z-10">
+            <tr
+              v-for="item in filteredKecamatanList"
+              :key="item.id"
+              class="border-b border-gray-200 hover:bg-gray-50 transition-colors"
+            >
+              <td
+                class="px-4 py-3 font-semibold text-gray-800 border-r border-gray-300 sticky left-0 bg-white z-10"
+              >
                 {{ item.data.name }}
               </td>
-              <td v-for="(bulan, index) in 12" :key="`rupiah-${index}`"
-                  class="px-4 py-3 text-right border-r border-gray-100">
+              <td
+                v-for="(bulan, index) in 12"
+                :key="`rupiah-${index}`"
+                class="px-4 py-3 text-right border-r border-gray-100"
+              >
                 {{ formatRupiah(item.data.detail_rupiah[index as keyof DetailBulan]) }}
               </td>
               <td class="px-4 py-3 text-right font-bold bg-gray-50">
@@ -252,11 +291,16 @@ onMounted(async () => {
 
             <!-- Grand Total -->
             <tr class="bg-green-50 border-t-2 border-green-300">
-              <td class="px-4 py-3 font-bold text-gray-800 border-r border-gray-300 sticky left-0 bg-green-50 z-10">
+              <td
+                class="px-4 py-3 font-bold text-gray-800 border-r border-gray-300 sticky left-0 bg-green-50 z-10"
+              >
                 TOTAL KESELURUHAN
               </td>
-              <td v-for="(bulan, index) in 12" :key="`total-${index}`"
-                  class="px-4 py-3 text-right font-bold border-r border-gray-100">
+              <td
+                v-for="(bulan, index) in 12"
+                :key="`total-${index}`"
+                class="px-4 py-3 text-right font-bold border-r border-gray-100"
+              >
                 {{ formatRupiah(calculateGrandTotalBulan(index)) }}
               </td>
               <td class="px-4 py-3 text-right font-bold bg-green-100">
