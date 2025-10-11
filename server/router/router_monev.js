@@ -1,4 +1,5 @@
 const express = require("express");
+const { body } = require("express-validator");
 const { validationResult } = require("express-validator");
 const controller = require("../modules/monev/controllers/index");
 const validation = require("../validation/monev");
@@ -20,52 +21,79 @@ router.post(
   controller.get_monev_list
 );
 
-router.get(
-  "/monev/pertanyaan_evaluasi",
-  authenticateTokenAdministrator,
-  controller.pertanyaan_evaluasi
-);
-
-router.get(
-  "/monev/pertanyaan_monitoring",
-  authenticateTokenAdministrator,
-  controller.pertanyaan_monitoring
-);
-
-router.get(
-  "/monev/gabung_status_monev",
-  authenticateTokenAdministrator,
-  controller.gabung_status_monev
-);
-
-// Kirim jawaban evaluasi
 router.post(
-  "/monev/kirim_jawaban_evaluasi",
+  "/monev/pertanyaan",
   authenticateTokenAdministrator,
-  validation.kirim_jawaban_evaluasi, // validasi dari validation/monev.js
-  (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ error: true, message: errors.array() });
-    }
-    next();
-  },
-  controller.kirim_jawaban_evaluasi
+  [
+    body("jenis_monev")
+      .trim()
+      .notEmpty()
+      .isIn([
+        "evaluasi_konsumtif",
+        "monitoring_konsumtif",
+        "evaluasi_pemberdayaan_ekonomi",
+        "monitoring_pemberdayaan_ekonomi",
+        "evaluasi_pendidikan",
+        "monitoring_pendidikan",
+      ])
+      .withMessage("Jenis tidak boleh kosong."),
+    body("tipe")
+      .trim()
+      .notEmpty()
+      .isIn(["evaluasi", "monitoring"])
+      .withMessage("Tipe tidak boleh kosong."),
+  ],
+  controller.pertanyaan
 );
 
-// Kirim jawaban monitoring
 router.post(
-  "/monev/kirim_jawaban_monitoring",
+  "/monev/kirim_jawaban",
   authenticateTokenAdministrator,
-  validation.kirim_jawaban_monitoring, //  validasi dari validation/monev.js
-  (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ error: true, message: errors.array() });
-    }
-    next();
-  },
-  controller.kirim_jawaban_monitoring
+  body("permohonan_id")
+    .notEmpty()
+    .withMessage("Permohonan ID tidak boleh kosong.")
+    .isInt()
+    .withMessage("Permohonan ID harus berupa angka.")
+    .custom(validation.check_id_permohonan),
+  body("jenis_monev")
+    .trim()
+    .notEmpty()
+    .isIn([
+      "evaluasi_konsumtif",
+      "monitoring_konsumtif",
+      "evaluasi_pemberdayaan_ekonomi",
+      "monitoring_pemberdayaan_ekonomi",
+      "evaluasi_pendidikan",
+      "monitoring_pendidikan",
+    ])
+    .withMessage("Jenis tidak boleh kosong."),
+  body("tipe")
+    .trim()
+    .notEmpty()
+    .isIn(["evaluasi", "monitoring"])
+    .withMessage("Tipe tidak boleh kosong."),
+  body("nama_petugas_monev")
+    .trim()
+    .notEmpty()
+    .withMessage("Nama petugas tidak boleh kosong."),
+  body("tim_monev_1")
+    .trim()
+    .notEmpty()
+    .withMessage("Tim 1 tidak boleh kosong."),
+  body("tim_monev_2").trim().optional({ nullable: true }),
+  body("tim_monev_3").trim().optional({ nullable: true }),
+  body("rekomendasi_tim").trim().optional({ nullable: true }),
+  body("jawaban").isArray().withMessage("Jawaban harus berupa array."),
+  body("jawaban.*.pertanyaan_id")
+    .exists()
+    .isInt()
+    .withMessage("Pertanyaan ID harus berupa angka."),
+  body("jawaban.*.jawaban")
+    .exists()
+    .notEmpty()
+    .withMessage("Jawaban harus diisi."),
+  [],
+  controller.kirim_jawaban
 );
 
 module.exports = router;

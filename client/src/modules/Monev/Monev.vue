@@ -1,28 +1,24 @@
 <script setup lang="ts">
 // library
-import { ref, computed, onMounted } from 'vue';
-import Notification from '@/components/Modal/Notification.vue';
-import Confirmation from '@/components/Modal/Confirmation.vue';
 import BaseButton from '@/components/Button/BaseButton.vue';
-import LightButton from '@/components/Button/LightButton.vue';
 import DangerButton from '@/components/Button/DangerButton.vue';
-import DeleteIcon from '@/components/Icons/DeleteIcon.vue';
-import Pagination from '@/components/Pagination/Pagination.vue';
-import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
-import SelectField from '@/components/Form/SelectField.vue';
 import BaseSelect from '@/components/Form/BaseSelect.vue';
-import FormEvaluasi from '@/modules/Monev/widgets/FormEvaluasi.vue';
-import FormMonitoring from './widgets/FormMonitoring.vue';
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
+import Confirmation from '@/components/Modal/Confirmation.vue';
+import Notification from '@/components/Modal/Notification.vue';
+import Pagination from '@/components/Pagination/Pagination.vue';
+import FormPertanyaan from '@/modules/Monev/widgets/FormPertanyaan.vue';
+import { onMounted, ref } from 'vue';
 
 // Composables
-import { usePagination } from '@/composables/usePaginations';
 import { useConfirmation } from '@/composables/useConfirmation';
 import { useNotification } from '@/composables/useNotification';
+import { usePagination } from '@/composables/usePaginations';
 
 // Service API
-import { get_filter_type, monev_list } from '@/service/monev';
 import ButtonGreen from '@/components/Button/ButtonGreen.vue';
 import IconDocumentation from '@/components/Icons/IconDocumentation.vue';
+import { get_filter_type, monev_list } from '@/service/monev';
 
 // Interface untuk Monev
 export interface Monev {
@@ -40,20 +36,19 @@ export interface Monev {
   status_evaluasi: string;
 }
 
-const selectedPermohonan = ref();
-function openModalEvaluasi(id: number) {
-  selectedPermohonan.value = id;
-  isModalAddOpen.value = true;
-}
+const selectedPermohonan = ref({
+  id: 0,
+  tipe: '',
+});
 
-function openModalMonitoring(id: number) {
-  selectedPermohonan.value = id;
-  isModalMonitoringOpen.value = true;
+function openModalPertanyaan(id: number, type: string) {
+  selectedPermohonan.value.id = id;
+  selectedPermohonan.value.tipe = type;
+  isModalPertanyaanOpen.value = true;
 }
 
 // Function: Modal
-const isModalAddOpen = ref(false);
-const isModalMonitoringOpen = ref(false);
+const isModalPertanyaanOpen = ref(false);
 
 // State
 const dataMonev = ref<Monev[]>([]);
@@ -107,19 +102,24 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="p-4 bg-gray-100 rounded">
-    <!-- Filter Kegiatan & Tahun -->
-    <div class="flex gap-4 mb-4 justify-end">
+  <div class="p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg min-h-screen">
+    <!-- Filter Section -->
+    <div class="flex gap-4 justify-end items-center mb-4">
+      <div class="flex items-center gap-2">
+        <span class="text-sm font-medium text-gray-700">Filter:</span>
+      </div>
       <BaseSelect
         v-model="selectedKegiatan"
         :options="kegiatanOptions"
         placeholder="Semua Kegiatan"
+        class="min-w-[200px]"
         @change="fetchData"
       />
       <BaseSelect
         v-model="selectedYear"
         :options="yearOptions"
         placeholder="Semua Tahun"
+        class="min-w-[150px]"
         @change="fetchData"
       />
     </div>
@@ -127,167 +127,300 @@ onMounted(async () => {
     <!-- Loader -->
     <LoadingSpinner v-if="isTableLoading" />
 
-    <div class="overflow-hidden rounded-xl border border-gray-200 shadow">
+    <!-- Table Section -->
+    <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
       <SkeletonTable v-if="isTableLoading" :columns="5" :rows="itemsPerPage" />
-      <table v-else class="w-full border-collapse bg-white text-sm">
-        <thead class="bg-gray-100 text-gray-700 text-center border-b border-gray-300">
-          <tr>
-            <th class="px-6 py-3 font-medium w-[30%]">Info Pemohon</th>
-            <th class="px-6 py-3 font-medium w-[30%]">Info Program Bantuan</th>
-            <th class="px-6 py-3 font-medium w-[20%]">Info Monev</th>
-            <th class="px-6 py-3 font-medium w-[10%]">DateTimes</th>
-            <th class="px-6 py-3 font-medium w-[10%]">Aksi</th>
-          </tr>
-        </thead>
+      <div v-else class="overflow-x-auto">
+        <table class="w-full border-collapse">
+          <thead class="bg-gray-100 text-gray-700 text-center border-b border-gray-300">
+            <tr>
+              <th class="px-6 py-4 font-semibold text-sm tracking-wider w-[28%]">Info Pemohon</th>
+              <th class="px-6 py-4 font-semibold text-sm tracking-wider w-[28%]">
+                Info Program Bantuan
+              </th>
+              <th class="px-6 py-4 font-semibold text-sm tracking-wider w-[22%]">Info Monev</th>
+              <th class="px-6 py-4 font-semibold text-sm tracking-wider w-[12%]">Waktu</th>
+              <th class="px-6 py-4 font-semibold text-sm tracking-wider w-[10%]">Aksi</th>
+            </tr>
+          </thead>
 
-        <tbody>
-          <tr
-            v-for="(item, index) in dataMonev"
-            :key="index"
-            class="border-t hover:bg-gray-50 transition-colors"
-          >
-            <!-- Info Pemohon -->
-            <td class="align-top px-4 py-3">
-              <table class="w-full border border-gray-300">
-                <tbody>
-                  <tr class="border-b border-gray-300">
-                    <th class="bg-gray-200 px-3 py-2 text-left font-semibold w-[40%]">
-                      NAMA PEMOHON
-                    </th>
-                    <td class="px-3 py-2">{{ item.fullname }}</td>
-                  </tr>
-                  <tr class="border-b border-gray-300">
-                    <th class="bg-gray-200 px-3 py-2 text-left font-semibold">NOMOR KTP PEMOHON</th>
-                    <td class="px-3 py-2">{{ item.nomor_ktp }}</td>
-                  </tr>
-                  <tr>
-                    <th class="bg-gray-200 px-3 py-2 text-left font-semibold">NOMOR REKENING</th>
-                    <td class="px-3 py-2">{{ item.nomor_akun_bank }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </td>
-
-            <!-- Info Program Bantuan -->
-            <td class="align-top px-4 py-3">
-              <table class="w-full border border-gray-300">
-                <tbody>
-                  <tr class="border-b border-gray-300">
-                    <th class="bg-gray-200 px-3 py-2 text-left font-semibold w-[40%]">
-                      NAMA KEGIATAN
-                    </th>
-                    <td class="px-3 py-2">{{ item.nama_kegiatan }}</td>
-                  </tr>
-                  <tr class="border-b border-gray-300 last:border-b-0">
-                    <th class="bg-gray-200 px-3 py-2 text-left font-semibold">BIAYA DISETUJUI</th>
-                    <td class="px-3 py-2">{{ $formatToRupiah(item.biaya_disetujui) }}</td>
-                  </tr>
-                  <tr>
-                    <th class="bg-gray-200 px-3 py-2 text-left font-semibold">STATUS REALISASI</th>
-                    <td class="px-3 py-2">
-                      {{
-                        item.status_realisasi === 'sudah_direalisasi'
-                          ? 'SUDAH DIREALISASI'
-                          : 'BELUM DIREALISASI'
-                      }}
-                    </td>
-                  </tr>
-                  <tr>
-                    <th class="bg-gray-200 px-3 py-2 text-left font-semibold">TANGGAL REALISASI</th>
-                    <td class="px-3 py-2">{{ item.tanggal_realisasi }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </td>
-
-            <!-- Info Monev -->
-            <td class="align-top px-4 py-3">
-              <table class="w-full border border-gray-300">
-                <tbody>
-                  <tr class="border-b border-gray-300">
-                    <th class="bg-gray-200 px-3 py-2 text-left font-semibold">JENIS MONEV</th>
-                    <td class="px-3 py-2">{{ item.jenis_monev }}</td>
-                  </tr>
-                  <tr class="border-b border-gray-300">
-                    <th class="bg-gray-200 px-3 py-2 text-left font-semibold">STATUS MONITORING</th>
-                    <td class="px-3 py-2">{{ item.status_monitoring || '-' }}</td>
-                  </tr>
-                  <tr>
-                    <th class="bg-gray-200 px-3 py-2 text-left font-semibold">STATUS EVALUASI</th>
-                    <td class="px-3 py-2">{{ item.status_evaluasi || '-' }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </td>
-
-            <!-- Datetimes -->
-            <td class="px-6 py-4 text-center font-medium text-gray-800">
-              {{ item.datetimes }}
-            </td>
-
-            <!-- Aksi -->
-            <td class="align-top text-center px-3 py-3">
-              <div class="flex flex-row justify-center gap-2">
-                <ButtonGreen @click="openModalEvaluasi(item.id)">
-                  <IconDocumentation />
-                </ButtonGreen>
-                <DangerButton
-                  class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
-                  @click="openModalMonitoring(item.id)"
+          <tbody class="divide-y divide-gray-200">
+            <tr
+              v-for="(item, index) in dataMonev"
+              :key="index"
+              class="hover:bg-gray-50 transition-all duration-200 group"
+            >
+              <!-- Info Pemohon -->
+              <td class="align-top px-4 py-4">
+                <div
+                  class="bg-gradient-to-br from-gray-50 to-white rounded-lg border border-gray-200 overflow-hidden shadow-sm"
                 >
-                  <IconDocumentation />
-                </DangerButton>
-              </div>
-            </td>
-          </tr>
+                  <table class="w-full">
+                    <tbody>
+                      <tr class="border-b border-gray-200">
+                        <th
+                          class="bg-gradient-to-r from-gray-100 to-gray-50 px-4 py-3 text-left font-semibold text-xs text-gray-900 uppercase w-[45%]"
+                        >
+                          Nama Pemohon
+                        </th>
+                        <td class="px-4 py-3 text-sm text-gray-800 font-medium">
+                          {{ item.fullname }}
+                        </td>
+                      </tr>
+                      <tr class="border-b border-gray-200">
+                        <th
+                          class="bg-gradient-to-r from-gray-100 to-gray-50 px-4 py-3 text-left font-semibold text-xs text-gray-900 uppercase"
+                        >
+                          Nomor KTP
+                        </th>
+                        <td class="px-4 py-3 text-sm text-gray-700 font-mono">
+                          {{ item.nomor_ktp }}
+                        </td>
+                      </tr>
+                      <tr>
+                        <th
+                          class="bg-gradient-to-r from-gray-100 to-gray-50 px-4 py-3 text-left font-semibold text-xs text-gray-900 uppercase"
+                        >
+                          Nomor Rekening
+                        </th>
+                        <td class="px-4 py-3 text-sm text-gray-700 font-mono">
+                          {{ item.nomor_akun_bank }}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </td>
 
-          <!-- Empty State -->
-          <tr v-if="dataMonev.length === 0">
-            <td colspan="5" class="text-center py-3 text-gray-500">Tidak ada data</td>
-          </tr>
-        </tbody>
-      </table>
+              <!-- Info Program Bantuan -->
+              <td class="align-top px-4 py-4">
+                <div
+                  class="bg-gradient-to-br from-gray-50 to-white rounded-lg border border-gray-200 overflow-hidden shadow-sm"
+                >
+                  <table class="w-full">
+                    <tbody>
+                      <tr class="border-b border-gray-200">
+                        <th
+                          class="bg-gradient-to-r from-gray-100 to-gray-50 px-4 py-3 text-left font-semibold text-xs text-gray-900 uppercase w-[45%]"
+                        >
+                          Nama Kegiatan
+                        </th>
+                        <td class="px-4 py-3 text-sm text-gray-800 font-medium">
+                          {{ item.nama_kegiatan }}
+                        </td>
+                      </tr>
+                      <tr class="border-b border-gray-200">
+                        <th
+                          class="bg-gradient-to-r from-gray-100 to-gray-50 px-4 py-3 text-left font-semibold text-xs text-gray-900 uppercase"
+                        >
+                          Biaya Disetujui
+                        </th>
+                        <td class="px-4 py-3 text-sm text-gray-800 font-semibold">
+                          {{ $formatToRupiah(item.biaya_disetujui) }}
+                        </td>
+                      </tr>
+                      <tr class="border-b border-gray-200">
+                        <th
+                          class="bg-gradient-to-r from-gray-100 to-gray-50 px-4 py-3 text-left font-semibold text-xs text-gray-900 uppercase"
+                        >
+                          Status Realisasi
+                        </th>
+                        <td class="px-4 py-3">
+                          <span
+                            :class="
+                              item.status_realisasi === 'sudah_direalisasi'
+                                ? 'bg-green-100 text-green-800 border-green-300'
+                                : 'bg-orange-100 text-orange-800 border-orange-300'
+                            "
+                            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border"
+                          >
+                            <span
+                              :class="
+                                item.status_realisasi === 'sudah_direalisasi'
+                                  ? 'bg-green-500'
+                                  : 'bg-orange-500'
+                              "
+                              class="w-2 h-2 rounded-full mr-2"
+                            ></span>
+                            {{
+                              item.status_realisasi === 'sudah_direalisasi'
+                                ? 'Sudah Direalisasi'
+                                : 'Belum Direalisasi'
+                            }}
+                          </span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th
+                          class="bg-gradient-to-r from-gray-100 to-gray-50 px-4 py-3 text-left font-semibold text-xs text-gray-900 uppercase"
+                        >
+                          Tanggal Realisasi
+                        </th>
+                        <td class="px-4 py-3 text-sm text-gray-700">
+                          {{ item.tanggal_realisasi || '-' }}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </td>
+
+              <!-- Info Monev -->
+              <td class="align-top px-4 py-4">
+                <div
+                  class="bg-gradient-to-br from-gray-50 to-white rounded-lg border border-gray-200 overflow-hidden shadow-sm"
+                >
+                  <table class="w-full">
+                    <tbody>
+                      <tr class="border-b border-gray-200">
+                        <th
+                          class="bg-gradient-to-r from-gray-100 to-gray-50 px-4 py-3 text-left font-semibold text-xs text-gray-900 uppercase w-[45%]"
+                        >
+                          Jenis Monev
+                        </th>
+                        <td class="px-4 py-3">
+                          <div class="flex flex-wrap gap-1.5">
+                            <span
+                              v-for="(jenis, idx) in item.jenis_monev"
+                              :key="idx"
+                              class="inline-flex items-center bg-gradient-to-r from-green-700 to-green-600 text-white px-2.5 py-1 rounded-md text-xs font-medium shadow-sm"
+                            >
+                              {{
+                                jenis
+                                  .replace('monitoring_', 'M: ')
+                                  .replace('evaluasi_', 'E: ')
+                                  .replace(/_/g, ' ')
+                                  .toUpperCase()
+                              }}
+                            </span>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr class="border-b border-gray-200">
+                        <th
+                          class="bg-gradient-to-r from-gray-100 to-gray-50 px-4 py-3 text-left font-semibold text-xs text-gray-900 uppercase"
+                        >
+                          Status Monitoring
+                        </th>
+                        <td class="px-4 py-3">
+                          <span
+                            :class="
+                              item.status_monitoring === 'selesai'
+                                ? 'bg-green-100 text-green-800 border-green-300'
+                                : 'bg-gray-100 text-gray-600 border-gray-300'
+                            "
+                            class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold border"
+                          >
+                            {{
+                              item.status_monitoring ? item.status_monitoring.toUpperCase() : '-'
+                            }}
+                          </span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th
+                          class="bg-gradient-to-r from-gray-100 to-gray-50 px-4 py-3 text-left font-semibold text-xs text-gray-900 uppercase"
+                        >
+                          Status Evaluasi
+                        </th>
+                        <td class="px-4 py-3">
+                          <span
+                            :class="
+                              item.status_evaluasi === 'selesai'
+                                ? 'bg-green-100 text-green-800 border-green-300'
+                                : 'bg-gray-100 text-gray-600 border-gray-300'
+                            "
+                            class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold border"
+                          >
+                            {{ item.status_evaluasi ? item.status_evaluasi.toUpperCase() : '-' }}
+                          </span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </td>
+
+              <!-- Datetimes -->
+              <td class="px-4 py-4 text-center align-middle text-sm">
+                {{ item.datetimes }}
+              </td>
+
+              <!-- Aksi -->
+              <td class="align-middle text-center px-4 py-4">
+                <div class="flex flex-col justify-center gap-2">
+                  <ButtonGreen
+                    class="w-full flex items-center justify-center gap-2 text-xs font-semibold py-2.5 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5"
+                    @click="openModalPertanyaan(item.id, 'evaluasi')"
+                  >
+                    <IconDocumentation class="w-6 h-4" />
+                    <span>Evaluasi</span>
+                  </ButtonGreen>
+                  <DangerButton
+                    class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-3 py-2.5 rounded-lg text-xs font-semibold shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5"
+                    @click="openModalPertanyaan(item.id, 'monitoring')"
+                  >
+                    <IconDocumentation class="w-6 h-4" />
+                    <span>Monitoring</span>
+                  </DangerButton>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Empty State -->
+            <tr v-if="dataMonev.length === 0">
+              <td :colspan="totalColumns" class="text-center py-12">
+                <div class="flex flex-col items-center justify-center">
+                  <div class="bg-gray-100 rounded-full p-6 mb-4">
+                    <svg
+                      class="w-16 h-16 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+                      />
+                    </svg>
+                  </div>
+                  <p class="text-gray-500 font-medium text-lg">Tidak ada data tersedia</p>
+                  <p class="text-gray-400 text-sm mt-1">
+                    Silakan ubah filter atau tambahkan data baru
+                  </p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <Pagination
+              :current-page="currentPage"
+              :total-pages="totalPages"
+              :total-columns="totalColumns"
+              :total-row="totalRow"
+              :next-page="nextPage"
+              :prev-page="prevPage"
+              :pages="pages"
+              :page-now="pageNow"
+            />
+          </tfoot>
+        </table>
+      </div>
     </div>
 
-    <!-- Pagination -->
-    <div class="mt-4">
-      <Pagination
-        :current-page="currentPage"
-        :total-pages="totalPages"
-        :total-columns="totalColumns"
-        :next-page="nextPage"
-        :prev-page="prevPage"
-        :pages="pages"
-        :page-now="pageNow"
-      />
-    </div>
-
-    <!-- Modal FormMonitoring -->
-    <FormMonitoring
-      :is-modal-open="isModalMonitoringOpen"
-      :monev_id="selectedPermohonan"
-      @close="((isModalMonitoringOpen = false), fetchData())"
+    <!-- Modal FormPertanyaan -->
+    <FormPertanyaan
+      :is-modal-open="isModalPertanyaanOpen"
+      :permohonan_id="selectedPermohonan.id"
+      :tipe="selectedPermohonan.tipe"
+      @close="((isModalPertanyaanOpen = false), fetchData())"
       @status="
         async (payload) => {
           if (!payload.error)
             displayNotification(
               payload.error_msg || 'Jawaban Monitoring Berhasil Dikirim',
-              payload.error ? 'error' : 'success',
-            );
-        }
-      "
-    />
-
-    <!-- Modal FormEvaluasi -->
-    <FormEvaluasi
-      :is-modal-open="isModalAddOpen"
-      :monev_id="selectedPermohonan"
-      @close="((isModalAddOpen = false), fetchData())"
-      @status="
-        async (payload) => {
-          if (!payload.error)
-            displayNotification(
-              payload.error_msg || 'Jawaban Evaluasi Berhasil Dikirim',
               payload.error ? 'error' : 'success',
             );
         }

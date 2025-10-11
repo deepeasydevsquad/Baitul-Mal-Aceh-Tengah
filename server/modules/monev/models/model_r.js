@@ -8,6 +8,7 @@ const {
   Realisasi_permohonan,
   Pertanyaan_monev,
   Jawaban_monev,
+  Urutan_bagian_monev,
 } = require("../../../models");
 const moment = require("moment");
 
@@ -15,58 +16,6 @@ class Model_r {
   constructor(req) {
     this.req = req;
   }
-
-  // async gabung_status_monev() {
-  //   try {
-  //     // Ambil semua data Monev
-  //     const monevData = await Monev.findAll({
-  //       attributes: ["id", "jenis_monev", "tipe"],
-  //     });
-
-  //     // Ambil semua jawaban (hanya id monev)
-  //     const jawabanData = await Jawaban_monev.findAll({
-  //       attributes: ["monev_id"],
-  //     });
-
-  //     // Buat set untuk percepatan pencarian
-  //     const sudahDijawab = new Set(jawabanData.map((j) => j.monev_id));
-
-  //     const hasilGabungan = [];
-
-  //     // Loop tiap record monev, langsung cek statusnya per tipe
-  //     for (const m of monevData) {
-  //       const baseJenis = m.jenis_monev
-  //         .replace("monitoring_", "")
-  //         .replace("evaluasi_", "");
-
-  //       // Cek status dari tipe monitoring & evaluasi
-  //       let entry = hasilGabungan.find((e) => e.jenis_monev === baseJenis);
-  //       if (!entry) {
-  //         entry = {
-  //           jenis_monev: baseJenis,
-  //           status_monitoring: "belum selesai",
-  //           status_evaluasi: "belum selesai",
-  //         };
-  //         hasilGabungan.push(entry);
-  //       }
-
-  //       if (m.tipe === "monitoring" && sudahDijawab.has(m.id)) {
-  //         entry.status_monitoring = "selesai";
-  //       }
-  //       if (m.tipe === "evaluasi" && sudahDijawab.has(m.id)) {
-  //         entry.status_evaluasi = "selesai";
-  //       }
-  //     }
-  //     console.log("_____DDDDDDDDD______:");
-  //     console.log(hasilGabungan);
-  //     console.log("_____DDDDDDDDD______:");
-
-  //     return hasilGabungan;
-  //   } catch (error) {
-  //     console.error("Error gabung_status_monev:", error);
-  //     return [];
-  //   }
-  // }
 
   async generateYears(start) {
     const current = new Date().getFullYear();
@@ -203,121 +152,23 @@ class Model_r {
     }
   }
 
-  // async daftar_monev() {
-  //   try {
-  //     let { page = 1, limit = 10 } = this.req.query;
-  //     page = parseInt(page);
-  //     limit = parseInt(limit);
-  //     const offset = (page - 1) * limit;
+  async pertanyaan() {
+    const body = this.req.body;
 
-  //     const totalData = await Permohonan.count();
-
-  //     const data = await Permohonan.findAll({
-  //       limit,
-  //       offset,
-  //       order: [["id", "ASC"]],
-  //       include: [
-  //         { model: Member, attributes: ["id", "fullname", "nomor_ktp"] },
-  //         { model: Kegiatan, attributes: ["id", "nama_kegiatan"] },
-  //         {
-  //           model: Realisasi_permohonan,
-  //           attributes: [
-  //             "id",
-  //             "biaya_disetujui",
-  //             "status_realisasi",
-  //             "tanggal_realisasi",
-  //           ],
-  //         },
-  //         {
-  //           model: Monev,
-  //           attributes: ["id", "jenis_monev", "tipe", "nama_petugas_monev"],
-  //           include: [
-  //             {
-  //               model: Jawaban_monev,
-  //               attributes: ["id", "jawaban", "pertanyaan_id"],
-  //               required: false, // biar tetap muncul walau belum ada jawaban
-  //             },
-  //           ],
-  //         },
-  //       ],
-  //     });
-
-  //     const result = data.map((item) => ({
-  //       id: item.id,
-  //       fullname: item.Member?.fullname || null,
-  //       nomor_akun_bank: item.nomor_akun_bank || null,
-  //       nomor_ktp: item.Member?.nomor_ktp || null,
-  //       kegiatan: item.Kegiatan?.nama_kegiatan || null,
-  //       realisasi:
-  //         item.Realisasi_permohonans?.map((r) => ({
-  //           id: r.id,
-  //           biaya_disetujui: r.biaya_disetujui,
-  //           status_realisasi: r.status_realisasi,
-  //           tanggal_realisasi: moment(r.tanggal_realisasi).format("YYYY-MM-DD"),
-  //         })) || [],
-  //       monev:
-  //         item.Monevs?.map((m) => {
-  //           const adaJawaban =
-  //             Array.isArray(m.Jawaban_monevs) && m.Jawaban_monevs.length > 0;
-
-  //           // Tentukan status per record monev
-  //           const status_monitoring =
-  //             m.tipe === "monitoring"
-  //               ? adaJawaban
-  //                 ? "selesai"
-  //                 : "belum selesai"
-  //               : "tidak berlaku";
-
-  //           const status_evaluasi =
-  //             m.tipe === "evaluasi"
-  //               ? adaJawaban
-  //                 ? "selesai"
-  //                 : "belum selesai"
-  //               : "tidak berlaku";
-
-  //           return {
-  //             id: m.id,
-  //             jenis_monev: m.jenis_monev,
-  //             tipe: m.tipe,
-  //             petugas: m.nama_petugas_monev,
-  //             status_monitoring,
-  //             status_evaluasi,
-  //           };
-  //         }) || [],
-  //     }));
-
-  //     const totalPages = Math.ceil(totalData / limit);
-
-  //     return {
-  //       success: true,
-  //       message: "Daftar monev berhasil diambil",
-  //       pagination: {
-  //         total_data: totalData,
-  //         total_pages: totalPages,
-  //         current_page: page,
-  //         per_page: limit,
-  //       },
-  //       data: result,
-  //     };
-  //   } catch (error) {
-  //     console.error("Terjadi error saat mengambil daftar monev:", error);
-  //     return {
-  //       success: false,
-  //       message: "Terjadi error saat mengambil daftar monev",
-  //       error: error.message,
-  //     };
-  //   }
-  // }
-
-  //  Pertanyaan Evaluasi
-
-  async pertanyaan_evaluasi() {
     try {
-      const pertanyaan_evaluasi = await Pertanyaan_monev.findAll({
-        order: [["bagian", "ASC"]],
+      // Ambil urutan bagian
+      const urutanData = await Urutan_bagian_monev.findOne({
+        where: { jenis_monev: body.jenis_monev },
+        attributes: ["urutan_bagian"],
         raw: true,
-        nest: true,
-        where: { tipe: "evaluasi" },
+      });
+
+      // Parse JSON string ke array JS
+      const urutanBagian = JSON.parse(urutanData.urutan_bagian);
+
+      // Ambil semua pertanyaan
+      const pertanyaan = await Pertanyaan_monev.findAll({
+        where: { jenis_monev: body.jenis_monev, tipe: body.tipe },
         attributes: [
           "id",
           "pertanyaan",
@@ -326,91 +177,43 @@ class Model_r {
           "parent_id",
           "bentuk_pertanyaan",
         ],
-      });
-
-      // mapping dari id -> sub pertanyaan biar cepat lookup-nya
-      const mapSub = {};
-      pertanyaan_evaluasi.forEach((item) => {
-        if (item.parent_id) {
-          if (!mapSub[item.parent_id]) mapSub[item.parent_id] = [];
-          mapSub[item.parent_id].push(item);
-        }
-      });
-
-      // hasil akhir: hanya parent utama yang dimunculkan
-      const result = pertanyaan_evaluasi
-        .filter((item) => !item.parent_id) // hanya yang bukan anak
-        .map((item) => ({
-          id: item.id,
-          pertanyaan: item.pertanyaan,
-          tipe: item.tipe,
-          bagian: item.bagian,
-          parent_id: item.parent_id,
-          bentuk_pertanyaan: item.bentuk_pertanyaan,
-          sub_pertanyaan: (mapSub[item.id] || []).map((p) => ({
-            id: p.id,
-            pertanyaan: p.pertanyaan,
-            tipe: p.tipe,
-            bagian: p.bagian,
-            parent_id: p.parent_id,
-            bentuk_pertanyaan: p.bentuk_pertanyaan,
-          })),
-        }));
-
-      return result;
-    } catch (error) {
-      console.error(
-        "Terjadi error saat mengambil daftar pertanyaan evaluasi:",
-        error
-      );
-      return [];
-    }
-  }
-
-  //  Pertanyaan Monitoring
-  async pertanyaan_monitoring() {
-    try {
-      const pertanyaan_monitoring = await Pertanyaan_monev.findAll({
-        order: [["bagian", "ASC"]],
         raw: true,
         nest: true,
-        where: { tipe: "monitoring" },
-        attributes: [
-          "id",
-          "pertanyaan",
-          "tipe",
-          "bagian",
-          "parent_id",
-          "bentuk_pertanyaan",
-        ],
       });
 
-      // mapping dari id -> sub pertanyaan biar cepat lookup-nya
+      // Map sub pertanyaan
       const mapSub = {};
-      pertanyaan_monitoring.forEach((item) => {
-        if (item.parent_id) {
-          if (!mapSub[item.parent_id]) mapSub[item.parent_id] = [];
-          mapSub[item.parent_id].push(item);
+      for (const p of pertanyaan) {
+        if (p.parent_id) {
+          if (!mapSub[p.parent_id]) mapSub[p.parent_id] = [];
+          mapSub[p.parent_id].push(p);
         }
+      }
+
+      // Urutkan berdasarkan urutan_bagian yang didefinisikan
+      pertanyaan.sort((a, b) => {
+        const indexA = urutanBagian.indexOf(a.bagian);
+        const indexB = urutanBagian.indexOf(b.bagian);
+        return indexA - indexB;
       });
 
-      // hasil akhir: hanya parent utama yang dimunculkan
-      const result = pertanyaan_monitoring
-        .filter((item) => !item.parent_id) // hanya yang bukan anak
-        .map((item) => ({
-          id: item.id,
-          pertanyaan: item.pertanyaan,
-          tipe: item.tipe,
-          bagian: item.bagian,
-          parent_id: item.parent_id,
-          bentuk_pertanyaan: item.bentuk_pertanyaan,
-          sub_pertanyaan: (mapSub[item.id] || []).map((p) => ({
-            id: p.id,
-            pertanyaan: p.pertanyaan,
-            tipe: p.tipe,
-            bagian: p.bagian,
-            parent_id: p.parent_id,
-            bentuk_pertanyaan: p.bentuk_pertanyaan,
+      // Bentuk hasil akhir
+      const result = pertanyaan
+        .filter((p) => !p.parent_id)
+        .map((p) => ({
+          id: p.id,
+          pertanyaan: p.pertanyaan,
+          tipe: p.tipe,
+          bagian: p.bagian,
+          parent_id: p.parent_id,
+          bentuk_pertanyaan: p.bentuk_pertanyaan,
+          sub_pertanyaan: (mapSub[p.id] || []).map((s) => ({
+            id: s.id,
+            pertanyaan: s.pertanyaan,
+            tipe: s.tipe,
+            bagian: s.bagian,
+            parent_id: s.parent_id,
+            bentuk_pertanyaan: s.bentuk_pertanyaan,
           })),
         }));
 

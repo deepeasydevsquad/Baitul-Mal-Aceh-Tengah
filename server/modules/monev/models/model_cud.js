@@ -1,145 +1,87 @@
-"use strict";
-
-const { Pertanyaan_monev, Jawaban_monev, Monev } = require("../../../models");
+const {
+  sequelize,
+  Pertanyaan_monev,
+  Jawaban_monev,
+  Monev,
+} = require("../../../models");
+const { writeLog } = require("../../../helper/writeLogHelper");
+const moment = require("moment");
 
 class Model_cud {
   constructor(req) {
     this.req = req;
   }
 
-  // KIRIM JAWABAN EVALUASI
-  async kirim_jawaban_evaluasi() {
+  async initialize() {
+    this.t = await sequelize.transaction();
+    this.state = true;
+  }
+
+  async kirim_jawaban() {
+    await this.initialize();
+    const body = this.req.body;
+
+    console.log(body);
+
     try {
-      const { monev_id, jawaban } = this.req.body;
+      const insertMonev = await Monev.create(
+        {
+          permohonan_id: body.permohonan_id,
+          tipe: body.tipe,
+          jenis_monev: body.jenis_monev,
+          nama_petugas_monev: body.nama_petugas_monev,
+          tim_monev_1: body.tim_monev_1,
+          tim_monev_2: body.tim_monev_2,
+          tim_monev_3: body.tim_monev_3,
+          rekomendasi_tim: body.rekomendasi_tim,
+          createdAt: moment().format("YYYY-MM-DD HH:mm:ss"),
+          updatedAt: moment().format("YYYY-MM-DD HH:mm:ss"),
+        },
+        { transaction: this.t }
+      );
 
-      if (!monev_id || !Array.isArray(jawaban) || jawaban.length === 0) {
-        return { success: false, message: "Data tidak valid." };
-      }
+      console.log("insertMonev", insertMonev);
 
-      // Ambil data monev
-      const monev = await Monev.findByPk(monev_id);
-      if (!monev) {
-        return { success: false, message: "Data monev tidak ditemukan." };
-      }
+      const jawabanData = body.jawaban.map((j) => ({
+        monev_id: insertMonev.id,
+        pertanyaan_id: j.pertanyaan_id,
+        jawaban: j.jawaban,
+        createdAt: moment().format("YYYY-MM-DD HH:mm:ss"),
+        updatedAt: moment().format("YYYY-MM-DD HH:mm:ss"),
+      }));
 
-      // Pastikan tipe monev adalah evaluasi
-      if (monev.tipe !== "evaluasi") {
-        return { success: false, message: "Tipe monev bukan evaluasi." };
-      }
+      console.log("=====================");
+      console.log(insertMonev);
+      console.log(jawabanData);
+      console.log("=====================");
 
-      // Simpan setiap jawaban ke tabel jawaban_monev
-      for (const item of jawaban) {
-        const { pertanyaan_id, jawaban: isi_jawaban } = item;
-        if (
-          !pertanyaan_id ||
-          isi_jawaban === undefined ||
-          isi_jawaban === null ||
-          isi_jawaban === ""
-        )
-          continue;
+      await Jawaban_monev.bulkCreate(jawabanData, { transaction: this.t });
 
-        await Jawaban_monev.create({
-          monev_id,
-          pertanyaan_id,
-          jawaban: isi_jawaban,
-        });
-      }
-
-      //  Hitung total pertanyaan dan total jawaban
-      const totalPertanyaan = await Pertanyaan_monev.count({
-        where: { tipe: "evaluasi" },
-      });
-
-      const totalJawaban = await Jawaban_monev.count({
-        where: { monev_id },
-      });
-
-      // Jika semua pertanyaan sudah dijawab → status selesai
-      const status_evaluasi =
-        totalJawaban >= totalPertanyaan ? "selesai" : "belum selesai";
-
-      //  Update status evaluasi
-      await Monev.update({ status_evaluasi }, { where: { id: monev_id } });
-
-      return {
-        success: true,
-        message: `Jawaban evaluasi berhasil disimpan dan status diperbarui menjadi "${status_evaluasi}".`,
-      };
+      this.message =
+        "Pertanyaan dan jawaban berhasil tersimpan dengan ID: " +
+        insertMonev.id +
+        "ID Permohonan: " +
+        body.permohonan_id;
     } catch (error) {
-      console.error("Error kirim_jawaban_evaluasi:", error);
-      return {
-        success: false,
-        message: "Terjadi kesalahan saat menyimpan jawaban evaluasi.",
-        error: error.message,
-      };
+      console.error("Error in kirim_jawaban:", error);
+      this.state = false;
+      this.message = error.message;
     }
   }
 
-  // KIRIM JAWABAN MONITORING
-  async kirim_jawaban_monitoring() {
-    try {
-      const { monev_id, jawaban } = this.req.body;
-
-      if (!monev_id || !Array.isArray(jawaban) || jawaban.length === 0) {
-        return { success: false, message: "Data tidak valid." };
-      }
-
-      // Ambil data monev
-      const monev = await Monev.findByPk(monev_id);
-      if (!monev) {
-        return { success: false, message: "Data monev tidak ditemukan." };
-      }
-
-      // Pastikan tipe monev adalah monitoring
-      if (monev.tipe !== "monitoring") {
-        return { success: false, message: "Tipe monev bukan monitoring." };
-      }
-
-      // Simpan setiap jawaban ke tabel jawaban_monev
-      for (const item of jawaban) {
-        const { pertanyaan_id, jawaban: isi_jawaban } = item;
-        if (
-          !pertanyaan_id ||
-          isi_jawaban === undefined ||
-          isi_jawaban === null ||
-          isi_jawaban === ""
-        )
-          continue;
-
-        await Jawaban_monev.create({
-          monev_id,
-          pertanyaan_id,
-          jawaban: isi_jawaban,
-        });
-      }
-
-      //  Hitung total pertanyaan dan total jawaban
-      const totalPertanyaan = await Pertanyaan_monev.count({
-        where: { tipe: "monitoring" },
+  // =============================
+  // Response handler
+  // =============================
+  async response() {
+    if (this.state) {
+      await writeLog(this.req, this.t, {
+        msg: this.message,
       });
-
-      const totalJawaban = await Jawaban_monev.count({
-        where: { monev_id },
-      });
-
-      // Jika semua pertanyaan sudah dijawab → status selesai
-      const status_monitoring =
-        totalJawaban >= totalPertanyaan ? "selesai" : "belum selesai";
-
-      //  Update status monitoring
-      await Monev.update({ status_monitoring }, { where: { id: monev_id } });
-
-      return {
-        success: true,
-        message: `Jawaban monitoring berhasil disimpan dan status diperbarui menjadi "${status_monitoring}".`,
-      };
-    } catch (error) {
-      console.error("Error kirim_jawaban_monitoring:", error);
-      return {
-        success: false,
-        message: "Terjadi kesalahan saat menyimpan jawaban monitoring.",
-        error: error.message,
-      };
+      await this.t.commit();
+      return true;
+    } else {
+      await this.t.rollback();
+      return false;
     }
   }
 }
