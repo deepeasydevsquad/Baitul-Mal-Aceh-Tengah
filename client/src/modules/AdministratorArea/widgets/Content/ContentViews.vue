@@ -54,6 +54,7 @@ import LaporanKesekretariatan from '@/modules/LaporanKesekretariatan/LaporanKese
 import Beranda from '@/modules/Beranda/Beranda.vue';
 import RekapPengumpulanPerKecamatan from '@/modules/RekapPengumpulanPerKecamatan/RekapPengumpulanPerKecamatan.vue';
 import RekapPerkecamatan from '@/modules/RekapPerkecamatan/RekapPerkecamatan.vue';
+import RekapDistribusiPerKodeAsnaf from '@/modules/RekapDistribusiPerKodeAsnaf/RekapDistribusiPerKodeAsnaf.vue';
 import LaporanPengumpulan from '@/modules/LaporanPengumpulan/LaporanPengumpulan.vue';
 import Kriteria from '@/modules/Kriteria/Kriteria.vue';
 
@@ -105,6 +106,7 @@ const tabComponents = {
   beranda_utama: Beranda,
   rekap_pengumpulan_per_kecamatan: RekapPengumpulanPerKecamatan,
   rekap_distribusi_kecamatan: RekapPerkecamatan,
+  rekap_distribusi_kode_asnaf: RekapDistribusiPerKodeAsnaf,
   laporan_pengumpulan: LaporanPengumpulan,
   kriteria: Kriteria,
 };

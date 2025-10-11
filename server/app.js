@@ -95,8 +95,10 @@ const arr_router = [
   "rekap_pengumpulan_per_kecamatan",
   "program_bantuan_member",
   "rekap_perkecamatan",
+  "rekap_distribusi_per_kode_asnaf",
   "laporan_pengumpulan",
   "infaq_member",
+  "zakat_member",
   "permohonan_bantuan_member",
   "kriteria",
 ];
