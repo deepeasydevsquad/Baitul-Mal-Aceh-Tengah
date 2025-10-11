@@ -141,8 +141,8 @@ async function deleteData(id: number) {
         <table v-else class="w-full border-collapse bg-white text-sm">
           <thead class="bg-gray-50 text-gray-700 text-center border-b border-gray-300">
             <tr>
-              <th class="w-[30%] px-6 py-3 font-medium">Info Program</th>
-              <th class="w-[50%] px-6 py-3 font-medium">Status Permohonan</th>
+              <th class="w-[50%] px-6 py-3 font-medium">Info Program</th>
+              <th class="w-[20%] px-6 py-3 font-medium">Status Permohonan</th>
               <th class="w-[20%] px-6 py-3 font-medium">Tanggal Permohonan</th>
               <th class="w-[10%] px-6 py-3 font-medium">Aksi</th>
             </tr>
@@ -150,23 +150,26 @@ async function deleteData(id: number) {
           <tbody class="divide-y divide-gray-100">
             <template v-if="datas">
               <tr v-for="data in datas" :key="data.id" class="hover:bg-gray-50 transition-colors">
-                <td class="px-6 py-4 text-center font-medium text-gray-800">
-                  <table class="mx-auto border border-gray-300 rounded-lg">
+                <td class="px-6 py-4 text-left font-medium text-gray-800">
+                  <table class="w-full mx-auto border border-gray-300 rounded-lg">
                     <tbody>
                       <tr>
-                        <td class="border border-gray-300 px-2 py-1 font-semibold">Nama Program</td>
-                        <td class="border border-gray-300 px-2 py-1">{{ data.program }}</td>
+                        <td class="border w-[35%] border-gray-300 px-2 py-1 font-normal">
+                          Nama Program
+                        </td>
+                        <td class="border border-gray-300 px-2 py-1 font-normal">
+                          {{ data.program }}
+                        </td>
                       </tr>
                       <tr>
-                        <td class="border border-gray-300 px-2 py-1 font-semibold">
-                          Nama Kegiatan
+                        <td class="border border-gray-300 px-2 py-1 font-normal">Nama Kegiatan</td>
+                        <td class="border border-gray-300 px-2 py-1 font-normal">
+                          {{ data.kegiatan }}
                         </td>
-                        <td class="border border-gray-300 px-2 py-1">{{ data.kegiatan }}</td>
                       </tr>
                     </tbody>
                   </table>
                 </td>
-
                 <td class="px-6 py-4 text-center font-medium text-gray-800">
                   {{ data.status_realisasi?.replaceAll('_', ' ').toUpperCase() }}
                 </td>
@@ -182,8 +185,6 @@ async function deleteData(id: number) {
                 </td>
               </tr>
             </template>
-
-            <!-- Empty State -->
             <tr v-else>
               <td :colspan="totalColumns" class="px-6 py-8 text-center text-gray-500">
                 <font-awesome-icon
