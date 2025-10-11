@@ -1,7 +1,9 @@
-
 const Model_r = require("../models/model_r");
 const Model_cud = require("../models/model_cud");
-const { handleValidationErrors, handleServerError } = require("../../../helper/handleError");
+const {
+  handleValidationErrors,
+  handleServerError,
+} = require("../../../helper/handleError");
 
 const controllers = {};
 
@@ -22,11 +24,11 @@ const controllers = {};
 //   }
 // };
 
-controllers.get_noWa = async (req, res) => {
+controllers.list = async (req, res) => {
   console.log("controller item");
   try {
     const model = new Model_r(req);
-    const data = await model.get_info_Whatsapp_message();
+    const data = await model.list();
     return res.status(200).json(data); // pake return
   } catch (error) {
     return handleServerError(res, error); // kasih full error object
@@ -43,7 +45,6 @@ controllers.get_jenis_pesan = async (req, res) => {
     return handleServerError(res, error); // kasih full error object
   }
 };
-
 
 // controllers.daftar_desa = async (req, res) => {
 //   if (!(await handleValidationErrors(req, res))) return;
@@ -138,12 +139,12 @@ controllers.delete = async (req, res) => {
     if (result.success) {
       res.status(200).json({
         error: false,
-        error_msg: 'Desa berhasil dihapus.',
+        error_msg: "Desa berhasil dihapus.",
       });
     } else {
       res.status(400).json({
         error: true,
-        error_msg: result.message || 'Desa gagal dihapus.',
+        error_msg: result.message || "Desa gagal dihapus.",
       });
     }
   } catch (error) {
