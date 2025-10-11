@@ -111,7 +111,7 @@ const tabComponents = {
   rekap_distribusi_asnaf: RekapDistribusiPerAsnaf,
   laporan_kesekretariatan: LaporanKesekretariatan,
   rekap_pengumpulan_per_kecamatan: RekapPengumpulanPerKecamatan,
-  rekap_per_kecamatan: RekapPerkecamatan,
+  rekap_distribusi_kecamatan: RekapPerkecamatan,
   rekap_distribusi_kode_asnaf: RekapDistribusiPerKodeAsnaf,
   laporan_pengumpulan: LaporanPengumpulan,
   kriteria: Kriteria,
@@ -224,12 +224,12 @@ watch(
     <div
       v-for="(item, key) in selectedTab.sharedArray"
       :key="key"
-      class="p-4 rounded-lg bg-gray-50 dark:bg-gray-800 min-h-[500px]"
+      class="p-4 bg-white dark:bg-gray-800 min-h-[500px] rounded-lg"
       :class="
         (activeTab.sharedString === tab.sharedObject[item.id].path ||
         (tabTerpilih.sharedNumber === 0 && key === 0)
           ? ''
-          : 'hidden') + (key === 0 ? ' rounded-tl-none' : '')
+          : 'hidden') + (key === 0 ? ' [border-top-left-radius:0px]' : '')
       "
       :id="tab.sharedObject[item.id].path"
       role="tabpanel"
