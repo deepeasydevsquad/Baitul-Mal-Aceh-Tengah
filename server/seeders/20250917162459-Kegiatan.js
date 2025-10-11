@@ -44,9 +44,11 @@ module.exports = {
           jenis_penyaluran: "langsung",
           status_kegiatan: "sedang_berlangsung",
           tahun: 2025,
-          banner: "pendidikan-2024.png",
-          periode_bantuan: "tahunan",
-          desc: "Program bantuan biaya pendidikan untuk anak dhuafa di tingkat desa (2024).",
+          banner: `${Math.floor(Math.random() * 10) + 1}.png`,
+          desc: `Program bantuan biaya pendidikan untuk siswa/siswi yatim dan dhuafa di seluruh kabupaten ${
+            Math.floor(Math.random() * 10) + 1
+          }`,
+          periode_bantuan: "bulanan",
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -133,9 +135,11 @@ module.exports = {
           jenis_penyaluran: "langsung",
           status_kegiatan: "sedang_berlangsung",
           tahun: 2025,
-          banner: "kesehatan-2025.png",
+          banner: `${Math.floor(Math.random() * 10) + 1}.png`,
+          desc: `Program bantuan biaya pendidikan untuk siswa/siswi yatim dan dhuafa di seluruh kecamatan ${
+            Math.floor(Math.random() * 10) + 1
+          }`,
           periode_bantuan: "bulanan",
-          desc: "Program bantuan sosial dan kesehatan untuk lansia dhuafa di seluruh kabupaten (2025).",
           createdAt: new Date(),
           updatedAt: new Date(),
         },

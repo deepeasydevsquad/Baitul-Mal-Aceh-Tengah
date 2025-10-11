@@ -26,8 +26,8 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       status_realisasi: {
-        type: Sequelize.ENUM, 
-        values: ["belum_direalisasi", "sudah_direalisasi"], 
+        type: Sequelize.ENUM,
+        values: ["belum_direalisasi", "sudah_direalisasi"],
         defaultValue : "belum_direalisasi"
       },
       tanggal_realisasi: {
@@ -49,6 +49,9 @@ module.exports = {
       },
       mou: {
         type: Sequelize.STRING
+      },
+      bulan: {
+        type: Sequelize.INTEGER
       },
       createdAt: {
         allowNull: false,

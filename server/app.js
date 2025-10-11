@@ -81,6 +81,8 @@ const arr_router = [
   "urutan_bagian_monev",
   "penetapan",
   "riwayat_infaq",
+  "permohonan_bantuan",
+  "validasi_permohonan_bantuan",
   "laporan_tahunan",
   "pertanyaan_monev",
   "rekap_pengumpulan",
@@ -93,8 +95,12 @@ const arr_router = [
   "rekap_pengumpulan_per_kecamatan",
   "program_bantuan_member",
   "rekap_perkecamatan",
+  "rekap_distribusi_per_kode_asnaf",
+  "laporan_pengumpulan",
   "infaq_member",
   "zakat_member",
+  "permohonan_bantuan_member",
+  "kriteria",
 ];
 
 const arr = {};
