@@ -21,7 +21,7 @@ controllers.login_administrator_process = async (req, res) => {
     const access_token = jwt.sign(
       userPayload,
       process.env.ADMINISTRATOR_SECRET_KEY,
-      { expiresIn: "5m" }
+      { expiresIn: "1h" }
     );
     const refresh_token = jwt.sign(
       userPayload,

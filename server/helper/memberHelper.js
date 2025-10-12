@@ -1,4 +1,5 @@
-const { Member } = require("../models");
+const { where } = require("sequelize");
+const { Member } = require("../models"); // Sesuaikan dengan model Company
 const jwt = require("jsonwebtoken");
 
 const memberHelper = {};
@@ -7,7 +8,7 @@ memberHelper.get_member_id = async (req) => {
   try {
     const authHeader = req.headers["authorization"];
     const token = authHeader && authHeader.split(" ")[1];
-    if (!token) return null;
+     if (!token) return null;
 
     const decoded = jwt.decode(token);
     if (!decoded || !decoded.username) return null;
