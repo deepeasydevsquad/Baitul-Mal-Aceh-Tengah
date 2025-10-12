@@ -1,4 +1,4 @@
-const { User } = require("../models");
+const { Op, User } = require("../models");
 const bcrypt = require("bcryptjs");
 
 const validation = {};
@@ -48,42 +48,43 @@ validation.password = async (value, { req }) => {
 
 // validasi username
 validation.check_username = async (value, { req }) => {
-  const id = req.body.id;
+  const id = req.body.id; // id user yang sedang di-edit (jika ada)
 
+  // 🧩 MODE EDIT (user sedang update profile)
   if (id) {
     const current = await User.findByPk(id);
+
     if (!current) {
-      throw new Error("User tidak ditemukan");
+      throw new Error("User tidak ditemukan di pangkalan data.");
     }
 
+    // Jika username tidak berubah, loloskan
     if (current.username === value) {
       return true;
     }
 
+    // Cek apakah username baru sudah dipakai user lain
     const check = await User.findOne({
       where: {
-        id: { [Op.ne]: id },
         username: value,
+        id: { [Op.ne]: id }, // user lain selain yang sedang login
       },
     });
 
     if (check) {
-      throw new Error(
-        "User dengan nama yang sama sudah terdaftar di pangkalan data"
-      );
+      throw new Error("Username sudah digunakan oleh pengguna lain.");
     }
-  } else {
-    const check = await User.findOne({
-      where: {
-        username: value,
-      },
-    });
 
-    if (check) {
-      throw new Error(
-        "User dengan nama yang sama sudah terdaftar di pangkalan data"
-      );
-    }
+    return true;
+  }
+
+  // MODE REGISTRASI (user baru)
+  const check = await User.findOne({
+    where: { username: value },
+  });
+
+  if (check) {
+    throw new Error("Username sudah digunakan oleh pengguna lain.");
   }
 
   return true;
