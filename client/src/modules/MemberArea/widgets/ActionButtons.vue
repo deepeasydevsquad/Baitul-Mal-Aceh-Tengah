@@ -2,6 +2,7 @@
 import { ref, onUnmounted, onMounted, nextTick } from 'vue';
 import { defineAsyncComponent } from 'vue';
 import Notification from '@/components/Modal/Notification.vue';
+import ModalEditProfile from '@/modules/MemberArea/widgets/ModalEditProfile.vue';
 import { initTooltips } from 'flowbite';
 
 // === State Notification ===
@@ -9,7 +10,15 @@ const timeoutId = ref<number | null>(null);
 const showNotification = ref<boolean>(false);
 const notificationMessage = ref<string>('');
 const notificationType = ref<'success' | 'error'>('success');
+const isModalEditProfile = ref<boolean>(false);
 
+
+// === Modal Edit Profile ===
+const openModalEditProfile = () => {
+  isModalEditProfile.value = true;
+};
+
+// === Display Notification ===
 const displayNotification = (message: string, type: 'success' | 'error' = 'success') => {
   notificationMessage.value = message;
   notificationType.value = type;
@@ -141,7 +150,7 @@ const activeTab = ref(menuItems[0].id);
     <!-- Edit Profil + Logout -->
     <div class="flex-1 flex justify-end items-center">
       <a
-        href="#"
+        @click="openModalEditProfile"
         class="px-4 py-2.5 h-10 bg-green-900 hover:bg-green-950 focus:bg-green-950 rounded-tl-lg rounded-bl-lg flex justify-center items-center gap-2 text-white font-semibold text-[14px]"
         :data-tooltip-target="`tooltip-default-edit-profil`"
       >
@@ -158,6 +167,20 @@ const activeTab = ref(menuItems[0].id);
       </a>
     </div>
   </div>
+
+  <ModalEditProfile
+    :formStatus="isModalEditProfile"
+    @cancel="isModalEditProfile = false"
+    @submitted="isModalEditProfile = false"
+    @notify="
+      (payload) => {
+        showNotification = true;
+        notificationType = payload.type;
+        notificationMessage = payload.message;
+      }
+    "
+  />
+
 
   <!-- Konten Dinamis -->
   <div class="mt-6">

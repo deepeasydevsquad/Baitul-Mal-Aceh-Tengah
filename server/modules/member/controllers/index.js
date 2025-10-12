@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const Model_r = require("../models/model_r");
+const Model_cud = require("../models/model_cud");
 const {
   handleValidationErrors,
   handleServerError,
@@ -17,7 +18,7 @@ controllers.login_member_process = async (req, res) => {
     const access_token = jwt.sign(
       userPayload,
       process.env.MEMBERSHIP_SECRET_KEY,
-      { expiresIn: "10s" }
+      { expiresIn: "10m" }
     );
     const refresh_token = jwt.sign(
       userPayload,
@@ -71,6 +72,46 @@ controllers.refreshToken = async (req, res) => {
       });
     }
   );
+};
+
+
+controllers.get_info_edit_profile_member = async (req, res) => {
+  if (!(await handleValidationErrors(req, res))) return;
+  try {
+    const model_r = new Model_r(req);
+    const data = await model_r.get_profile_member();
+    res.status(200).json({
+      error: false,
+      message: "Data Berhasil Ditemukan.",
+      data: data,
+    });
+  } catch (error) {
+    handleServerError(res, error);
+  }
+};
+
+
+controllers.edit_profile_member = async (req, res) => {
+  if (!(await handleValidationErrors(req, res))) return;
+
+  try {
+    const model_cud = new Model_cud(req);
+    await model_cud.edit_profile_member();
+
+    if (await model_cud.response()) {
+      res.status(200).json({
+        error: false,
+        error_msg: "Member Profile berhasil diperbaharui.",
+      });
+    } else {
+      res.status(400).json({
+        error: true,
+        error_msg: "Member Profile gagal diperbaharui.",
+      });
+    }
+  } catch (error) {
+    handleServerError(res, error);
+  }
 };
 
 module.exports = controllers;
