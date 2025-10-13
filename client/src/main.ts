@@ -151,7 +151,8 @@ import {
   faCircleCheck,
   faSpinner,
   faPaperPlane,
-} from '@fortawesome/free-solid-svg-icons'  
+  faComments,
+} from '@fortawesome/free-solid-svg-icons';
 
 // FontAwesome Icons - Regular
 import { faCircle, faClock, faUser as farUser, faEye } from '@fortawesome/free-regular-svg-icons';
@@ -284,6 +285,7 @@ library.add(
   faCircleCheck,
   faSpinner,
   faPaperPlane,
+  faComments,
 );
 
 // Buat App Vue

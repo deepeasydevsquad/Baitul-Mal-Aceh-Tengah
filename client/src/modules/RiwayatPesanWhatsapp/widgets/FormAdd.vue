@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
+import { ref, onMounted, onBeforeUnmount, computed, watch } from 'vue';
 import Notification from '@/components/Modal/Notification.vue';
 import BaseButton from '@/components/Button/BaseButton.vue';
 import SelectField from '@/components/Form/SelectField.vue';
@@ -11,7 +11,10 @@ import TextArea from '@/components/Form/TextArea.vue';
 import { useNotification } from '@/composables/useNotification';
 
 // Service
-import { get_info_Whatsapp_message } from '@/service/riwayat_pesan_whatsapp';
+import {
+  get_template_pesan_whatsapp,
+  get_pesan_template_pesan_whatsapp,
+} from '@/service/riwayat_pesan_whatsapp';
 
 // Composable: notification
 const { showNotification, notificationType, notificationMessage, displayNotification } =
@@ -26,59 +29,73 @@ const emit = defineEmits<{
   (e: 'status', payload: { error_msg?: string; error?: boolean }): void;
 }>();
 
-// 🧱 ENUM: Jenis Pesan (statis)
-enum JenisPesanEnum {
-  pesan_biasa = 'Pesan Biasa',
-  munfiq = 'Munfiq',
-  muzakki = 'Muzakki',
-  semua_member = 'Semua Member',
-  surveyor = 'Surveyor',
-  otp = 'OTP',
-}
+// 🧾 Data Form
+const form = ref<{
+  name: string;
+  jenis_pesan: string;
+  nomor_tujuan?: string;
+  isi_pesan: string;
+  template_pesan?: string;
+}>({
+  name: '',
+  jenis_pesan: 'pilih_jenis',
+  isi_pesan: '',
+  template_pesan: 'pilih_template',
+});
 
 // 🔄 Convert enum ke array untuk SelectField
-const jenisPesanOption = ref<{ id: string; name: string }[]>(
-  Object.entries(JenisPesanEnum).map(([key, value]) => ({
-    id: key,
-    name: value,
-  })),
-);
+const jenisPesanOption = ref<{ id: string; name: string }[]>([
+  { id: 'pilih_jenis', name: 'Pilih Jenis Pesan' },
+  { id: 'pesan_biasa', name: 'Pesan Biasa' },
+  { id: 'munfiq', name: 'Munfiq' },
+  { id: 'muzakki', name: 'Muzakki' },
+  { id: 'sumber_member', name: 'Sumber Member' },
+  { id: 'surveyor', name: 'Surveyor' },
+  { id: 'otp', name: 'OTP' },
+]);
 
 // 🧩 TEMPLATE PESAN (dinamis dari database)
 const templatePesanOption = ref<Array<{ id: number; name: string }>>([]);
 
 // 🔍 Fungsi ambil data dari database
-async function fetchTemplatePesan() {
+async function get_template_pesan_whatsapp_fn() {
   try {
-    const response = await get_info_Whatsapp_message();
-    // Asumsi response.data = [{ id: 1, name: "Template Ucapan" }, ...]
-    templatePesanOption.value = response.data || [];
-
-    console.log('Template pesan berhasil diambil:', templatePesanOption.value);
+    const response = await get_template_pesan_whatsapp({ type: form.value.jenis_pesan });
+    templatePesanOption.value = [
+      { id: 'pilih_template', name: '-- Pilih Template --' },
+      ...response.data,
+    ];
+    form.value.template_pesan = 'pilih_template';
   } catch (error) {
     console.error('Gagal mengambil data template pesan:', error);
     displayNotification('Gagal mengambil data template pesan', 'error');
   }
 }
 
-// 🧾 Data Form
-const form = ref<{
-  name: string;
-  jenis_pesan: string | null;
-  nomor_tujuan?: string;
-  isi_pesan: string;
-}>({
-  name: '',
-  jenis_pesan: 'pesan_biasa',
-  isi_pesan: '',
-});
+async function get_pesan_template_pesan_whatsapp_fn() {
+  console.log('XXXX');
+  try {
+    const response = await get_pesan_template_pesan_whatsapp({
+      template_id: form.value.template_pesan,
+    });
+    form.value.isi_pesan = response.data;
+  } catch (error) {
+    console.error('Gagal mengambil data template pesan:', error);
+    displayNotification('Gagal mengambil data template pesan', 'error');
+  }
+}
 
 // Error state
 const errors = ref<Record<string, string>>({});
 
 // 🔁 Reset form
 const resetForm = () => {
-  form.value = { name: '', jenis_pesan: null, template_pesan: null, isi_pesan: '' };
+  form.value = {
+    name: '',
+    jenis_pesan: 'pilih_jenis',
+    template_pesan: 'pilih_template',
+    isi_pesan: '',
+  };
   errors.value = {};
 };
 
@@ -96,10 +113,11 @@ const validateForm = () => {
     isValid = false;
   }
 
-  // if (form.value.jenis_pesan === 'PESAN_TEMPLATE' && !form.value.template_pesan) {
-  //   errors.value.template_pesan = 'Template pesan harus dipilih.';
-  //   isValid = false;
-  // }
+  if (form.value.jenis_pesan == 'pesan_biasa') {
+    if (form.value.nomor_tujuan == '') {
+      errors.value.nomor_tujuan = 'Untuk jenis pesan "Pesan Biasa", Nomor tujuan wajib diisi.';
+    }
+  }
 
   if (!form.value.isi_pesan) {
     errors.value.isi_pesan = 'Isi pesan tidak boleh kosong.';
@@ -154,21 +172,62 @@ const handleEscape = (e: KeyboardEvent) => {
   if (e.key === 'Escape' && props.isModalOpen) closeModal();
 };
 
-// 🚀 Fetch data saat modal dibuka
-watch(
-  () => props.isModalOpen,
-  async (val) => {
-    if (val) {
-      await fetchTemplatePesan();
-    }
-  },
-);
-
 onMounted(() => {
   document.addEventListener('keydown', handleEscape);
 });
 onBeforeUnmount(() => {
   document.removeEventListener('keydown', handleEscape);
+});
+
+// Watch perubahan modal + data
+watch(
+  () => form.value.jenis_pesan,
+  (v) => {
+    if (v != 'pilih_jenis') {
+      get_template_pesan_whatsapp_fn();
+    }
+  },
+);
+
+watch(
+  () => form.value.template_pesan,
+  (v) => {
+    if (v != 'pilih_template') {
+      get_pesan_template_pesan_whatsapp_fn();
+    }
+  },
+);
+
+const isDisbaled = computed(() => {
+  let status = true;
+
+  if (form.value.jenis_pesan != 'pilih_jenis' && form.value.isi_pesan) {
+    if (form.value.jenis_pesan == 'pesan_biasa') {
+      if (form.value.nomor_tujuan !== undefined && form.value.nomor_tujuan !== '') {
+        status = false;
+        console.log('1----');
+        console.log(form.value.nomor_tujuan);
+        console.log('1----');
+      }
+    } else {
+      console.log('2----');
+      status = false;
+    }
+  }
+
+  console.log('Status ==== ');
+  console.log(form.value.jenis_pesan);
+  console.log(form.value.isi_pesan);
+  console.log(status);
+  console.log('Status ==== ');
+
+  return status;
+  // if (!apiData.value) return 0;
+  // return (
+  //   apiData.value.infaq.realisasi_pengumpulan +
+  //   apiData.value.zakat.realisasi_pengumpulan +
+  //   apiData.value.donasi.realisasi_pengumpulan
+  // );
 });
 </script>
 
@@ -201,16 +260,6 @@ onBeforeUnmount(() => {
           </button>
         </div>
 
-        <!-- Nomor Asal -->
-        <!-- <InputText
-          id="nomorAsal"
-          readonly
-          v-model="form.name"
-          label="Nomor Asal"
-          placeholder="Masukkan nomor asal"
-          :error="errors.name"
-        /> -->
-
         <!-- Jenis Pesan -->
         <SelectField
           id="jenis_pesan"
@@ -228,17 +277,19 @@ onBeforeUnmount(() => {
           label="Nomor Tujuan"
           placeholder="Masukkan nomor tujuan anda"
           :error="errors.nomor_tujuan"
+          :note="'Silahkan masukkan nomor tujuan pada kolom diatas. Untuk nomor tujuan yang lebih dari satu, maka setiap nomor dipisahkan oleh tanda koma.'"
         />
 
         <!-- Template Pesan -->
-        <!-- <SelectField
+        <SelectField
+          v-if="form.jenis_pesan != 'pilih_jenis'"
           id="jenis_pesan"
           v-model="form.template_pesan"
           :options="templatePesanOption"
           label="Jenis Pesan"
           placeholder="--- Pilih Template Pesan ---"
           :error="errors.jenis_pesan"
-        /> -->
+        />
 
         <!-- Isi Pesan -->
         <TextArea
@@ -251,7 +302,7 @@ onBeforeUnmount(() => {
         />
 
         <!-- Tombol Simpan -->
-        <BaseButton
+        <!-- <BaseButton
           type="submit"
           fullWidth
           variant="primary"
@@ -260,7 +311,21 @@ onBeforeUnmount(() => {
         >
           <span v-if="isSubmitting">Menyimpan...</span>
           <span v-else>Simpan</span>
-        </BaseButton>
+        </BaseButton> -->
+        <div class="flex justify-end gap-3">
+          <BaseButton
+            @click="closeModal"
+            type="button"
+            :disabled="isSubmitting"
+            variant="secondary"
+          >
+            Batal
+          </BaseButton>
+          <BaseButton type="submit" variant="primary" :disabled="isDisbaled" @click="handleSubmit">
+            <span v-if="isSubmitting">Menyimpan...</span>
+            <span v-else>Simpan</span>
+          </BaseButton>
+        </div>
       </div>
     </div>
   </Transition>

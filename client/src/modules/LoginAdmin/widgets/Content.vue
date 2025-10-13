@@ -2,6 +2,9 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import Notification from '@/components/Modal/Notification.vue';
+import { API_URL } from '@/config/config';
+
+// const API_BASE_URL = API_URL;
 
 interface FormData {
   username: string;
@@ -54,7 +57,7 @@ const LoginProcess = async () => {
   }
 
   try {
-    const baseUrl = window.location.protocol + '//' + window.location.hostname + ':3001'
+    const baseUrl = API_URL;
     const response = await axios.post(baseUrl + '/auth/login_administrator', {
       username: form.value.username,
       password: form.value.password,

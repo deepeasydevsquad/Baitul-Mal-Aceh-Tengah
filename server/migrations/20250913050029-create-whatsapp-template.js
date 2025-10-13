@@ -1,39 +1,46 @@
-'use strict';
+"use strict";
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Whatsapp_templates', {
+    await queryInterface.createTable("Whatsapp_templates", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       name: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       type: {
-        type: Sequelize.ENUM, 
-        values: ['pesan_biasa', 'semua_member', 'semua_surveyor', 'semua_user'], 
-        defaultValue: 'pesan_biasa'
+        type: Sequelize.ENUM,
+        values: [
+          "surveyor",
+          "pemohon",
+          "otp",
+          "munfiq",
+          "muzakki",
+          "pesan_biasa",
+        ],
+        defaultValue: "pesan_biasa",
       },
       message: {
-        type: Sequelize.TEXT
+        type: Sequelize.TEXT,
       },
       variable: {
-        type: Sequelize.TEXT
+        type: Sequelize.TEXT,
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE
-      }
+        type: Sequelize.DATE,
+      },
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Whatsapp_templates');
-  }
+    await queryInterface.dropTable("Whatsapp_templates");
+  },
 };

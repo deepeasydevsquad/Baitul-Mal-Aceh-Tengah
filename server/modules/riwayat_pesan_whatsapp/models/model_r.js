@@ -11,22 +11,6 @@ class Model_r {
     this.req = req;
   }
 
-  // ambil data untuk no asal
-  // async get_info_pengaturan_whatsapp() {
-  //   const data = await Setting.findAll({
-  //     where: {
-  //       name: { [Op.in]: ["whatsapp_number"] },
-  //     },
-  //     attributes: ["name", "value"],
-  //   });
-  //   return {
-  //     data: data.map((e) => ({
-  //       name: e.name,
-  //       value: e.value,
-  //     })),
-  //   };
-  // }
-
   // ambil data untuk template pesan
   async jenis_pesan() {
     try {
@@ -43,16 +27,37 @@ class Model_r {
     }
   }
 
-  async template_pesan() {
+  async get_template_pesan_whatsapp() {
     try {
+      let data = [];
       // ambil nomor asal
-      const templatePesan = await Whatsapp_template.findAll({
-        attributes: ["name", "message"],
+      await Whatsapp_template.findAll({
+        where: { type: this.req.body.type },
+      }).then(async (value) => {
+        await Promise.all(
+          await value.map(async (e) => {
+            data.push({ id: e.id, name: e.name });
+          })
+        );
       });
-      console.log(jenisPesan);
+      return data;
     } catch (error) {
       console.error("Error fetching Whatsapp_template data:", error);
-      return;
+      return {};
+    }
+  }
+
+  async get_pesan_template_pesan_whatsapp() {
+    try {
+      var q = await Whatsapp_template.findOne({
+        where: {
+          id: this.req.body.template_id,
+        },
+      });
+      return q.message;
+    } catch (error) {
+      console.error("Error:", error);
+      return "";
     }
   }
 

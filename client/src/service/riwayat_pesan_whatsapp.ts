@@ -72,15 +72,39 @@ export const get_info_Whatsapp_message = async (param: any) => {
   }
 };
 
-export const jenis_pesan = async (param: any) => {
+export const get_template_pesan_whatsapp = async (param: any) => {
   try {
-    const response = await api('/riwayat_pesan_whatsapp/get_jenis_pesan"', param);
+    const response = await api.post('/riwayat_pesan_whatsapp/get_template_pesan_whatsapp', param);
     return response.data;
   } catch (error) {
-    console.error('Gagal mengambil Jenis Pesan', error);
+    console.error('Gagal mengambil template pesan:', error);
     throw error;
   }
 };
+
+export const get_pesan_template_pesan_whatsapp = async (param: any) => {
+  try {
+    const response = await api.post(
+      '/riwayat_pesan_whatsapp/get_pesan_template_pesan_whatsapp',
+      param,
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Gagal mengambil template pesan:', error);
+    throw error;
+  }
+};
+
+// export const jenis_pesan = async (param: any) => {
+//   try {
+//     const response = await api('/riwayat_pesan_whatsapp/get_jenis_pesan"', param);
+//     return response.data;
+//   } catch (error) {
+//     console.error('Gagal mengambil Jenis Pesan', error);
+//     throw error;
+//   }
+// };
+
 // export const get_info_riwayat_whatsapp = async (param: any = { perpage: 10, pageNumber: 1, search: "" }) => {
 //   try {
 //     const response = await api.post('/desa/list', param)

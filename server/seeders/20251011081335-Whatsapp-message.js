@@ -16,13 +16,6 @@ module.exports = {
     ]);
   },
 
-  // "surveyor",
-  //       "pemohon",
-  //       "otp",
-  //       "munfiq",
-  //       "muzakki",
-  //       "pesan_biasa",
-
   async down(queryInterface, Sequelize) {
     await queryInterface.bulkDelete("Whatsapp_templates", null, {});
   },
