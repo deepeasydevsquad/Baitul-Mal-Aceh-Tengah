@@ -43,7 +43,7 @@ class Model_r {
     }
   }
 
-  async template_pesan() {
+  async get_template_pesan_whatsapp() {
     try {
       // ambil nomor asal
       const templatePesan = await Whatsapp_template.findAll({
@@ -55,6 +55,8 @@ class Model_r {
       return;
     }
   }
+
+  // get_template_pesan_whatsapp
 
   // ambil data untuk Jenis pesan, status dan tanggal pengiriman
   async list() {

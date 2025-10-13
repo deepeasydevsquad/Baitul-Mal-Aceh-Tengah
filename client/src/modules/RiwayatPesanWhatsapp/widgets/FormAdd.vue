@@ -27,22 +27,31 @@ const emit = defineEmits<{
 }>();
 
 // 🧱 ENUM: Jenis Pesan (statis)
-enum JenisPesanEnum {
-  pesan_biasa = 'Pesan Biasa',
-  munfiq = 'Munfiq',
-  muzakki = 'Muzakki',
-  semua_member = 'Semua Member',
-  surveyor = 'Surveyor',
-  otp = 'OTP',
-}
+// enum JenisPesanEnum {
+//   pesan_biasa = 'Pesan Biasa',
+//   munfiq = 'Munfiq',
+//   muzakki = 'Muzakki',
+//   semua_member = 'Semua Member',
+//   surveyor = 'Surveyor',
+//   otp = 'OTP',
+// }
 
 // 🔄 Convert enum ke array untuk SelectField
-const jenisPesanOption = ref<{ id: string; name: string }[]>(
-  Object.entries(JenisPesanEnum).map(([key, value]) => ({
-    id: key,
-    name: value,
-  })),
-);
+const jenisPesanOption = ref<{ id: string; name: string }[]>([
+  { id: 'pilih_jenis', name: 'Pilih Jenis Pesan' },
+  { id: 'pesan_biasa', name: 'Pesan Biasa' },
+  { id: 'munfiq', name: 'Munfiq' },
+  { id: 'muzakki', name: 'Muzakki' },
+  { id: 'sumber_member', name: 'Sumber Member' },
+  { id: 'surveyor', name: 'Surveyor' },
+  { id: 'otp', name: 'OTP' },
+]);
+
+// 'surveyor','pemohon','otp','munfiq','muzakki','pesan_biasa'
+// Object.entries(JenisPesanEnum).map(([key, value]) => ({
+//   id: key,
+//   name: value,
+// })),
 
 // 🧩 TEMPLATE PESAN (dinamis dari database)
 const templatePesanOption = ref<Array<{ id: number; name: string }>>([]);
@@ -67,10 +76,12 @@ const form = ref<{
   jenis_pesan: string | null;
   nomor_tujuan?: string;
   isi_pesan: string;
+  template_pesan: number;
 }>({
   name: '',
-  jenis_pesan: 'pesan_biasa',
+  jenis_pesan: 'pilih_jenis',
   isi_pesan: '',
+  template_pesan: 0,
 });
 
 // Error state
@@ -95,11 +106,6 @@ const validateForm = () => {
     errors.value.jenis_pesan = 'Jenis pesan harus dipilih.';
     isValid = false;
   }
-
-  // if (form.value.jenis_pesan === 'PESAN_TEMPLATE' && !form.value.template_pesan) {
-  //   errors.value.template_pesan = 'Template pesan harus dipilih.';
-  //   isValid = false;
-  // }
 
   if (!form.value.isi_pesan) {
     errors.value.isi_pesan = 'Isi pesan tidak boleh kosong.';
@@ -170,6 +176,21 @@ onMounted(() => {
 onBeforeUnmount(() => {
   document.removeEventListener('keydown', handleEscape);
 });
+
+// Watch perubahan modal + data
+watch(
+  () => form.value.jenis_pesan,
+  (v) => {
+    if (v != 'pilih_pesan') {
+      get_template_pesan_whatsapp();
+    }
+    // if (val && props.selectedAsnaf?.id) {
+    //   fetchData()
+    // } else if (!val) {
+    //   resetForm()
+    // }
+  },
+);
 </script>
 
 <template>

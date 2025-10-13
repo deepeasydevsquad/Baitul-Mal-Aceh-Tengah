@@ -25,7 +25,8 @@ const controllers = {};
 // };
 
 controllers.list = async (req, res) => {
-  console.log("controller item");
+  if (!(await handleValidationErrors(req, res))) return;
+
   try {
     const model = new Model_r(req);
     const data = await model.list();
@@ -35,16 +36,33 @@ controllers.list = async (req, res) => {
   }
 };
 
-controllers.get_jenis_pesan = async (req, res) => {
-  console.log("controller item");
+controllers.get_template_pesan_whatsapp = async (req, res) => {
+  if (!(await handleValidationErrors(req, res))) return;
+
   try {
-    const model = new Model_r(req);
-    const data = await model.jenis_pesan();
-    return res.status(200).json(data); // pake return
+    const model_r = new Model_r(req);
+    const feedBack = await model_r.get_template_pesan_whatsapp();
+
+    res.status(200).json({
+      error: false,
+      message: "Daftar template pesan whatsapp ditemukan.",
+      data: feedBack.data,
+    });
   } catch (error) {
-    return handleServerError(res, error); // kasih full error object
+    handleServerError(res, error);
   }
 };
+
+// controllers.get_jenis_pesan = async (req, res) => {
+//   console.log("controller item");
+//   try {
+//     const model = new Model_r(req);
+//     const data = await model.jenis_pesan();
+//     return res.status(200).json(data); // pake return
+//   } catch (error) {
+//     return handleServerError(res, error); // kasih full error object
+//   }
+// };
 
 // controllers.daftar_desa = async (req, res) => {
 //   if (!(await handleValidationErrors(req, res))) return;

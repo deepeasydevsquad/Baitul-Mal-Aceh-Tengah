@@ -1,151 +1,158 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
-import Notification from '@/components/Modal/Notification.vue'
-import BaseButton from '@/components/Button/BaseButton.vue'
-import InputText from '@/components/Form/InputText.vue'
-import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
-import SelectField from '@/components/Form/SelectField.vue'
-import InputReadonly from '@/components/Form/InputReadonly.vue'
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
+import Notification from '@/components/Modal/Notification.vue';
+import BaseButton from '@/components/Button/BaseButton.vue';
+import InputText from '@/components/Form/InputText.vue';
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
+import SelectField from '@/components/Form/SelectField.vue';
+import InputReadonly from '@/components/Form/InputReadonly.vue';
 
 // Composable
-import { useNotification } from '@/composables/useNotification'
+import { useNotification } from '@/composables/useNotification';
 
 // Service
-import { edit_template_pesan_whatsapp } from '@/service/template_pesan_whatsapp'
+import { edit_template_pesan_whatsapp } from '@/service/template_pesan_whatsapp';
 
 // Notification
 const { showNotification, notificationType, notificationMessage, displayNotification } =
-  useNotification()
+  useNotification();
 
 // Props
 interface Props {
-  isModalOpen: boolean
+  isModalOpen: boolean;
   selectedTemplatePesanWhatsapp: {
-    id: number
-    name: string
-    type: string
-    message: string
-    variable: string[]
-  } | null
+    id: number;
+    name: string;
+    type: string;
+    message: string;
+    variable: string[];
+  } | null;
 }
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 
 // Emit
 const emit = defineEmits<{
-  (e: 'close'): void
-  (e: 'status', payload: { error_msg?: string; error?: boolean }): void
-}>()
+  (e: 'close'): void;
+  (e: 'status', payload: { error_msg?: string; error?: boolean }): void;
+}>();
 
 // State
-const isSubmitting = ref(false)
-const form = ref({ id: null, name: '', type: '', message: '', variable: [] as string[] })
-const errors = ref<Record<string, string>>({})
+const isSubmitting = ref(false);
+const form = ref({ id: null, name: '', type: '', message: '', variable: [] as string[] });
+const errors = ref<Record<string, string>>({});
 
 // Reset form
 const resetForm = () => {
-  form.value = { id: null, name: '', type: '', message: '', variable: [] }
-  errors.value = {}
-}
+  form.value = { id: null, name: '', type: '', message: '', variable: [] };
+  errors.value = {};
+};
 
 // Variabel otomatis berdasarkan type
 const getVariableByType = (type: string): string[] => {
   switch (type) {
-    case 'semua_member':
-      return ['{{nama_member}}', '{{nomor_identitas}}']
+    case 'surveyor':
+      return ['{{nama_surveyor}}', '{{nomor_identitas}}', '{{nomor_whatsapp}}'];
 
-    case 'semua_surveyor':
-      return ['{{nama_surveyor}}']
+    case 'munfiq':
+      return ['{{nama_munfiq}}', '{{nomor_identitas}}', '{{jumlah_infaq}}'];
 
-    case 'semua_user':
-      return ['{{nama_user}}']
+    case 'muzakki':
+      return ['{{nama_muzakki}}', '{{nomor_identitas}}', '{{jumlah_zakat}}'];
 
     case 'pesan_biasa':
     default:
-      return []
+      return [];
   }
-}
+};
 
 const getMessageByType = (type: string): string => {
   switch (type) {
-    case 'semua_member':
-      return 'Halo {{nama_member}} '
-    case 'semua_surveyor':
-      return 'Halo {{nama_surveyor}}'
-    case 'semua_user':
-      return 'Halo {{nama_user}}'
+    case 'surveyor':
+      return 'Halo {{nama_surveyor}}, nomor identitas kamu {{nomor_identitas}} dan nomor WhatsApp {{nomor_whatsapp}} sudah terdaftar.';
+
+    case 'munfiq':
+      return 'Halo {{nama_munfiq}}, nomor identitas kamu {{nomor_identitas}} dan jumlah infaq kamu sebesar {{jumlah_infaq}}.';
+
+    case 'muzakki':
+      return 'Halo {{nama_muzakki}}, nomor identitas kamu {{nomor_identitas}} dan jumlah zakat kamu sebesar {{jumlah_zakat}}.';
+
     case 'pesan_biasa':
     default:
-      return ''
+      return '';
   }
-}
+};
 
 // Watch type untuk update variable dan message
 watch(
   () => form.value.type,
   (type) => {
-    form.value.variable = getVariableByType(type)
-    form.value.message = getMessageByType(type)
+    form.value.variable = getVariableByType(type);
+    form.value.message = getMessageByType(type);
   },
-)
+);
 
 // Watch modal open untuk sync data
 watch(
   () => props.isModalOpen,
   (open) => {
     if (open && props.selectedTemplatePesanWhatsapp) {
-      form.value = { ...props.selectedTemplatePesanWhatsapp }
+      form.value = { ...props.selectedTemplatePesanWhatsapp };
     } else {
-      resetForm()
+      resetForm();
     }
   },
-)
+);
 
 // Validasi
 const validateForm = () => {
-  errors.value = {}
-  let valid = true
+  errors.value = {};
+  let valid = true;
   if (!form.value.name) {
-    errors.value.name = 'Nama template pesan tidak boleh kosong.'
-    valid = false
+    errors.value.name = 'Nama template pesan tidak boleh kosong.';
+    valid = false;
   }
   if (!form.value.type) {
-    errors.value.type = 'Jenis template pesan tidak boleh kosong.'
-    valid = false
+    errors.value.type = 'Jenis template pesan tidak boleh kosong.';
+    valid = false;
   }
-  return valid
-}
+  if (!form.value.message) {
+    errors.value.message = 'Isi Pesan tidak boleh kosong.';
+    valid = false;
+  }
+  return valid;
+};
 
 // Submit
 const handleSubmit = async () => {
-  if (!validateForm()) return
-  isSubmitting.value = true
+  if (!validateForm()) return;
+  isSubmitting.value = true;
   try {
-    const payload = { ...form.value }
-    const response = await edit_template_pesan_whatsapp(payload)
-    emit('status', { error_msg: response.error_msg, error: response.error })
+    const payload = { ...form.value };
+    const response = await edit_template_pesan_whatsapp(payload);
+    emit('status', { error_msg: response.error_msg, error: response.error });
   } catch (error: any) {
     const msg =
-      error.response?.data?.error_msg || error.response?.data?.message || 'Terjadi kesalahan'
-    displayNotification(msg, 'error')
+      error.response?.data?.error_msg || error.response?.data?.message || 'Terjadi kesalahan';
+    displayNotification(msg, 'error');
   } finally {
-    isSubmitting.value = false
-    closeModal()
+    isSubmitting.value = false;
+    closeModal();
   }
-}
+};
 
 // Close modal
 const closeModal = () => {
-  resetForm()
-  emit('close')
-}
+  resetForm();
+  emit('close');
+};
 
 // Escape key
 const handleEscape = (e: KeyboardEvent) => {
-  if (e.key === 'Escape' && props.isModalOpen) closeModal()
-}
-onMounted(() => document.addEventListener('keydown', handleEscape))
-onBeforeUnmount(() => document.removeEventListener('keydown', handleEscape))
+  if (e.key === 'Escape' && props.isModalOpen) closeModal();
+};
+onMounted(() => document.addEventListener('keydown', handleEscape));
+onBeforeUnmount(() => document.removeEventListener('keydown', handleEscape));
 </script>
 
 <template>
@@ -193,24 +200,49 @@ onBeforeUnmount(() => document.removeEventListener('keydown', handleEscape))
           :error="errors.type"
           :options="[
             { id: '', name: '-- Pilih Jenis Template --' },
-            { id: 'pesan_biasa', name: 'pesan biasa' },
-            { id: 'semua_member', name: 'semua member' },
-            { id: 'semua_surveyor', name: 'semua surveyor' },
-            { id: 'semua_user', name: 'semua user' },
+            { id: 'pesan_biasa', name: 'Pesan Biasa' },
+            { id: 'munfiq', name: 'Munfiq' },
+            { id: 'muzakki', name: 'Muzakki' },
+            { id: 'surveyor', name: 'Surveyor' },
           ]"
         />
 
         <div v-if="form.type">
-          <InputReadonly label="Variable Otomatis" :value="form.variable.join(', ') || '-'" />
+          <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300"
+            >Nilai</label
+          >
+          <div class="mb-4" aria-hidden="false">
+            <span
+              role="textbox"
+              :aria-readonly="true"
+              tabindex="0"
+              class="block w-full px-3 py-2 rounded-md border bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-base text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400"
+              >{{ form.variable.join(', ') || '-' }}</span
+            >
+          </div>
           <div class="mt-3">
             <label class="block text-sm font-medium text-gray-700 mb-1">Isi Pesan</label>
             <textarea v-model="form.message" rows="4" class="w-full border rounded-lg p-2" />
           </div>
         </div>
-
-        <div class="pt-4">
-          <BaseButton fullWidth variant="primary" :disabled="isSubmitting" @click="handleSubmit">
-            Simpan Perubahan
+        <!-- Actions -->
+        <div class="flex justify-end gap-3">
+          <BaseButton
+            @click="closeModal"
+            type="button"
+            :disabled="isSubmitting"
+            variant="secondary"
+          >
+            Batal
+          </BaseButton>
+          <BaseButton
+            type="submit"
+            variant="primary"
+            :disabled="!(form.name.trim() && form.type && form.message)"
+            @click="handleSubmit"
+          >
+            <span v-if="isSubmitting">Menyimpan...</span>
+            <span v-else>Simpan</span>
           </BaseButton>
         </div>
       </div>

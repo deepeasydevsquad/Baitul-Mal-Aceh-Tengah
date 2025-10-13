@@ -8,31 +8,6 @@ const {
 
 const router = express.Router();
 
-// router.get(
-//   "/riwayat_infaq/list_member",
-//   authenticateTokenAdministrator,
-//   controllers.list_member
-// );
-
-// router.post(
-//   "/riwayat_pengaturan_whatsapp/get",
-//   authenticateTokenAdministrator,
-//   [
-//     body("perpage") // <-- Validasi ini
-//       .notEmpty()
-//       .withMessage("Perpage Tidak Boleh Kosong")
-//       .isInt()
-//       .withMessage("Perpage Harus Angka"),
-//     body("pageNumber") // <-- Dan validasi ini
-//       .notEmpty()
-//       .withMessage("Page Number Tidak Boleh Kosong")
-//       .isInt()
-//       .withMessage("Page Number Harus Angka"),
-//     body("search").optional().isString().withMessage("Search Harus String"),
-//   ],
-//   controllers.get_info_pengaturan_whatsapp
-// );
-
 router.post(
   "/riwayat_pesan_whatsapp/list",
   authenticateTokenAdministrator,
@@ -51,11 +26,27 @@ router.post(
   controllers.list
 );
 
-router.get(
-  "/riwayat_pesan_whatsapp/get_jenis_pesan",
+router.post(
+  "/riwayat_pesan_whatsapp/get_template_pesan_whatsapp",
   authenticateTokenAdministrator,
-  controllers.get_jenis_pesan
+  [
+    body("jenis_pesan")
+      .notEmpty()
+      .withMessage("Jenis Pesan Tidak Boleh Kosong")
+      .isIn(["surveyor", "pemohon", "otp", "munfiq", "muzakki", "pesan_biasa"])
+      .withMessage("Jenis Pesan Tidak Ditemukan."),
+  ],
+  controllers.get_template_pesan_whatsapp
 );
+
+// 'surveyor','pemohon','otp','munfiq','muzakki','pesan_biasa'
+// router.get(
+//   "/riwayat_pesan_whatsapp/get_jenis_pesan",
+//   authenticateTokenAdministrator,
+//   controllers.get_jenis_pesan
+// );
+
+// riwayat_pesan_whatsapp/get_template_pesan_whatsapp
 
 // router.post(
 //   "/riwayat_infaq/add",
