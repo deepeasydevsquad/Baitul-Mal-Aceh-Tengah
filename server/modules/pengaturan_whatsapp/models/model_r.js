@@ -118,14 +118,32 @@ class Model_r {
         }
       );
 
-      return {
+      let vr = {
         device_key: settings["device_key"] || null,
         whatsapp_number: settings["whatsapp_number"] || null,
-        status: wapisenderResponse.data.data.status || null,
-        created_at: wapisenderResponse.data.data.created_at || null,
-        expired_at: wapisenderResponse.data.data.expired_at || null,
-        qr_url,
       };
+
+      if (wapisenderResponse.data.status == "ok") {
+        return {
+          ...vr,
+          ...{
+            ["status"]: wapisenderResponse.data.status || null,
+            ["created_at"]: wapisenderResponse.data.created_at || null,
+            ["expired_at"]: wapisenderResponse.data.expired_at || null,
+            ["qr_url"]: qr_url,
+          },
+        };
+      } else {
+        return {
+          ...vr,
+          ...{
+            ["status"]: wapisenderResponse.data.status,
+            ["created_at"]: wapisenderResponse.data.created_at,
+            ["expired_at"]: wapisenderResponse.data.expired_at,
+            ["qr_url"]: qr_url,
+          },
+        };
+      }
     } catch (error) {
       console.error("Error fetching data settings:", error);
       return {};
