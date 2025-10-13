@@ -242,7 +242,10 @@ class Model_r {
     console.log(body.search);
     const where = body.search
       ? {
-          [Op.or]: [{ name: { [Op.like]: `%${body.search}%` } }],
+          [Op.or]: [
+            { sender_number: { [Op.like]: `%${body.search}%` } },
+            { destination_number: { [Op.like]: `%${body.search}%` } },
+          ],
         }
       : {};
 

@@ -77,4 +77,18 @@ router.post(
   controllers.kirim_pesan
 );
 
+router.post(
+  "/riwayat_pesan_whatsapp/delete",
+  authenticateTokenAdministrator,
+  [
+    body("id")
+      .notEmpty()
+      .withMessage("ID Pesan Tidak Boleh Kosong")
+      .custom(validation.check_id),
+  ],
+  controllers.delete
+);
+
+// riwayat_pesan_whatsapp/delete
+
 module.exports = router;

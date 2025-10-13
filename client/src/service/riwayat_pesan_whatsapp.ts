@@ -42,3 +42,13 @@ export const kirim_pesan = async (param: any) => {
     throw error;
   }
 };
+
+export const delete_pesan_whatsapp = async (id: number) => {
+  try {
+    const response = await api.post('/riwayat_pesan_whatsapp/delete', { id: id });
+    return response.data;
+  } catch (error) {
+    console.error('Gagal:', error);
+    throw error;
+  }
+};

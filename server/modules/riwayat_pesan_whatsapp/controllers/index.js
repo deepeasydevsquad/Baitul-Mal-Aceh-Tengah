@@ -154,4 +154,27 @@ controllers.kirim_pesan = async (req, res) => {
   }
 };
 
+controllers.delete = async (req, res) => {
+  if (!(await handleValidationErrors(req, res))) return;
+
+  try {
+    const model_cud = new Model_cud(req);
+    await model_cud.delete();
+    // response
+    if (await model_cud.response()) {
+      res.status(200).json({
+        error: false,
+        error_msg: "Pesan whatsapp berhasil dihapus.",
+      });
+    } else {
+      res.status(400).json({
+        error: true,
+        error_msg: "Pesan whatsapp gagal dihapus.",
+      });
+    }
+  } catch (error) {
+    handleServerError(res, error);
+  }
+};
+
 module.exports = controllers;

@@ -45,6 +45,8 @@ class Model_cud {
       this.message = err.message;
     }
   }
+
+  // async delete() {}
   // async add() {
   //   await this.initialize();
   //   const myDate = moment().format("YYYY-MM-DD HH:mm:ss");
@@ -103,34 +105,13 @@ class Model_cud {
     const { id } = this.req.body;
 
     try {
-      console.log("Attempting to delete kecamatan with ID:", id);
-
-      // Cek apakah data ada
-      const existingData = await Desa.findByPk(id, { transaction: this.t });
-      if (!existingData) {
-        throw new Error("Data kecamatan tidak ditemukan");
-      }
-
-      // Ambil info sebelum dihapus
-      const model_r = new Model_r(this.req);
-      const info_Desa = await model_r.info_desa(id);
-
-      if (!info_Desa) {
-        throw new Error("Tidak dapat mengambil informasi kecamatan");
-      }
-
       // Hapus data
-      const deleted = await Desa.destroy({
+      await Whatsapp_message.destroy({
         where: { id },
         transaction: this.t,
       });
 
-      if (!deleted) {
-        throw new Error("Gagal menghapus data kecamatan");
-      }
-
-      this.message = `Menghapus Desa dengan Nama: ${info_Desa.name} dan ID: ${info_Desa.id}`;
-      console.log("Delete successful:", this.message);
+      this.message = `Menghapus Pesan Whatsapp dengan ID Pesan Whatsapp: ${id} `;
     } catch (error) {
       console.error("Error in delete method:", error);
       this.state = false;
