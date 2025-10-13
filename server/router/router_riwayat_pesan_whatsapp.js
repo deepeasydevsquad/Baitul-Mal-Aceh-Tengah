@@ -51,51 +51,44 @@ router.post(
   controllers.get_pesan_template_pesan_whatsapp
 );
 
-// 'surveyor','pemohon','otp','munfiq','muzakki','pesan_biasa'
-// router.get(
-//   "/riwayat_pesan_whatsapp/get_jenis_pesan",
-//   authenticateTokenAdministrator,
-//   controllers.get_jenis_pesan
-// );
+router.post(
+  "/riwayat_pesan_whatsapp/kirim_pesan",
+  authenticateTokenAdministrator,
+  [
+    body("type")
+      .notEmpty()
+      .withMessage("Jenis Pesan Tidak Boleh Kosong")
+      .isIn(["surveyor", "munfiq", "muzakki", "pesan_biasa"])
+      .withMessage("Jenis Pesan Tidak Ditemukan."),
+    body("nomor_tujuan").custom((value, { req }) => {
+      if (req.body.type == "pesan_biasa" && value == "") {
+        throw new Error(
+          "Untuk pesan dengan jenis pesan 'Pesan Biasa' nomor tujuan wajib diisi."
+        );
+      }
+      return true;
+    }),
+    body("template_id")
+      .notEmpty()
+      .withMessage("ID Template Pesan Tidak Boleh Kosong")
+      .custom(validation.check_template_id),
+    body("isi_pesan").notEmpty().withMessage("Isi Pesan Tidak Boleh Kosong"),
+  ],
+  controllers.kirim_pesan
+);
 
-// riwayat_pesan_whatsapp/get_template_pesan_whatsapp
+router.post(
+  "/riwayat_pesan_whatsapp/delete",
+  authenticateTokenAdministrator,
+  [
+    body("id")
+      .notEmpty()
+      .withMessage("ID Pesan Tidak Boleh Kosong")
+      .custom(validation.check_id),
+  ],
+  controllers.delete
+);
 
-// router.post(
-//   "/riwayat_infaq/add",
-//   authenticateTokenAdministrator,
-//   [
-//     body("member_id")
-//       .notEmpty()
-//       .withMessage("Member ID Tidak Boleh Kosong")
-//       .isInt()
-//       .withMessage("Member ID Harus Angka")
-//       .custom(validation.check_id_member),
-//     body("nominal")
-//       .notEmpty()
-//       .withMessage("Nominal Tidak Boleh Kosong")
-//       .isInt()
-//       .withMessage("Nominal Harus Angka"),
-//     body("status_pemasukan")
-//       .notEmpty()
-//       .withMessage("Status Pemasukan Tidak Boleh Kosong")
-//       .isIn(["belum_dikirim", "sudah_dikirim"])
-//       .withMessage("Status Pemasukan Harus String"),
-//   ],
-//   controllers.add
-// );
-
-// router.post(
-//   "/riwayat_infaq/delete",
-//   authenticateTokenAdministrator,
-//   [
-//     body("id")
-//       .notEmpty()
-//       .withMessage("ID Tidak Boleh Kosong")
-//       .isInt()
-//       .withMessage("ID Harus Angka")
-//       .custom(validation.check_id_riwayat_infaq),
-//   ],
-//   controllers.delete
-// );
+// riwayat_pesan_whatsapp/delete
 
 module.exports = router;

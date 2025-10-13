@@ -19,7 +19,7 @@ import { useConfirmation } from '@/composables/useConfirmation';
 import { useNotification } from '@/composables/useNotification';
 
 // Service API
-import { get_info_Whatsapp_message } from '@/service/riwayat_pesan_whatsapp';
+import { get_info_Whatsapp_message, delete_pesan_whatsapp } from '@/service/riwayat_pesan_whatsapp';
 
 // State: Loading
 const isLoading = ref(false);
@@ -99,17 +99,20 @@ const handleStatus = (payload: any) => {
 
 // Function: Delete Data
 async function deleteData(id: number) {
+  console.log('-------');
+  console.log(id);
+  console.log('-------');
   displayConfirmation(
-    'Hapus Data Desa',
-    'Apakah Anda yakin ingin menghapus data desa ini?',
+    'Hapus Pesan Whatsapp',
+    'Apakah Anda yakin ingin menghapus data pesan ini?',
     async () => {
       try {
         isLoading.value = true;
-        await delete_desa(id);
-        displayNotification('Data desa berhasil dihapus', 'success');
+        await delete_pesan_whatsapp(id);
+        displayNotification('Pesan whatsapp berhasil dihapus', 'success');
         await fetchData();
       } catch (error) {
-        displayNotification('Gagal menghapus data desa', 'error');
+        displayNotification('Gagal', 'error');
       } finally {
         isLoading.value = false;
       }
@@ -227,5 +230,14 @@ async function deleteData(id: number) {
       :notificationMessage="notificationMessage"
       @close="showNotification = false"
     />
+    <!-- Confirmation -->
+    <Confirmation
+      :showConfirmDialog="showConfirmDialog"
+      :confirmTitle="confirmTitle"
+      :confirmMessage="confirmMessage"
+    >
+      <BaseButton variant="secondary" @click="cancel">Tidak</BaseButton>
+      <BaseButton variant="warning" @click="confirm">Ya</BaseButton>
+    </Confirmation>
   </div>
 </template>

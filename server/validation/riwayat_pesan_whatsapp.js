@@ -28,6 +28,14 @@ validation.check_template_id = async (value) => {
   return true;
 };
 
+validation.check_id = async (value) => {
+  const check = await Whatsapp_message.findOne({ where: { id: value } });
+  if (!check) {
+    throw new Error("ID Pesan whatsapp tidak terdaftar di pangkalan data");
+  }
+  return true;
+};
+
 // Validasi id bank apakah sudah ada di database
 // validation.check_id_riwayat_infaq = async (value) => {
 //   console.log("ID riwayat infaq", value);

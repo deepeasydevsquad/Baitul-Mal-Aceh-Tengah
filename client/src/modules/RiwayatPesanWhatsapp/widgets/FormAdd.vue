@@ -14,6 +14,7 @@ import { useNotification } from '@/composables/useNotification';
 import {
   get_template_pesan_whatsapp,
   get_pesan_template_pesan_whatsapp,
+  kirim_pesan,
 } from '@/service/riwayat_pesan_whatsapp';
 
 // Composable: notification
@@ -36,6 +37,7 @@ const form = ref<{
   nomor_tujuan?: string;
   isi_pesan: string;
   template_pesan?: string;
+  variable?: string;
 }>({
   name: '',
   jenis_pesan: 'pilih_jenis',
@@ -49,9 +51,7 @@ const jenisPesanOption = ref<{ id: string; name: string }[]>([
   { id: 'pesan_biasa', name: 'Pesan Biasa' },
   { id: 'munfiq', name: 'Munfiq' },
   { id: 'muzakki', name: 'Muzakki' },
-  { id: 'sumber_member', name: 'Sumber Member' },
   { id: 'surveyor', name: 'Surveyor' },
-  { id: 'otp', name: 'OTP' },
 ]);
 
 // 🧩 TEMPLATE PESAN (dinamis dari database)
@@ -73,12 +73,16 @@ async function get_template_pesan_whatsapp_fn() {
 }
 
 async function get_pesan_template_pesan_whatsapp_fn() {
-  console.log('XXXX');
   try {
     const response = await get_pesan_template_pesan_whatsapp({
       template_id: form.value.template_pesan,
     });
-    form.value.isi_pesan = response.data;
+    form.value.isi_pesan = response.data.message;
+    form.value.variable = response.data.variable.toString();
+
+    console.log('++++++++++++++++');
+    console.log(form.value.variable);
+    console.log('++++++++++++++++');
   } catch (error) {
     console.error('Gagal mengambil data template pesan:', error);
     displayNotification('Gagal mengambil data template pesan', 'error');
@@ -104,17 +108,20 @@ const validateForm = () => {
   let isValid = true;
   errors.value = {};
 
-  if (!form.value.name) {
-    errors.value.name = 'Nomor asal tidak boleh kosong.';
-    isValid = false;
-  }
+  // if (!form.value.name) {
+  //   errors.value.name = 'Nomor asal tidak boleh kosong.';
+  //   isValid = false;
+  // }
+
   if (!form.value.jenis_pesan) {
     errors.value.jenis_pesan = 'Jenis pesan harus dipilih.';
     isValid = false;
   }
 
   if (form.value.jenis_pesan == 'pesan_biasa') {
+    console.log('**********1');
     if (form.value.nomor_tujuan == '') {
+      console.log('**********2');
       errors.value.nomor_tujuan = 'Untuk jenis pesan "Pesan Biasa", Nomor tujuan wajib diisi.';
     }
   }
@@ -124,27 +131,40 @@ const validateForm = () => {
     isValid = false;
   }
 
+  console.log('****************');
+  console.log(form.value);
+  console.log(isValid);
+  console.log(errors.value);
+  console.log('****************');
+
   return isValid;
 };
 
 // 💾 Submit form
 const isSubmitting = ref(false);
 const handleSubmit = async () => {
+  // console.log('___++++++++___');
+  // console.log('___++++++++___');
+  // console.log('___++++++++___');
   if (!validateForm()) return;
   isSubmitting.value = true;
-
+  // console.log('___XXXXXXXXX___');
   try {
-    const payload = {
-      name: form.value.name,
-      jenis_pesan: form.value.jenis_pesan,
-      template_pesan: form.value.template_pesan,
+    // console.log('________');
+    // console.log(form.value.variable);
+    // console.log('________');
+
+    let payload = {
+      type: form.value.jenis_pesan,
+      template_id: form.value.template_pesan,
       isi_pesan: form.value.isi_pesan,
     };
 
-    console.log('Payload dikirim:', payload);
+    if (form.value.jenis_pesan == 'pesan_biasa') {
+      payload = { ...payload, ...{ ['nomor_tujuan']: form.value.nomor_tujuan } };
+    }
 
-    // const response = await add_desa(payload);
-    const response = { error: false, error_msg: '' }; // dummy
+    const response = await kirim_pesan(payload);
 
     emit('status', {
       error_msg: response?.error_msg || '',
@@ -194,6 +214,8 @@ watch(
   (v) => {
     if (v != 'pilih_template') {
       get_pesan_template_pesan_whatsapp_fn();
+    } else {
+      form.value.isi_pesan = '';
     }
   },
 );
@@ -205,29 +227,13 @@ const isDisbaled = computed(() => {
     if (form.value.jenis_pesan == 'pesan_biasa') {
       if (form.value.nomor_tujuan !== undefined && form.value.nomor_tujuan !== '') {
         status = false;
-        console.log('1----');
-        console.log(form.value.nomor_tujuan);
-        console.log('1----');
       }
     } else {
-      console.log('2----');
       status = false;
     }
   }
 
-  console.log('Status ==== ');
-  console.log(form.value.jenis_pesan);
-  console.log(form.value.isi_pesan);
-  console.log(status);
-  console.log('Status ==== ');
-
   return status;
-  // if (!apiData.value) return 0;
-  // return (
-  //   apiData.value.infaq.realisasi_pengumpulan +
-  //   apiData.value.zakat.realisasi_pengumpulan +
-  //   apiData.value.donasi.realisasi_pengumpulan
-  // );
 });
 </script>
 
@@ -291,6 +297,20 @@ const isDisbaled = computed(() => {
           :error="errors.jenis_pesan"
         />
 
+        <div v-if="form.template_pesan != 'pilih_template'">
+          <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300"
+            >Variable</label
+          >
+          <div class="mb-4" aria-hidden="false">
+            <span
+              role="textbox"
+              :aria-readonly="true"
+              tabindex="0"
+              class="block w-full px-3 py-2 italic rounded-md border bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-base text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400"
+              >{{ form.variable }}</span
+            >
+          </div>
+        </div>
         <!-- Isi Pesan -->
         <TextArea
           id="isi_pesan"
@@ -300,18 +320,6 @@ const isDisbaled = computed(() => {
           placeholder="Tulis isi pesan di sini..."
           :error="errors.isi_pesan"
         />
-
-        <!-- Tombol Simpan -->
-        <!-- <BaseButton
-          type="submit"
-          fullWidth
-          variant="primary"
-          :disabled="isSubmitting"
-          @click="handleSubmit"
-        >
-          <span v-if="isSubmitting">Menyimpan...</span>
-          <span v-else>Simpan</span>
-        </BaseButton> -->
         <div class="flex justify-end gap-3">
           <BaseButton
             @click="closeModal"
@@ -321,7 +329,7 @@ const isDisbaled = computed(() => {
           >
             Batal
           </BaseButton>
-          <BaseButton type="submit" variant="primary" :disabled="isDisbaled" @click="handleSubmit">
+          <BaseButton type="button" variant="primary" :disabled="isDisbaled" @click="handleSubmit">
             <span v-if="isSubmitting">Menyimpan...</span>
             <span v-else>Simpan</span>
           </BaseButton>
