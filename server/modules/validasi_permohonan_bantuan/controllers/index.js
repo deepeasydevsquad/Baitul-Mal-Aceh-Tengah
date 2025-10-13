@@ -58,12 +58,35 @@ controllers.get_info_edit_file = async (req, res) => {
   }
 };
 
-controllers.get_info_edit = async (req, res) => {
+controllers.edit_file = async (req, res) => {
+  if (!(await handleValidationErrors(req, res))) return;
+
+  try {
+    const model_cud = new Model_cud(req);
+    await model_cud.edit_file();
+
+    if (await model_cud.response()) {
+      res.status(200).json({
+        error: false,
+        error_msg: "File permohonan bantuan berhasil diperbaharui.",
+      });
+    } else {
+      res.status(400).json({
+        error: true,
+        error_msg: "File permohonan bantuan gagal diperbaharui.",
+      });
+    }
+  } catch (error) {
+    handleServerError(res, error);
+  }
+};
+
+controllers.get_info_pemberitahuan = async (req, res) => {
   if (!(await handleValidationErrors(req, res))) return;
 
   try {
     const model_r = new Model_r(req);
-    const feedBack = await model_r.get_info_edit();
+    const feedBack = await model_r.get_info_pemberitahuan();
 
     res.status(200).json({
       error: false,
@@ -75,22 +98,22 @@ controllers.get_info_edit = async (req, res) => {
   }
 };
 
-controllers.edit = async (req, res) => {
+controllers.approve_berkas = async (req, res) => {
   if (!(await handleValidationErrors(req, res))) return;
 
   try {
     const model_cud = new Model_cud(req);
-    await model_cud.edit();
+    await model_cud.approve_berkas();
 
     if (await model_cud.response()) {
       res.status(200).json({
         error: false,
-        error_msg: "Permohonan bantuan berhasil diperbaharui.",
+        error_msg: "Berkas permohonan bantuan berhasil disetujui.",
       });
     } else {
       res.status(400).json({
         error: true,
-        error_msg: "Permohonan bantuan gagal diperbaharui.",
+        error_msg: "Berkas permohonan bantuan gagal disetujui.",
       });
     }
   } catch (error) {
@@ -98,22 +121,22 @@ controllers.edit = async (req, res) => {
   }
 };
 
-controllers.edit_status = async (req, res) => {
+controllers.reject_berkas = async (req, res) => {
   if (!(await handleValidationErrors(req, res))) return;
 
   try {
     const model_cud = new Model_cud(req);
-    await model_cud.edit_status();
+    await model_cud.reject_berkas();
 
     if (await model_cud.response()) {
       res.status(200).json({
         error: false,
-        error_msg: "Status Permohonan bantuan berhasil diperbaharui.",
+        error_msg: "Berkas permohonan bantuan berhasil ditolak.",
       });
     } else {
       res.status(400).json({
         error: true,
-        error_msg: "Status Permohonan bantuan gagal diperbaharui.",
+        error_msg: "Berkas permohonan bantuan gagal ditolak.",
       });
     }
   } catch (error) {
@@ -121,12 +144,28 @@ controllers.edit_status = async (req, res) => {
   }
 };
 
-controllers.get_info_persetujuan = async (req, res) => {
+controllers.send_pemberitahuan_wa = async (req, res) => {
   if (!(await handleValidationErrors(req, res))) return;
 
   try {
     const model_r = new Model_r(req);
-    const feedBack = await model_r.get_info_persetujuan();
+    await model_r.send_notification_wa();
+
+    res.status(200).json({
+      error: false,
+      error_msg: "Pemberitahuan WA berhasil dikirim.",
+    });
+  } catch (error) {
+    handleServerError(res, error);
+  }
+};
+
+controllers.get_info_reject_permohonan = async (req, res) => {
+  if (!(await handleValidationErrors(req, res))) return;
+
+  try {
+    const model_r = new Model_r(req);
+    const feedBack = await model_r.get_info_reject_permohonan();
 
     res.status(200).json({
       error: false,
@@ -138,12 +177,29 @@ controllers.get_info_persetujuan = async (req, res) => {
   }
 };
 
-controllers.persetujuan = async (req, res) => {
+controllers.get_info_approve_permohonan = async (req, res) => {
+  if (!(await handleValidationErrors(req, res))) return;
+
+  try {
+    const model_r = new Model_r(req);
+    const feedBack = await model_r.get_info_approve_permohonan();
+
+    res.status(200).json({
+      error: false,
+      data: feedBack,
+      total: 1,
+    });
+  } catch (error) {
+    handleServerError(res, error);
+  }
+};
+
+controllers.approve_permohonan = async (req, res) => {
   if (!(await handleValidationErrors(req, res))) return;
 
   try {
     const model_cud = new Model_cud(req);
-    await model_cud.persetujuan();
+    await model_cud.approve_permohonan();
 
     if (await model_cud.response()) {
       res.status(200).json({
@@ -161,22 +217,22 @@ controllers.persetujuan = async (req, res) => {
   }
 };
 
-controllers.delete = async (req, res) => {
+controllers.reject_permohonan = async (req, res) => {
   if (!(await handleValidationErrors(req, res))) return;
 
   try {
     const model_cud = new Model_cud(req);
-    await model_cud.delete();
+    await model_cud.reject_permohonan();
 
     if (await model_cud.response()) {
       res.status(200).json({
         error: false,
-        error_msg: "Permohonan bantuan berhasil dihapus.",
+        error_msg: "Permohonan bantuan berhasil ditolak.",
       });
     } else {
       res.status(400).json({
         error: true,
-        error_msg: "Permohonan bantuan gagal dihapus.",
+        error_msg: "Permohonan bantuan gagal ditolak.",
       });
     }
   } catch (error) {

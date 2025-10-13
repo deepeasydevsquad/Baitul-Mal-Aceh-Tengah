@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // Library
 import BaseButton from '@/components/Button/BaseButton.vue';
+import ButtonGreen from '@/components/Button/ButtonGreen.vue';
 import DangerButton from '@/components/Button/DangerButton.vue';
 import LightButton from '@/components/Button/LightButton.vue';
 import BaseSelect from '@/components/Form/BaseSelect.vue';
@@ -13,6 +14,10 @@ import { onMounted, ref } from 'vue';
 
 // Form
 import FormEditFile from '@/modules/ValidasiPermohonanBantuan/widgets/FormEditFile.vue';
+import FormPemberitahuan from '@/modules/ValidasiPermohonanBantuan/widgets/FormPemberitahuan.vue';
+import FormRejectBerkas from '@/modules/ValidasiPermohonanBantuan/widgets/FormRejectBerkas.vue';
+import FormSetujuiPermohonan from '@/modules/ValidasiPermohonanBantuan/widgets/FormSetujuiPermohonan.vue';
+import FormTolakPermohonan from '@/modules/ValidasiPermohonanBantuan/widgets/FormTolakPermohonan.vue';
 
 // Config API
 const BASEURL = import.meta.env.VITE_APP_API_BASE_URL;
@@ -24,6 +29,7 @@ import { usePagination } from '@/composables/usePaginations';
 
 // Service API
 import {
+  approve_berkas,
   get_filter_type,
   get_validasi_permohonan_bantuan,
 } from '@/service/validasi_permohonan_bantuan';
@@ -94,8 +100,9 @@ const dataValidasiPermohonanBantuan = ref<ValidasiPermohonanBantuan[]>([]);
 const selectedData = ref<any>(null);
 const isModalPemberitahuanOpen = ref(false);
 const isModalTolakOpen = ref(false);
-const isModalApproveOpen = ref(false);
+const isModalSetujuiOpen = ref(false);
 const isModalEditFileOpen = ref(false);
+const isModalRejectBerkasOpen = ref(false);
 
 function openModalPemberitahuan(data: any) {
   selectedData.value = data;
@@ -107,9 +114,9 @@ function openModalTolak(data: any) {
   isModalTolakOpen.value = true;
 }
 
-function openModalApprove(data: any) {
+function openModalSetujui(data: any) {
   selectedData.value = data;
-  isModalApproveOpen.value = true;
+  isModalSetujuiOpen.value = true;
 }
 
 // Function: Aksi Syarat
@@ -118,19 +125,47 @@ function viewFile(syarat: any) {
 }
 
 function editFile(realisasi_id: number, syarat: any) {
-  selectedData.value = { realisasi_id, syarat };
-  isModalEditFileOpen.value = true;
+  if (syarat.status_validasi === 'approve') {
+    displayNotification(
+      `Syarat ${syarat.syarat_name} telah selesai diproses dan tidak dapat diubah`,
+      'warning',
+      4000, // 4   detik
+    );
+  } else {
+    selectedData.value = { realisasi_id, validasi_id: syarat.validasi_id };
+    isModalEditFileOpen.value = true;
+  }
   console.log('Edit file:', selectedData.value);
 }
 
-function approveSyarat(realisasi_id: number, syarat: any) {
-  // Implement approve syarat logic
-  console.log('Approve syarat:', syarat);
+function openModalRejectBerkas(realisasi_id: number, data: any) {
+  selectedData.value = { realisasi_id, validasi_id: data.validasi_id };
+  isModalRejectBerkasOpen.value = true;
 }
 
-function rejectSyarat(realisasi_id: number, syarat: any) {
-  // Implement reject syarat logic
-  console.log('Reject syarat:', syarat);
+async function approveSyarat(realisasi_id: number, syarat: any) {
+  displayConfirmation(
+    'Konfirmasi Syarat',
+    `Apakah anda yakin ingin menyetujui syarat ${syarat.syarat_name}?`,
+    async () => {
+      try {
+        const response = await approve_berkas({
+          id: realisasi_id,
+          validasi_id: syarat.validasi_id,
+        });
+        console.log('Reject syarat:', syarat);
+        displayNotification(response.error_msg || 'Syarat berhasil disetujui', 'success');
+      } catch (error: any) {
+        console.error('Error updating file:', error);
+        displayNotification(
+          error.response?.data?.message || error.response?.data?.error_msg || 'Terjadi kesalahan',
+          'error',
+        );
+      } finally {
+        fetchData();
+      }
+    },
+  );
 }
 
 // Function: Fetch Data
@@ -172,11 +207,16 @@ onMounted(async () => {
     <!-- Header -->
     <LoadingSpinner v-if="isLoading" label="Memuat halaman..." />
     <div v-else class="space-y-4">
-      <!-- Filter Section -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-end gap-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <!-- Refresh -->
+        <BaseButton @click="fetchData" variant="primary" :loading="isTableLoading">
+          <font-awesome-icon icon="fa-solid fa-clock-rotate-left" class="mr-2" />
+          Refresh
+        </BaseButton>
+
+        <!-- Filter Section -->
         <div class="flex items-center w-full sm:w-auto gap-2">
           <label for="search" class="mr-2 text-sm font-medium text-gray-600">Filter</label>
-
           <!-- Kegiatan -->
           <BaseSelect
             v-model="selectedKegiatan"
@@ -348,13 +388,13 @@ onMounted(async () => {
                     <table class="w-full text-sm">
                       <thead class="bg-gray-100">
                         <tr>
-                          <th class="w-[55%] px-3 py-2 text-left font-semibold text-gray-700">
+                          <th class="w-[50%] px-3 py-2 text-left font-semibold text-gray-700">
                             Nama Syarat
                           </th>
-                          <th class="w-[15%] px-3 py-2 text-center font-semibold text-gray-700">
+                          <th class="w-[25%] px-3 py-2 text-center font-semibold text-gray-700">
                             Status
                           </th>
-                          <th class="w-[30%] px-3 py-2 text-center font-semibold text-gray-700">
+                          <th class="w-[25%] px-3 py-2 text-center font-semibold text-gray-700">
                             Aksi
                           </th>
                         </tr>
@@ -428,7 +468,7 @@ onMounted(async () => {
                               </button>
                               <button
                                 v-if="syarat.status_validasi !== 'approve'"
-                                @click="approveSyarat(syarat)"
+                                @click="approveSyarat(data.realisasi_id, syarat)"
                                 class="p-1 hover:bg-green-100 rounded transition-colors"
                                 title="Approve"
                               >
@@ -439,7 +479,7 @@ onMounted(async () => {
                               </button>
                               <button
                                 v-if="syarat.status_validasi !== 'reject'"
-                                @click="rejectSyarat(syarat)"
+                                @click="openModalRejectBerkas(data.realisasi_id, syarat)"
                                 class="p-1 hover:bg-red-100 rounded transition-colors"
                                 title="Reject"
                               >
@@ -485,13 +525,13 @@ onMounted(async () => {
                     >
                       <font-awesome-icon icon="fa-brands fa-whatsapp" />
                     </LightButton>
-                    <BaseButton
+                    <ButtonGreen
                       v-if="data.all_syarat_approved"
-                      @click="openModalApprove(data)"
+                      @click="openModalSetujui(data)"
                       title="Approve Permohonan"
                     >
-                      <font-awesome-icon icon="fa-solid fa-check-double" />
-                    </BaseButton>
+                      <font-awesome-icon icon="fa-solid fa-check" />
+                    </ButtonGreen>
                     <button
                       v-else
                       disabled
@@ -537,6 +577,74 @@ onMounted(async () => {
         </table>
       </div>
     </div>
+
+    <!-- Modal Reject -->
+    <FormRejectBerkas
+      :is-modal-open="isModalRejectBerkasOpen"
+      :selected-validasi-permohonan-bantuan="selectedData"
+      @close="
+        isModalRejectBerkasOpen = false;
+        fetchData();
+      "
+      @status="
+        (payload: any) =>
+          displayNotification(
+            payload.error_msg || 'Validasi berkas Permohonan Bantuan gagal',
+            payload.error ? 'error' : 'success',
+          )
+      "
+    />
+
+    <!-- Modal Setujui -->
+    <FormSetujuiPermohonan
+      :is-modal-open="isModalSetujuiOpen"
+      :selected-validasi-permohonan-bantuan="selectedData"
+      @close="
+        isModalSetujuiOpen = false;
+        fetchData();
+      "
+      @status="
+        (payload: any) =>
+          displayNotification(
+            payload.error_msg || 'Validasi Permohonan Bantuan gagal',
+            payload.error ? 'error' : 'success',
+          )
+      "
+    />
+
+    <!-- Modal Tolak -->
+    <FormTolakPermohonan
+      :is-modal-open="isModalTolakOpen"
+      :selected-validasi-permohonan-bantuan="selectedData"
+      @close="
+        isModalTolakOpen = false;
+        fetchData();
+      "
+      @status="
+        (payload: any) =>
+          displayNotification(
+            payload.error_msg || 'Validasi Permohonan Bantuan gagal',
+            payload.error ? 'error' : 'success',
+          )
+      "
+    />
+
+    <!-- Modal Pemberitahuan -->
+    <FormPemberitahuan
+      :is-modal-open="isModalPemberitahuanOpen"
+      :selected-validasi-permohonan-bantuan="selectedData"
+      @close="
+        isModalPemberitahuanOpen = false;
+        fetchData();
+      "
+      @status="
+        (payload: any) =>
+          displayNotification(
+            payload.error_msg || 'Validasi Permohonan Bantuan gagal',
+            payload.error ? 'error' : 'success',
+          )
+      "
+    />
 
     <!-- Modal Edit File -->
     <FormEditFile

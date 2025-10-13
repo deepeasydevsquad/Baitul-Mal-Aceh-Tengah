@@ -3,10 +3,10 @@
 import BaseButton from '@/components/Button/BaseButton.vue';
 import DangerButton from '@/components/Button/DangerButton.vue';
 import BaseSelect from '@/components/Form/BaseSelect.vue';
-import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
 import Confirmation from '@/components/Modal/Confirmation.vue';
 import Notification from '@/components/Modal/Notification.vue';
 import Pagination from '@/components/Pagination/Pagination.vue';
+import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
 import FormPertanyaan from '@/modules/Monev/widgets/FormPertanyaan.vue';
 import { onMounted, ref } from 'vue';
 
@@ -71,6 +71,7 @@ const { showConfirmDialog, confirmTitle, confirmMessage, confirm, cancel } = use
 
 async function fetchData() {
   isTableLoading.value = true;
+
   try {
     //Ambil daftar monev
     const [res, filterRes] = await Promise.all([
@@ -123,9 +124,6 @@ onMounted(async () => {
         @change="fetchData"
       />
     </div>
-
-    <!-- Loader -->
-    <LoadingSpinner v-if="isTableLoading" />
 
     <!-- Table Section -->
     <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
@@ -216,7 +214,11 @@ onMounted(async () => {
                           Biaya Disetujui
                         </th>
                         <td class="px-4 py-3 text-sm text-gray-800 font-semibold">
-                          {{ $formatToRupiah(item.biaya_disetujui) }}
+                          {{
+                            item.biaya_disetujui === null
+                              ? '0'
+                              : $formatToRupiah(item.biaya_disetujui)
+                          }}
                         </td>
                       </tr>
                       <tr class="border-b border-gray-200">

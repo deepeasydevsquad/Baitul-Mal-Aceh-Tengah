@@ -10,10 +10,10 @@ import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useNotification } from '@/composables/useNotification';
 
 // Service
-import {
-  edit_permohonan_bantuan,
-  get_info_edit_permohonan_bantuan,
-} from '@/service/permohonan_bantuan';
+import { edit_file, get_info_edit_file } from '@/service/validasi_permohonan_bantuan';
+
+// Config API
+const BASEURL = import.meta.env.VITE_APP_API_BASE_URL;
 
 // State: Loading
 const isLoading = ref(false);
@@ -34,6 +34,18 @@ const emit = defineEmits<{
   (e: 'status', payload: { error_msg?: string; error?: boolean }): void;
 }>();
 
+// Data file
+const fileData = ref({
+  id: null as number | null,
+  file_name: '',
+  file_path: '',
+  status_validasi: 'process',
+  alasan_penolakan: null as string | null,
+});
+
+// File yang akan diupload (baru)
+const newFile = ref<File | null>(null);
+
 // Function: Close modal
 const closeModal = () => {
   if (isSubmitting.value) return;
@@ -43,46 +55,44 @@ const closeModal = () => {
 
 // Function: Reset form
 const resetForm = () => {
-  form.value = {
-    kegiatan_id: null,
-    bank_id: null,
-    member_id: null,
-    nomor_rekening: '',
-    atas_nama: '',
+  fileData.value = {
+    id: null,
+    file_name: '',
+    file_path: '',
+    status_validasi: 'process',
+    alasan_penolakan: null,
   };
-
-  formUploadDynamic.value = {};
-
-  // Reset errors
+  newFile.value = null;
   errors.value = {};
 };
 
+// Function: Fetch data file
 async function fetchData() {
-  if (!props.selectedValidasiPermohonanBantuan?.id) {
-    displayNotification('Gagal memuat data. Silakan coba lagi.', 'error');
+  if (!props.selectedValidasiPermohonanBantuan?.realisasi_id) {
+    displayNotification('Data tidak valid. Silakan tutup dan buka kembali.', 'error');
     return;
   }
+
   isLoading.value = true;
   try {
-    const [InitialResponse] = await Promise.all([
-      get_info_edit_permohonan_bantuan(props.selectedValidasiPermohonanBantuan.id),
-    ]);
+    const response = await get_info_edit_file({
+      id: props.selectedValidasiPermohonanBantuan.realisasi_id,
+      validasi_id: props.selectedValidasiPermohonanBantuan.validasi_id,
+    });
 
-    // bikin formUploadDynamic konsisten (punya id, path, status)
-    formUploadDynamic.value = Object.fromEntries(
-      InitialResponse.data.syarat.map((syarat: any) => [
-        `dokumen_${syarat.path}`, // pake id biar unique
-        {
-          id: syarat.id,
-          path: syarat.path || '', // path lama dari backend
-          file: null, // default belum ada file baru
-          status: 'keep', // default keep
-        },
-      ]),
-    );
+    if (response.error) {
+      displayNotification(response.error_msg || 'Gagal memuat data', 'error');
+      return;
+    }
 
-    console.log('formUploadDynamic init:', formUploadDynamic.value);
-    console.log('form init:', form.value);
+    // Set data file
+    fileData.value = {
+      id: response.data.id,
+      file_name: response.data.file_name || '',
+      file_path: response.data.file_path || '',
+      status_validasi: response.data.status_validasi || 'process',
+      alasan_penolakan: response.data.alasan_penolakan || null,
+    };
   } catch (error: any) {
     displayNotification('Gagal memuat data. Silakan coba lagi.', 'error');
     console.error('Error fetching data:', error);
@@ -93,124 +103,60 @@ async function fetchData() {
 
 // Function: Validate form
 const errors = ref<Record<string, string>>({
-  kegiatan_id: '',
-  bank_id: '',
-  member_id: '',
-  nomor_rekening: '',
-  atas_nama: '',
+  file: '',
 });
 
 const validateForm = () => {
   let isValid = true;
-
-  // Reset errors
   errors.value = {};
 
-  // Validate kegiatan_id
-  if (!props.selectedValidasiPermohonanBantuan?.realisasi_id) {
-    errors.value.kegiatan_id =
-      'Realisasi ID tidak ditemukan, Silahkan keluar dan buka form kembali.';
+  // Validate: file wajib diisi (karena ini edit file)
+  if (!newFile.value) {
+    errors.value.file = 'Silakan pilih file baru untuk diupload';
     isValid = false;
   }
 
-  // Validate atas_nama
-  if (!form.value.atas_nama.trim()) {
-    errors.value.atas_nama = 'Atas nama harus diisi';
-    isValid = false;
-  }
-
-  // if (dataKriteriaSyarat.value.syarat.length) {
-  //   dataKriteriaSyarat.value.syarat.forEach((syarat) => {
-  //     if (!formUploadDynamic.value[`dokumen_${syarat.path}`]) {
-  //       errors.value[`dokumen_${syarat.path}`] = `${syarat.name} harus diunggah`;
-  //       isValid = false;
-  //     }
-  //   });
-  // }
   return isValid;
 };
 
-// Function: Handle file
-const handleFile = (file: File | null, path: string) => {
-  const key = `dokumen_${path}`;
-  if (!formUploadDynamic.value[key]) {
-    formUploadDynamic.value[key] = {};
-  }
-
-  formUploadDynamic.value[key] = {
-    ...formUploadDynamic.value[key],
-    file: file, // simpan file (bisa null)
-    status: file ? 'replace' : 'keep', // simple flag
-  };
-
-  errors.value[key] = '';
+// Function: Handle file change
+const handleFileChange = (file: File | null) => {
+  newFile.value = file;
+  errors.value.file = '';
 };
 
 // Function: Handle submit
 const isSubmitting = ref(false);
 
-const formUploadDynamic = ref<
-  Record<string, { file: File | null; id: number; path: string; status: 'replace' | 'keep' }>
->({});
-const form = ref<{
-  kegiatan_id: number | null;
-  bank_id: number | null;
-  member_id: number | null;
-  nomor_rekening: string;
-  atas_nama: string;
-}>({
-  kegiatan_id: null,
-  bank_id: null,
-  member_id: null,
-  nomor_rekening: '',
-  atas_nama: '',
-});
-
 const handleSubmit = async () => {
   if (!validateForm()) return;
+
   isSubmitting.value = true;
 
   const formData = new FormData();
+  formData.append('id', String(props.selectedValidasiPermohonanBantuan.realisasi_id));
+  formData.append('validasi_id', String(props.selectedValidasiPermohonanBantuan.validasi_id));
 
-  formData.append('validasi_id', Number(props.selectedValidasiPermohonanBantuan.realisasi_id));
-  Object.entries(formUploadDynamic.value).forEach(([key, val]) => {
-    if (val.file) {
-      // kirim file baru
-      formData.append(key, val.file);
+  // Append file baru
+  if (newFile.value) {
+    formData.append('file', newFile.value);
+  }
 
-      // kirim metadata
-      formData.append(
-        `${key}_meta`,
-        JSON.stringify({
-          id: val.id,
-          path: val.path,
-          status: val.status || 'replace',
-        }),
-      );
-    } else {
-      // kalau gak ada file, tetap kirim metadata
-      formData.append(
-        `${key}_meta`,
-        JSON.stringify({
-          id: val.id,
-          path: val.path,
-          status: val.status || 'keep',
-        }),
-      );
-    }
-  });
-
-  // tambahin field lain (bank_id, member_id, dll)
-  Object.entries(form.value).forEach(([k, v]) => {
-    formData.append(k, v as any);
-  });
   try {
-    const response = await edit_permohonan_bantuan(formData);
-    console.log(response);
-    emit('status', { error_msg: response.error_msg || response, error: response.error });
+    const response = await edit_file(formData);
+
+    if (response.error) {
+      displayNotification(response.error_msg || 'Gagal mengupdate file', 'error');
+    } else {
+      emit('status', { error_msg: response.error_msg || 'File berhasil diupdate', error: false });
+      closeModal();
+    }
   } catch (error: any) {
-    console.error(error);
-    displayNotification(error.response.data.error_msg || error.response.data.message, 'error');
+    console.error('Error updating file:', error);
+    displayNotification(
+      error.response?.data?.error_msg || error.response?.data?.message || 'Gagal mengupdate file',
+      'error',
+    );
   } finally {
     isSubmitting.value = false;
     closeModal();
@@ -221,11 +167,12 @@ const handleSubmit = async () => {
 const handleEscape = (e: KeyboardEvent) => {
   if (e.key === 'Escape' && props.isModalOpen) closeModal();
 };
-onMounted(async () => {
+
+onMounted(() => {
   document.addEventListener('keydown', handleEscape);
 });
 
-onBeforeUnmount(async () => {
+onBeforeUnmount(() => {
   document.removeEventListener('keydown', handleEscape);
 });
 
@@ -238,17 +185,6 @@ watch(
     }
   },
 );
-
-// watch(
-//   () => form.value.kegiatan_id,
-//   (newVal) => {
-//     if (newVal !== null) {
-//       fetchKriteriaSyarat(newVal);
-//     } else {
-//       dataKriteriaSyarat.value = { kriteria: [], syarat: [] };
-//     }
-//   },
-// );
 </script>
 
 <template>
@@ -268,7 +204,7 @@ watch(
       aria-labelledby="modal-title"
     >
       <LoadingSpinner v-if="isLoading" label="Memuat halaman..." />
-      <div v-else class="relative max-w-4xl w-full bg-white shadow-2xl rounded-2xl p-6 space-y-6">
+      <div v-else class="relative max-w-xl w-full bg-white shadow-2xl rounded-2xl p-6 space-y-6">
         <!-- Header -->
         <div class="flex items-center justify-between">
           <h2 id="modal-title" class="text-xl font-bold text-gray-800">Edit File Permohonan</h2>
@@ -281,9 +217,63 @@ watch(
           </button>
         </div>
 
-        <div class="px-1 py-1 space-y-4 max-h-[64vh] overflow-y-auto pr-2">
-          <InputFile />
+        <!-- Info File Lama -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <h3 class="font-semibold text-blue-800 text-sm mb-2 flex items-center gap-2">
+            <font-awesome-icon icon="fa-solid fa-info-circle" />
+            File Saat Ini
+          </h3>
+          <div class="space-y-1 text-xs text-blue-700">
+            <p><strong>Nama File:</strong> {{ fileData.file_name || '-' }}</p>
+            <p>
+              <strong>Status:</strong>
+              <span
+                :class="{
+                  'text-green-700 font-bold': fileData.status_validasi === 'approve',
+                  'text-red-700 font-bold': fileData.status_validasi === 'reject',
+                  'text-yellow-700 font-bold': fileData.status_validasi === 'process',
+                }"
+              >
+                {{
+                  fileData.status_validasi === 'approve'
+                    ? ' DISETUJUI'
+                    : fileData.status_validasi === 'reject'
+                      ? ' DITOLAK'
+                      : ' DIPROSES'
+                }}
+              </span>
+            </p>
+            <p v-if="fileData.alasan_penolakan">
+              <strong>Alasan Penolakan:</strong> {{ fileData.alasan_penolakan }}
+            </p>
+            <a
+              v-if="fileData.file_path"
+              :href="`${BASEURL}/uploads/dokumen/permohonan_bantuan/${fileData.file_path}`"
+              target="_blank"
+              class="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-semibold"
+            >
+              <font-awesome-icon icon="fa-solid fa-eye" />
+              Lihat File Lama
+            </a>
+          </div>
         </div>
+
+        <!-- Form Upload File Baru -->
+        <div class="px-1 py-1 space-y-4 max-h-[50vh] overflow-y-auto pr-2">
+          <InputFile
+            id="edit-file-upload"
+            label="Upload File Baru"
+            buttonText="Pilih File"
+            accept=".pdf"
+            :error="errors.file"
+            :maxSize="1000"
+            :required="true"
+            :hideInfo="false"
+            :showPreview="false"
+            @change="handleFileChange"
+          />
+        </div>
+
         <!-- Actions -->
         <div class="flex justify-end gap-3">
           <BaseButton
@@ -295,13 +285,19 @@ watch(
             Batal
           </BaseButton>
           <BaseButton
-            type="submit"
+            type="button"
             variant="primary"
-            :disabled="!formUploadDynamic || isSubmitting"
+            :disabled="!newFile || isSubmitting"
             @click="handleSubmit"
           >
-            <span v-if="isSubmitting">Menyimpan...</span>
-            <span v-else>Simpan</span>
+            <span v-if="isSubmitting">
+              <font-awesome-icon icon="fa-solid fa-spinner" spin class="mr-2" />
+              Menyimpan...
+            </span>
+            <span v-else>
+              <font-awesome-icon icon="fa-solid fa-upload" class="mr-2" />
+              Upload File Baru
+            </span>
           </BaseButton>
         </div>
       </div>
