@@ -30,13 +30,25 @@ router.post(
   "/riwayat_pesan_whatsapp/get_template_pesan_whatsapp",
   authenticateTokenAdministrator,
   [
-    body("jenis_pesan")
+    body("type")
       .notEmpty()
       .withMessage("Jenis Pesan Tidak Boleh Kosong")
       .isIn(["surveyor", "pemohon", "otp", "munfiq", "muzakki", "pesan_biasa"])
       .withMessage("Jenis Pesan Tidak Ditemukan."),
   ],
   controllers.get_template_pesan_whatsapp
+);
+
+router.post(
+  "/riwayat_pesan_whatsapp/get_pesan_template_pesan_whatsapp",
+  authenticateTokenAdministrator,
+  [
+    body("template_id")
+      .notEmpty()
+      .withMessage("ID Template Pesan Tidak Boleh Kosong")
+      .custom(validation.check_template_id),
+  ],
+  controllers.get_pesan_template_pesan_whatsapp
 );
 
 // 'surveyor','pemohon','otp','munfiq','muzakki','pesan_biasa'

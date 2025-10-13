@@ -20,6 +20,14 @@ validation.Whatsapp_message = async (value) => {
   return true;
 };
 
+validation.check_template_id = async (value) => {
+  const check = await Whatsapp_template.findByPk(value);
+  if (!check) {
+    throw new Error("Template pesan ini tidak terdaftar di pangkalan data");
+  }
+  return true;
+};
+
 // Validasi id bank apakah sudah ada di database
 // validation.check_id_riwayat_infaq = async (value) => {
 //   console.log("ID riwayat infaq", value);
