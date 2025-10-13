@@ -5,7 +5,7 @@ import InputCheckbox from '@/components/Form/InputCheckbox.vue';
 import InputCurrency from '@/components/Form/InputCurrency.vue';
 import InputText from '@/components/Form/InputText.vue';
 import SelectField from '@/components/Form/SelectField.vue';
-import InputTextarea from '@/components/Form/Textarea.vue';
+import InputTextarea from '@/components/Form/TextArea.vue';
 import Notification from '@/components/Modal/Notification.vue';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
