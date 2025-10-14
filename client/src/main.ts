@@ -79,6 +79,7 @@ import {
   faDownload,
   faEnvelope,
   faExchange,
+  faEye,
   faEyeSlash,
   faFile,
   faFileContract,
@@ -104,6 +105,7 @@ import {
   faHotel,
   faHouseCrack,
   faImage,
+  faInbox,
   faInfo,
   faLayerGroup,
   faList,
@@ -159,7 +161,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 // FontAwesome Icons - Regular
-import { faCircle, faEye, faUser as farUser } from '@fortawesome/free-regular-svg-icons';
+import { faCircle, faUser as farUser } from '@fortawesome/free-regular-svg-icons';
 
 // FontAwesome Icons - Brands
 import { faCcVisa, faWhatsapp } from '@fortawesome/free-brands-svg-icons';
@@ -295,6 +297,8 @@ library.add(
   faFile,
   faTriangleExclamation,
   faCircleInfo,
+  faEye,
+  faInbox,
 );
 
 // Buat App Vue

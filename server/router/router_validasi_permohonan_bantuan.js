@@ -58,7 +58,7 @@ router.post(
 router.post(
   "/validasi_permohonan_bantuan/edit_file",
   authenticateTokenAdministrator,
-  validation.upload.single("file"),
+  validation.upload.any(),
   [
     body("id")
       .notEmpty()

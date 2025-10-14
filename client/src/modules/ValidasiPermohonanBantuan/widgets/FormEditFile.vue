@@ -43,9 +43,6 @@ const fileData = ref({
   alasan_penolakan: null as string | null,
 });
 
-// File yang akan diupload (baru)
-const newFile = ref<File | null>(null);
-
 // Function: Close modal
 const closeModal = () => {
   if (isSubmitting.value) return;
@@ -62,7 +59,7 @@ const resetForm = () => {
     status_validasi: 'process',
     alasan_penolakan: null,
   };
-  newFile.value = null;
+  formUpload.value = {};
   errors.value = {};
 };
 
@@ -110,8 +107,18 @@ const validateForm = () => {
   let isValid = true;
   errors.value = {};
 
+  if (!props.selectedValidasiPermohonanBantuan.realisasi_id) {
+    displayNotification('Form Invalid, Silahkan keluar dan isi form kembali.', 'error');
+    isValid = false;
+  }
+
+  if (!props.selectedValidasiPermohonanBantuan.validasi_id) {
+    displayNotification('Form Invalid, Silahkan keluar dan isi form kembali.', 'error');
+    isValid = false;
+  }
+
   // Validate: file wajib diisi (karena ini edit file)
-  if (!newFile.value) {
+  if (!formUpload.value) {
     errors.value.file = 'Silakan pilih file baru untuk diupload';
     isValid = false;
   }
@@ -120,8 +127,15 @@ const validateForm = () => {
 };
 
 // Function: Handle file change
-const handleFileChange = (file: File | null) => {
-  newFile.value = file;
+const formUpload = ref<Record<string, File | null>>({});
+const handleFileChange = (e: Event) => {
+  const input = e.target as HTMLInputElement;
+  const file = input.files ? input.files[0] : null;
+
+  if (!file) return;
+
+  formUpload.value[`dokumen_${fileData.value?.file_name || ''}`] = file;
+
   errors.value.file = '';
 };
 
@@ -138,8 +152,10 @@ const handleSubmit = async () => {
   formData.append('validasi_id', String(props.selectedValidasiPermohonanBantuan.validasi_id));
 
   // Append file baru
-  if (newFile.value) {
-    formData.append('file', newFile.value);
+  if (formUpload.value) {
+    Object.entries(formUpload.value).forEach(([key, value]) => {
+      formData.append(key, value);
+    });
   }
 
   try {
@@ -224,7 +240,16 @@ watch(
             File Saat Ini
           </h3>
           <div class="space-y-1 text-xs text-blue-700">
-            <p><strong>Nama File:</strong> {{ fileData.file_name || '-' }}</p>
+            <p>
+              <strong>Nama File:</strong>
+              {{
+                fileData.file_name
+                  ?.split('_')
+                  .filter((item) => item.trim() !== '')
+                  .join(' ')
+                  .toUpperCase() || '-'
+              }}
+            </p>
             <p>
               <strong>Status:</strong>
               <span
@@ -270,7 +295,7 @@ watch(
             :required="true"
             :hideInfo="false"
             :showPreview="false"
-            @change="handleFileChange"
+            @change="handleFileChange($event)"
           />
         </div>
 
@@ -287,17 +312,14 @@ watch(
           <BaseButton
             type="button"
             variant="primary"
-            :disabled="!newFile || isSubmitting"
+            :disabled="!formUpload || isSubmitting"
             @click="handleSubmit"
           >
             <span v-if="isSubmitting">
               <font-awesome-icon icon="fa-solid fa-spinner" spin class="mr-2" />
               Menyimpan...
             </span>
-            <span v-else>
-              <font-awesome-icon icon="fa-solid fa-upload" class="mr-2" />
-              Upload File Baru
-            </span>
+            <span v-else> Upload File Baru </span>
           </BaseButton>
         </div>
       </div>

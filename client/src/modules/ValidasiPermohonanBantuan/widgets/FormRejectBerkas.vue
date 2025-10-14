@@ -219,10 +219,7 @@ onBeforeUnmount(() => {
               <font-awesome-icon icon="fa-solid fa-spinner" spin class="mr-2" />
               Menyimpan...
             </span>
-            <span v-else>
-              <font-awesome-icon icon="fa-solid fa-upload" class="mr-2" />
-              Tolak Berkas
-            </span>
+            <span v-else>Tolak Berkas </span>
           </BaseButton>
         </div>
       </div>

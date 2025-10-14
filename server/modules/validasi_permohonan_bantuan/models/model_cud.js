@@ -54,8 +54,8 @@ class Model_cud {
       // Update dengan file baru
       await dataValidasi.update(
         {
-          file_name: file.basename,
-          path: file.path,
+          file_name: file[0].basename,
+          path: file[0].path,
           status: "process", // Reset status jadi process lagi
           alasan_penolakan: null, // Reset alasan penolakan
           updatedAt: myDate,
