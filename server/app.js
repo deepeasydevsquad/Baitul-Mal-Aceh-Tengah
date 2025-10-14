@@ -104,6 +104,7 @@ const arr_router = [
   "rekap_distribusi_per_kode_asnaf",
   "riwayat_permohonan_member",
   "rekap_distribusi_kecamatan",
+  "donasi_member",
 ];
 
 const arr = {};
