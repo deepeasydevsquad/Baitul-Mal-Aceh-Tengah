@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import Notification from '@/components/Modal/Notification.vue';
+import { API_URL } from '@/config/config';
 
 interface FormData {
   username: string;
@@ -58,7 +59,7 @@ const LoginProcess = async () => {
   }
 
   try {
-    const baseUrl = window.location.protocol + '//' + window.location.hostname + ':3003';
+    const baseUrl = API_URL;
     const response = await axios.post(baseUrl + '/auth/login_member', {
       username: form.value.username,
       password: form.value.password,

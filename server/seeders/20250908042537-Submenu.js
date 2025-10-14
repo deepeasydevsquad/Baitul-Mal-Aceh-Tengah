@@ -121,7 +121,7 @@ module.exports = {
           menu_id: menus[4].id,
           name: "Laporan Pendistribusian",
           path: "laporan_pendistribusian",
-          tab: `[{"id":"${tabs[44].id}"},{"id":"${tabs[32].id}"},{"id":"${tabs[33].id}"},{"id":"${tabs[34].id}"},{"id":"${tabs[35].id}"},{"id":"${tabs[36].id}"},{"id":"${tabs[37].id}"}]`,
+          tab: `[{"id":"${tabs[32].id}"},{"id":"${tabs[33].id}"},{"id":"${tabs[34].id}"},{"id":"${tabs[35].id}"},{"id":"${tabs[36].id}"},{"id":"${tabs[37].id}"}]`,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
