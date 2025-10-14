@@ -162,7 +162,7 @@ function formatRupiah(amount: number): string {
                 }}</span>
               </div>
               <div class="flex justify-between mt-1">
-                <span class="text-gray-600">Invoice INFAQ:</span>
+                <span class="text-gray-600">Invoice Donasi:</span>
                 <span class="font-bold text-green-700">{{ DetailKonfirmasi?.invoice }}</span>
               </div>
               <div class="flex justify-between mt-1">
@@ -199,7 +199,7 @@ function formatRupiah(amount: number): string {
               <div>
                 <h3 class="text-xl font-bold text-gray-800 mb-2">Pembayaran Berhasil!</h3>
                 <p class="text-gray-600">
-                  Alhamdulillah, pembayaran infaq Anda sebesar
+                  Alhamdulillah, pembayaran Donasi Anda sebesar
                   <strong class="text-green-700">{{
                     formatRupiah(DetailKonfirmasi?.nominal || 0)
                   }}</strong>
@@ -230,7 +230,7 @@ function formatRupiah(amount: number): string {
               <div>
                 <h3 class="text-xl font-bold text-gray-800 mb-2">Konfirmasi Terkirim</h3>
                 <p class="text-gray-600">
-                  Anda sudah mengirimkan konfirmasi pembayaran untuk infaq sebesar
+                  Anda sudah mengirimkan konfirmasi pembayaran untuk Donasi sebesar
                   <strong class="text-blue-700">{{
                     formatRupiah(DetailKonfirmasi?.nominal || 0)
                   }}</strong>
@@ -254,7 +254,7 @@ function formatRupiah(amount: number): string {
             <template v-else>
               <div class="text-center">
                 <p class="text-gray-700">
-                  Silakan lakukan pembayaran Infaq anda sebesar
+                  Silakan lakukan pembayaran Donasi anda sebesar
                   <strong class="text-lg">{{
                     formatRupiah(DetailKonfirmasi?.nominal || 0)
                   }}</strong>

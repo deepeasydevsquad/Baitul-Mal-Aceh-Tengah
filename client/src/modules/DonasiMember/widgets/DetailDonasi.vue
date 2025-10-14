@@ -37,6 +37,7 @@ interface DetailProgram {
 }
 
 interface Donatur {
+  member_id: number;
   id: number;
   name: string;
   nominal: number;
@@ -62,10 +63,16 @@ const loadingRiwayat = ref(false);
 const imageError = ref(false);
 
 // Pagination untuk donatur
-const currentPage = ref(1);
-const perPage = ref(10);
+const currentPageDonatur = ref(1);
+const perPageDonatur = ref(5);
 const totalDonatur = ref(0);
-const totalPages = ref(1);
+const totalPagesDonatur = ref(1);
+
+// Pagination untuk riwayat donasi user
+const currentPageRiwayat = ref(1);
+const perPageRiwayat = ref(5);
+const totalRiwayat = ref(0);
+const totalPagesRiwayat = ref(1);
 
 const fetchDetailProgram = async () => {
   loadingDetail.value = true;
@@ -85,13 +92,24 @@ const fetchDaftarDonatur = async () => {
   try {
     const response = await daftar_donatur({
       program_donasi_id: props.idKegiatan,
-      page: currentPage.value,
-      perpage: perPage.value,
+      pageNumber: currentPageDonatur.value,
+      perpage: perPageDonatur.value,
     });
 
-    daftarDonatur.value = Array.isArray(response) ? response : [];
-    totalDonatur.value = response?.total?.jumlah_donatur || daftarDonatur.value.length;
-    totalPages.value = totalDonatur.value > 0 ? Math.ceil(totalDonatur.value / perPage.value) : 1;
+    daftarDonatur.value = Array.isArray(response.data) ? response.data : [];
+
+    // Gunakan total dari response API
+    const dataDonatur = response?.data || [];
+
+    // Ambil cuma donatur unik berdasarkan member_id
+    const donaturUnik = dataDonatur.filter(
+      (item: any, index: any, self: any) =>
+        index === self.findIndex((t) => t.member_id === item.member_id),
+    );
+
+    // Total donatur = jumlah donatur unik
+    totalDonatur.value = response?.total?.jumlah_donatur || donaturUnik.length;
+    totalPagesDonatur.value = response?.total_page || 1;
   } catch (error) {
     console.error('Error fetching daftar donatur:', error);
     daftarDonatur.value = [];
@@ -115,8 +133,17 @@ const fetchStatus = async () => {
 const fetchRiwayatDonasi = async () => {
   loadingRiwayat.value = true;
   try {
-    const response = await riwayat_donasi_user({ program_donasi_id: props.idKegiatan });
-    RiwayatDonasi.value = response;
+    const response = await riwayat_donasi_user({
+      program_donasi_id: props.idKegiatan,
+      pageNumber: currentPageRiwayat.value,
+      perpage: perPageRiwayat.value,
+    });
+
+    RiwayatDonasi.value = Array.isArray(response.data) ? response.data : [];
+
+    // Gunakan total dari response API
+    totalRiwayat.value = response?.total || 0;
+    totalPagesRiwayat.value = response?.total_page || 1;
   } catch (error) {
     console.error('Error fetching riwayat donasi:', error);
   } finally {
@@ -153,17 +180,33 @@ const calculatePercentage = () => {
   return Math.min(percentage, 100);
 };
 
-const nextPage = () => {
-  if (currentPage.value < totalPages.value) {
-    currentPage.value++;
+// Pagination untuk daftar donatur
+const nextPageDonatur = () => {
+  if (currentPageDonatur.value < totalPagesDonatur.value) {
+    currentPageDonatur.value++;
     fetchDaftarDonatur();
   }
 };
 
-const prevPage = () => {
-  if (currentPage.value > 1) {
-    currentPage.value--;
+const prevPageDonatur = () => {
+  if (currentPageDonatur.value > 1) {
+    currentPageDonatur.value--;
     fetchDaftarDonatur();
+  }
+};
+
+// Pagination untuk riwayat donasi user
+const nextPageRiwayat = () => {
+  if (currentPageRiwayat.value < totalPagesRiwayat.value) {
+    currentPageRiwayat.value++;
+    fetchRiwayatDonasi();
+  }
+};
+
+const prevPageRiwayat = () => {
+  if (currentPageRiwayat.value > 1) {
+    currentPageRiwayat.value--;
+    fetchRiwayatDonasi();
   }
 };
 
@@ -218,7 +261,7 @@ const handleImageError = () => {
           <div class="w-full h-96 bg-gray-200 relative">
             <img
               v-if="detailProgram.banner && !imageError"
-              :src="`${BASE_URL}/uploads/img/program_kegiatan_bantuan/${detailProgram.banner}`"
+              :src="`${BASE_URL}/uploads/img/program_donasi/${detailProgram.banner}`"
               alt="Banner Program"
               class="w-full h-full object-cover"
               @error="handleImageError"
@@ -388,7 +431,7 @@ const handleImageError = () => {
                 d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
               />
             </svg>
-            Riwayat Donasi ({{ totalDonatur }})
+            Riwayat Donasi
           </h2>
 
           <div v-if="loadingDonatur" class="flex justify-center py-10">
@@ -440,15 +483,15 @@ const handleImageError = () => {
           </div>
 
           <div
-            v-if="totalDonatur > perPage"
-            class="flex justify-between items-center mt-4 pt-4 border-t"
+            v-if="totalDonatur > perPageDonatur"
+            class="flex justify-between items-center mt-4 pt-4"
           >
             <button
-              @click="prevPage"
-              :disabled="currentPage === 1"
+              @click="prevPageDonatur"
+              :disabled="currentPageDonatur === 1"
               class="px-3 py-1.5 text-xs font-medium rounded-lg transition-all"
               :class="
-                currentPage === 1
+                currentPageDonatur === 1
                   ? 'text-gray-400 cursor-not-allowed'
                   : 'text-green-700 hover:bg-green-100'
               "
@@ -456,14 +499,16 @@ const handleImageError = () => {
               ← Prev
             </button>
 
-            <span class="text-xs text-gray-600"> {{ currentPage }} / {{ totalPages }} </span>
+            <span class="text-xs text-gray-600">
+              {{ currentPageDonatur }} / {{ totalPagesDonatur }}
+            </span>
 
             <button
-              @click="nextPage"
-              :disabled="currentPage === totalPages"
+              @click="nextPageDonatur"
+              :disabled="currentPageDonatur === totalPagesDonatur"
               class="px-3 py-1.5 text-xs font-medium rounded-lg transition-all"
               :class="
-                currentPage === totalPages
+                currentPageDonatur === totalPagesDonatur
                   ? 'text-gray-400 cursor-not-allowed'
                   : 'text-green-700 hover:bg-green-100'
               "
@@ -572,6 +617,41 @@ const handleImageError = () => {
             </svg>
             <p class="text-sm font-medium">Belum ada riwayat donasi</p>
             <p class="text-xs mt-1">Mulai berdonasi untuk program ini</p>
+          </div>
+
+          <div
+            v-if="totalRiwayat > perPageRiwayat"
+            class="flex justify-between items-center mt-4 pt-4"
+          >
+            <button
+              @click="prevPageRiwayat"
+              :disabled="currentPageRiwayat === 1"
+              class="px-3 py-1.5 text-xs font-medium rounded-lg transition-all"
+              :class="
+                currentPageRiwayat === 1
+                  ? 'text-gray-400 cursor-not-allowed'
+                  : 'text-blue-700 hover:bg-blue-100'
+              "
+            >
+              ← Prev
+            </button>
+
+            <span class="text-xs text-gray-600">
+              {{ currentPageRiwayat }} / {{ totalPagesRiwayat }}
+            </span>
+
+            <button
+              @click="nextPageRiwayat"
+              :disabled="currentPageRiwayat === totalPagesRiwayat"
+              class="px-3 py-1.5 text-xs font-medium rounded-lg transition-all"
+              :class="
+                currentPageRiwayat === totalPagesRiwayat
+                  ? 'text-gray-400 cursor-not-allowed'
+                  : 'text-blue-700 hover:bg-blue-100'
+              "
+            >
+              Next →
+            </button>
           </div>
         </div>
       </div>

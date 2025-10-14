@@ -302,7 +302,7 @@ const formatNominal = (event: Event) => {
                 }}</span>
               </div>
               <div class="flex justify-between mt-1">
-                <span class="text-gray-600">Invoice INFAQ:</span>
+                <span class="text-gray-600">Invoice Donasi:</span>
                 <span class="font-bold text-green-700">{{ generatedInvoice }}</span>
               </div>
               <div class="flex justify-between mt-1">
@@ -314,7 +314,7 @@ const formatNominal = (event: Event) => {
             </div>
             <div class="text-center">
               <p class="text-gray-700">
-                Silakan lakukan pembayaran Infaq anda sebesar
+                Silakan lakukan pembayaran Donasi anda sebesar
                 <strong class="text-lg"
                   >Rp {{ formData.nominal?.toLocaleString('id-ID') ?? '0' }}</strong
                 >

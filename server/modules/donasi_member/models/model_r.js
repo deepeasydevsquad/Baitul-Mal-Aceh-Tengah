@@ -134,27 +134,54 @@ class Model_r {
 
   async donatur_donasi() {
     const body = this.req.body;
+
+    const limit = parseInt(body.perpage, 10) || 10;
+    const page =
+      body.pageNumber && body.pageNumber !== "0"
+        ? parseInt(body.pageNumber, 10)
+        : 1;
+
+    const offset = (page - 1) * limit;
+
     try {
-      const donatur = await Riwayat_donasi.findAll({
+      const { count, rows } = await Riwayat_donasi.findAndCountAll({
         where: {
           program_donasi_id: body.program_donasi_id,
+          status: "success",
         },
         include: [{ model: Member, attributes: ["fullname"] }],
+        limit,
+        offset,
+        order: [["createdAt", "DESC"]],
       });
 
-      const data = donatur.map((item) => {
+      const data = rows.map((item) => {
         const row = item.toJSON();
         return {
           id: row.id,
+          member_id: row.member_id,
           nominal: row.nominal,
           waktu_donasi: moment(row.createdAt).format("YYYY-MM-DD HH:mm:ss"),
           name: row.Member.fullname,
         };
       });
-      return data;
+
+      return {
+        total: count,
+        current_page: page,
+        per_page: limit,
+        total_page: Math.ceil(count / limit),
+        data,
+      };
     } catch (error) {
       console.error("Error donatur_donasi:", error);
-      return [];
+      return {
+        total: 0,
+        current_page: 1,
+        per_page: limit,
+        total_page: 0,
+        data: [],
+      };
     }
   }
 
@@ -314,29 +341,49 @@ class Model_r {
     await this.initialize();
     const body = this.req.body;
 
+    const limit = parseInt(body.perpage, 10) || 10;
+    const page =
+      body.pageNumber && body.pageNumber !== "0"
+        ? parseInt(body.pageNumber, 10)
+        : 1;
+    const offset = (page - 1) * limit;
+
     try {
-      const riwayat = await Riwayat_donasi.findAll({
+      const { count, rows } = await Riwayat_donasi.findAndCountAll({
         where: {
           member_id: this.member_id,
           program_donasi_id: body.program_donasi_id,
         },
         attributes: ["id", "invoice", "nominal", "status", "createdAt"],
+        limit,
+        offset,
+        order: [["createdAt", "DESC"]],
       });
 
-      const data = riwayat.map((item) => {
-        return {
-          id: item.id,
-          invoice: item.invoice,
-          nominal: item.nominal,
-          status: item.status,
-          waktu_donasi: moment(item.createdAt).format("YYYY-MM-DD HH:mm:ss"),
-        };
-      });
+      const data = rows.map((item) => ({
+        id: item.id,
+        invoice: item.invoice,
+        nominal: item.nominal,
+        status: item.status,
+        waktu_donasi: moment(item.createdAt).format("YYYY-MM-DD HH:mm:ss"),
+      }));
 
-      return data;
+      return {
+        total: count,
+        current_page: page,
+        per_page: limit,
+        total_page: Math.ceil(count / limit),
+        data,
+      };
     } catch (error) {
       console.error("Error get_riwayat_donasi_user:", error);
-      return [];
+      return {
+        total: 0,
+        current_page: 1,
+        per_page: limit,
+        total_page: 0,
+        data: [],
+      };
     }
   }
 }
