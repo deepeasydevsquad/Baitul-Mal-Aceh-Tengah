@@ -137,7 +137,7 @@ onMounted(async () => {
                 Info Program Bantuan
               </th>
               <th class="px-6 py-4 font-semibold text-sm tracking-wider w-[22%]">Info Monev</th>
-              <th class="px-6 py-4 font-semibold text-sm tracking-wider w-[12%]">Waktu</th>
+              <th class="px-6 py-4 font-semibold text-sm tracking-wider w-[12%]">Datetimes</th>
               <th class="px-6 py-4 font-semibold text-sm tracking-wider w-[10%]">Aksi</th>
             </tr>
           </thead>
