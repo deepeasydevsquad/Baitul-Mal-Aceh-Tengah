@@ -225,7 +225,6 @@ onMounted(async () => {
           </div>
         </div>
       </div>
-
       <!-- Info Message -->
       <div
         v-if="filteredKecamatanList.length === 0 && !isTableLoading"
