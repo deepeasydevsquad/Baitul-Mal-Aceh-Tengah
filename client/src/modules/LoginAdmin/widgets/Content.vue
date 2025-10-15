@@ -1,10 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
 import axios from 'axios';
+import { onMounted, ref } from 'vue';  
 import Notification from '@/components/Modal/Notification.vue';
 import { API_URL } from '@/config/config';
-
-// const API_BASE_URL = API_URL;
 
 interface FormData {
   username: string;

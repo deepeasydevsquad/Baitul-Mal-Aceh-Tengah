@@ -10,7 +10,10 @@ const {
   Syarat,
   Bank,
 } = require("../../../models");
-const { get_info_lokasi_list } = require("../../../helper/locationHelper");
+const {
+  get_info_lokasi,
+  get_info_lokasi_list,
+} = require("../../../helper/locationHelper");
 const moment = require("moment");
 
 class Model_r {
@@ -409,11 +412,6 @@ class Model_r {
       return {
         data: finalData,
         total,
-        summary: {
-          current_page: page,
-          per_page: limit,
-          total_pages: Math.ceil(total / limit),
-        },
       };
     } catch (error) {
       console.error("Error fetching validasi permohonan:", error);
@@ -424,101 +422,244 @@ class Model_r {
   async get_info_edit_file() {
     const body = this.req.body;
 
-    console.log("--------------");
-    console.log(body);
-    console.log("--------------");
-
     try {
       const dataValidasiSyarat = await Validasi_syarat_permohonan.findOne({
-        where: { realisasi_permohonan_id: body.id, id: body.validasi_id },
+        where: {
+          realisasi_permohonan_id: body.id,
+          id: body.validasi_id,
+        },
         attributes: ["id", "file_name", "path", "status", "alasan_penolakan"],
         raw: true,
-        nest: true,
       });
 
       return {
-        validasi_id: dataValidasiSyarat?.id || null,
-        file_name: dataValidasiSyarat?.file_name || null,
-        file_path: dataValidasiSyarat?.path || null, // Path file yang diupload
-        status_validasi: dataValidasiSyarat?.status || null, // process, approve, reject, atau null
-        alasan_penolakan: dataValidasiSyarat?.alasan_penolakan || null,
-        has_file: !!dataValidasiSyarat, // boolean untuk cek apakah sudah upload
+        id: dataValidasiSyarat.id,
+        file_name: dataValidasiSyarat.file_name || null,
+        file_path: dataValidasiSyarat.path || null, // Full path atau URL file
+        status_validasi: dataValidasiSyarat.status || "process",
+        alasan_penolakan: dataValidasiSyarat.alasan_penolakan || null,
+        has_file: !!dataValidasiSyarat.file_name, // true jika ada file
       };
     } catch (error) {
-      console.error("Error fetching info for permohonan:", error);
-      return null;
+      console.error("Error fetching info for edit file:", error);
+      return {
+        error: true,
+        error_msg: "Gagal mengambil data file",
+      };
     }
   }
 
-  async get_info_edit() {
+  async get_info_pemberitahuan() {
     const body = this.req.body;
 
     try {
-      const realisasi = await Realisasi_permohonan.findByPk(body.id, {
-        attributes: ["id", "permohonan_id"],
-      });
+      // Ambil data dari helper
+      const info_realisasi = await this.info_realisasi(body.id);
+      const info_permohonan = await this.info_permohonan(
+        info_realisasi.permohonan_id
+      );
+      const info_kegiatan = await this.info_kegiatan(
+        info_permohonan.kegiatan_id
+      );
+      const info_member = await this.info_member(info_permohonan.member_id);
 
-      const permohonan = await this.info_permohonan(realisasi.permohonan_id);
-      const member = await this.info_member(permohonan.member_id);
+      const dataLokasi = await get_info_lokasi(info_member.desa_id);
 
-      // --- Ambil syarat
-      const syaratData = await Syarat_kegiatan.findAll({
-        attributes: ["id", "kegiatan_id"],
-        where: { kegiatan_id: permohonan.kegiatan_id },
-        include: [{ model: Syarat, attributes: ["id", "name", "path"] }],
-        order: [[Syarat, "name", "ASC"]],
-        raw: true,
-        nest: true,
-      });
-
-      // --- Ambil validasi
-      const validasiData = await Validasi_syarat_permohonan.findAll({
-        attributes: ["id", "file_name", "path"],
+      // Ambil semua berkas yang terkait
+      const berkas = await Validasi_syarat_permohonan.findAll({
         where: { realisasi_permohonan_id: body.id },
+        attributes: ["id", "file_name", "path", "status", "alasan_penolakan"],
         raw: true,
       });
 
-      // --- Index validasi by syarat_id
-      const validasiByPath = {};
-      validasiData.forEach((v) => {
-        validasiByPath[v.file_name] = v; // asumsi: path unik untuk binding sesuai syaratfile
-      });
+      // Pisahkan berdasarkan status
+      const berkasRejected = berkas.filter((b) => b.status === "reject");
+      const berkasProcessing = berkas.filter((b) => b.status === "process");
 
-      // --- Gabung syarat + validasi
-      const syarat = syaratData.map((e) => {
-        const v = validasiByPath[e.Syarat.path] || {}; // ambil validasi kalau ada
-        return {
-          id: v.id,
-          name: e.Syarat.name,
-          path: e.Syarat.path,
-          file_path: v.path || null,
-        };
-      });
+      let whatsappMessage = "";
+      let isProcessing = false;
+      if (berkasRejected.length > 0) {
+        const berkasRejectedText = berkasRejected
+          .map(
+            (b, i) =>
+              `\n${i + 1}. *${b.file_name
+                .split("_")
+                .filter((item) => item.trim() !== "")
+                .join(" ")}*\n   Alasan: {${b.alasan_penolakan || "-"}`
+          )
+          .join("\n");
 
-      return { permohonan, member, syarat };
+        whatsappMessage = `Halo *${info_member.fullname}*,\n\nBerkas permohonan bantuan Anda untuk kegiatan *"${info_kegiatan.nama_kegiatan}"* memiliki berkas yang ditolak:\n${berkasRejectedText}\n\nMohon lengkapi berkas yang ditolak dan upload ulang.\n\nTerima kasih.`;
+      } else if (berkasProcessing.length > 0) {
+        isProcessing = true;
+      } else if (berkas.length > 0) {
+        whatsappMessage = `Halo *${info_member.fullname}*,\n\nBerkas permohonan bantuan Anda untuk kegiatan *"${info_kegiatan.nama_kegiatan}"* telah disetujui.\n\nTerima kasih.`;
+      } else {
+        whatsappMessage = `Halo *${info_member.fullname}*,\n\nTidak ditemukan berkas untuk permohonan kegiatan *"${info_kegiatan.nama_kegiatan}"*.\nSilakan hubungi admin untuk konfirmasi.`;
+      }
+
+      return {
+        member: {
+          id: info_member.id,
+          name: info_member.fullname,
+          phone: info_member.nomor_hp,
+        },
+        kegiatan: {
+          id: info_kegiatan.id,
+          name: info_kegiatan.nama_kegiatan,
+        },
+        lokasi: {
+          kecamatan: dataLokasi.kecamatan_name,
+          desa: dataLokasi.desa_name,
+        },
+        berkas_rejected: berkasRejected.map((b) => ({
+          id: b.id,
+          file_name: b.file_name,
+          alasan_penolakan: b.alasan_penolakan || null,
+        })),
+        total_berkas_rejected: berkasRejected.length,
+        is_processing: isProcessing,
+        whatsapp_message: whatsappMessage,
+      };
     } catch (error) {
-      console.error("Error fetching info for permohonan:", error);
+      console.error("Error get info pemberitahuan:", error);
+      return {
+        error: true,
+        error_msg: "Gagal mengambil info pemberitahuan",
+      };
+    }
+  }
+
+  async send_notification_wa() {
+    const body = this.req.body;
+
+    try {
+      // Get info permohonan
+      const info_realisasi = await this.info_realisasi(body.id);
+      const info_permohonan = await this.info_permohonan(
+        info_realisasi.permohonan_id
+      );
+      const info_kegiatan = await this.info_kegiatan(
+        info_permohonan.kegiatan_id
+      );
+      const info_member = await this.info_member(info_permohonan.member_id);
+
+      // Get semua berkas yang ditolak
+      const berkas = await Validasi_syarat_permohonan.findAll({
+        where: {
+          realisasi_permohonan_id: body.id,
+        },
+      });
+
+      // Pisahkan berdasarkan status
+      const berkasRejected = berkas.filter((b) => b.status === "reject");
+      const berkasProcessing = berkas.filter((b) => b.status === "process");
+
+      // Format list berkas yang ditolak
+      let whatsappMessage = "";
+      let berkasRejectedText = "";
+      let isProcessing = false;
+      if (berkas.length > 0) {
+        const berkasRejectedText = berkas
+          .map(
+            (b, i) =>
+              `\n${i + 1}. *${b.file_name
+                .split("_")
+                .filter((item) => item.trim() !== "")
+                .join(" ")}*\n   Alasan: {${b.alasan_penolakan || "-"}
+                b.alasan_penolakan || "-"
+              }`
+          )
+          .join("\n");
+
+        whatsappMessage = `Halo *${info_member.fullname}*,\n\nBerkas permohonan bantuan Anda untuk kegiatan *"${info_kegiatan.nama_kegiatan}"* memiliki berkas yang ditolak:\n${berkasRejectedText}\n\nMohon lengkapi berkas yang ditolak dan upload ulang.\n\nTerima kasih.`;
+      } else if (berkasProcessing.length > 0) {
+        isProcessing = true;
+      } else if (berkas.length > 0) {
+        whatsappMessage = `Halo *${info_member.fullname}*,\n\nBerkas permohonan bantuan Anda untuk kegiatan *"${info_kegiatan.nama_kegiatan}"* telah disetujui.\n\nTerima kasih.`;
+      } else {
+        whatsappMessage = `Halo *${info_member.fullname}*,\n\nTidak ditemukan berkas untuk permohonan kegiatan *"${info_kegiatan.nama_kegiatan}"*.\nSilakan hubungi admin untuk konfirmasi.`;
+      }
+
+      // Kirim WA via WAPISender
+      console.log("WA:", info_member.whatsapp_number, whatsappMessage);
+      await sendWhatsApp(info_member.whatsapp_number, whatsappMessage);
+
+      this.message = `Mengirim pemberitahuan WA ke ${info_member.fullname} (${info_member.whatsapp_number}) tentang berkas yang ditolak`;
+    } catch (error) {
+      this.state = false;
+      console.error("Error send notification WA:", error);
+      throw error;
+    }
+  }
+
+  async get_info_reject_permohonan() {
+    const body = this.req.body;
+    try {
+      // Get info permohonan
+      const info_realisasi = await this.info_realisasi(body.id);
+      const info_permohonan = await this.info_permohonan(
+        info_realisasi.permohonan_id
+      );
+      const info_kegiatan = await this.info_kegiatan(
+        info_permohonan.kegiatan_id
+      );
+      const info_member = await this.info_member(info_permohonan.member_id);
+
+      const dataLokasi = await get_info_lokasi(info_member.desa_id);
+
+      return {
+        member: {
+          name: info_member.fullname,
+        },
+        kegiatan: {
+          id: info_kegiatan.id,
+          name: info_kegiatan.nama_kegiatan,
+        },
+        lokasi: {
+          kecamatan: dataLokasi.kecamatan_name,
+          desa: dataLokasi.desa_name,
+        },
+      };
+    } catch (error) {
+      console.error("Error fetching info permohonan:", error);
       return null;
     }
   }
 
-  async get_info_persetujuan() {
+  async get_info_approve_permohonan() {
     const body = this.req.body;
-
     try {
-      const permohonan = await this.info_permohonan(body.id);
-      const kegiatan = await this.info_kegiatan(permohonan.kegiatan_id);
-      const sisa_dana = await this.sisa_dana(permohonan.kegiatan_id);
+      // Get info permohonan
+      const info_realisasi = await this.info_realisasi(body.id);
+      const info_permohonan = await this.info_permohonan(
+        info_realisasi.permohonan_id
+      );
+      const info_kegiatan = await this.info_kegiatan(
+        info_permohonan.kegiatan_id
+      );
+      const info_member = await this.info_member(info_permohonan.member_id);
 
-      let data = {
-        jumlah_maksimal_nominal_bantuan:
-          kegiatan.jumlah_maksimal_nominal_bantuan,
-        sisa_dana,
+      const dataLokasi = await get_info_lokasi(info_member.desa_id);
+
+      return {
+        member: {
+          name: info_member.fullname,
+        },
+        kegiatan: {
+          id: info_kegiatan.id,
+          name: info_kegiatan.nama_kegiatan,
+          jumlah_dana: info_kegiatan.jumlah_dana,
+          maksimal_bantuan: info_kegiatan.jumlah_maksimal_nominal_bantuan,
+        },
+        lokasi: {
+          kecamatan: dataLokasi.kecamatan_name,
+          desa: dataLokasi.desa_name,
+        },
+        sisa_dana: await this.sisa_dana(info_kegiatan.id),
       };
-
-      return data;
     } catch (error) {
-      console.error("Error fetching info for permohonan:", error);
+      console.error("Error fetching info permohonan:", error);
       return null;
     }
   }
@@ -591,7 +732,7 @@ class Model_r {
         where: { id: member_id },
         raw: true,
         nest: true,
-        attributes: ["id", "fullname", "tipe", "desa_id"],
+        attributes: ["id", "fullname", "tipe", "whatsapp_number", "desa_id"],
       });
       return member;
     } catch (error) {
