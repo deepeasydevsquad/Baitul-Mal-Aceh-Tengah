@@ -51,9 +51,9 @@ jobs:
             sleep 5
           done
 
-          echo "⏳ Waiting for Container_server to be running..."
-          until [ "$(docker inspect -f '{{.State.Running}}' Container_server)" == "true" ]; do
-            echo "   ... still waiting for Container_server"
+          echo "⏳ Waiting for Container_server_baitulmal to be running..."
+          until [ "$(docker inspect -f '{{.State.Running}}' Container_server_baitulmal)" == "true" ]; do
+            echo "   ... still waiting for Container_server_baitulmal"
             sleep 5
           done
 
