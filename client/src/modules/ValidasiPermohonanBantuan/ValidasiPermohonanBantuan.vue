@@ -442,50 +442,48 @@ onMounted(async () => {
 
                           <!-- Aksi -->
                           <td class="px-3 py-2 text-center">
-                            <div
-                              class="flex items-center justify-center gap-1"
-                              v-if="syarat.has_file"
-                            >
+                            <div class="flex items-center justify-end gap-1" v-if="syarat.has_file">
                               <button
                                 @click="viewFile(syarat)"
-                                class="p-1 hover:bg-blue-100 rounded transition-colors"
+                                class="w-6 p-1 bg-blue-500 hover:bg-blue-100 rounded transition-colors text-white hover:text-blue-500"
                                 title="Lihat File"
                               >
                                 <font-awesome-icon
                                   icon="fa-solid fa-clipboard-list"
-                                  class="text-blue-600 text-sm"
+                                  class="text-sm"
                                 />
                               </button>
                               <button
                                 @click="editFile(data.realisasi_id, syarat)"
-                                class="p-1 hover:bg-yellow-100 rounded transition-colors"
+                                class="w-6 p-1 bg-yellow-500 hover:bg-yellow-100 rounded transition-colors"
                                 title="Edit File"
                               >
                                 <font-awesome-icon
                                   icon="fa-solid fa-pen"
-                                  class="text-yellow-600 text-sm"
+                                  class="text-white text-sm"
                                 />
                               </button>
                               <button
                                 v-if="syarat.status_validasi !== 'approve'"
+                                      
                                 @click="approveSyarat(data.realisasi_id, syarat)"
-                                class="p-1 hover:bg-green-100 rounded transition-colors"
+                                class="w-6 p-1 bg-green-500 text-white hover:bg-green-100 rounded transition-colors"
                                 title="Approve"
                               >
                                 <font-awesome-icon
                                   icon="fa-solid fa-check"
-                                  class="text-green-600 text-sm"
+                                  class="text-white text-sm"
                                 />
                               </button>
                               <button
                                 v-if="syarat.status_validasi !== 'reject'"
                                 @click="openModalRejectBerkas(data.realisasi_id, syarat)"
-                                class="p-1 hover:bg-red-100 rounded transition-colors"
+                                class="w-6 p-1 bg-red-500 hover:bg-red-100 rounded transition-colors"
                                 title="Reject"
                               >
                                 <font-awesome-icon
                                   icon="fa-solid fa-xmark"
-                                  class="text-red-600 text-sm"
+                                  class="text-white text-sm"
                                 />
                               </button>
                             </div>

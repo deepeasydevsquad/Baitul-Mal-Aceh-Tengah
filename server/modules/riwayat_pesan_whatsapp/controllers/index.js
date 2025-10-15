@@ -7,23 +7,6 @@ const {
 
 const controllers = {};
 
-// controllers.get_info_pengaturan_whatsapp = async (req, res) => {
-//   if (!(await handleValidationErrors(req, res))) return;
-
-//   try {
-//     const model_r = new Model_r(req);
-//     const feedBack = await model_r.get_info_pengaturan_whatsapp();
-
-//     res.status(200).json({
-//       error: false,
-//       data: feedBack.data,
-//       total: feedBack.total,
-//     });
-//   } catch (error) {
-//     handleServerError(res, error);
-//   }
-// };
-
 controllers.list = async (req, res) => {
   if (!(await handleValidationErrors(req, res))) return;
 
@@ -42,109 +25,134 @@ controllers.get_template_pesan_whatsapp = async (req, res) => {
   try {
     const model_r = new Model_r(req);
     const feedBack = await model_r.get_template_pesan_whatsapp();
-
     res.status(200).json({
       error: false,
       message: "Daftar template pesan whatsapp ditemukan.",
-      data: feedBack.data,
+      data: feedBack,
     });
   } catch (error) {
     handleServerError(res, error);
   }
 };
 
-// controllers.get_jenis_pesan = async (req, res) => {
-//   console.log("controller item");
-//   try {
-//     const model = new Model_r(req);
-//     const data = await model.jenis_pesan();
-//     return res.status(200).json(data); // pake return
-//   } catch (error) {
-//     return handleServerError(res, error); // kasih full error object
-//   }
-// };
+controllers.get_pesan_template_pesan_whatsapp = async (req, res) => {
+  if (!(await handleValidationErrors(req, res))) return;
 
-// controllers.daftar_desa = async (req, res) => {
-//   if (!(await handleValidationErrors(req, res))) return;
+  try {
+    const model_r = new Model_r(req);
+    const feedBack = await model_r.get_pesan_template_pesan_whatsapp();
+    res.status(200).json({
+      error: false,
+      message: "Success.",
+      data: feedBack,
+    });
+  } catch (error) {
+    handleServerError(res, error);
+  }
+};
 
-//   try {
-//     const model_r = new Model_r(req);
-//     const feedBack = await model_r.Desa();
+controllers.kirim_pesan = async (req, res) => {
+  function parseNomorTujuan(str) {
+    if (!str || typeof str !== "string") return [];
 
-//     res.status(200).json({
-//       error: false,
-//       data: feedBack.data,
-//       total: feedBack.total,
-//     });
-//   } catch (error) {
-//     handleServerError(res, error);
-//   }
-// };
+    const nomorRegex = /^0\d{9,14}$/; // contoh: mulai dengan 0 dan panjang 10–15 digit
 
-// controllers.add = async (req, res) => {
-//   if (!(await handleValidationErrors(req, res))) return;
+    return str
+      .split(",")
+      .map((s) => s.trim())
+      .filter((s) => s !== "" && nomorRegex.test(s));
+  }
 
-//   try {
-//     const model_cud = new Model_cud(req);
-//     await model_cud.add();
+  function replaceTemplate(template, data) {
+    return template.replace(/{{(.*?)}}/g, (match, key) => {
+      return data[key.trim()] || match;
+    });
+  }
 
-//     const result = await model_cud.response();
-//     if (result.success) {
-//       res.status(200).json({
-//         error: false,
-//         error_msg: 'Desa berhasil ditambahkan.',
-//       });
-//     } else {
-//       res.status(400).json({
-//         error: true,
-//         error_msg: result.message || 'Desa gagal ditambahkan.',
-//       });
-//     }
-//   } catch (error) {
-//     handleServerError(res, error);
-//   }
-// };
+  if (!(await handleValidationErrors(req, res))) return;
 
-// controllers.get_info_edit_desa = async (req, res) => {
-//   if (!(await handleValidationErrors(req, res))) return;
+  try {
+    // get info
+    const model_r = new Model_r(req);
+    const model_cud = new Model_cud(req);
+    const setting_info = await model_r.get_parameter_setting();
 
-//   try {
-//     const model_r = new Model_r(req);
-//     const feedBack = await model_r.get_info_edit_desa();
+    const type = req.body.type;
+    const template_id = req.body.template_id;
+    let isi_pesan = req.body.isi_pesan;
+    let sendingInfo = [];
 
-//     res.status(200).json({
-//       error: false,
-//       data: feedBack,
-//       total: 1
-//     });
-//   } catch (error) {
-//     handleServerError(res, error);
-//   }
-// };
+    if (type == "pesan_biasa") {
+      nomor_tujuan = parseNomorTujuan(req.body.nomor_tujuan);
+      for (let x in nomor_tujuan) {
+        sendingInfo.push({ destination: nomor_tujuan[x], message: isi_pesan });
+      }
+    } else {
+      const template_info = await model_r.get_info_template();
+      if (type == "surveyor") {
+        // get info surveyor
+        var info_surveyor = await model_r.get_info_surveyor();
+        for (let x in info_surveyor) {
+          const message = replaceTemplate(isi_pesan, info_surveyor[x]);
+          sendingInfo.push({
+            destination: info_surveyor[x].whatsapp_number,
+            message: message,
+          });
+        }
+      } else if (type == "munfiq") {
+        // get nomor whatsapp munfiq
+        var info_munfiq = await model_r.get_info_munfiq();
+        for (let x in info_munfiq) {
+          const message = replaceTemplate(isi_pesan, info_munfiq[x]);
+          sendingInfo.push({
+            destination: info_munfiq[x].whatsapp_number,
+            message: message,
+          });
+        }
+      } else if (type == "muzakki") {
+        // get nomor whatsapp muzakki
+        var info_muzakki = await model_r.get_info_muzakki();
+        for (let x in info_muzakki) {
+          const message = replaceTemplate(isi_pesan, info_muzakki[x]);
+          sendingInfo.push({
+            destination: info_muzakki[x].whatsapp_number,
+            message: message,
+          });
+        }
+      }
+    }
 
-// controllers.edit = async (req, res) => {
-//   if (!(await handleValidationErrors(req, res))) return;
+    // kirim pesan
+    // for (let y in sendingInfo) {
+    //   await axios.post("https://wapisender.id/api/v5/message/text", {
+    //     api_key: setting_info.api_key,
+    //     device_key: setting_info.device_key,
+    //     destination: sendingInfo[y].destination,
+    //     message: sendingInfo[y].message,
+    //   });
+    // }
 
-//   try {
-//     const model_cud = new Model_cud(req);
-//     await model_cud.update(); // Gunakan method update, bukan edit
+    // insert to database.
+    await model_cud.insert_whatsapp_message(
+      setting_info.whatsapp_number,
+      sendingInfo
+    );
 
-//     const result = await model_cud.response();
-//     if (result.success) {
-//       res.status(200).json({
-//         error: false,
-//         error_msg: 'Desa berhasil diperbaharui.',
-//       });
-//     } else {
-//       res.status(400).json({
-//         error: true,
-//         error_msg: result.message || 'Desa gagal diperbaharui.',
-//       });
-//     }
-//   } catch (error) {
-//     handleServerError(res, error);
-//   }
-// };
+    if (await model_cud.response()) {
+      res.status(200).json({
+        error: false,
+        error_msg: "Pesan berhasil dikirim.",
+      });
+    } else {
+      res.status(400).json({
+        error: true,
+        error_msg: "Pesan gagal dikirim.",
+      });
+    }
+  } catch (error) {
+    handleServerError(res, error);
+  }
+};
 
 controllers.delete = async (req, res) => {
   if (!(await handleValidationErrors(req, res))) return;
@@ -152,17 +160,16 @@ controllers.delete = async (req, res) => {
   try {
     const model_cud = new Model_cud(req);
     await model_cud.delete();
-
-    const result = await model_cud.response();
-    if (result.success) {
+    // response
+    if (await model_cud.response()) {
       res.status(200).json({
         error: false,
-        error_msg: "Desa berhasil dihapus.",
+        error_msg: "Pesan whatsapp berhasil dihapus.",
       });
     } else {
       res.status(400).json({
         error: true,
-        error_msg: result.message || "Desa gagal dihapus.",
+        error_msg: "Pesan whatsapp gagal dihapus.",
       });
     }
   } catch (error) {

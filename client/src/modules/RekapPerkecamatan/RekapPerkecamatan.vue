@@ -225,7 +225,6 @@ onMounted(async () => {
           </div>
         </div>
       </div>
-
       <!-- Info Message -->
       <div
         v-if="filteredKecamatanList.length === 0 && !isTableLoading"
@@ -245,14 +244,27 @@ onMounted(async () => {
         <SkeletonTable v-if="isTableLoading" :columns="15" :rows="10" />
         <table v-else class="w-full border-collapse bg-white text-sm">
           <!-- Header -->
-          <thead class="bg-gray-50 text-gray-700 text-center border-b border-gray-300">
-            <tr>
+          <thead class="text-gray-700 text-center border-b border-gray-300">
+            <tr class="bg-gray-50 sticky top-0 z-20">
               <th
                 rowspan="2"
-                class="px-4 py-3 font-medium border-r border-gray-300 sticky left-0 bg-gray-50 z-10"
+                class="w-[20%] px-4 py-3 font-medium border-r border-gray-300 sticky left-0 bg-gray-50 z-30"
+              >
+                NO
+              </th>
+              <th
+                rowspan="2"
+                class="w-[20%] px-4 py-3 font-medium border-r border-gray-300 sticky left-0 bg-gray-50 z-30"
               >
                 KECAMATAN
               </th>
+              <th :colspan="bulanNames.length" class="px-4 py-3 font-medium border border-gray-300">
+                BULAN
+              </th>
+              <th rowspan="2" class="px-4 py-3 font-medium bg-gray-100 min-w-[120px]">JUMLAH</th>
+            </tr>
+
+            <tr class="bg-gray-50 sticky top-[40px] z-10">
               <th
                 v-for="bulan in bulanNames"
                 :key="bulan"
@@ -260,7 +272,6 @@ onMounted(async () => {
               >
                 {{ bulan }}
               </th>
-              <th rowspan="2" class="px-4 py-3 font-medium bg-gray-100 min-w-[120px]">JUMLAH</th>
             </tr>
           </thead>
 
@@ -268,12 +279,17 @@ onMounted(async () => {
           <tbody v-if="filteredKecamatanList.length > 0">
             <!-- Data per Kecamatan -->
             <tr
-              v-for="item in filteredKecamatanList"
+              v-for="(item, index) in filteredKecamatanList"
               :key="item.id"
               class="border-b border-gray-200 hover:bg-gray-50 transition-colors"
             >
               <td
-                class="px-4 py-3 font-semibold text-gray-800 border-r border-gray-300 sticky left-0 bg-white z-10"
+                class="px-4 py-3 font-normal text-center text-gray-800 border-r border-gray-300 sticky left-0 bg-white z-10"
+              >
+                {{ index + 1 }}
+              </td>
+              <td
+                class="px-4 py-3 font-normal text-gray-800 border-r border-gray-300 sticky left-0 bg-white z-10"
               >
                 {{ item.data.name }}
               </td>
@@ -284,26 +300,27 @@ onMounted(async () => {
               >
                 {{ formatRupiah(item.data.detail_rupiah[index as keyof DetailBulan]) }}
               </td>
-              <td class="px-4 py-3 text-right font-bold bg-gray-50">
+              <td class="px-4 py-3 text-right font-normal bg-gray-100">
                 {{ formatRupiah(calculateTotal(item.data.detail_rupiah)) }}
               </td>
             </tr>
 
             <!-- Grand Total -->
-            <tr class="bg-green-50 border-t-2 border-green-300">
+            <tr class="border border-gray-200">
               <td
-                class="px-4 py-3 font-bold text-gray-800 border-r border-gray-300 sticky left-0 bg-green-50 z-10"
+                class="px-4 py-3 font-normal text-gray-800 border-r border-gray-200 sticky left-0 bg-gray-100 z-10"
+                colspan="2"
               >
                 TOTAL KESELURUHAN
               </td>
               <td
                 v-for="(bulan, index) in 12"
                 :key="`total-${index}`"
-                class="px-4 py-3 text-right font-bold border-r border-gray-100"
+                class="px-4 py-3 text-right font-normal border-r border-gray-200 bg-gray-100"
               >
                 {{ formatRupiah(calculateGrandTotalBulan(index)) }}
               </td>
-              <td class="px-4 py-3 text-right font-bold bg-green-100">
+              <td class="px-4 py-3 text-right font-normal border-gray-200 bg-gray-100">
                 {{ formatRupiah(calculateGrandTotal()) }}
               </td>
             </tr>

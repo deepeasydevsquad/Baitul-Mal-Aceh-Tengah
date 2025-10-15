@@ -215,7 +215,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', handleEscape));
         <!-- Muncul setelah pilih type -->
         <div v-if="form.type">
           <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300"
-            >Nilai</label
+            >Variable</label
           >
           <div class="mb-4" aria-hidden="false">
             <span

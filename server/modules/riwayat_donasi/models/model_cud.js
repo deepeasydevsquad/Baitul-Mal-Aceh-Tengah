@@ -61,6 +61,40 @@ class Model_cud {
     }
   }
 
+async updatestatus() {
+  const { id, status } = this.req.body;
+  this.t = await sequelize.transaction();
+
+  try {
+    if (!id || !status) {
+      throw new Error("ID dan status wajib diisi");
+    }
+
+    const riwayat = await Riwayat_donasi.findByPk(id, { transaction: this.t });
+    if (!riwayat) {
+      throw new Error("Data riwayat donasi tidak ditemukan");
+    }
+
+    await Riwayat_donasi.update(
+      { status: status.toLowerCase() },
+      {
+        where: { id },
+        transaction: this.t,
+      }
+    );
+
+    await this.t.commit();
+
+    this.state = true;
+    this.message = `Status donasi berhasil diubah menjadi ${status}`;
+  } catch (error) {
+    await this.t.rollback();
+    console.error("❌ Gagal update status:", error);
+    this.state = false;
+    this.message = error.message || "Gagal mengubah status donasi";
+  }
+}
+
   // Response konsisten
   async response(data = null) {
     if (this.state) {
@@ -74,6 +108,7 @@ class Model_cud {
       return { success: false, message: this.message };
     }
   }
+
 }
 
 module.exports = Model_cud;

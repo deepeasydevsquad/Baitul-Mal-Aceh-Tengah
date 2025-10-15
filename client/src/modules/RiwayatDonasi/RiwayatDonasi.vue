@@ -9,6 +9,9 @@ import DeleteIcon from '@/components/Icons/DeleteIcon.vue';
 import Pagination from '@/components/Pagination/Pagination.vue';
 import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
+import ButtonGreen from '@/components/Button/ButtonGreen.vue';
+import LightButton from '@/components/Button/LightButton.vue';
+import YellowButton from '@/components/Button/YellowButton.vue';
 
 // Composable
 import { usePagination } from '@/composables/usePaginations';
@@ -16,7 +19,7 @@ import { useConfirmation } from '@/composables/useConfirmation';
 import { useNotification } from '@/composables/useNotification';
 
 // Service API
-import { get_riwayat_donasi, delete_riwayat_donasi } from '@/service/riwayat_donasi';
+import { get_riwayat_donasi, delete_riwayat_donasi, update_status } from '@/service/riwayat_donasi';
 
 // State
 const isLoading = ref(false);
@@ -107,6 +110,32 @@ async function deleteData(id: number) {
       }
     },
   );
+}
+
+async function updatestatus(id: number, newStatus: string) {
+  const title = newStatus === 'success' ? 'Approve Donasi' : 'Reject Donasi';
+  const message =
+    newStatus === 'success'
+      ? 'Apakah Anda yakin ingin menyetujui donasi ini?'
+      : 'Apakah Anda yakin ingin menolak donasi ini?';
+
+  displayConfirmation(title, message, async () => {
+    try {
+      isLoading.value = true;
+      await update_status(id, newStatus);
+
+      const notifMsg =
+        newStatus === 'success' ? 'Donasi berhasil disetujui' : 'Donasi berhasil ditolak';
+      displayNotification(notifMsg, 'success');
+
+      // 🔁 Refresh tabel agar data terbaru muncul
+      await fetchData();
+    } catch (error) {
+      displayNotification('Gagal mengubah status donasi', 'error');
+    } finally {
+      isLoading.value = false;
+    }
+  });
 }
 </script>
 
@@ -266,7 +295,21 @@ async function deleteData(id: number) {
 
                 <!-- Aksi -->
                 <td class="px-6 py-4">
-                  <div class="flex justify-center gap-2">
+                  <div class="flex flex-col gap-2 items-center">
+                    <LightButton
+                      title="Approve Donasi"
+                      @click="updatestatus(data.id, 'success')"
+                      v-if="data.status_konfirmasi === 'sudah_dikirim' && data.status !== 'success'"
+                    >
+                      <font-awesome-icon icon="fa-solid fa-check" />
+                    </LightButton>
+                    <LightButton
+                      title="Reject Donasi"
+                      @click="updatestatus(data.id, 'failed')"
+                      v-if="data.status_konfirmasi === 'sudah_dikirim' && data.status === 'success'"
+                    >
+                      <font-awesome-icon icon="fa-solid fa-times" />
+                    </LightButton>
                     <DangerButton @click="deleteData(data.id)">
                       <DeleteIcon />
                     </DangerButton>

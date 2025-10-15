@@ -84,3 +84,29 @@ exports.detail = async (req, res) => {
         handleServerError(res, error);
     }
 };
+
+exports.update_status = async (req, res) => {
+  if (!(await handleValidationErrors(req, res))) return;
+
+  try {
+    const model = new Model_cud(req);
+    await model.updatestatus();
+
+    if (model.state) {
+      res.status(200).json({
+        status: "success",
+        message: model.message,
+        error: false,
+      });
+    } else {
+      res.status(400).json({
+        status: "failed",
+        message: model.message,
+        error: true,
+      });
+    }
+  } catch (error) {
+    console.error("❌ Terjadi error saat mengupdate status riwayat donasi:", error);
+    handleServerError(res, error);
+  }
+};

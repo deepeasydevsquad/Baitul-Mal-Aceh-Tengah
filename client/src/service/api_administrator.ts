@@ -1,8 +1,9 @@
 import axios from 'axios';
 
 // Gunakan variabel lingkungan dari .env
-const API_BASE_URL = window.location.protocol + '//' + window.location.hostname + ':3001';
+import { API_URL } from '@/config/config';
 
+const API_BASE_URL = API_URL;
 // Base URL API
 const api = axios.create({
   baseURL: API_BASE_URL,
