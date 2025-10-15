@@ -9,6 +9,7 @@ const {
   Realisasi_permohonan,
   Setting,
 } = require("../../../models");
+const { Op } = Sequelize;
 
 class Model_r {
   constructor(req) {
@@ -127,6 +128,39 @@ class Model_r {
       return { error: true, message: error.message };
     }
   }
+
+  async tanda_tangan() {
+    try {
+      const data = {};
+      
+      const settings = await Setting.findAll({
+        where: {
+          name: {
+            [Op.in]: [
+              "nama_jabatan1",
+              "nama_pejabat1",
+              "nama_jabatan2",
+              "nama_pejabat2",
+              "nama_jabatan3",
+              "nama_pejabat3",
+            ],
+          },
+        },
+      });
+
+      settings.forEach((setting) => {
+        data[setting.name] = setting.value;
+      });
+
+      console.log("Tanda tangan data:", data);
+
+      return { error: false, data: data };
+    } catch (error) {
+      console.log("Error tanda_tangan:", error);
+      return { error: true, data: {} };
+    }
+  }
+
 }
 
 module.exports = Model_r;
