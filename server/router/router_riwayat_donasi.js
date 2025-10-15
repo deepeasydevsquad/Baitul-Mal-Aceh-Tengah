@@ -52,5 +52,21 @@ router.post(
     controllers.detail
 );
 
+router.post(
+    "/riwayat_donasi/update_status",
+    authenticateTokenAdministrator,
+    [
+        body("id")
+            .notEmpty()
+            .withMessage("ID Tidak Boleh Kosong")
+            .isInt()
+            .withMessage("ID harus angka"),
+        body("status")
+            .notEmpty()
+            .withMessage("Status Tidak Boleh Kosong")
+    ],
+    controllers.update_status
+);
+
 module.exports = router;
 
