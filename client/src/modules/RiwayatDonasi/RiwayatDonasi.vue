@@ -10,6 +10,7 @@ import Pagination from '@/components/Pagination/Pagination.vue';
 import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
 import ButtonGreen from '@/components/Button/ButtonGreen.vue';
+import LightButton from '@/components/Button/LightButton.vue';
 import YellowButton from '@/components/Button/YellowButton.vue';
 
 // Composable
@@ -113,18 +114,18 @@ async function deleteData(id: number) {
 
 async function updatestatus(id: number, newStatus: string) {
   const title = newStatus === 'success' ? 'Approve Donasi' : 'Reject Donasi';
-  const message = newStatus === 'success'
-    ? 'Apakah Anda yakin ingin menyetujui donasi ini?'
-    : 'Apakah Anda yakin ingin menolak donasi ini?';
+  const message =
+    newStatus === 'success'
+      ? 'Apakah Anda yakin ingin menyetujui donasi ini?'
+      : 'Apakah Anda yakin ingin menolak donasi ini?';
 
   displayConfirmation(title, message, async () => {
     try {
       isLoading.value = true;
       await update_status(id, newStatus);
 
-      const notifMsg = newStatus === 'success'
-        ? 'Donasi berhasil disetujui'
-        : 'Donasi berhasil ditolak';
+      const notifMsg =
+        newStatus === 'success' ? 'Donasi berhasil disetujui' : 'Donasi berhasil ditolak';
       displayNotification(notifMsg, 'success');
 
       // 🔁 Refresh tabel agar data terbaru muncul
@@ -136,7 +137,6 @@ async function updatestatus(id: number, newStatus: string) {
     }
   });
 }
-
 </script>
 
 <template>
@@ -296,18 +296,20 @@ async function updatestatus(id: number, newStatus: string) {
                 <!-- Aksi -->
                 <td class="px-6 py-4">
                   <div class="flex flex-col gap-2 items-center">
-                    <ButtonGreen
+                    <LightButton
                       title="Approve Donasi"
                       @click="updatestatus(data.id, 'success')"
+                      v-if="data.status_konfirmasi === 'sudah_dikirim' && data.status !== 'success'"
                     >
                       <font-awesome-icon icon="fa-solid fa-check" />
-                    </ButtonGreen>                    
-                    <YellowButton
+                    </LightButton>
+                    <LightButton
                       title="Reject Donasi"
                       @click="updatestatus(data.id, 'failed')"
+                      v-if="data.status_konfirmasi === 'sudah_dikirim' && data.status === 'success'"
                     >
                       <font-awesome-icon icon="fa-solid fa-times" />
-                    </YellowButton>
+                    </LightButton>
                     <DangerButton @click="deleteData(data.id)">
                       <DeleteIcon />
                     </DangerButton>
