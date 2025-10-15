@@ -2,6 +2,7 @@ const {
   Op,
   sequelize,
   Realisasi_permohonan,
+  Validasi_syarat_permohonan,
   Permohonan,
   Kegiatan,
   Bank,
@@ -11,6 +12,7 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 const moment = require("moment");
+const { convertToRP } = require("../helper/currencyHelper");
 
 const validation = {};
 
@@ -23,87 +25,82 @@ validation.check_id_permohonan_bantuan = async (value) => {
   return true;
 };
 
-validation.check_status_permohonan_bantuan = async (value) => {
-  const check = await Realisasi_permohonan.findOne({
-    where: { id: value },
-    attributes: ["status_realisasi"],
-    raw: true,
+validation.check_id_validasi_permohonan_bantuan = async (value, { req }) => {
+  const body = req.body;
+  const check = await Validasi_syarat_permohonan.findOne({
+    where: {
+      id: value,
+      realisasi_permohonan_id: body.id,
+    },
   });
 
   if (!check) {
-    throw new Error("Permohonan tidak ditemukan");
+    throw new Error("Validasi file syarat tidak terdaftar di pangkalan data");
   }
 
-  if (check.status_realisasi === "sudah_direalisasi") {
+  // Pastikan status bukan approve
+  if (check.status === "approve") {
     throw new Error(
-      "Status permohonan sudah direalisasi dan tidak dapat diubah"
+      "Validasi file syarat sudah disetujui, tidak dapat diubah lagi"
     );
   }
 
   return true;
 };
 
-validation.check_id_kegiatan = async (value) => {
-  const check = await Kegiatan.findByPk(value);
-  if (!check) {
-    throw new Error("Kegiatan tidak terdaftar di pangkalan data");
-  }
-  return true;
-};
+validation.check_berkas = async (value) => {
+  const totalBerkas = await Validasi_syarat_permohonan.count({
+    where: { realisasi_permohonan_id: value },
+  });
 
-validation.check_id_bank = async (value) => {
-  const check = await Bank.findByPk(value);
-  if (!check) {
-    throw new Error("Bank tidak terdaftar di pangkalan data");
-  }
-  return true;
-};
-
-validation.check_id_member = async (value, { req }) => {
-  const body = req.body;
-
-  const check = await Member.findByPk(value);
-  if (!check) {
-    throw new Error("Member tidak terdaftar di pangkalan data");
+  if (totalBerkas === 0) {
+    throw new Error("Belum ada berkas yang diunggah untuk permohonan ini.");
   }
 
-  if (!body.id) {
-    const check_permohonan = await Realisasi_permohonan.findOne({
-      include: [
-        {
-          model: Permohonan,
-          where: { member_id: value },
-          required: true,
-          attributes: [],
-          include: [
-            {
-              model: Kegiatan,
-              attributes: [],
-              where: { tahun: moment().format("YYYY") },
-              required: true,
-            },
-          ],
-        },
-      ],
-    });
-    if (check_permohonan) {
-      throw new Error("Member sudah mempunyai permohonan");
-    }
+  const berkasBelumApprove = await Validasi_syarat_permohonan.count({
+    where: {
+      realisasi_permohonan_id: value,
+      status: { [Op.ne]: "approve" }, // Not equal to 'approve'
+    },
+  });
+
+  if (berkasBelumApprove > 0) {
+    throw new Error(
+      "Masih ada berkas yang belum disetujui. Harap approve semua berkas terlebih dahulu."
+    );
   }
 
   return true;
 };
 
-validation.check_nominal_yang_disetujui = async (value, { req }) => {
-  const { id } = req.body;
-  const [dataKegiatan, dataPermohonan] = await Promise.all([
+validation.check_biaya_disetujui = async (value, { req }) => {
+  // Ambil kegiatan_id langsung lewat relasi Realisasi → Permohonan
+  const realisasi = await Realisasi_permohonan.findOne({
+    where: { id: req.body.id },
+    attributes: [],
+    include: [
+      {
+        model: Permohonan,
+        attributes: ["kegiatan_id"],
+        required: true,
+      },
+    ],
+    raw: true,
+    nest: true,
+  });
+
+  if (!realisasi) throw new Error("Data realisasi permohonan tidak ditemukan");
+
+  const kegiatanId = realisasi.Permohonan.kegiatan_id;
+
+  // Jalankan dua query paralel
+  const [dataKegiatan, dataRealisasiTotal] = await Promise.all([
     Kegiatan.findOne({
-      where: { id },
-      attributes: ["jumlah_dana", "jumlah_maksimal_nominal_bantuan"],
+      where: { id: kegiatanId },
+      attributes: ["jumlah_dana"],
       raw: true,
     }),
     Realisasi_permohonan.findOne({
-      raw: true,
       attributes: [
         [
           sequelize.fn(
@@ -117,21 +114,28 @@ validation.check_nominal_yang_disetujui = async (value, { req }) => {
       include: [
         {
           model: Permohonan,
-          where: { kegiatan_id: id },
+          where: { kegiatan_id: kegiatanId },
           required: true,
           attributes: [],
         },
       ],
+      raw: true,
     }),
   ]);
 
-  if (value > dataKegiatan.jumlah_maksimal_nominal_bantuan) {
-    throw new Error("Nominal yang disetujui melebihi batas maksimal bantuan");
+  if (!dataKegiatan) throw new Error("Data kegiatan tidak ditemukan");
+
+  const totalRealisasi = Number(dataRealisasiTotal.total) || 0;
+  const sisaDana = dataKegiatan.jumlah_dana - totalRealisasi;
+
+  if (value > sisaDana) {
+    throw new Error(
+      `Nominal disetujui (${convertToRP(
+        value
+      )}) melebihi sisa dana kegiatan (${convertToRP(sisaDana)})`
+    );
   }
 
-  if (value > dataKegiatan.jumlah_dana - dataPermohonan.total) {
-    throw new Error("Nominal yang disetujui melebihi sisa dana kegiatan ini");
-  }
   return true;
 };
 
@@ -156,9 +160,8 @@ const storage = multer.diskStorage({
     const filename = `${baseName}_${timestamp}${ext}`;
 
     // inject ke req.body biar gampang diakses di controller
-    if (!req.body.arr_path) req.body.arr_path = [];
-    req.body.arr_path.push({ basename: baseName, path: filename });
-
+    if (!req.body.file) req.body.file = [];
+    req.body.file.push({ basename: baseName, path: filename });
     cb(null, filename);
   },
 });
@@ -177,44 +180,6 @@ validation.upload = multer({
   storage,
   fileFilter,
   limits: { fileSize: 1 * 1024 * 1024 }, // 1 MB
-}).any(); // <== allow semua dokumen dynamic
-
-// === HELPER UNTUK MERGE FILES + META ===
-validation.parseUploadData = (req) => {
-  const dokumenMap = {};
-
-  // 1. Files dari multer
-  if (req.files && req.files.length > 0) {
-    req.files.forEach((file) => {
-      dokumenMap[file.fieldname] = {
-        file: file.filename,
-      };
-    });
-  }
-
-  // 2. Meta dari req.body (JSON string yg dikirim frontend)
-  Object.entries(req.body).forEach(([key, val]) => {
-    if (key.startsWith("dokumen_")) {
-      try {
-        const meta = JSON.parse(val);
-        if (!dokumenMap[key]) dokumenMap[key] = {};
-        dokumenMap[key] = { ...dokumenMap[key], ...meta };
-      } catch (err) {
-        // kalo bukan JSON valid, skip
-      }
-    }
-  });
-
-  return dokumenMap;
-};
-
-validation.parseUploadMiddleware = (req, res, next) => {
-  try {
-    req.body.dokumenMap = validation.parseUploadData(req);
-    next();
-  } catch (err) {
-    next(err);
-  }
-};
+});
 
 module.exports = validation;

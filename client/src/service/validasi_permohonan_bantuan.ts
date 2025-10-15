@@ -20,24 +20,9 @@ export const get_validasi_permohonan_bantuan = async (param: any) => {
   }
 };
 
-export const get_view_validasi_permohonan_bantuan = async (id: number) => {
+export const get_info_edit_file = async (param: any) => {
   try {
-    const response = await api.post('/validasi_permohonan_bantuan/view', { id: id });
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching view validasi permohonan bantuan');
-    throw error;
-  }
-};
-
-export const get_info_edit_validasi_permohonan_bantuan = async (id: number) => {
-  try {
-    const response = await api.post(
-      '/validasi_permohonan_bantuan/get_info_edit_validasi_permohonan_bantuan',
-      {
-        id: id,
-      },
-    );
+    const response = await api.post('/validasi_permohonan_bantuan/get_info_edit_file', param);
     return response.data;
   } catch (error) {
     console.error('Error fetching permohonan bantuan:', error);
@@ -45,9 +30,9 @@ export const get_info_edit_validasi_permohonan_bantuan = async (id: number) => {
   }
 };
 
-export const edit_validasi_permohonan_bantuan = async (param: any) => {
+export const edit_file = async (param: any) => {
   try {
-    const response = await api.post('/validasi_permohonan_bantuan/edit', param, {
+    const response = await api.post('/validasi_permohonan_bantuan/edit_file', param, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -59,24 +44,32 @@ export const edit_validasi_permohonan_bantuan = async (param: any) => {
   }
 };
 
-export const edit_status_validasi_permohonan_bantuan = async (param: any) => {
+export const approve_berkas = async (param: any) => {
   try {
-    const response = await api.post('/validasi_permohonan_bantuan/edit_status', param);
+    const response = await api.post('/validasi_permohonan_bantuan/approve_berkas', param);
     return response.data;
   } catch (error) {
-    console.error('Error editing status permohonan bantuan:', error);
+    console.error('Error editing permohonan bantuan:', error);
     throw error;
   }
 };
 
-export const get_info_persetujuan_validasi_permohonan_bantuan = async (id: number) => {
+export const reject_berkas = async (param: any) => {
   try {
-    const response = await api.post(
-      '/validasi_permohonan_bantuan/get_info_persetujuan_validasi_permohonan_bantuan',
-      {
-        id: id,
-      },
-    );
+    const response = await api.post('/validasi_permohonan_bantuan/reject_berkas', param);
+    return response.data;
+  } catch (error) {
+    console.error('Error editing permohonan bantuan:', error);
+    throw error;
+  }
+};
+
+export const get_info_pemberitahuan = async (id: number) => {
+  try {
+    console.log(id);
+    const response = await api.post('/validasi_permohonan_bantuan/get_info_pemberitahuan', {
+      id: id,
+    });
     return response.data;
   } catch (error) {
     console.error('Error fetching permohonan bantuan:', error);
@@ -84,15 +77,56 @@ export const get_info_persetujuan_validasi_permohonan_bantuan = async (id: numbe
   }
 };
 
-export const persetujuan_validasi_permohonan_bantuan = async (param: any) => {
+export const pemberitahuan = async (param: any) => {
   try {
-    const response = await api.post(
-      '/validasi_permohonan_bantuan/persetujuan_validasi_permohonan_bantuan',
-      param,
-    );
+    const response = await api.post('/validasi_permohonan_bantuan/pemberitahuan', param);
     return response.data;
   } catch (error) {
-    console.error('Error editing persetujuan permohonan bantuan:', error);
+    console.error('Error editing permohonan bantuan:', error);
+    throw error;
+  }
+};
+
+export const get_info_approve_permohonan = async (id: number) => {
+  try {
+    const response = await api.post('/validasi_permohonan_bantuan/get_info_approve_permohonan', {
+      id: id,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching permohonan bantuan:', error);
+    throw error;
+  }
+};
+
+export const approve_permohonan = async (param: any) => {
+  try {
+    const response = await api.post('/validasi_permohonan_bantuan/approve_permohonan', param);
+    return response.data;
+  } catch (error) {
+    console.error('Error editing permohonan bantuan:', error);
+    throw error;
+  }
+};
+
+export const get_info_reject_permohonan = async (id: number) => {
+  try {
+    const response = await api.post('/validasi_permohonan_bantuan/get_info_reject_permohonan', {
+      id: id,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching permohonan bantuan:', error);
+    throw error;
+  }
+};
+
+export const reject_permohonan = async (param: any) => {
+  try {
+    const response = await api.post('/validasi_permohonan_bantuan/reject_permohonan', param);
+    return response.data;
+  } catch (error) {
+    console.error('Error editing permohonan bantuan:', error);
     throw error;
   }
 };

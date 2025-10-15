@@ -812,6 +812,7 @@ class Model_r {
   async info_realisasi(realisasi_id) {
     try {
       const realisasi = await Realisasi_permohonan.findOne({
+        order: [["id", "ASC"]],
         where: { id: realisasi_id },
         raw: true,
         nest: true,

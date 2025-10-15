@@ -1,22 +1,17 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted, computed } from 'vue';
-import Notification from '@/components/Modal/Notification.vue';
-import Confirmation from '@/components/Modal/Confirmation.vue';
 import BaseButton from '@/components/Button/BaseButton.vue';
-import LightButton from '@/components/Button/LightButton.vue';
-import EditIcon from '@/components/Icons/EditIcon.vue';
-import DangerButton from '@/components/Button/DangerButton.vue';
-import DeleteIcon from '@/components/Icons/DeleteIcon.vue';
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
+import Notification from '@/components/Modal/Notification.vue';
 import Pagination from '@/components/Pagination/Pagination.vue';
 import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
-import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
 import FormAdd from '@/modules/KegiatanKeseketariatan/widgets/FormAdd.vue';
+import { onMounted, ref } from 'vue';
 
 // Composable
-import { usePagination } from '@/composables/usePaginations';
 import { useConfirmation } from '@/composables/useConfirmation';
 import { useNotification } from '@/composables/useNotification';
+import { usePagination } from '@/composables/usePaginations';
 
 // Service API
 import { list } from '@/service/kegiatan_keseketariatan';
@@ -27,7 +22,7 @@ const isTableLoading = ref(false);
 
 // Composable: pagination
 const itemsPerPage = ref<number>(100);
-const totalColumns = ref<number>(3);
+const totalColumns = ref<number>(6);
 
 const { currentPage, perPage, totalRow, totalPages, nextPage, prevPage, pageNow, pages } =
   usePagination(fetchData, { perPage: itemsPerPage.value });
@@ -109,7 +104,7 @@ const handleStatus = (payload: any) => {
         <BaseButton
           @click="openModalAdd()"
           variant="primary"
-          :loading="isModalAddOpen || isModalEditOpen"
+          :loading="isModalAddOpen"
           type="button"
         >
           <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" />
