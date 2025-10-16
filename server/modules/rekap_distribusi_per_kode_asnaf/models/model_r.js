@@ -39,7 +39,6 @@ class Model_r {
       console.log("🧭 DEBUG START: Rekap distribusi per kode asnaf (ALL ASNAF)");
       console.log("Tahun target:", targetYear);
 
-      // 🔥 STEP 1: Ambil SEMUA Asnaf dengan Kegiatannya
       const allAsnaf = await Asnaf.findAll({
         attributes: ["id", "name"],
         include: [
@@ -58,7 +57,6 @@ class Model_r {
         console.log(`   - ${a.name} (ID: ${a.id}) - Kegiatan: ${a.Kegiatans?.length || 0}`);
       });
 
-      // 🔥 STEP 2: Ambil semua realisasi untuk tahun ini
       const allRealisasi = await Realisasi_permohonan.findAll({
         attributes: ["id", "nominal_realisasi", "createdAt"],
         where: {
@@ -85,7 +83,6 @@ class Model_r {
 
       console.log(`📊 Total realisasi tahun ${targetYear}:`, allRealisasi.length);
 
-      // 🔥 STEP 3: Build Map Realisasi per Bulan & Kegiatan
       const realisasiMap = {};
 
       for (const r of allRealisasi) {
@@ -110,7 +107,6 @@ class Model_r {
 
       console.log("🗺️ Total kombinasi bulan-kegiatan dengan realisasi:", Object.keys(realisasiMap).length);
 
-      // 🔥 STEP 4: Build Final Data - Semua Asnaf untuk setiap bulan
       const finalData = [];
 
       for (const m of months) {
@@ -118,8 +114,6 @@ class Model_r {
         const monthData = [];
 
         console.log(`\n📅 Processing Bulan: ${m.format("MMMM YYYY")}`);
-
-        // Loop semua asnaf
         for (const asnaf of allAsnaf) {
           // Jika asnaf tidak punya kegiatan
           if (!asnaf.Kegiatans || asnaf.Kegiatans.length === 0) {
@@ -152,10 +146,6 @@ class Model_r {
           }
         }
 
-        console.log(`   ✅ Total entries bulan ini: ${monthData.length}`);
-        console.log(`   💰 Yang sudah direalisasi: ${monthData.filter(x => x.status === "sudah_direalisasi").length}`);
-        console.log(`   ⏳ Yang belum direalisasi: ${monthData.filter(x => x.status === "belum_direalisasi").length}`);
-
         finalData.push({
           year: targetYear,
           month: monthKey,
@@ -180,14 +170,6 @@ class Model_r {
           else totalBelumRealisasi++;
         });
       });
-
-      console.log("\n==============================================");
-      console.log("✅ Rekap Selesai:");
-      console.log("   - Total Asnaf: ", uniqueAsnaf.size);
-      console.log("   - Total Kegiatan:", uniqueKegiatan.size);
-      console.log("   - Sudah Direalisasi:", totalRealisasi);
-      console.log("   - Belum Direalisasi:", totalBelumRealisasi);
-      console.log("==============================================");
 
       return {
         success: true,
