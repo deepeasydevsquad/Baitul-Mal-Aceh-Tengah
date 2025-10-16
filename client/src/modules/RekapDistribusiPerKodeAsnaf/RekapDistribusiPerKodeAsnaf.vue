@@ -1,20 +1,21 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import autoTable from 'jspdf-autotable';
 import Notification from '@/components/Modal/Notification.vue';
 import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
-import SelectField from '@/components/Form/SelectField.vue';
+import BaseButton from '@/components/Button/BaseButton.vue';
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
 import { useNotification } from '@/composables/useNotification';
 import { list_rekap_distribusi_per_kode_asnaf } from '@/service/rekap_distribusi_per_kode_asnaf';
-import BaseButton from '@/components/Button/BaseButton.vue';
 
 // ==================== STATE ====================
 const isLoading = ref(false);
 const isDownloading = ref(false);
+const isTableLoading = ref(false);
 const selectedYear = ref(new Date().getFullYear().toString());
+const searchAsnaf = ref('');
 const rowsNominal = ref<any[]>([]);
-const rowsPenerima = ref<any[]>([]);
 
 // ==================== CONSTANTS ====================
 const currentYear = new Date().getFullYear();
@@ -43,29 +44,62 @@ const { showNotification, notificationType, notificationMessage, displayNotifica
 
 // ==================== INTERFACES ====================
 interface KegiatanData {
-  asnaf: string;
   kode: string;
-  kegiatan_id: number;
-  valuesNominal: Record<string, number>;
-  valuesPenerima: Record<string, number>;
-}
-
-interface RowData {
-  asnaf: string;
-  kode: string;
-  kegiatan_id: number;
+  kegiatan_id: number | null;
   values: Record<string, number>;
   total: number;
 }
 
+interface RowData {
+  asnaf: string;
+  asnaf_id: number;
+  kegiatan: KegiatanData[];
+  values: Record<string, number>;
+  total: number;
+}
+
+// ==================== COMPUTED ====================
+const filteredRows = computed(() => {
+  if (!searchAsnaf.value.trim()) {
+    return rowsNominal.value;
+  }
+
+  const searchLower = searchAsnaf.value.toLowerCase().trim();
+  return rowsNominal.value.filter((row) => row.asnaf.toLowerCase().includes(searchLower));
+});
+
+// ==================== HELPER FUNCTIONS ====================
+function formatRupiah(amount: number): string {
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
+function formatRupiahPlain(amount: number): string {
+  return new Intl.NumberFormat('id-ID', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
+function calculateGrandTotalBulan(monthKey: string): number {
+  return filteredRows.value.reduce((sum, row) => sum + (row.values[monthKey] || 0), 0);
+}
+
+function calculateGrandTotal(): number {
+  return months.reduce((sum, m) => sum + calculateGrandTotalBulan(m.key), 0);
+}
+
 // ==================== FETCH DATA ====================
 async function fetchData() {
-  isLoading.value = true;
+  isTableLoading.value = true;
   rowsNominal.value = [];
-  rowsPenerima.value = [];
 
   try {
-    const res = await list_rekap_distribusi_per_kode_asnaf({ year: selectedYear.value });
+    const res = await list_rekap_distribusi_per_kode_asnaf({ year: parseInt(selectedYear.value) });
     console.log('📊 Response backend:', res);
 
     if (!res.success) {
@@ -79,103 +113,98 @@ async function fetchData() {
       return;
     }
 
-    // Map untuk menyimpan data per kegiatan
-    const kegiatanMap: Record<string, KegiatanData> = {};
+    const asnafMap: Record<number, any> = {};
 
-    // Proses data dari API
     raw.forEach((monthData: any) => {
       const month = monthData.month;
 
-      monthData.data.forEach((item: any) => {
-        // Key unik: asnaf_id + kegiatan_id (biar tiap kegiatan terpisah)
-        const key = `${item.asnaf_id}_${item.kegiatan_id}`;
+      if (!monthData.data || !Array.isArray(monthData.data)) {
+        return;
+      }
 
-        // Inisialisasi jika belum ada
-        if (!kegiatanMap[key]) {
-          kegiatanMap[key] = {
-            asnaf: item.asnaf,
-            kode: item.kode,
-            kegiatan_id: item.kegiatan_id,
+      monthData.data.forEach((item: any) => {
+        const asnafId = item.asnaf_id;
+
+        if (!asnafMap[asnafId]) {
+          asnafMap[asnafId] = {
+            asnaf_id: asnafId,
+            asnaf: item.asnaf || 'Tidak Diketahui',
+            kegiatan: {},
             valuesNominal: {},
-            valuesPenerima: {},
           };
         }
 
-        // Simpan nilai per bulan
-        kegiatanMap[key].valuesNominal[month] = item.total_nominal || 0;
-        kegiatanMap[key].valuesPenerima[month] = item.total_penerima || 0;
+        const kegiatanId = item.kegiatan_id || 'null';
+        if (!asnafMap[asnafId].kegiatan[kegiatanId]) {
+          asnafMap[asnafId].kegiatan[kegiatanId] = {
+            kegiatan_id: item.kegiatan_id,
+            kode: item.kode || '-',
+            valuesNominal: {},
+          };
+        }
+
+        asnafMap[asnafId].kegiatan[kegiatanId].valuesNominal[month] = item.total_nominal || 0;
+
+        if (!asnafMap[asnafId].valuesNominal[month]) {
+          asnafMap[asnafId].valuesNominal[month] = 0;
+        }
+        asnafMap[asnafId].valuesNominal[month] += item.total_nominal || 0;
       });
     });
 
-    // Build rows untuk tabel nominal
-    rowsNominal.value = Object.entries(kegiatanMap).map(([key, data]) => {
-      let total = 0;
-      const values: Record<string, number> = {};
+    rowsNominal.value = Object.values(asnafMap)
+      .map((data: any) => {
+        let totalAsnaf = 0;
+        const valuesAsnaf: Record<string, number> = {};
 
-      months.forEach((m) => {
-        const val = data.valuesNominal[m.key] || 0;
-        total += val;
-        values[m.key] = val;
-      });
+        const kegiatanArray = Object.values(data.kegiatan).map((k: any) => {
+          let totalKegiatan = 0;
+          const valuesKegiatan: Record<string, number> = {};
 
-      return {
-        asnaf: data.asnaf,
-        kode: data.kode,
-        kegiatan_id: data.kegiatan_id,
-        values,
-        total,
-      };
-    });
+          months.forEach((m) => {
+            const val = k.valuesNominal[m.key] || 0;
+            totalKegiatan += val;
+            valuesKegiatan[m.key] = val;
 
-    // Build rows untuk tabel penerima
-    rowsPenerima.value = Object.entries(kegiatanMap).map(([key, data]) => {
-      let total = 0;
-      const values: Record<string, number> = {};
+            if (!valuesAsnaf[m.key]) {
+              valuesAsnaf[m.key] = 0;
+            }
+            valuesAsnaf[m.key] += val;
+          });
 
-      months.forEach((m) => {
-        const val = data.valuesPenerima[m.key] || 0;
-        total += val;
-        values[m.key] = val;
-      });
+          totalAsnaf += totalKegiatan;
 
-      return {
-        asnaf: data.asnaf,
-        kode: data.kode,
-        kegiatan_id: data.kegiatan_id,
-        values,
-        total,
-      };
-    });
+          return {
+            kode: k.kode,
+            kegiatan_id: k.kegiatan_id,
+            values: valuesKegiatan,
+            total: totalKegiatan,
+          };
+        });
 
-    console.log('✅ Data berhasil diproses:', {
-      nominal: rowsNominal.value.length,
-      penerima: rowsPenerima.value.length,
-    });
+        return {
+          asnaf_id: data.asnaf_id,
+          asnaf: data.asnaf,
+          kegiatan: kegiatanArray,
+          values: valuesAsnaf,
+          total: totalAsnaf,
+        };
+      })
+      .sort((a, b) => a.asnaf.localeCompare(b.asnaf, 'id'));
+
+    console.log('✅ Data berhasil diproses. Total asnaf:', rowsNominal.value.length);
   } catch (e: any) {
     console.error('❌ Error fetching data:', e);
     displayNotification(e.response?.data?.message || 'Gagal memuat data', 'error');
   } finally {
-    isLoading.value = false;
+    isTableLoading.value = false;
   }
-}
-
-// ==================== PDF UTILS ====================
-function fixOklchColors(element: HTMLElement) {
-  const all = element.querySelectorAll('*');
-  all.forEach((el) => {
-    const htmlEl = el as HTMLElement;
-    const style = window.getComputedStyle(htmlEl);
-
-    if (style.color.includes('oklch')) htmlEl.style.color = '#000000';
-    if (style.backgroundColor.includes('oklch')) htmlEl.style.backgroundColor = '#ffffff';
-    if (style.borderColor.includes('oklch')) htmlEl.style.borderColor = '#d1d5db';
-  });
 }
 
 // ==================== DOWNLOAD PDF ====================
 async function downloadPDF() {
   if (isDownloading.value) return;
-  if (rowsNominal.value.length === 0) {
+  if (filteredRows.value.length === 0) {
     displayNotification('Tidak ada data untuk diunduh', 'error');
     return;
   }
@@ -183,78 +212,134 @@ async function downloadPDF() {
   isDownloading.value = true;
 
   try {
-    const content = document.getElementById('rekap-pdf');
-    if (!content) {
-      displayNotification('Konten tidak ditemukan', 'error');
-      return;
-    }
-
-    // Simpan state original
-    const originalOverflow = document.body.style.overflow;
-    const originalWidth = content.style.width;
-    const originalMaxWidth = content.style.maxWidth;
-
-    // Force konten jadi full width & visible
-    document.body.style.overflow = 'visible';
-    content.style.width = 'max-content';
-    content.style.maxWidth = 'none';
-
-    // Fix warna oklch
-    fixOklchColors(content);
-
-    // Tunggu layout settle
-    await new Promise((resolve) => setTimeout(resolve, 150));
-
-    // Capture ke canvas
-    const canvas = await html2canvas(content, {
-      scale: 2,
-      useCORS: true,
-      logging: false,
-      backgroundColor: '#ffffff',
-      width: content.scrollWidth,
-      height: content.scrollHeight,
-      windowWidth: content.scrollWidth,
-      windowHeight: content.scrollHeight,
-    });
-
-    // Restore style
-    document.body.style.overflow = originalOverflow;
-    content.style.width = originalWidth;
-    content.style.maxWidth = originalMaxWidth;
-
-    const imgData = canvas.toDataURL('image/png');
-
-    // Buat PDF A4 Landscape
-    const pdf = new jsPDF({
+    const doc = new jsPDF({
       orientation: 'landscape',
       unit: 'mm',
       format: 'a4',
-      compress: true,
     });
 
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
+    // Header
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.text('REKAP PENYALURAN PER KODE ASNAF', doc.internal.pageSize.getWidth() / 2, 15, {
+      align: 'center',
+    });
 
-    // Convert px to mm
-    const imgWidthMM = (canvas.width * 25.4) / 96;
-    const imgHeightMM = (canvas.height * 25.4) / 96;
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Tahun: ${selectedYear.value}`, doc.internal.pageSize.getWidth() / 2, 22, {
+      align: 'center',
+    });
 
-    // Scale untuk fit ke lebar A4
-    const scale = pdfWidth / imgWidthMM;
-    const scaledHeight = imgHeightMM * scale;
+    // Prepare table data
+    const tableHead = [
+      [
+        { content: 'NO', rowSpan: 2, styles: { halign: 'center', valign: 'middle' } },
+        { content: 'ASNAF', rowSpan: 2, styles: { halign: 'center', valign: 'middle' } },
+        { content: 'KODE', rowSpan: 2, styles: { halign: 'center', valign: 'middle' } },
+        { content: 'BULAN', colSpan: 12, styles: { halign: 'center' } },
+        { content: 'JUMLAH', rowSpan: 2, styles: { halign: 'center', valign: 'middle' } },
+      ],
+      [...months.map((m) => ({ content: m.label, styles: { halign: 'center' } }))],
+    ];
 
-    // Split ke multiple pages jika perlu
-    let yPosition = 0;
-    while (yPosition < scaledHeight) {
-      if (yPosition > 0) pdf.addPage();
+    const tableBody: any[] = [];
+    let rowNumber = 1;
 
-      pdf.addImage(imgData, 'PNG', 0, -yPosition, pdfWidth, scaledHeight, '', 'FAST');
+    filteredRows.value.forEach((row) => {
+      const firstKegiatan = row.kegiatan[0];
+      const firstRow = [
+        {
+          content: rowNumber.toString(),
+          rowSpan: row.kegiatan.length,
+          styles: { halign: 'center', valign: 'middle' },
+        },
+        { content: row.asnaf, rowSpan: row.kegiatan.length, styles: { valign: 'middle' } },
+        { content: firstKegiatan?.kode || '-', styles: { halign: 'center' } },
+        ...months.map((m) => ({
+          content: 'Rp ' + formatRupiahPlain(firstKegiatan?.values[m.key] || 0),
+          styles: { halign: 'right' },
+        })),
+        {
+          content: 'Rp ' + formatRupiahPlain(row.total),
+          rowSpan: row.kegiatan.length,
+          styles: { halign: 'right', valign: 'middle', fillColor: [243, 244, 246] },
+        },
+      ];
+      tableBody.push(firstRow);
 
-      yPosition += pdfHeight;
-    }
+      for (let i = 1; i < row.kegiatan.length; i++) {
+        const kegiatan = row.kegiatan[i];
+        const additionalRow = [
+          { content: kegiatan.kode, styles: { halign: 'center' } },
+          ...months.map((m) => ({
+            content: 'Rp ' + formatRupiahPlain(kegiatan.values[m.key] || 0),
+            styles: { halign: 'right' },
+          })),
+        ];
+        tableBody.push(additionalRow);
+      }
 
-    // Download
-    pdf.save(`Rekap_Penyaluran_Asnaf_${selectedYear.value}.pdf`);
+      rowNumber++;
+    });
+
+    // Grand Total Row
+    const grandTotalRow = [
+      {
+        content: 'TOTAL KESELURUHAN',
+        colSpan: 3,
+        styles: { halign: 'center', fontStyle: 'bold', fillColor: [243, 244, 246] },
+      },
+      ...months.map((m) => ({
+        content: 'Rp ' + formatRupiahPlain(calculateGrandTotalBulan(m.key)),
+        styles: { halign: 'right', fontStyle: 'bold', fillColor: [243, 244, 246] },
+      })),
+      {
+        content: 'Rp ' + formatRupiahPlain(calculateGrandTotal()),
+        styles: { halign: 'right', fontStyle: 'bold', fillColor: [243, 244, 246] },
+      },
+    ];
+    tableBody.push(grandTotalRow);
+
+    // Generate table using autoTable
+    autoTable(doc, {
+      head: tableHead,
+      body: tableBody,
+      startY: 28,
+      theme: 'grid',
+      styles: {
+        fontSize: 7,
+        cellPadding: 2,
+        lineColor: [200, 200, 200],
+        lineWidth: 0.1,
+      },
+      headStyles: {
+        fillColor: [249, 250, 251],
+        textColor: [55, 65, 81],
+        fontStyle: 'bold',
+        halign: 'center',
+      },
+      columnStyles: {
+        0: { cellWidth: 10 },
+        1: { cellWidth: 30 },
+        2: { cellWidth: 15 },
+        16: { cellWidth: 25 },
+      },
+      didDrawPage: (data: any) => {
+        // Footer
+        const pageCount = doc.internal.pages.length - 1;
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.text(
+          `Halaman ${data.pageNumber} dari ${pageCount}`,
+          doc.internal.pageSize.getWidth() / 2,
+          doc.internal.pageSize.getHeight() - 10,
+          { align: 'center' },
+        );
+      },
+    });
+
+    doc.save(`Rekap_Penyaluran_Asnaf_${selectedYear.value}.pdf`);
     displayNotification('PDF berhasil diunduh', 'success');
   } catch (error: any) {
     console.error('❌ Error generating PDF:', error);
@@ -270,70 +355,200 @@ watch(selectedYear, fetchData);
 </script>
 
 <template>
-  <div class="px-6 py-0 space-y-8">
-    <!-- ==================== HEADER ==================== -->
-    <div class="flex items-end justify-between gap-4 mb-0">
-      <BaseButton @click="downloadPDF" variant="primary" type="button">
-        <font-awesome-icon icon="fa-solid fa-download" class="mr-2" />
-        Download PDF
-      </BaseButton>
-      <div class="w-48">
-        <SelectField label="Tahun" v-model="selectedYear" :options="years" />
+  <div class="mx-auto p-4">
+    <LoadingSpinner v-if="isLoading" label="Memuat halaman..." />
+    <div v-else class="space-y-4">
+      <!-- Header Controls -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <BaseButton @click="downloadPDF" variant="primary" :loading="isDownloading" type="button">
+          <font-awesome-icon icon="fa-solid fa-download" class="mr-2" />
+          Download PDF
+        </BaseButton>
+
+        <!-- Filters -->
+        <div class="flex flex-col sm:flex-row gap-3">
+          <!-- Search -->
+          <div class="flex items-center">
+            <label
+              for="search-asnaf"
+              class="mr-2 text-sm font-medium text-gray-600 whitespace-nowrap"
+            >
+              Cari Asnaf
+            </label>
+            <input
+              id="search-asnaf"
+              type="text"
+              v-model="searchAsnaf"
+              placeholder="Nama asnaf..."
+              class="w-full sm:w-64 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:border-green-900 focus:ring-2 focus:ring-green-900 transition"
+            />
+          </div>
+
+          <!-- Year Filter -->
+          <div class="flex items-center">
+            <label
+              for="year-filter"
+              class="mr-2 text-sm font-medium text-gray-600 whitespace-nowrap"
+            >
+              Tahun
+            </label>
+            <select
+              id="year-filter"
+              v-model="selectedYear"
+              class="w-full sm:w-48 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:border-green-900 focus:ring-2 focus:ring-green-900 transition"
+            >
+              <option v-for="year in years" :key="year.id" :value="year.id">
+                {{ year.name }}
+              </option>
+            </select>
+          </div>
+        </div>
       </div>
-    </div>
 
-    <!-- ==================== TABLE ==================== -->
-    <div class="mt-0">
-      <div id="rekap-pdf" class="overflow-x-auto bg-white p-4 rounded-lg shadow-sm">
-        <SkeletonTable v-if="isLoading" :columns="months.length + 3" :rows="6" />
+      <!-- Info Message -->
+      <div
+        v-if="filteredRows.length === 0 && !isTableLoading"
+        class="bg-yellow-50 border-l-4 border-yellow-400 p-4"
+      >
+        <p class="text-sm text-yellow-700">
+          {{
+            searchAsnaf
+              ? `Asnaf "${searchAsnaf}" tidak ditemukan`
+              : 'Rekap Penyaluran Per Kode Asnaf Tidak Ditemukan'
+          }}
+        </p>
+      </div>
 
-        <table
-          v-else
-          class="min-w-full table-auto border-collapse bg-white shadow-md rounded-xl overflow-hidden text-sm"
-        >
-          <!-- TABLE HEAD -->
-          <thead class="bg-gray-50 text-gray-700 text-center border-b border-gray-300">
-            <tr>
-              <th class="px-4 py-2 border border-gray-300 font-medium">ASNAF</th>
-              <th class="px-4 py-2 border border-gray-300 font-medium">KODE</th>
+      <!-- Table -->
+      <div class="overflow-x-auto rounded-xl border border-gray-200 shadow">
+        <SkeletonTable v-if="isTableLoading" :columns="15" :rows="10" />
+        <table v-else class="w-full border-collapse bg-white text-sm">
+          <!-- Header -->
+          <thead class="text-gray-700 text-center border-b border-gray-300">
+            <tr class="bg-gray-50 sticky top-0 z-20">
+              <th
+                rowspan="2"
+                class="w-[5%] px-4 py-3 font-medium border-r border-gray-300 sticky left-0 bg-gray-50 z-30"
+              >
+                NO
+              </th>
+              <th
+                rowspan="2"
+                class="w-[15%] px-4 py-3 font-medium border-r border-gray-300 sticky left-[60px] bg-gray-50 z-30"
+              >
+                ASNAF
+              </th>
+              <th
+                rowspan="2"
+                class="w-[10%] px-4 py-3 font-medium border-r border-gray-300 sticky left-[220px] bg-gray-50 z-30"
+              >
+                KODE
+              </th>
+              <th :colspan="months.length" class="px-4 py-3 font-medium border border-gray-300">
+                BULAN
+              </th>
+              <th rowspan="2" class="px-4 py-3 font-medium bg-gray-100 min-w-[120px]">JUMLAH</th>
+            </tr>
+            <tr class="bg-gray-50 sticky top-[48px] z-10">
               <th
                 v-for="m in months"
                 :key="m.key"
-                class="px-4 py-2 border border-gray-300 font-medium"
+                class="px-4 py-3 font-medium border-r border-gray-300 min-w-[100px]"
               >
                 {{ m.label }}
               </th>
-              <th class="px-4 py-2 border border-gray-300 font-medium">JUMLAH</th>
             </tr>
           </thead>
 
-          <!-- TABLE BODY -->
-          <tbody v-if="rowsNominal.length > 0">
-            <tr
-              v-for="r in rowsNominal"
-              :key="`${r.asnaf}_${r.kegiatan_id}`"
-              class="even:bg-gray-50 hover:bg-gray-100 transition-colors"
-            >
-              <td class="px-4 py-2 text-left border border-gray-200">{{ r.asnaf }}</td>
-              <td class="px-4 py-2 text-left border border-gray-200">{{ r.kode }}</td>
+          <!-- Body -->
+          <tbody v-if="filteredRows.length > 0">
+            <template v-for="(row, index) in filteredRows" :key="`asnaf_${row.asnaf_id}`">
+              <!-- Baris pertama untuk kegiatan pertama -->
+              <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                <td
+                  :rowspan="row.kegiatan.length"
+                  class="px-4 py-3 font-normal text-center text-gray-800 border-r border-gray-300 sticky left-0 bg-white z-10"
+                >
+                  {{ index + 1 }}
+                </td>
+                <td
+                  :rowspan="row.kegiatan.length"
+                  class="px-4 py-3 font-normal text-gray-800 border-r border-gray-300 sticky left-[60px] bg-white z-10"
+                >
+                  {{ row.asnaf }}
+                </td>
+                <td
+                  class="px-4 py-3 font-normal text-center text-gray-800 border-r border-gray-300 sticky left-[220px] bg-white z-10"
+                >
+                  {{ row.kegiatan[0]?.kode || '-' }}
+                </td>
+                <td
+                  v-for="m in months"
+                  :key="`${row.asnaf_id}_0_${m.key}`"
+                  class="px-4 py-3 text-right border-r border-gray-100"
+                >
+                  {{ formatRupiah(row.kegiatan[0]?.values[m.key] || 0) }}
+                </td>
+                <td
+                  :rowspan="row.kegiatan.length"
+                  class="px-4 py-3 text-right font-normal bg-gray-100"
+                >
+                  {{ formatRupiah(row.total) }}
+                </td>
+              </tr>
+
+              <!-- Baris tambahan untuk kegiatan kedua dan seterusnya -->
+              <tr
+                v-for="(kegiatan, kIdx) in row.kegiatan.slice(1)"
+                :key="`${row.asnaf_id}_${kIdx + 1}`"
+                class="border-b border-gray-200 hover:bg-gray-50 transition-colors"
+              >
+                <td
+                  class="px-4 py-3 font-normal text-center text-gray-800 border-r border-gray-300 sticky left-[220px] bg-white z-10"
+                >
+                  {{ kegiatan.kode }}
+                </td>
+                <td
+                  v-for="m in months"
+                  :key="`${row.asnaf_id}_${kIdx + 1}_${m.key}`"
+                  class="px-4 py-3 text-right border-r border-gray-100"
+                >
+                  {{ formatRupiah(kegiatan.values[m.key] || 0) }}
+                </td>
+              </tr>
+            </template>
+
+            <!-- Grand Total -->
+            <tr class="border border-gray-200 bg-gray-100">
+              <td
+                colspan="3"
+                class="px-4 py-3 font-bold text-gray-800 border-r border-gray-200 sticky left-0 bg-gray-100 z-10"
+              >
+                TOTAL KESELURUHAN
+              </td>
               <td
                 v-for="m in months"
-                :key="m.key"
-                class="px-4 py-2 text-right tabular-nums whitespace-nowrap border border-gray-200"
+                :key="`total-${m.key}`"
+                class="px-4 py-3 text-right font-bold border-r border-gray-200"
               >
-                {{ $formatToRupiah(r.values[m.key]) }}
+                {{ formatRupiah(calculateGrandTotalBulan(m.key)) }}
               </td>
-              <td class="px-4 py-2 text-right font-bold text-indigo-600 border border-gray-200">
-                {{ $formatToRupiah(r.total) }}
+              <td class="px-4 py-3 text-right font-bold border-gray-200">
+                {{ formatRupiah(calculateGrandTotal()) }}
               </td>
             </tr>
           </tbody>
 
-          <!-- EMPTY STATE -->
+          <!-- Empty State -->
           <tbody v-else>
             <tr>
-              <td :colspan="months.length + 3" class="text-center py-8 text-gray-500">
-                📋 Rekap Penyaluran Per Kode Asnaf Tidak Ditemukan
+              <td colspan="16" class="px-6 py-8 text-center text-gray-500">
+                <font-awesome-icon
+                  icon="fa-solid fa-database"
+                  class="text-4xl mb-2 text-gray-400"
+                />
+                <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ada data</h3>
+                <p class="text-sm">Belum ada data rekap penyaluran.</p>
               </td>
             </tr>
           </tbody>
@@ -341,7 +556,7 @@ watch(selectedYear, fetchData);
       </div>
     </div>
 
-    <!-- ==================== NOTIFICATION ==================== -->
+    <!-- Notification -->
     <Notification
       :showNotification="showNotification"
       :notificationType="notificationType"
@@ -350,3 +565,36 @@ watch(selectedYear, fetchData);
     />
   </div>
 </template>
+
+<style scoped>
+.sticky {
+  position: sticky;
+  z-index: 10;
+}
+
+table {
+  border-spacing: 0;
+}
+
+.overflow-x-auto {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e0 #f7fafc;
+}
+
+.overflow-x-auto::-webkit-scrollbar {
+  height: 8px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: #f7fafc;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background: #a0aec0;
+}
+</style>

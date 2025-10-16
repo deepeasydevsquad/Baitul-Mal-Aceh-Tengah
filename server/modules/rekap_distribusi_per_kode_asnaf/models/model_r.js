@@ -17,8 +17,6 @@ class Model_r {
   async list_rekap_distribusi_per_kode_asnaf() {
     try {
       const currentYear = moment().year();
-      const availableYears = [currentYear - 1, currentYear, currentYear + 1];
-
       const targetYear = this.req.query.year
         ? parseInt(this.req.query.year, 10)
         : currentYear;
@@ -34,137 +32,162 @@ class Model_r {
       const startDate = moment().year(targetYear).startOf("year");
       const endDate = moment().year(targetYear).endOf("year");
       const months = Array.from(
-        { length: endDate.diff(startDate, "months") + 1 },
+        { length: 12 },
         (_, k) => moment(startDate).add(k, "months")
       );
 
+      console.log("🧭 DEBUG START: Rekap distribusi per kode asnaf (ALL ASNAF)");
+      console.log("Tahun target:", targetYear);
+
+      // 🔥 STEP 1: Ambil SEMUA Asnaf dengan Kegiatannya
+      const allAsnaf = await Asnaf.findAll({
+        attributes: ["id", "name"],
+        include: [
+          {
+            model: Kegiatan,
+            attributes: ["id", "kode", "asnaf_id"],
+            required: false, // LEFT JOIN - tetap tampilkan asnaf meski tidak punya kegiatan
+          },
+        ],
+        order: [["name", "ASC"]],
+      });
+
+      console.log("📋 Total Asnaf di database:", allAsnaf.length);
+      console.log("📋 Daftar Asnaf:");
+      allAsnaf.forEach((a) => {
+        console.log(`   - ${a.name} (ID: ${a.id}) - Kegiatan: ${a.Kegiatans?.length || 0}`);
+      });
+
+      // 🔥 STEP 2: Ambil semua realisasi untuk tahun ini
+      const allRealisasi = await Realisasi_permohonan.findAll({
+        attributes: ["id", "nominal_realisasi", "createdAt"],
+        where: {
+          status_realisasi: "sudah_direalisasi",
+          createdAt: {
+            [Op.between]: [startDate.toDate(), endDate.toDate()],
+          },
+        },
+        include: [
+          {
+            model: Permohonan,
+            attributes: ["id", "member_id", "kegiatan_id"],
+            required: true,
+            include: [
+              {
+                model: Member,
+                attributes: ["id"],
+                required: true,
+              },
+            ],
+          },
+        ],
+      });
+
+      console.log(`📊 Total realisasi tahun ${targetYear}:`, allRealisasi.length);
+
+      // 🔥 STEP 3: Build Map Realisasi per Bulan & Kegiatan
+      const realisasiMap = {};
+
+      for (const r of allRealisasi) {
+        const kegiatanId = r.Permohonan?.kegiatan_id;
+        if (!kegiatanId) continue;
+
+        const monthKey = moment(r.createdAt).format("MM");
+        const mapKey = `${monthKey}_${kegiatanId}`;
+
+        if (!realisasiMap[mapKey]) {
+          realisasiMap[mapKey] = {
+            total_nominal: 0,
+            total_penerima: new Set(),
+          };
+        }
+
+        realisasiMap[mapKey].total_nominal += r.nominal_realisasi || 0;
+        if (r.Permohonan?.member_id) {
+          realisasiMap[mapKey].total_penerima.add(r.Permohonan.member_id);
+        }
+      }
+
+      console.log("🗺️ Total kombinasi bulan-kegiatan dengan realisasi:", Object.keys(realisasiMap).length);
+
+      // 🔥 STEP 4: Build Final Data - Semua Asnaf untuk setiap bulan
       const finalData = [];
 
-      console.log("🧭 DEBUG START: Rekap distribusi per kode asnaf");
-      console.log("Tahun target:", targetYear);
-      console.log(
-        "Rentang waktu:",
-        startDate.format("YYYY-MM-DD"),
-        "→",
-        endDate.format("YYYY-MM-DD")
-      );
-      console.log("Total bulan:", months.length);
-      console.log("==============================================");
-
       for (const m of months) {
-        const start = m.clone().startOf("month").toDate();
-        const end = m.clone().endOf("month").toDate();
+        const monthKey = m.format("MM");
+        const monthData = [];
 
-        console.log(`\n📅 Bulan: ${m.format("MMMM YYYY")}`);
-        console.log("Range tanggal:", start, "→", end);
+        console.log(`\n📅 Processing Bulan: ${m.format("MMMM YYYY")}`);
 
-        const realisasi = await Realisasi_permohonan.findAll({
-          attributes: ["id", "nominal_realisasi", "createdAt"],
-          where: {
-            status_realisasi: "sudah_direalisasi",
-            createdAt: { [Op.between]: [start, end] },
-          },
-          include: [
-            {
-              model: Permohonan,
-              attributes: ["id", "member_id", "kegiatan_id"],
-              include: [
-                { model: Member, attributes: ["id"] },
-                {
-                  model: Kegiatan,
-                  attributes: ["id", "asnaf_id", "kode"],
-                  include: [{ model: Asnaf, attributes: ["id", "name"] }],
-                },
-              ],
-            },
-          ],
-        });
-
-        console.log(`Jumlah data realisasi di bulan ini: ${realisasi.length}`);
-
-        // Kalau tidak ada data di bulan ini, skip ke bulan berikutnya
-        if (realisasi.length === 0) continue;
-
-        const rekap = {};
-
-        for (const r of realisasi) {
-          const asnafId = r.Permohonan?.Kegiatan?.Asnaf?.id;
-          const asnafName =
-            r.Permohonan?.Kegiatan?.Asnaf?.name || "Tidak Diketahui";
-          const kegiatanId = r.Permohonan?.Kegiatan?.id;
-          const kodeKegiatan = r.Permohonan?.Kegiatan?.kode || "-";
-
-          // 🔍 Debug relasi
-          console.log("➡️ Realisasi:", {
-            id: r.id,
-            nominal: r.nominal_realisasi,
-            kegiatan_id: kegiatanId,
-            asnaf_id: asnafId,
-            asnaf: asnafName,
-            kode: kodeKegiatan,
-          });
-
-          if (!asnafId || !kegiatanId) {
-            console.log("⚠️  Data dilewati karena asnaf/kegiatan null");
+        // Loop semua asnaf
+        for (const asnaf of allAsnaf) {
+          // Jika asnaf tidak punya kegiatan
+          if (!asnaf.Kegiatans || asnaf.Kegiatans.length === 0) {
+            monthData.push({
+              asnaf_id: asnaf.id,
+              asnaf: asnaf.name,
+              kegiatan_id: null,
+              kode: "-",
+              total_nominal: 0,
+              total_penerima: 0,
+              status: "belum_ada_kegiatan",
+            });
             continue;
           }
 
-          const key = `${asnafId}_${kegiatanId}`;
+          // Loop setiap kegiatan dari asnaf ini
+          for (const kegiatan of asnaf.Kegiatans) {
+            const mapKey = `${monthKey}_${kegiatan.id}`;
+            const realisasiData = realisasiMap[mapKey];
 
-          if (!rekap[key]) {
-            rekap[key] = {
-              asnaf_id: asnafId,
-              asnaf: asnafName,
-              kegiatan_id: kegiatanId,
-              kode: kodeKegiatan,
-              total_nominal: 0,
-              total_penerima: new Set(),
-            };
-          }
-
-          rekap[key].total_nominal += r.nominal_realisasi || 0;
-          if (r.Permohonan?.member_id) {
-            rekap[key].total_penerima.add(r.Permohonan.member_id);
+            monthData.push({
+              asnaf_id: asnaf.id,
+              asnaf: asnaf.name,
+              kegiatan_id: kegiatan.id,
+              kode: kegiatan.kode || "-",
+              total_nominal: realisasiData?.total_nominal || 0,
+              total_penerima: realisasiData?.total_penerima.size || 0,
+              status: realisasiData ? "sudah_direalisasi" : "belum_direalisasi",
+            });
           }
         }
 
-        const monthData = Object.values(rekap).map((item) => ({
-          asnaf_id: item.asnaf_id,
-          asnaf: item.asnaf,
-          kegiatan_id: item.kegiatan_id,
-          kode: item.kode,
-          total_nominal: item.total_nominal,
-          total_penerima: item.total_penerima.size,
-        }));
-
-        console.log("📊 Rekap bulan ini:", monthData.length, "asnaf ditemukan");
-        console.table(
-          monthData.map((x) => ({
-            Asnaf: x.asnaf,
-            Kode: x.kode,
-            Nominal: x.total_nominal,
-            Penerima: x.total_penerima,
-          }))
-        );
+        console.log(`   ✅ Total entries bulan ini: ${monthData.length}`);
+        console.log(`   💰 Yang sudah direalisasi: ${monthData.filter(x => x.status === "sudah_direalisasi").length}`);
+        console.log(`   ⏳ Yang belum direalisasi: ${monthData.filter(x => x.status === "belum_direalisasi").length}`);
 
         finalData.push({
           year: targetYear,
-          month: m.format("MM"),
+          month: monthKey,
           month_name: m.format("MMMM"),
           data: monthData,
         });
       }
 
+      // 🔥 Summary
+      const uniqueAsnaf = new Set();
+      const uniqueKegiatan = new Set();
+      let totalRealisasi = 0;
+      let totalBelumRealisasi = 0;
+
+      finalData.forEach((monthData) => {
+        monthData.data.forEach((item) => {
+          uniqueAsnaf.add(item.asnaf_id);
+          if (item.kegiatan_id) {
+            uniqueKegiatan.add(`${item.asnaf_id}_${item.kegiatan_id}`);
+          }
+          if (item.status === "sudah_direalisasi") totalRealisasi++;
+          else totalBelumRealisasi++;
+        });
+      });
+
+      console.log("\n==============================================");
+      console.log("✅ Rekap Selesai:");
+      console.log("   - Total Asnaf: ", uniqueAsnaf.size);
+      console.log("   - Total Kegiatan:", uniqueKegiatan.size);
+      console.log("   - Sudah Direalisasi:", totalRealisasi);
+      console.log("   - Belum Direalisasi:", totalBelumRealisasi);
       console.log("==============================================");
-      console.log(
-        "✅ Debug Selesai. Total bulan dengan data:",
-        finalData.length
-      );
-      console.log(
-        "📦 Total asnaf unik (gabungan semua bulan):",
-        [...new Set(finalData.flatMap((f) => f.data.map((x) => x.asnaf_id)))]
-          .length
-      );
 
       return {
         success: true,
