@@ -1,51 +1,68 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, watch, nextTick } from 'vue'
-import { getActiveRunningText } from '@/service/running_text'
+import { ref, onMounted, computed, watch, nextTick } from 'vue';
+import { getActiveRunningText, getSpeedSetting } from '@/service/running_text';
 
 // --- State Management ---
 const combinedActiveText = ref(
   'SELAMAT DATANG DI APLIKASI MUSTAHIK DAN MUZAKKI BAITUL MAL KABUPATEN ACEH TENGAH',
-)
-const isLoading = ref(true)
+);
+const isLoading = ref(true);
+const speed = ref(80);
 
 // Ref untuk elemen teks yang akan dianimasikan
-const marqueeTextRef = ref<HTMLElement | null>(null)
+const marqueeTextRef = ref<HTMLElement | null>(null);
 
 // State untuk kalkulasi animasi
-const textWidth = ref(0)
-const containerWidth = ref(0)
-const animationDuration = ref(0)
+const textWidth = ref(0);
+const containerWidth = ref(0);
+const animationDuration = ref(0);
 
 const fetchData = async () => {
   try {
-    isLoading.value = true
-    const response = await getActiveRunningText()
-    const activeTexts = response.data
+    isLoading.value = true;
+    const response = await getActiveRunningText();
+    const activeTexts = response.data;
 
     if (activeTexts && activeTexts.length > 0) {
-      combinedActiveText.value = activeTexts.map((text: any) => text.content).join('   |||   ')
+      combinedActiveText.value = activeTexts.map((text: any) => text.content).join('   |||   ');
     } else {
-      combinedActiveText.value = 'Tidak ada informasi untuk ditampilkan saat ini.'
+      combinedActiveText.value = 'Tidak ada informasi untuk ditampilkan saat ini.';
     }
   } catch (error) {
-    console.error('Gagal mengambil data running text:', error)
-    combinedActiveText.value = 'Gagal memuat informasi.'
+    console.error('Gagal mengambil data running text:', error);
+    combinedActiveText.value = 'Gagal memuat informasi.';
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
-}
+};
+
+const fetchSpeedSetting = async () => {
+  try {
+    const response = await getSpeedSetting();
+    speed.value = response.data.speed;
+    console.log('[Footer.vue] Speed loaded:', speed.value);
+  } catch (error) {
+    console.error('Gagal mengambil pengaturan kecepatan:', error);
+    speed.value = 80;
+  }
+};
 
 const updateMarqueeParameters = () => {
   if (marqueeTextRef.value && marqueeTextRef.value.parentElement) {
-    const container = marqueeTextRef.value.parentElement
-    textWidth.value = marqueeTextRef.value.scrollWidth
-    containerWidth.value = container.offsetWidth
+    const container = marqueeTextRef.value.parentElement;
+    textWidth.value = marqueeTextRef.value.scrollWidth;
+    containerWidth.value = container.offsetWidth;
 
-    const speed = 80
-    const distance = textWidth.value + containerWidth.value
-    animationDuration.value = distance / speed / 0.99
+    const distance = textWidth.value + containerWidth.value;
+    animationDuration.value = distance / speed.value / 0.99;
+
+    console.log('[Footer.vue] Updated animation parameters:', {
+      speed: speed.value,
+      distance,
+      duration: animationDuration.value,
+    });
   }
-}
+};
 
 const marqueeStyle = computed(() => {
   return {
@@ -53,30 +70,35 @@ const marqueeStyle = computed(() => {
     '--text-width': `${textWidth.value}px`,
     '--animation-duration': `${animationDuration.value}s`,
     animation: `scroll-and-pause var(--animation-duration) linear infinite`,
-  }
-})
+  };
+});
 
-onMounted(() => {
-  fetchData()
+onMounted(async () => {
+  await Promise.all([fetchData(), fetchSpeedSetting()]);
+
   if (marqueeTextRef.value && marqueeTextRef.value.parentElement) {
     const resizeObserver = new ResizeObserver(() => {
-      updateMarqueeParameters()
-    })
-    resizeObserver.observe(marqueeTextRef.value.parentElement)
+      updateMarqueeParameters();
+    });
+    resizeObserver.observe(marqueeTextRef.value.parentElement);
   }
-})
 
-watch([combinedActiveText, isLoading], async () => {
-  await nextTick()
+  // Polling untuk update speed setiap 30 detik
+  setInterval(async () => {
+    await fetchSpeedSetting();
+  }, 30000);
+});
+
+watch([combinedActiveText, isLoading, speed], async () => {
+  await nextTick();
 
   requestAnimationFrame(() => {
-    updateMarqueeParameters()
-  })
-})
+    updateMarqueeParameters();
+  });
+});
 </script>
 
 <template>
-
   <div
     class="w-full h-24 py-3.5 bg-green-900 border-t-2 border-b-2 border-yellow-400 flex items-center overflow-hidden"
   >

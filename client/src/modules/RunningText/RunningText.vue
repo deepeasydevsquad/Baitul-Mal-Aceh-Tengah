@@ -9,6 +9,8 @@ import {
   deleteRunningText,
   toggleRunningTextStatus,
   updateRunningTextOrder,
+  getSpeedSetting,
+  updateSpeedSetting,
 } from '@/service/running_text';
 
 import DeleteIcon from '@/components/Icons/DeleteIcon.vue';
@@ -25,6 +27,7 @@ import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
 import FormAdd from './Widgets/FormAdd.vue';
 import FormEdit from './Widgets/FormEdit.vue';
+import FormSpeedSettings from './Widgets/FormSpeedSettings.vue';
 
 // Composable
 import { usePagination } from '@/composables/usePaginations';
@@ -60,6 +63,10 @@ interface RunningText {
 
 const dataRunningText = ref<RunningText[]>([]);
 const editData = ref<RunningText | null>(null);
+
+// Speed settings
+const currentSpeed = ref(80);
+const isModalSpeedOpen = ref(false);
 
 // Computed properties
 const activeTexts = computed({
@@ -98,8 +105,19 @@ async function fetchData() {
   }
 }
 
+// Function: fetch speed setting
+async function fetchSpeedSetting() {
+  try {
+    const response = await getSpeedSetting();
+    currentSpeed.value = response.data.speed;
+  } catch (error: any) {
+    console.error('Error fetching speed setting:', error);
+  }
+}
+
 onMounted(async () => {
   await fetchData();
+  await fetchSpeedSetting();
 });
 
 // Function: handler untuk menambahkan teks
@@ -197,6 +215,28 @@ const updateOrder = async (orderIds: number[]) => {
   }
 };
 
+// Function: handler untuk update speed
+const handleSpeedUpdate = async (speed: number) => {
+  try {
+    console.log('[RunningText.vue] Updating speed to:', speed);
+
+    await updateSpeedSetting(speed);
+    currentSpeed.value = speed;
+
+    isModalSpeedOpen.value = false;
+
+    displayNotification('Kecepatan running text berhasil diperbarui', 'success');
+  } catch (error: any) {
+    console.error('[RunningText.vue] Error updating speed:', error);
+
+    isModalSpeedOpen.value = false;
+
+    const errorMessage =
+      error.response?.data?.message || 'Gagal memperbarui kecepatan. Silakan coba lagi.';
+    displayNotification(errorMessage, 'error');
+  }
+};
+
 // Modal functions
 const openModalAdd = () => {
   console.log('[RunningText.vue] Opening modal for adding new text');
@@ -207,6 +247,11 @@ const openModalEdit = (runningText: RunningText) => {
   console.log('[RunningText.vue] Opening modal for editing text:', runningText);
   editData.value = { ...runningText };
   isModalEditOpen.value = true;
+};
+
+const openModalSpeed = () => {
+  console.log('[RunningText.vue] Opening modal for speed settings');
+  isModalSpeedOpen.value = true;
 };
 
 // Function: handler untuk menghapus
@@ -251,15 +296,28 @@ const handleEdit = (runningText: RunningText) => {
 <template>
   <div class="mx-auto px-4">
     <div class="flex justify-between items-center mb-6">
-      <BaseButton
-        @click="openModalAdd()"
-        variant="primary"
-        :loading="isModalAddOpen || isModalEditOpen"
-        type="button"
-      >
-        <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" />
-        Tambahkan Teks</BaseButton
-      >
+      <div class="flex gap-2">
+        <BaseButton
+          @click="openModalAdd()"
+          variant="primary"
+          :loading="isModalAddOpen || isModalEditOpen"
+          type="button"
+        >
+          <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" />
+          Tambahkan Teks
+        </BaseButton>
+
+        <!-- Speed Settings Button -->
+        <BaseButton
+          @click="openModalSpeed()"
+          variant="secondary"
+          type="button"
+          title="Pengaturan Kecepatan"
+        >
+          <font-awesome-icon icon="fa-solid fa-gear" class="text-lg" />
+        </BaseButton>
+      </div>
+
       <div class="flex items-center">
         <label for="search" class="mr-2 text-sm font-medium text-gray-600">Cari</label>
         <input
@@ -291,7 +349,7 @@ const handleEdit = (runningText: RunningText) => {
               :key="data.id"
               class="hover:bg-gray-50 transition-colors"
             >
-              <td class="px-6 py-4 text-center font-medium text-gray-800 whitespace-nowrap">
+              <td class="px-6 py-4 text-left font-medium text-gray-800 whitespace-nowrap">
                 <p
                   class="text-gray-900 break-words whitespace-normal leading-relaxed max-w-[600px] line-clamp-4"
                 >
@@ -308,7 +366,7 @@ const handleEdit = (runningText: RunningText) => {
                   {{ data.is_active ? 'Aktif' : 'Tidak Aktif' }}
                 </span>
               </td>
-              <td class="px-6 py-4 flex">
+              <td class="py-4 flex justify-center items-center">
                 <div class="flex justify-center items-center gap-2">
                   <ToggleSwitch
                     :id="data.id"
@@ -411,6 +469,14 @@ const handleEdit = (runningText: RunningText) => {
       :editData="editData"
       @close="isModalEditOpen = false"
       @save="handleSubmitEdit"
+    />
+
+    <!-- Modal Speed Settings -->
+    <FormSpeedSettings
+      :showModal="isModalSpeedOpen"
+      :currentSpeed="currentSpeed"
+      @close="isModalSpeedOpen = false"
+      @save="handleSpeedUpdate"
     />
 
     <!-- Confirmation -->

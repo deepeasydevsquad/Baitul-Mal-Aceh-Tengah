@@ -100,7 +100,21 @@ router.post(
   controllers.update_order_running_text
 );
 
-
 router.get("/running_text/active", controllers.getActiveRunningText);
+
+router.get("/running_text/speed", controllers.getSpeedSetting);
+
+router.post(
+  "/running_text/speed/update",
+  authenticateTokenAdministrator,
+  [
+    body("speed")
+      .notEmpty()
+      .withMessage("Kecepatan tidak boleh kosong")
+      .isInt({ min: 20, max: 200 })
+      .withMessage("Kecepatan harus antara 20-200 pixel per detik"),
+  ],
+  controllers.updateSpeedSetting
+);
 
 module.exports = router;

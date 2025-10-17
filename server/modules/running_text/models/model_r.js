@@ -58,6 +58,22 @@ class model_r {
       throw error;
     }
   }
+
+  async get_speed_setting() {
+    try {
+      // Ambil speed dari record pertama (atau record mana saja, karena speed seharusnya sama untuk semua)
+      const runningText = await Running_text.findOne();
+      
+      if (!runningText) {
+        return { speed: 80 }; // default speed
+      }
+      
+      return { speed: runningText.speed };
+    } catch (error) {
+      console.error("Error in model_r.get_speed_setting:", error);
+      throw error;
+    }
+  }
 }
 
 module.exports = model_r;
