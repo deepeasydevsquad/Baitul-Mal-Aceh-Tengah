@@ -4,6 +4,7 @@ import { ref, onMounted, computed } from 'vue';
 import VueApexCharts from 'vue3-apexcharts';
 import Notification from '@/components/Modal/Notification.vue';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
+import Logo from '@/components/Logo/Logo.vue';
 
 // Composable
 import { useNotification } from '@/composables/useNotification';
@@ -148,6 +149,7 @@ onMounted(fetchData);
 
 <template>
   <div class="mx-auto p-4">
+    <Logo />
     <LoadingSpinner v-if="isLoading" label="Memuat halaman..." />
 
     <div v-else class="space-y-4">
