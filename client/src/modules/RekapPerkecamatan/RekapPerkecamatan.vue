@@ -246,12 +246,12 @@ onMounted(async () => {
           <!-- Header -->
           <thead class="text-gray-700 text-center border-b border-gray-300">
             <tr class="bg-gray-50 sticky top-0 z-20">
-              <th
+              <!-- <th
                 rowspan="2"
                 class="w-[20%] px-4 py-3 font-medium border-r border-gray-300 sticky left-0 bg-gray-50 z-30"
               >
                 NO
-              </th>
+              </th> -->
               <th
                 rowspan="2"
                 class="w-[20%] px-4 py-3 font-medium border-r border-gray-300 sticky left-0 bg-gray-50 z-30"
@@ -279,15 +279,10 @@ onMounted(async () => {
           <tbody v-if="filteredKecamatanList.length > 0">
             <!-- Data per Kecamatan -->
             <tr
-              v-for="(item, index) in filteredKecamatanList"
+              v-for="item in filteredKecamatanList"
               :key="item.id"
               class="border-b border-gray-200 hover:bg-gray-50 transition-colors"
             >
-              <td
-                class="px-4 py-3 font-normal text-center text-gray-800 border-r border-gray-300 sticky left-0 bg-white z-10"
-              >
-                {{ index + 1 }}
-              </td>
               <td
                 class="px-4 py-3 font-normal text-gray-800 border-r border-gray-300 sticky left-0 bg-white z-10"
               >
