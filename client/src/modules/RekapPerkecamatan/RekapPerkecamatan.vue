@@ -346,7 +346,6 @@ onMounted(async () => {
             <tr class="border border-gray-200">
               <td
                 class="px-4 py-3 font-normal text-gray-800 border-r border-gray-200 sticky left-0 bg-gray-100 z-10"
-                colspan="2"
               >
                 TOTAL KESELURUHAN
               </td>
