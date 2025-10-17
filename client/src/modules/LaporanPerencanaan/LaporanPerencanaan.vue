@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch} from 'vue';
 import Notification from '@/components/Modal/Notification.vue';
 import Pagination from '@/components/Pagination/Pagination.vue';
 import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
@@ -50,6 +50,18 @@ interface asnaf {
 
 const datas = ref<asnaf[]>([]);
 const grandTotal = ref<string>('');
+const tahunOptions = ref<number[]>([2023, 2024, 2025 , 2026, 2027]);
+const selectedYear = ref<number | null>(new Date().getFullYear())
+
+const programOptions = ref<string[]>([
+  'Bantuan Sosial',
+  'Bantuan Pemberdayaan Ekonomi',
+  'Bantuan Kesehatan',
+  'Bantuan Sosial Keagamaan',
+  'Bantuan Pendidikan',
+  'Bantuan Infaq'
+])
+const selectedProgram = ref<string>('')
 
 // Helper Format
 const formatRupiah = (val: number) =>
@@ -66,6 +78,8 @@ async function fetchData() {
     const response = await get_laporan_perencanaan({
       perpage: perPage.value,
       pageNumber: currentPage.value,
+      tahun: selectedYear.value || undefined,
+      program: selectedProgram.value || undefined,
     });
     datas.value = response.data;
     totalRow.value = response.total;
@@ -78,6 +92,10 @@ async function fetchData() {
 }
 
 onMounted(fetchData);
+watch([selectedYear, selectedProgram], async () => {
+  currentPage.value = 1;
+  await fetchData();
+});
 
 const isDownloading = ref(false);
 
@@ -221,12 +239,40 @@ async function downloadPDF() {
 
 <template>
   <div class="mx-auto p-4">
+    <div class="flex flex-wrap items-end justify-between mb-4 gap-4">
+      <div class="flex flex-wrap gap-4">
+        <!-- Filter Tahun -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Tahun</label>
+          <select
+            v-model="selectedYear"
+            class="border border-gray-300 rounded-lg px-3 py-2 text-sm w-40"
+          >
+            <option :value="null">Semua</option>
+            <option v-for="tahun in tahunOptions" :key="tahun" :value="tahun">{{ tahun }}</option>
+          </select>
+        </div>
+
+        <!-- Filter Program -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Program</label>
+          <select
+            v-model="selectedProgram"
+            class="border border-gray-300 rounded-lg px-3 py-2 text-sm w-48"
+          >
+            <option value="">Semua</option>
+            <option v-for="prog in programOptions" :key="prog" :value="prog">{{ prog }}</option>
+          </select>
+        </div>
+      </div>
+
     <div class="flex items-end justify-between gap-4 mb-4">
       <BaseButton @click="downloadPDF" variant="primary" type="button" :disabled="isDownloading">
         <font-awesome-icon icon="fa-solid fa-download" class="mr-2" />
         {{ isDownloading ? 'Downloading...' : 'Download PDF' }}
       </BaseButton>
     </div>
+  </div>
     <LoadingSpinner v-if="isLoading" label="Memuat halaman..." />
     <div v-else class="space-y-4">
       <div class="overflow-hidden rounded-xl border border-gray-200 shadow">
