@@ -10,7 +10,10 @@ import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
 import { useNotification } from '@/composables/useNotification';
 
 // Service API
-import { daftar_rekap_distribusi_kecamatan } from '@/service/rekap_distribusi_kecamatan';
+import {
+  daftar_rekap_distribusi_kecamatan,
+  download_rekap_perkecamatan,
+} from '@/service/rekap_distribusi_kecamatan';
 
 // State: Loading
 const isLoading = ref(false);
@@ -172,6 +175,41 @@ async function fetchData() {
   }
 }
 
+// Function: Download Excel
+async function downloadExcel() {
+  try {
+    isLoading.value = true;
+
+    const params = selectedYear.value !== '0' ? { tahun: selectedYear.value } : { tahun: '0' };
+
+    const response = await download_rekap_perkecamatan(params);
+
+    const blob = new Blob([response.data], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+
+    const tahunText = selectedYear.value === '0' ? 'semua' : selectedYear.value;
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+    link.download = `laporan_rekap_penyaluran_per_kecamatan_tahun_${tahunText}_${timestamp}.xlsx`;
+
+    document.body.appendChild(link);
+    link.click();
+
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+
+    displayNotification('File Excel berhasil didownload', 'success');
+  } catch (error) {
+    console.error('Error downloading:', error);
+    displayNotification('Gagal mendownload laporan', 'error');
+  } finally {
+    isLoading.value = false;
+  }
+}
+
 // Lifecycle
 onMounted(async () => {
   generateYears();
@@ -184,7 +222,11 @@ onMounted(async () => {
     <!-- Header -->
     <LoadingSpinner v-if="isLoading" label="Memuat halaman..." />
     <div v-else class="space-y-4">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-end gap-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <BaseButton @click="downloadExcel()" variant="primary" :loading="isLoading" type="button">
+          <font-awesome-icon icon="fa-solid fa-download" class="mr-2" />
+          Download Rekap Distribusi Per Kecamatan
+        </BaseButton>
         <!-- Filters -->
         <div class="flex flex-col sm:flex-row gap-3">
           <div class="flex items-center">
