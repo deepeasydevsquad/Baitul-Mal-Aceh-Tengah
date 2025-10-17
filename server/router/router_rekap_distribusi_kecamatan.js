@@ -12,4 +12,10 @@ router.get(
   controller.fn_get_data_laporan_rekap_per_kecamatan
 );
 
+router.get(
+  "/rekap_perkecamatan/download",
+  authenticateTokenAdministrator,
+  controller.download_excel_laporan_rekap_penyaluran_per_kecamatan
+);
+
 module.exports = router;
