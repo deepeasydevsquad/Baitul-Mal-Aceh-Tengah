@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
 import Notification from '@/components/Modal/Notification.vue';
 import BaseButton from '@/components/Button/BaseButton.vue';
 import InputText from '@/components/Form/InputText.vue';
@@ -28,13 +28,40 @@ const emit = defineEmits<{
   (e: 'status', payload: { error_msg?: string; error?: boolean }): void;
 }>();
 
+// Menambahkan watch untuk mereset form saat modal ditutup
+watch(
+  () => props.isModalOpen,
+  (isOpen) => {
+    if (!isOpen) {
+      resetForm();
+    }
+  },
+);
+
 // State
 const isSubmitting = ref(false);
 const tahun = ref('');
+const bulan = ref('');
 const asnafList = ref<{ id: number; name: string; target_orang: string; target_rupiah: string }[]>(
   [],
 );
 const errors = ref<Record<string, string>>({});
+
+// Daftar Bulan
+const bulanOptions = [
+  { value: 1, label: 'Januari' },
+  { value: 2, label: 'Februari' },
+  { value: 3, label: 'Maret' },
+  { value: 4, label: 'April' },
+  { value: 5, label: 'Mei' },
+  { value: 6, label: 'Juni' },
+  { value: 7, label: 'Juli' },
+  { value: 8, label: 'Agustus' },
+  { value: 9, label: 'September' },
+  { value: 10, label: 'Oktober' },
+  { value: 11, label: 'November' },
+  { value: 12, label: 'Desember' },
+];
 
 // Tambahan untuk Infaq & Donasi
 const infaq = ref({ orang: '', rupiah: '' });
@@ -43,6 +70,7 @@ const donasi = ref({ orang: '', rupiah: '' });
 // Reset form
 const resetForm = () => {
   tahun.value = '';
+  bulan.value = '';
   infaq.value = { orang: '', rupiah: '' };
   donasi.value = { orang: '', rupiah: '' };
   asnafList.value = asnafList.value.map((a) => ({
@@ -78,6 +106,11 @@ const validateForm = () => {
 
   if (!tahun.value) {
     errors.value.tahun = 'Tahun tidak boleh kosong.';
+    isValid = false;
+  }
+
+  if (!bulan.value) {
+    errors.value.bulan = 'Bulan tidak boleh kosong.';
     isValid = false;
   }
 
@@ -125,9 +158,12 @@ const handleSubmit = async () => {
   if (!validateForm()) return;
 
   isSubmitting.value = true;
+  let hasError = false;
+
   try {
     const payload = {
       tahun: tahun.value,
+      bulan: parseInt(bulan.value),
       infaq: {
         target_orang: parseInt(infaq.value.orang) || 0,
         target_rupiah: parseInt(infaq.value.rupiah) || 0,
@@ -147,14 +183,16 @@ const handleSubmit = async () => {
 
     const response = await add_target(payload);
     emit('status', { error_msg: response.error_msg, error: response.error });
-    closeModal();
-    emit('close');
   } catch (error: any) {
+    hasError = true;
     const msg =
       error.response?.data?.error_msg || error.response?.data?.message || 'Terjadi kesalahan';
     displayNotification(msg, 'error');
   } finally {
     isSubmitting.value = false;
+    if (!hasError) {
+      closeModal();
+    }
   }
 };
 
@@ -207,16 +245,33 @@ onBeforeUnmount(() => document.removeEventListener('keydown', handleEscape));
               <font-awesome-icon icon="fa-solid fa-xmark" />
             </button>
           </div>
-          <!-- Tahun -->
-          <div class="max-w-full">
+
+          <!-- Tahun & Bulan -->
+          <div class="flex gap-4">
             <InputText
               v-model="tahun"
               label="Tahun"
+              type="number"
               placeholder="Masukkan tahun"
               :error="errors.tahun"
               class="w-32"
             />
+            <div class="flex flex-col">
+              <label class="text-sm font-medium text-gray-700 mb-1">Bulan</label>
+              <select
+                v-model="bulan"
+                class="w-40 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:border-green-900 focus:ring-2 focus:ring-green-900 transition"
+                :class="{ 'border-red-500': errors.bulan }"
+              >
+                <option value="">Pilih Bulan</option>
+                <option v-for="b in bulanOptions" :key="b.value" :value="b.value">
+                  {{ b.label }}
+                </option>
+              </select>
+              <span v-if="errors.bulan" class="text-xs text-red-500 mt-1">{{ errors.bulan }}</span>
+            </div>
           </div>
+
           <!-- Infaq -->
           <div class="flex gap-4">
             <InputText
@@ -235,6 +290,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', handleEscape));
               class="w-56"
             />
           </div>
+
           <!-- Donasi -->
           <div class="flex gap-4">
             <InputText
@@ -253,6 +309,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', handleEscape));
               class="w-56"
             />
           </div>
+
           <!-- Daftar Asnaf (Zakat) -->
           <div class="space-y-4">
             <table class="w-full rounded-lg">
@@ -310,7 +367,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', handleEscape));
           <BaseButton
             type="submit"
             variant="primary"
-            :disabled="!tahun.trim() || isSubmitting"
+            :disabled="!tahun || !bulan || isSubmitting"
             @click="handleSubmit"
           >
             <span v-if="isSubmitting">Menyimpan...</span>

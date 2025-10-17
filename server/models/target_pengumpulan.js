@@ -15,6 +15,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   Target_pengumpulan.init({
     tahun: DataTypes.INTEGER,
+    bulan: DataTypes.INTEGER,
     zakat: DataTypes.INTEGER,
     infaq: DataTypes.INTEGER,
     donasi: DataTypes.INTEGER
