@@ -30,8 +30,6 @@ class Model_r {
     // filter search kalau dikirim
     if (body.search && body.search !== "") {
       where.nama_kegiatan = { [Op.like]: `%${body.search}%` };
-      // NOTE: lu tadi pake `where.name`, padahal di attributes ga ada field `name`
-      // harusnya `fullname` atau field lain yg sesuai model lu
     }
 
     const include = [
@@ -49,6 +47,7 @@ class Model_r {
         "id",
         "kode",
         "nama_kegiatan",
+        "sumber_dana",
         "penerima",
         "jenis_penerima",
         "nominal_kegiatan",
@@ -69,6 +68,7 @@ class Model_r {
           id: row.id,
           kode: row.kode,
           nama_kegiatan: row.nama_kegiatan,
+          sumber_dana: row.sumber_dana,
           penerima: row.penerima,
           jenis_penerima: row.jenis_penerima,
           nominal_kegiatan: row.nominal_kegiatan,
@@ -94,9 +94,9 @@ class Model_r {
 
   async daftar_desa() {
     const body = this.req.body;
-    console.log("_____________Ddddddddddddddddddddd____________");
+    console.log("_____________Daftar Desa____________");
     console.log(body);
-    console.log("_____________Ddddddddddddddddddddd____________");
+    console.log("_____________Daftar Desa____________");
 
     try {
       const sql = await Desa.findAll({
@@ -111,7 +111,7 @@ class Model_r {
       }));
       return data;
     } catch (error) {
-      console.error("Gagal ambil daftar kostumer:", error);
+      console.error("Gagal ambil daftar desa:", error);
       return [];
     }
   }
@@ -126,7 +126,7 @@ class Model_r {
       }));
       return data;
     } catch (error) {
-      console.error("Gagal ambil daftar kostumer:", error);
+      console.error("Gagal ambil daftar kecamatan:", error);
       return [];
     }
   }

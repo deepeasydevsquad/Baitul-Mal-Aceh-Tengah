@@ -33,6 +33,12 @@ router.post(
       .trim()
       .notEmpty()
       .withMessage("nama tidak boleh kosong."),
+    body("sumber_dana")
+      .trim()
+      .notEmpty()
+      .withMessage("sumber dana tidak boleh kosong.")
+      .isIn(['zakat', 'infaq', 'operasional_apbk'])
+      .withMessage("sumber dana harus salah satu dari: zakat, infaq, operasional_apbk"),
     body("penerima")
       .trim()
       .notEmpty()
