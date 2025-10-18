@@ -25,7 +25,7 @@ module.exports = (sequelize, DataTypes) => {
       kesimpulan: DataTypes.TEXT,
       form_survey: DataTypes.STRING,
       berita_acara: DataTypes.STRING,
-      dokumentasi: DataTypes.STRING,
+      dokumentasi: DataTypes.TEXT,
       tanggal_penilaian: DataTypes.DATEONLY,
       nomor_ktp: DataTypes.STRING,
       tempat_lahir: DataTypes.STRING,

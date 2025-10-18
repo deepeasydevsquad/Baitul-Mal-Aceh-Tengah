@@ -38,7 +38,7 @@ module.exports = {
         type: Sequelize.STRING,
       },
       dokumentasi: {
-        type: Sequelize.STRING,
+        type: Sequelize.TEXT,
       },
       tanggal_penilaian: {
         type: Sequelize.DATEONLY,
