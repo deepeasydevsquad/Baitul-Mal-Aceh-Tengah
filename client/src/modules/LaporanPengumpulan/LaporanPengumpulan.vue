@@ -260,7 +260,6 @@ onMounted(fetchData);
 
 <template>
   <div class="mx-auto p-4">
-    <div class=""><Logo /></div>
     <LoadingSpinner v-if="isLoading" label="Memuat halaman..." />
 
     <div v-else class="space-y-4">
@@ -277,6 +276,7 @@ onMounted(fetchData);
             </option>
           </select>
         </div>
+        <Logo />
       </div>
 
       <!-- Ringkasan Cards -->

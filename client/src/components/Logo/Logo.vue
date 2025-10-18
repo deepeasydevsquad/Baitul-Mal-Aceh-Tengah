@@ -21,7 +21,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex items-center justify-end">
+  <div class="flex items-center justify-end ml-auto">
     <img
       v-if="logoUrl"
       :src="`${BASE_URL}/uploads/img/logos/${logoUrl}`"

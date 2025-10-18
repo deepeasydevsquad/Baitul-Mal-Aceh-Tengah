@@ -10,6 +10,8 @@ import DangerButton from '@/components/Button/DangerButton.vue';
 import Pagination from '@/components/Pagination/Pagination.vue';
 import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
 
+import Logo from '@/components/Logo/Logo.vue';
+
 // Composable
 import { useNotification } from '@/composables/useNotification';
 import { usePagination } from '@/composables/usePaginations';
@@ -76,12 +78,14 @@ const formatRupiah = (value: number) => {
 <template>
   <div class="p-6">
     <!-- Header -->
-    <h2 class="text-lg font-semibold flex items-center mb-2"></h2>
+    <!-- <h2 class="text-lg font-semibold flex items-center mb-2"></h2> -->
+    <Logo />
     <!-- Grid Content -->
-    <div v-if="data" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div v-if="data" class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
       <!-- Kiri -->
       <div class="space-y-6">
         <!-- Info Umum -->
+
         <div>
           <div class="bg-gray-200 px-4 py-2 border-t border-l border-r border-gray-300 font-medium">
             INFO UMUM

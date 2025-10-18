@@ -149,7 +149,6 @@ onMounted(fetchData);
 
 <template>
   <div class="mx-auto p-4">
-    <Logo />
     <LoadingSpinner v-if="isLoading" label="Memuat halaman..." />
 
     <div v-else class="space-y-4">
@@ -164,6 +163,7 @@ onMounted(fetchData);
         >
           <option v-for="t in tahunOptions" :key="t" :value="t">{{ t }}</option>
         </select>
+        <Logo />
       </div>
 
       <!-- Ringkasan total -->
