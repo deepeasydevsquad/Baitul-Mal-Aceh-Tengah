@@ -22,6 +22,8 @@ router.post(
       .isInt()
       .withMessage("Page Number Harus Angka"),
     body("search").optional().isString().withMessage("Search Harus String"),
+    body("tahun").optional().isInt().withMessage("Tahun harus angka"),
+    body("program").optional().isString().withMessage("Program harus string"),
   ],
   controllers.list_laporan_perencanaan
 );
