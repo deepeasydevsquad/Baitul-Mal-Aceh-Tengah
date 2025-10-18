@@ -1,6 +1,6 @@
 const express = require("express");
 const { body } = require("express-validator");
-const controllers = require("../modules/laporan_umum/controllers/index");
+const controllers = require("../modules/Laporan_Umum/controllers/index");
 const {
   authenticateTokenAdministrator,
 } = require("../middleware/authenticateToken");
