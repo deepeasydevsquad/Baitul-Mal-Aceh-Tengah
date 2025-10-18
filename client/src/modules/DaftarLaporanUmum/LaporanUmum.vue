@@ -4,7 +4,7 @@ import Notification from '@/components/Modal/Notification.vue';
 import BaseButton from '@/components/Button/BaseButton.vue';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-
+import Logo from '@/components/Logo/Logo.vue';
 import { useNotification } from '@/composables/useNotification';
 
 import { list } from '@/service/laporan_umum';
@@ -202,68 +202,29 @@ const getMonthName = (month: number) => {
 
 <template>
   <div class="p-6">
-    <!-- Header (hidden on print) -->
-    <h2 class="text-lg font-semibold flex items-center mb-4 no-print">Laporan Umum</h2>
-    
-    <!-- Filter dan Action Buttons (hidden on print) -->
-    <div class="mb-4 flex items-center gap-4 no-print">
-      <div class="flex items-center gap-2">
-        <label class="text-sm font-medium">Tahun:</label>
-        <select 
-          v-model="selectedYear" 
-          @change="handleFilterChange"
-          class="px-3 py-2 border border-gray-300 rounded-md"
-        >
-          <option v-for="year in yearOptions" :key="year" :value="year">{{ year }}</option>
-        </select>
-      </div>
+    <!-- Header -->
+    <!-- <h2 class="text-lg font-semibold flex items-center mb-2"></h2> -->
+    <Logo />
+    <!-- Grid Content -->
+    <div v-if="data" class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+      <!-- Kiri -->
+      <div class="space-y-6">
+        <!-- Info Umum -->
 
-      <div class="flex items-center gap-2">
-        <label class="text-sm font-medium">Bulan:</label>
-        <select 
-          v-model="selectedMonth" 
-          @change="handleFilterChange"
-          class="px-3 py-2 border border-gray-300 rounded-md"
-        >
-          <option v-for="month in monthOptions" :key="month.value" :value="month.value">
-            {{ month.label }}
-          </option>
-        </select>
-      </div>
-
-      <div class="ml-auto flex gap-2">
-        <BaseButton
-          @click="handleDownloadPDF"
-          variant="primary"
-          type="button"
-          :disabled="isDownloading || isLoading"
-        >
-          <font-awesome-icon
-            :icon="isDownloading ? 'fa-solid fa-spinner' : 'fa-solid fa-download'"
-            :class="{ 'animate-spin': isDownloading, 'mr-2': true }"
-          />
-          {{ isDownloading ? 'Mengunduh...' : 'Download PDF' }}
-        </BaseButton>
-      </div>
-    </div>
-
-
-    <!-- Grid Content - wrapped with id for PDF -->
-    <div id="laporan-content">
-      <!-- PDF Header (only visible when capturing) -->
-      <div class="pdf-header text-center mb-4" style="display: none;">
-        <h1 class="text-lg font-bold mb-1">Laporan Umum</h1>
-        <p class="text-xs">Tahun: {{ selectedYear }} &nbsp; Bulan: {{ getMonthName(selectedMonth) }}</p>
-      </div>
-
-      <!-- Content -->
-      <div v-if="data && !isLoading" class="grid grid-cols-1 md:grid-cols-2 gap-6 print-grid">
-        <!-- Kiri -->
-        <div class="space-y-6">
-          <!-- Info Umum -->
-          <div>
-            <div class="bg-gray-200 px-4 py-2 border-t border-l border-r border-gray-300 font-medium">
-              INFO UMUM
+        <div>
+          <div class="bg-gray-200 px-4 py-2 border-t border-l border-r border-gray-300 font-medium">
+            INFO UMUM
+          </div>
+          <div class="border border-t-0 border-gray-300 divide-y divide-gray-300">
+            <div class="grid grid-cols-[1fr_20px_1fr] px-4 py-2">
+              <span>Total Member</span>
+              <span>:</span>
+              <span>{{ data.info_umum.totalMember }} Orang</span>
+            </div>
+            <div class="grid grid-cols-[1fr_20px_1fr] px-4 py-2">
+              <span>Total Asnaf</span>
+              <span>:</span>
+              <span>{{ data.info_umum.totalAsnaf }} Asnaf</span>
             </div>
             <div class="border border-t-0 border-gray-300 divide-y divide-gray-300">
               <div class="grid grid-cols-[1fr_20px_1fr] px-4 py-2">

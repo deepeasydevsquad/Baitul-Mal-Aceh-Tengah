@@ -278,9 +278,9 @@ watch(selectedYear, fetchData);
 </script>
 
 <template>
-  <div class="px-6 py-0 space-y-8">
+  <div class="p-4 space-y-8">
     <!-- Filter Section -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-0">
       <!-- Kiri: Tombol Download -->
       <div class="flex items-center">
         <BaseButton
@@ -315,10 +315,9 @@ watch(selectedYear, fetchData);
       </div>
     </div>
 
-    <div id="tables-for-pdf" class="space-y-8">
+    <div id="tables-for-pdf" style="margin-top: 20px">
       <!-- Tabel Nominal Distribusi -->
       <div class="mt-0">
-        <h2 class="text-lg font-medium mb-3">Distribusi (Nominal Rupiah)</h2>
         <div class="overflow-x-auto rounded-xl border border-gray-200 shadow">
           <SkeletonTable v-if="isLoading" :columns="months.length + 2" :rows="5" />
           <table
@@ -326,10 +325,18 @@ watch(selectedYear, fetchData);
             class="min-w-full table-auto border-collapse bg-white shadow-md rounded-xl overflow-hidden text-sm"
           >
             <thead class="text-gray-700 text-center border-b border-gray-300">
+              <tr>
+                <th
+                  colspan="14"
+                  class="px-4 py-3 font-medium border border-gray-300 sticky left-0 bg-gray-200 z-30 text-left"
+                >
+                  <h2 class="text-lg font-bold">DISTRIBUSI (NOMINAL RUPIAH)</h2>
+                </th>
+              </tr>
               <tr class="bg-gray-50 sticky top-0 z-20">
                 <th
                   rowspan="2"
-                  class="w-[20%] px-4 py-3 font-medium border-r border-gray-300 sticky left-0 bg-gray-50 z-30"
+                  class="px-4 py-3 font-medium border-r border-gray-300 sticky left-0 bg-gray-50 z-30 min-w-[180px]"
                 >
                   ASNAF
                 </th>
@@ -339,26 +346,32 @@ watch(selectedYear, fetchData);
                 >
                   BULAN
                 </th>
-                <th rowspan="2" class="px-4 py-3 font-medium bg-gray-100 min-w-[120px]">JUMLAH</th>
+                <th
+                  rowspan="2"
+                  class="px-4 py-3 font-medium bg-gray-100 min-w-[120px] border border-gray-300"
+                >
+                  JUMLAH
+                </th>
               </tr>
 
               <tr class="bg-gray-50 sticky top-[40px] z-10">
                 <th
                   v-for="bulan in bulanNames"
                   :key="bulan"
-                  class="px-4 py-3 font-medium border-r border-gray-300 min-w-[100px]"
+                  class="px-4 py-3 font-medium border-r border-gray-300 min-w-[120px]"
                 >
                   {{ bulan }}
                 </th>
               </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-gray-100">
               <tr
                 v-for="(r, i) in rowsNominal"
                 :key="r.label"
                 class="even:bg-gray-50 hover:bg-indigo-50 transition-colors"
               >
-                <td class="px-4 py-3 text-left font-medium text-gray-700 sticky left-0 bg-inherit">
+                <!-- px-6 py-4 text-center font-medium text-gray-800 -->
+                <td class="px-6 py-4 text-left font-medium text-gray-700 sticky left-0 bg-inherit">
                   {{ r.label }}
                 </td>
                 <td
@@ -368,11 +381,39 @@ watch(selectedYear, fetchData);
                 >
                   {{ formatRupiah(r.values[m.key]) }}
                 </td>
-                <td class="px-4 py-3 text-right font-semibold bg-gray-100 whitespace-nowrap">
+                <td
+                  class="px-4 py-3 text-right font-semibold bg-gray-100 whitespace-nowrap italic text-yellow-500 border border-gray-300"
+                >
                   {{ formatRupiah(r.total) }}
                 </td>
               </tr>
             </tbody>
+            <tfoot>
+              <tr>
+                <td
+                  class="px-6 py-4 text-left font-bold text-gray-700 sticky left-0 bg-gray-100 border border-gray-300"
+                >
+                  Total
+                </td>
+                <td
+                  v-for="m in months"
+                  :key="m.key"
+                  class="px-4 py-3 text-right font-bold bg-gray-100 whitespace-nowrap italic text-yellow-500 border border-gray-300"
+                >
+                  {{
+                    formatRupiah(
+                      rowsNominal.reduce((acc, curr) => acc + (curr.values[m.key] || 0), 0),
+                    )
+                  }}
+                </td>
+
+                <td
+                  class="px-4 py-3 text-right font-bold bg-gray-100 whitespace-nowrap italic text-yellow-500 border border-gray-300"
+                >
+                  {{ formatRupiah(rowsNominal.reduce((acc, curr) => acc + (curr.total || 0), 0)) }}
+                </td>
+              </tr>
+            </tfoot>
           </table>
           <div v-else class="bg-white shadow-md rounded-xl p-12 text-center">
             <p class="text-gray-500 text-lg">Data laporan penyaluran tidak ditemukan</p>
@@ -381,8 +422,8 @@ watch(selectedYear, fetchData);
       </div>
 
       <!-- Tabel Jumlah Penerima -->
-      <div>
-        <h2 class="text-lg font-medium mb-3">Distribusi (Jumlah Penerima)</h2>
+      <div class="mt-10">
+        <!-- <h2 class="text-lg font-medium mb-3">Distribusi (Jumlah Penerima)</h2> -->
         <div class="overflow-x-auto rounded-xl border border-gray-200 shadow">
           <SkeletonTable v-if="isLoading" :columns="months.length + 2" :rows="5" />
           <table
@@ -390,10 +431,18 @@ watch(selectedYear, fetchData);
             class="min-w-full table-auto border-collapse bg-white shadow-md rounded-xl overflow-hidden text-sm"
           >
             <thead class="text-gray-700 text-center border-b border-gray-300">
+              <tr>
+                <th
+                  colspan="14"
+                  class="px-4 py-3 font-medium border border-gray-300 sticky left-0 bg-gray-200 z-30 text-left"
+                >
+                  <h2 class="text-lg font-bold">DISTRIBUSI (JUMLAH PENERIMA)</h2>
+                </th>
+              </tr>
               <tr class="bg-gray-50 sticky top-0 z-20">
                 <th
                   rowspan="2"
-                  class="w-[20%] px-4 py-3 font-medium border-r border-gray-300 sticky left-0 bg-gray-50 z-30"
+                  class="w-[20%] px-4 py-3 font-medium border-r border-gray-300 sticky left-0 bg-gray-50 z-30 min-w-[180px]"
                 >
                   ASNAF
                 </th>
@@ -416,23 +465,51 @@ watch(selectedYear, fetchData);
                 </th>
               </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-gray-100">
               <tr
                 v-for="(r, i) in rowsPenerima"
                 :key="r.label"
                 class="even:bg-gray-50 hover:bg-indigo-50 transition-colors"
               >
-                <td class="px-4 py-3 text-left font-medium text-gray-700 sticky left-0 bg-inherit">
+                <td class="px-6 py-4 text-left font-medium text-gray-700 sticky left-0 bg-inherit">
                   {{ r.label }}
                 </td>
-                <td v-for="m in months" :key="m.key" class="px-4 py-3 text-center tabular-nums">
+                <td
+                  v-for="m in months"
+                  :key="m.key"
+                  class="px-4 py-3 text-center tabular-nums min-w-[120px]"
+                >
                   {{ r.values[m.key] || '-' }}
                 </td>
-                <td class="px-4 py-3 text-center font-semibold bg-gray-100">
+                <td
+                  class="px-4 py-3 text-center font-semibold bg-gray-100 min-w-[120px] border border-gray-300"
+                >
                   {{ r.total }}
                 </td>
               </tr>
             </tbody>
+            <tfoot>
+              <tr>
+                <td
+                  class="px-6 py-4 text-left font-bold text-gray-700 sticky left-0 bg-gray-100 border border-gray-300"
+                >
+                  Total
+                </td>
+                <td
+                  v-for="m in months"
+                  :key="m.key"
+                  class="px-4 py-3 text-center font-bold bg-gray-100 whitespace-nowrap italic text-yellow-500 border border-gray-300"
+                >
+                  {{ rowsPenerima.reduce((acc, curr) => acc + (curr.values[m.key] || 0), 0) }}
+                </td>
+
+                <td
+                  class="px-4 py-3 text-center font-bold bg-gray-100 whitespace-nowrap italic text-yellow-500 border border-gray-300"
+                >
+                  {{ rowsPenerima.reduce((acc, curr) => acc + (curr.total || 0), 0) }}
+                </td>
+              </tr>
+            </tfoot>
           </table>
           <div v-else class="bg-white shadow-md rounded-xl p-12 text-center">
             <p class="text-gray-500 text-lg">Data laporan penyaluran tidak ditemukan</p>
