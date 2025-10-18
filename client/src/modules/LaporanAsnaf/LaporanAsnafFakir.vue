@@ -94,7 +94,7 @@ async function fetchData() {
 // Function: Download Excel
 async function downloadExcel() {
   try {
-    const response = await download_excel_asnaf(selectedTahun.value);
+    const response = await download_excel_asnaf(selectedTahun.value, 'Fakir');
 
     const blob = new Blob([response.data]);
     const url = window.URL.createObjectURL(blob);

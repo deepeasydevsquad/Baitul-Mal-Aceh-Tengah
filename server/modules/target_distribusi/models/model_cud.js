@@ -24,6 +24,12 @@ class Model_cud {
         return;
       }
 
+      if (!body.bulan) {
+        this.state = false;
+        this.message = "Bulan harus diisi";
+        return;
+      }
+
       const dataInsert = [];
 
       // --- Bulk insert untuk Zakat (dari daftar asnaf) ---
@@ -31,6 +37,7 @@ class Model_cud {
         body.targets.forEach((t) => {
           dataInsert.push({
             tahun: body.tahun,
+            bulan: body.bulan,
             tipe: "zakat",
             asnaf_id: t.asnaf_id,
             target_orang: t.target_orang || 0,
@@ -45,6 +52,7 @@ class Model_cud {
       if (body.infaq) {
         dataInsert.push({
           tahun: body.tahun,
+          bulan: body.bulan,
           tipe: "infaq",
           target_orang: body.infaq.target_orang || 0,
           target_rupiah: body.infaq.target_rupiah || 0,
@@ -57,6 +65,7 @@ class Model_cud {
       if (body.donasi) {
         dataInsert.push({
           tahun: body.tahun,
+          bulan: body.bulan,
           tipe: "donasi",
           target_orang: body.donasi.target_orang || 0,
           target_rupiah: body.donasi.target_rupiah || 0,
@@ -76,7 +85,9 @@ class Model_cud {
       });
 
       this.state = true;
-      this.message = `Berhasil menambahkan ${insert.length} target distribusi untuk tahun ${body.tahun}`;
+      this.message = `Berhasil menambahkan ${
+        insert.length
+      } target distribusi untuk ${this.getBulanName(body.bulan)} ${body.tahun}`;
     } catch (error) {
       console.error("Error in add method:", error);
       this.state = false;
@@ -96,6 +107,12 @@ class Model_cud {
         return;
       }
 
+      if (!body.bulan) {
+        this.state = false;
+        this.message = "Bulan harus diisi";
+        return;
+      }
+
       // --- Update zakat per asnaf ---
       if (body.targets && Array.isArray(body.targets)) {
         for (const t of body.targets) {
@@ -108,6 +125,7 @@ class Model_cud {
             {
               where: {
                 tahun: body.tahun,
+                bulan: body.bulan,
                 tipe: "zakat",
                 asnaf_id: t.asnaf_id,
               },
@@ -126,7 +144,7 @@ class Model_cud {
             updatedAt: myDate,
           },
           {
-            where: { tahun: body.tahun, tipe: "infaq" },
+            where: { tahun: body.tahun, bulan: body.bulan, tipe: "infaq" },
             transaction: this.t,
           }
         );
@@ -141,14 +159,16 @@ class Model_cud {
             updatedAt: myDate,
           },
           {
-            where: { tahun: body.tahun, tipe: "donasi" },
+            where: { tahun: body.tahun, bulan: body.bulan, tipe: "donasi" },
             transaction: this.t,
           }
         );
       }
 
       this.state = true;
-      this.message = `Berhasil update target distribusi tahun ${body.tahun}`;
+      this.message = `Berhasil update target distribusi ${this.getBulanName(
+        body.bulan
+      )} ${body.tahun}`;
     } catch (error) {
       console.error("Error in update method:", error);
       this.state = false;
@@ -168,23 +188,52 @@ class Model_cud {
         return;
       }
 
+      if (!body.bulan) {
+        this.state = false;
+        this.message =
+          "Bulan harus diisi untuk menghapus data target distribusi";
+        return;
+      }
+
       const deleted = await Target_distribusi.destroy({
-        where: { tahun: body.tahun },
+        where: { tahun: body.tahun, bulan: body.bulan },
         transaction: this.t,
       });
 
       if (deleted > 0) {
         this.state = true;
-        this.message = `Berhasil menghapus ${deleted} target distribusi untuk tahun ${body.tahun}`;
+        this.message = `Berhasil menghapus ${deleted} target distribusi untuk ${this.getBulanName(
+          body.bulan
+        )} ${body.tahun}`;
       } else {
         this.state = false;
-        this.message = `Tidak ada data target distribusi untuk tahun ${body.tahun}`;
+        this.message = `Tidak ada data target distribusi untuk ${this.getBulanName(
+          body.bulan
+        )} ${body.tahun}`;
       }
     } catch (error) {
       console.error("Error in delete method:", error);
       this.state = false;
       this.message = error.message;
     }
+  }
+
+  getBulanName(bulan) {
+    const namaBulan = [
+      "Januari",
+      "Februari",
+      "Maret",
+      "April",
+      "Mei",
+      "Juni",
+      "Juli",
+      "Agustus",
+      "September",
+      "Oktober",
+      "November",
+      "Desember",
+    ];
+    return namaBulan[parseInt(bulan) - 1] || bulan;
   }
 
   async response() {

@@ -63,19 +63,19 @@ module.exports = {
         },
         {
           name: "nama_jabatan1",
-          value: "ketua",
+          value: "Jetua",
           createdAt: new Date(),
           updatedAt: new Date(),
         },
         {
           name: "nama_jabatan2",
-          value: "sekretaris",
+          value: "Sekretaris",
           createdAt: new Date(),
           updatedAt: new Date(),
         },
         {
           name: "nama_jabatan3",
-          value: "bendahara",
+          value: "Bendahara",
           createdAt: new Date(),
           updatedAt: new Date(),
         },

@@ -7,10 +7,11 @@ const {
 
 const controllers = {};
 
-controllers.daftar_target_pengumpulan = async (req, res) => {
+controllers.list = async (req, res) => {
+  if (!(await handleValidationErrors(req, res))) return;
   try {
     const model_r = new Model_r(req);
-    const feedBack = await model_r.target_pengumpulan();
+    const feedBack = await model_r.list();
 
     res.status(200).json({
       error: false,
@@ -22,12 +23,12 @@ controllers.daftar_target_pengumpulan = async (req, res) => {
   }
 };
 
-controllers.add_target_pengumpulan = async (req, res) => {
+controllers.add = async (req, res) => {
   if (!(await handleValidationErrors(req, res))) return;
 
   try {
     const model_cud = new Model_cud(req);
-    await model_cud.add_target_pengumpulan();
+    await model_cud.add();
 
     if (await model_cud.response()) {
       res.status(200).json({
@@ -41,48 +42,32 @@ controllers.add_target_pengumpulan = async (req, res) => {
       });
     }
   } catch (error) {
-    if (error.name === 'SequelizeValidationError') {
-      return res.status(400).json({
-        error: true,
-        error_msg: error.errors[0].message,
-      });
-    } else if (error.name === 'SequelizeUniqueConstraintError') {
-      return res.status(400).json({
-        error: true,
-        error_msg: 'Target pengumpulan untuk tahun ini sudah ada',
-      });
-    }
-    
     handleServerError(res, error);
   }
 };
 
-controllers.get_info_edit_target_pengumpulan = async (req, res) => {
+controllers.detail = async (req, res) => {
   if (!(await handleValidationErrors(req, res))) return;
 
   try {
     const model_r = new Model_r(req);
-    const feedBack = await model_r.get_info_edit_target_pengumpulan();
+    const feedBack = await model_r.detail();
 
     res.status(200).json({
       error: false,
       data: feedBack,
-      total: 1,
     });
   } catch (error) {
-    res.status(500).json({
-      error: true,
-      error_msg: "Gagal mengambil data target pengumpulan.",
-    });
+    handleServerError(res, error);
   }
 };
 
-controllers.edit_target_pengumpulan = async (req, res) => {
+controllers.edit = async (req, res) => {
   if (!(await handleValidationErrors(req, res))) return;
 
   try {
     const model_cud = new Model_cud(req);
-    await model_cud.edit_target_pengumpulan();
+    await model_cud.edit();
 
     if (await model_cud.response()) {
       res.status(200).json({
@@ -92,22 +77,11 @@ controllers.edit_target_pengumpulan = async (req, res) => {
     } else {
       res.status(400).json({
         error: true,
-        error_msg: model_cud.message || "Target pengumpulan gagal diperbaharui.",
+        error_msg:
+          model_cud.message || "Target pengumpulan gagal diperbaharui.",
       });
     }
   } catch (error) {
-    if (error.name === 'SequelizeValidationError') {
-      return res.status(400).json({
-        error: true,
-        error_msg: error.errors[0].message,
-      });
-    } else if (error.name === 'SequelizeUniqueConstraintError') {
-      return res.status(400).json({
-        error: true,
-        error_msg: 'Target pengumpulan untuk tahun ini sudah ada',
-      });
-    }
-    
     handleServerError(res, error);
   }
 };
@@ -131,27 +105,7 @@ controllers.delete = async (req, res) => {
       });
     }
   } catch (error) {
-    res.status(500).json({
-      error: true,
-      error_msg: "Terjadi kesalahan saat menghapus data.",
-    });
-  }
-};
-
-controllers.get_tahun = async (req, res) => {
-  try {
-    const model_r = new Model_r(req);
-    const feedBack = await model_r.get_available_years();
-
-    res.status(200).json({
-      error: false,
-      data: feedBack.data,
-    });
-  } catch (error) {
-    res.status(500).json({
-      error: true,
-      error_msg: "Gagal mengambil data tahun.",
-    });
+    handleServerError(res, error);
   }
 };
 
