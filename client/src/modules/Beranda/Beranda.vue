@@ -4,6 +4,7 @@ import { ref, onMounted, computed } from 'vue';
 import VueApexCharts from 'vue3-apexcharts';
 import Notification from '@/components/Modal/Notification.vue';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
+import Logo from '@/components/Logo/Logo.vue';
 
 // Composable
 import { useNotification } from '@/composables/useNotification';
@@ -162,6 +163,7 @@ onMounted(fetchData);
         >
           <option v-for="t in tahunOptions" :key="t" :value="t">{{ t }}</option>
         </select>
+        <Logo />
       </div>
 
       <!-- Ringkasan total -->

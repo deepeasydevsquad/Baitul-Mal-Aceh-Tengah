@@ -212,8 +212,8 @@ async function kirim_pesan(kegiatan_id: number) {
         <table v-else class="w-full border-collapse bg-white text-sm">
           <thead class="bg-gray-50 text-gray-700 text-center border-b border-gray-300">
             <tr class="border-b border-gray-300">
-              <th class="w-[20%] px-6 py-3 font-medium">Banner</th>
-              <th class="w-[25%] px-6 py-3 font-medium">Info Penyaluran</th>
+              <th class="w-[15%] px-6 py-3 font-medium">Banner</th>
+              <th class="w-[30%] px-6 py-3 font-medium">Info Penyaluran</th>
               <th class="w-[30%] px-6 py-3 font-medium">Info Detail Penyaluran</th>
               <th class="w-[15%] px-6 py-3 font-medium">Datetimes</th>
               <th class="w-[10%] px-6 py-3 font-medium">Aksi</th>
@@ -357,19 +357,19 @@ async function kirim_pesan(kegiatan_id: number) {
                       </tr>
 
                       <tr class="border-b border-gray-300">
-                        <td class="w-[45%] bg-gray-200 px-4 py-1 font-semibold">Surveyor</td>
+                        <td class="w-[40%] bg-gray-200 px-4 py-1 font-semibold">SURVEYOR</td>
                         <td class="px-4 py-1">
                           <div v-if="data.surveyors && data.surveyors.length > 0">
                             <!-- List surveyor -->
                             <div
                               v-for="(s, i) in data.surveyors"
                               :key="i"
-                              class="flex justify-between items-center mb-1"
+                              class="flex justify-between items-center mb-3"
                             >
                               <span>{{ s.name }}</span>
                               <button
                                 @click="copyLink(s.access_code)"
-                                class="bg-white text-black text-sm px-2 py-1 rounded border border-black hover:bg-gray-200"
+                                class="bg-white text-gray-500 text-sm px-2 py-1 rounded hover:bg-gray-200 py-4"
                               >
                                 <SuratIcon />
                               </button>
@@ -379,9 +379,9 @@ async function kirim_pesan(kegiatan_id: number) {
                             <div class="mt-2 flex justify-end">
                               <ButtonGreen
                                 @click="kirim_pesan(data.id)"
-                                class="flex items-center gap-2"
+                                class="w-full flex items-center gap-2"
                               >
-                                <font-awesome-icon icon="fa-brands fa-whatsapp" />
+                                <font-awesome-icon icon="fa-brands fa-whatsapp" />Kirim Pesan WA
                               </ButtonGreen>
                             </div>
                           </div>

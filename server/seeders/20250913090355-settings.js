@@ -26,19 +26,19 @@ module.exports = {
         },
         {
           name: "icon",
-          value: null,
+          value: "site_icon.ico",
           createdAt: new Date(),
           updatedAt: new Date(),
         },
         {
           name: "logo",
-          value: null,
+          value: "site_logo.png",
           createdAt: new Date(),
           updatedAt: new Date(),
         },
         {
           name: "hero_logo",
-          value: null,
+          value: "hero_logo.png",
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -63,7 +63,7 @@ module.exports = {
         },
         {
           name: "nama_jabatan1",
-          value: "Ketua",
+          value: "Jetua",
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -93,7 +93,7 @@ module.exports = {
         },
         {
           name: "nama_pejabat3",
-          value: "YUdis",
+          value: "Yudis",
           createdAt: new Date(),
           updatedAt: new Date(),
         },
