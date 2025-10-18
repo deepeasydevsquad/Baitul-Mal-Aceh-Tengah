@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch} from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import Notification from '@/components/Modal/Notification.vue';
 import Pagination from '@/components/Pagination/Pagination.vue';
 import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
@@ -50,8 +50,8 @@ interface asnaf {
 
 const datas = ref<asnaf[]>([]);
 const grandTotal = ref<string>('');
-const tahunOptions = ref<number[]>([2023, 2024, 2025 , 2026, 2027]);
-const selectedYear = ref<number | null>(new Date().getFullYear())
+const tahunOptions = ref<number[]>([2023, 2024, 2025, 2026, 2027]);
+const selectedYear = ref<number | null>(new Date().getFullYear());
 
 const programOptions = ref<string[]>([
   'Bantuan Sosial',
@@ -59,9 +59,9 @@ const programOptions = ref<string[]>([
   'Bantuan Kesehatan',
   'Bantuan Sosial Keagamaan',
   'Bantuan Pendidikan',
-  'Bantuan Infaq'
-])
-const selectedProgram = ref<string>('')
+  'Bantuan Infaq',
+]);
+const selectedProgram = ref<string>('');
 
 // Helper Format
 const formatRupiah = (val: number) =>
@@ -266,13 +266,13 @@ async function downloadPDF() {
         </div>
       </div>
 
-    <div class="flex items-end justify-between gap-4 mb-4">
-      <BaseButton @click="downloadPDF" variant="primary" type="button" :disabled="isDownloading">
-        <font-awesome-icon icon="fa-solid fa-download" class="mr-2" />
-        {{ isDownloading ? 'Downloading...' : 'Download PDF' }}
-      </BaseButton>
+      <div class="flex items-end justify-between gap-4 mb-0">
+        <BaseButton @click="downloadPDF" variant="primary" type="button" :disabled="isDownloading">
+          <font-awesome-icon icon="fa-solid fa-download" class="mr-2" />
+          {{ isDownloading ? 'Downloading...' : 'Download PDF' }}
+        </BaseButton>
+      </div>
     </div>
-  </div>
     <LoadingSpinner v-if="isLoading" label="Memuat halaman..." />
     <div v-else class="space-y-4">
       <div class="overflow-hidden rounded-xl border border-gray-200 shadow">
@@ -356,6 +356,13 @@ async function downloadPDF() {
                   {{ grandTotal }}
                 </td>
                 <td colspan="2"></td>
+              </tr>
+            </template>
+            <template v-else>
+              <tr>
+                <td colspan="9" class="px-6 py-4 text-gray-600 text-center">
+                  Data tidak ditemukan
+                </td>
               </tr>
             </template>
           </tbody>
