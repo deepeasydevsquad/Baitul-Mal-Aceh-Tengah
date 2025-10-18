@@ -66,7 +66,6 @@ async function handleFilterChange() {
   await fetchData();
 }
 
-
 // Function: Fix oklch colors
 function fixOklchColors(element: HTMLElement) {
   const all = element.querySelectorAll('*');
@@ -196,7 +195,7 @@ const formatRupiah = (value: number) => {
 };
 
 const getMonthName = (month: number) => {
-  return monthOptions.find(m => m.value === month)?.label || '';
+  return monthOptions.find((m) => m.value === month)?.label || '';
 };
 </script>
 
@@ -247,7 +246,9 @@ const getMonthName = (month: number) => {
 
           <!-- Info Program Bantuan -->
           <div>
-            <div class="bg-gray-200 px-4 py-2 border-t border-l border-r border-gray-300 font-medium">
+            <div
+              class="bg-gray-200 px-4 py-2 border-t border-l border-r border-gray-300 font-medium"
+            >
               INFO PROGRAM BANTUAN
             </div>
             <div class="border border-t-0 border-gray-300 divide-y divide-gray-300">
@@ -269,101 +270,116 @@ const getMonthName = (month: number) => {
             </div>
           </div>
         </div>
-
-        <!-- Kanan -->
-        <div class="space-y-6">
-          <!-- Total Penerimaan Zakat -->
-          <div>
-            <div class="bg-gray-200 px-4 py-2 border-t border-l border-r border-gray-300 font-medium">
-              TOTAL PENERIMAAN ZAKAT
+      </div>
+      <!-- Kanan -->
+      <div class="space-y-6">
+        <!-- Total Penerimaan Zakat -->
+        <div>
+          <div class="bg-gray-200 px-4 py-2 border-t border-l border-r border-gray-300 font-medium">
+            TOTAL PENERIMAAN ZAKAT
+          </div>
+          <div class="border border-t-0 border-gray-300 divide-y divide-gray-300">
+            <div class="grid grid-cols-[1fr_20px_1fr] px-4 py-2">
+              <span>Total Penerimaan Zakat Hari Ini</span>
+              <span>:</span>
+              <span>{{
+                formatRupiah(data.total_penerimaan_zakat.totalPenerimaanZakatHariIni)
+              }}</span>
             </div>
-            <div class="border border-t-0 border-gray-300 divide-y divide-gray-300">
-              <div class="grid grid-cols-[1fr_20px_1fr] px-4 py-2">
-                <span>Total Penerimaan Zakat Hari Ini</span>
-                <span>:</span>
-                <span>{{ formatRupiah(data.total_penerimaan_zakat.totalPenerimaanZakatHariIni) }}</span>
-              </div>
-              <div class="grid grid-cols-[1fr_20px_1fr] px-4 py-2">
-                <span>Total Penerimaan Zakat Bulan Ini</span>
-                <span>:</span>
-                <span>{{ formatRupiah(data.total_penerimaan_zakat.totalPenerimaanZakatBulanIni) }}</span>
-              </div>
-              <div class="grid grid-cols-[1fr_20px_1fr] px-4 py-2">
-                <span>Total Penerimaan Zakat Tahun Ini</span>
-                <span>:</span>
-                <span>{{ formatRupiah(data.total_penerimaan_zakat.totalPenerimaanZakatTahunIni) }}</span>
-              </div>
-              <div class="grid grid-cols-[1fr_20px_1fr] px-4 py-2">
-                <span>Total Penerimaan Zakat</span>
-                <span>:</span>
-                <span>{{ formatRupiah(data.total_penerimaan_zakat.totalPenerimaanZakat) }}</span>
-              </div>
+            <div class="grid grid-cols-[1fr_20px_1fr] px-4 py-2">
+              <span>Total Penerimaan Zakat Bulan Ini</span>
+              <span>:</span>
+              <span>{{
+                formatRupiah(data.total_penerimaan_zakat.totalPenerimaanZakatBulanIni)
+              }}</span>
+            </div>
+            <div class="grid grid-cols-[1fr_20px_1fr] px-4 py-2">
+              <span>Total Penerimaan Zakat Tahun Ini</span>
+              <span>:</span>
+              <span>{{
+                formatRupiah(data.total_penerimaan_zakat.totalPenerimaanZakatTahunIni)
+              }}</span>
+            </div>
+            <div class="grid grid-cols-[1fr_20px_1fr] px-4 py-2">
+              <span>Total Penerimaan Zakat</span>
+              <span>:</span>
+              <span>{{ formatRupiah(data.total_penerimaan_zakat.totalPenerimaanZakat) }}</span>
             </div>
           </div>
+        </div>
 
-          <!-- Total Penerimaan Infaq -->
-          <div>
-            <div class="bg-gray-200 px-4 py-2 border-t border-l border-r border-gray-300 font-medium">
-              TOTAL PENERIMAAN INFAQ
+        <!-- Total Penerimaan Infaq -->
+        <div>
+          <div class="bg-gray-200 px-4 py-2 border-t border-l border-r border-gray-300 font-medium">
+            TOTAL PENERIMAAN INFAQ
+          </div>
+          <div class="border border-t-0 border-gray-300 divide-y divide-gray-300">
+            <div class="grid grid-cols-[1fr_20px_1fr] px-4 py-2">
+              <span>Total Penerimaan Infaq Hari Ini</span>
+              <span>:</span>
+              <span>{{
+                formatRupiah(data.total_penerimaan_infaq.totalPenerimaanInfaqHariIni)
+              }}</span>
             </div>
-            <div class="border border-t-0 border-gray-300 divide-y divide-gray-300">
-              <div class="grid grid-cols-[1fr_20px_1fr] px-4 py-2">
-                <span>Total Penerimaan Infaq Hari Ini</span>
-                <span>:</span>
-                <span>{{ formatRupiah(data.total_penerimaan_infaq.totalPenerimaanInfaqHariIni) }}</span>
-              </div>
-              <div class="grid grid-cols-[1fr_20px_1fr] px-4 py-2">
-                <span>Total Penerimaan Infaq Bulan Ini</span>
-                <span>:</span>
-                <span>{{ formatRupiah(data.total_penerimaan_infaq.totalPenerimaanInfaqBulanIni) }}</span>
-              </div>
-              <div class="grid grid-cols-[1fr_20px_1fr] px-4 py-2">
-                <span>Total Penerimaan Infaq Tahun Ini</span>
-                <span>:</span>
-                <span>{{ formatRupiah(data.total_penerimaan_infaq.totalPenerimaanInfaqTahunIni) }}</span>
-              </div>
-              <div class="grid grid-cols-[1fr_20px_1fr] px-4 py-2">
-                <span>Total Penerimaan Infaq</span>
-                <span>:</span>
-                <span>{{ formatRupiah(data.total_penerimaan_infaq.totalPenerimaanInfaq) }}</span>
-              </div>
+            <div class="grid grid-cols-[1fr_20px_1fr] px-4 py-2">
+              <span>Total Penerimaan Infaq Bulan Ini</span>
+              <span>:</span>
+              <span>{{
+                formatRupiah(data.total_penerimaan_infaq.totalPenerimaanInfaqBulanIni)
+              }}</span>
+            </div>
+            <div class="grid grid-cols-[1fr_20px_1fr] px-4 py-2">
+              <span>Total Penerimaan Infaq Tahun Ini</span>
+              <span>:</span>
+              <span>{{
+                formatRupiah(data.total_penerimaan_infaq.totalPenerimaanInfaqTahunIni)
+              }}</span>
+            </div>
+            <div class="grid grid-cols-[1fr_20px_1fr] px-4 py-2">
+              <span>Total Penerimaan Infaq</span>
+              <span>:</span>
+              <span>{{ formatRupiah(data.total_penerimaan_infaq.totalPenerimaanInfaq) }}</span>
             </div>
           </div>
+        </div>
 
-          <!-- Total Penerimaan Donasi -->
-          <div>
-            <div class="bg-gray-200 px-4 py-2 border-t border-l border-r border-gray-300 font-medium">
-              TOTAL PENERIMAAN DONASI
+        <!-- Total Penerimaan Donasi -->
+        <div>
+          <div class="bg-gray-200 px-4 py-2 border-t border-l border-r border-gray-300 font-medium">
+            TOTAL PENERIMAAN DONASI
+          </div>
+          <div class="border border-t-0 border-gray-300 divide-y divide-gray-300">
+            <div class="grid grid-cols-[1fr_20px_1fr] px-4 py-2">
+              <span>Total Penerimaan Donasi Hari Ini</span>
+              <span>:</span>
+              <span>{{
+                formatRupiah(data.total_penerimaan_donasi.totalPenerimaanDonasiHariIni)
+              }}</span>
             </div>
-            <div class="border border-t-0 border-gray-300 divide-y divide-gray-300">
-              <div class="grid grid-cols-[1fr_20px_1fr] px-4 py-2">
-                <span>Total Penerimaan Donasi Hari Ini</span>
-                <span>:</span>
-                <span>{{ formatRupiah(data.total_penerimaan_donasi.totalPenerimaanDonasiHariIni) }}</span>
-              </div>
-              <div class="grid grid-cols-[1fr_20px_1fr] px-4 py-2">
-                <span>Total Penerimaan Donasi Bulan Ini</span>
-                <span>:</span>
-                <span>{{ formatRupiah(data.total_penerimaan_donasi.totalPenerimaanDonasiBulanIni) }}</span>
-              </div>
-              <div class="grid grid-cols-[1fr_20px_1fr] px-4 py-2">
-                <span>Total Penerimaan Donasi Tahun Ini</span>
-                <span>:</span>
-                <span>{{ formatRupiah(data.total_penerimaan_donasi.totalPenerimaanDonasiTahunIni) }}</span>
-              </div>
-              <div class="grid grid-cols-[1fr_20px_1fr] px-4 py-2">
-                <span>Total Penerimaan Donasi</span>
-                <span>:</span>
-                <span>{{ formatRupiah(data.total_penerimaan_donasi.totalPenerimaanDonasi) }}</span>
-              </div>
+            <div class="grid grid-cols-[1fr_20px_1fr] px-4 py-2">
+              <span>Total Penerimaan Donasi Bulan Ini</span>
+              <span>:</span>
+              <span>{{
+                formatRupiah(data.total_penerimaan_donasi.totalPenerimaanDonasiBulanIni)
+              }}</span>
+            </div>
+            <div class="grid grid-cols-[1fr_20px_1fr] px-4 py-2">
+              <span>Total Penerimaan Donasi Tahun Ini</span>
+              <span>:</span>
+              <span>{{
+                formatRupiah(data.total_penerimaan_donasi.totalPenerimaanDonasiTahunIni)
+              }}</span>
+            </div>
+            <div class="grid grid-cols-[1fr_20px_1fr] px-4 py-2">
+              <span>Total Penerimaan Donasi</span>
+              <span>:</span>
+              <span>{{ formatRupiah(data.total_penerimaan_donasi.totalPenerimaanDonasi) }}</span>
             </div>
           </div>
         </div>
       </div>
-
-      <!-- Loading State -->
-      <div v-else class="text-center text-gray-500 py-10">Memuat data laporan umum...</div>
     </div>
+    <div v-else class="text-center text-gray-500 py-10">Memuat data laporan umum...</div>
 
     <!-- Notification Modal -->
     <Notification
@@ -374,5 +390,3 @@ const getMonthName = (month: number) => {
     />
   </div>
 </template>
-
-
