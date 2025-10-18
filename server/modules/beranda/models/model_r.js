@@ -144,7 +144,62 @@ class Model_r {
           where: { tahun },
         })) || 0;
 
+      const data_perbulan_zakat_dan_infaq = await Riwayat_pengumpulan.findAll({
+        attributes: [
+          [Sequelize.fn("MONTH", Sequelize.col("createdAt")), "bulan"],
+          [Sequelize.fn("SUM", Sequelize.col("nominal")), "total"],
+        ],
+        where: Sequelize.where(
+          Sequelize.fn("YEAR", Sequelize.col("createdAt")),
+          tahun
+        ),
+        group: [Sequelize.fn("MONTH", Sequelize.col("createdAt"))],
+        raw: true,
+      });
+
+      // ambil total donasi per bulan
+      const data_perbulan_donasi = await Riwayat_donasi.findAll({
+        attributes: [
+          [Sequelize.fn("MONTH", Sequelize.col("createdAt")), "bulan"],
+          [Sequelize.fn("SUM", Sequelize.col("nominal")), "total"],
+        ],
+        where: Sequelize.where(
+          Sequelize.fn("YEAR", Sequelize.col("createdAt")),
+          tahun
+        ),
+        group: [Sequelize.fn("MONTH", Sequelize.col("createdAt"))],
+        raw: true,
+      });
+
+      // fungsi biar tetap lengkap 12 bulan
+      function generateBulanLengkap(data) {
+        const hasil = [];
+        for (let i = 1; i <= 12; i++) {
+          const bulanData = data.find((d) => d.bulan === i);
+          hasil.push({
+            bulan: i,
+            total: bulanData ? parseInt(bulanData.total) : 0,
+          });
+        }
+        return hasil;
+      }
+
+      // bikin jadi array lengkap
+      const zakatInfaq = generateBulanLengkap(data_perbulan_zakat_dan_infaq);
+      const donasi = generateBulanLengkap(data_perbulan_donasi);
+
+      // gabungin total per bulan
+      const totalGabungan = zakatInfaq.map((z, index) => ({
+        bulan: z.bulan,
+        total: z.total + donasi[index].total,
+      }));
+
+      console.log(totalGabungan);
+
       const data = {
+        pengumpulan: {
+          totalGabungan,
+        },
         infaq: {
           target_pengumpulan: target_pengumpulan.infaq,
           realisasi_pengumpulan: realisasi_infaq_pengumpulan,
