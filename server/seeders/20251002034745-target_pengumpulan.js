@@ -8,6 +8,7 @@ module.exports = {
       [
         {
           tahun: 2025,
+          bulan: 1,
           zakat: 10000000,
           infaq: 5000000,
           donasi: 3000000,

@@ -22,6 +22,7 @@ class Model_cud {
         content: body.content.trim(),
         is_active: false,
         order: 0,
+        speed: 80, // default speed
       });
 
       this.message = `Menambahkan running text dengan content ${body.content.trim()} dengan ID ${
@@ -91,7 +92,6 @@ class Model_cud {
     try {
       console.log("Received order updates:", orderArray);
 
-
       const records = await Running_text.findAll({
         where: {
           id: orderArray.map((id) => parseInt(id, 10)),
@@ -128,6 +128,27 @@ class Model_cud {
       });
 
       this.message = `Order Running Text berhasil diperbaharui (${updates.length} records).`;
+    } catch (error) {
+      this.state = false;
+      this.message = error.message;
+    }
+  }
+
+  async update_speed() {
+    await this.initialize();
+    const body = this.req.body;
+
+    try {
+      // Update speed untuk semua record
+      await Running_text.update(
+        { speed: body.speed },
+        { 
+          where: {},
+          transaction: this.t 
+        }
+      );
+
+      this.message = `Memperbaharui kecepatan running text menjadi ${body.speed} pixel/detik`;
     } catch (error) {
       this.state = false;
       this.message = error.message;

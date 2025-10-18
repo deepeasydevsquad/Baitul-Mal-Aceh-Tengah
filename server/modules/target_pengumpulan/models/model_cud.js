@@ -12,7 +12,25 @@ class Model_cud {
     this.state = true;
   }
 
-  async add_target_pengumpulan() {
+  getBulanName(bulan) {
+    const namaBulan = [
+      "Januari",
+      "Februari",
+      "Maret",
+      "April",
+      "Mei",
+      "Juni",
+      "Juli",
+      "Agustus",
+      "September",
+      "Oktober",
+      "November",
+      "Desember",
+    ];
+    return namaBulan[parseInt(bulan, 10) - 1] || "Unknown";
+  }
+
+  async add() {
     await this.initialize();
     const myDate = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
     const body = this.req.body;
@@ -21,6 +39,7 @@ class Model_cud {
       const insert = await Target_pengumpulan.create(
         {
           tahun: body.tahun,
+          bulan: body.bulan,
           zakat: body.zakat,
           infaq: body.infaq,
           donasi: body.donasi,
@@ -32,25 +51,17 @@ class Model_cud {
         }
       );
 
-      this.message = `Menambahkan Target Pengumpulan Baru dengan ID Target Pengumpulan: ${insert.id}`;
+      this.message = `Menambahkan Target Pengumpulan untuk ${this.getBulanName(
+        body.bulan
+      )} ${body.tahun}.`;
     } catch (error) {
       this.state = false;
-      if (error.name === 'SequelizeValidationError') {
-        this.message = error.errors[0].message;
-      } else if (error.name === 'SequelizeUniqueConstraintError') {
-        this.message = 'Target pengumpulan untuk tahun ini sudah ada';
-      } else if (error.original && error.original.code === 'ER_DUP_ENTRY') {
-        this.message = 'Target pengumpulan untuk tahun ini sudah ada';
-      } else if (error.message) {
-        this.message = error.message;
-      } else {
-        this.message = 'Terjadi kesalahan saat menambahkan data';
-      }
-      console.error('Error in add_target_pengumpulan:', error);
+      this.message =
+        "Terjadi kesalahan saat menambahkan data: " + error.message;
     }
   }
 
-  async edit_target_pengumpulan() {
+  async edit() {
     await this.initialize();
     const myDate = moment().format("YYYY-MM-DD HH:mm:ss");
     const body = this.req.body;
@@ -58,7 +69,6 @@ class Model_cud {
     try {
       await Target_pengumpulan.update(
         {
-          tahun: body.tahun,
           zakat: body.zakat,
           infaq: body.infaq,
           donasi: body.donasi,
@@ -70,21 +80,13 @@ class Model_cud {
         }
       );
 
-      this.message = `Memperbarui Target Pengumpulan dengan ID: ${body.id}`;
+      this.message = `Memperbarui Target Pengumpulan untuk ${this.getBulanName(
+        body.bulan
+      )} ${body.tahun}.`;
     } catch (error) {
       this.state = false;
-      if (error.name === 'SequelizeValidationError') {
-        this.message = error.errors[0].message;
-      } else if (error.name === 'SequelizeUniqueConstraintError') {
-        this.message = 'Target pengumpulan untuk tahun ini sudah ada';
-      } else if (error.original && error.original.code === 'ER_DUP_ENTRY') {
-        this.message = 'Target pengumpulan untuk tahun ini sudah ada';
-      } else if (error.message) {
-        this.message = error.message;
-      } else {
-        this.message = 'Terjadi kesalahan saat memperbarui data';
-      }
-      console.error('Error in edit_target_pengumpulan:', error);
+      this.message =
+        "Terjadi kesalahan saat memperbarui data: " + error.message;
     }
   }
 
@@ -94,28 +96,24 @@ class Model_cud {
 
     try {
       const result = await Target_pengumpulan.destroy({
-        where: { id: body.id },
+        where: { tahun: body.tahun, bulan: body.bulan },
         transaction: this.t,
       });
 
       if (result === 0) {
         this.state = false;
-        this.message = 'Data tidak ditemukan atau sudah dihapus';
+        this.message = "Data tidak ditemukan atau sudah dihapus";
       } else {
-        this.message = `Menghapus Target Pengumpulan dengan ID: ${body.id}`;
+        this.message = `Menghapus Target Pengumpulan untuk ${this.getBulanName(
+          body.bulan
+        )} ${body.tahun}.`;
       }
     } catch (error) {
       this.state = false;
-      if (error.message) {
-        this.message = error.message;
-      } else {
-        this.message = 'Terjadi kesalahan saat menghapus data';
-      }
-      console.error('Error in delete:', error);
+      this.message = "Terjadi kesalahan saat menghapus data: " + error.message;
     }
   }
 
-  // response
   async response() {
     if (this.state) {
       await writeLog(this.req, this.t, {

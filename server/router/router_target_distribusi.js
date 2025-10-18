@@ -22,7 +22,14 @@ router.post(
       .withMessage("Page Number Tidak Boleh Kosong")
       .isInt()
       .withMessage("Page Number Harus Angka"),
-    body("search").optional().isString().withMessage("Search Harus String"),
+    body("tahun")
+      .optional({ checkFalsy: true })
+      .isInt()
+      .withMessage("Tahun harus angka"),
+    body("bulan")
+      .optional({ checkFalsy: true })
+      .isInt()
+      .withMessage("Bulan harus angka"),
   ],
   controllers.list
 );
@@ -31,11 +38,14 @@ router.post(
   "/target_distribusi/add",
   authenticateTokenAdministrator,
   [
-    body("tahun")
+    body("tahun").notEmpty().withMessage("Tahun Tidak Boleh Kosong"),
+    body("bulan")
       .notEmpty()
-      .withMessage("Tahun Tidak Boleh Kosong")
+      .withMessage("Bulan Tidak Boleh Kosong")
+      .isInt({ min: 1, max: 12 })
+      .withMessage("Bulan harus antara 1-12")
       .bail()
-      .custom(validation.cek_tahun),
+      .custom(validation.cek_tahun_bulan),
     body("targets")
       .isArray({ min: 1 })
       .withMessage("Targets harus berupa array"),
@@ -57,6 +67,11 @@ router.post(
   authenticateTokenAdministrator,
   [
     body("tahun").notEmpty().withMessage("Tahun Tidak Boleh Kosong"),
+    body("bulan")
+      .notEmpty()
+      .withMessage("Bulan Tidak Boleh Kosong")
+      .isInt({ min: 1, max: 12 })
+      .withMessage("Bulan harus antara 1-12"),
     body("targets")
       .isArray({ min: 1 })
       .withMessage("Targets harus berupa array"),
@@ -76,14 +91,20 @@ router.post(
 router.post(
   "/target_distribusi/detail",
   authenticateTokenAdministrator,
-  [body("tahun").notEmpty().withMessage("tahun Tidak Boleh Kosong")],
+  [
+    body("tahun").notEmpty().withMessage("Tahun Tidak Boleh Kosong"),
+    body("bulan").notEmpty().withMessage("Bulan Tidak Boleh Kosong"),
+  ],
   controllers.detail_target
 );
 
 router.post(
   "/target_distribusi/delete",
   authenticateTokenAdministrator,
-  [body("tahun").notEmpty().withMessage("tahun Tidak Boleh Kosong")],
+  [
+    body("tahun").notEmpty().withMessage("Tahun Tidak Boleh Kosong"),
+    body("bulan").notEmpty().withMessage("Bulan Tidak Boleh Kosong"),
+  ],
   controllers.delete
 );
 

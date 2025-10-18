@@ -77,3 +77,24 @@ export const getActiveRunningText = async () => {
     throw error
   }
 }
+
+export const getSpeedSetting = async () => {
+  try {
+    const response = await api_public.get('/running_text/speed')
+    return response.data
+  } catch (error) {
+    console.error('Gagal mengambil pengaturan kecepatan:', error)
+    throw error
+  }
+}
+
+
+export const updateSpeedSetting = async (speed: number) => {
+  try {
+    const response = await api_administrator.post('/running_text/speed/update', { speed })
+    return response.data
+  } catch (error) {
+    console.error('Gagal memperbarui kecepatan:', error)
+    throw error
+  }
+}

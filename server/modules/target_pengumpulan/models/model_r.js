@@ -6,9 +6,25 @@ class Model_r {
     this.req = req;
   }
 
-  async initialize() {}
+  getBulanName(bulan) {
+    const namaBulan = [
+      "Januari",
+      "Februari",
+      "Maret",
+      "April",
+      "Mei",
+      "Juni",
+      "Juli",
+      "Agustus",
+      "September",
+      "Oktober",
+      "November",
+      "Desember",
+    ];
+    return namaBulan[parseInt(bulan, 10) - 1] || "Unknown";
+  }
 
-  async target_pengumpulan() {
+  async list() {
     const body = this.req.body;
     const limit = parseInt(body.perpage, 10) || 10;
     const page =
@@ -18,22 +34,22 @@ class Model_r {
 
     let where = {};
 
-    if (body.search && body.search !== "") {
-      const searchYear = parseInt(body.search, 10);
-
-      if (!isNaN(searchYear)) {
-        where = {
-          tahun: searchYear,
-        };
-      }
+    if (body.tahun && body.tahun !== "") {
+      where.tahun = body.tahun;
+    }
+    if (body.bulan && body.bulan !== "") {
+      where.bulan = body.bulan;
     }
 
     try {
       const result = await Target_pengumpulan.findAndCountAll({
         limit,
         offset: (page - 1) * limit,
-        order: [["tahun", "DESC"]],
-        attributes: ["id", "tahun", "zakat", "infaq", "donasi"],
+        order: [
+          ["tahun", "ASC"],
+          ["bulan", "ASC"],
+        ],
+        attributes: ["id", "tahun", "bulan", "zakat", "infaq", "donasi"],
         where,
       });
 
@@ -41,6 +57,8 @@ class Model_r {
         data: result.rows.map((e) => ({
           id: e.id,
           tahun: e.tahun,
+          bulan: e.bulan,
+          bulan_name: this.getBulanName(e.bulan),
           zakat: e.zakat,
           infaq: e.infaq,
           donasi: e.donasi,
@@ -53,35 +71,22 @@ class Model_r {
     }
   }
 
-  async get_info_edit_target_pengumpulan() {
+  async detail() {
     const body = this.req.body;
     try {
-      const result = await Target_pengumpulan.findByPk(body.id);
+      const result = await Target_pengumpulan.findOne({
+        where: { tahun: body.tahun, bulan: body.bulan },
+      });
       return {
         id: result.id,
         tahun: result.tahun,
+        bulan: result.bulan,
         zakat: result.zakat,
         infaq: result.infaq,
         donasi: result.donasi,
       };
     } catch (error) {
       console.error("Error fetching target pengumpulan data:", error);
-      return { data: [] };
-    }
-  }
-
-  async get_available_years() {
-    try {
-      const years = await Target_pengumpulan.findAll({
-        attributes: ["tahun"],
-        group: ["tahun"],
-        order: [["tahun", "DESC"]],
-        raw: true,
-      });
-
-      return { data: years.map((item) => item.tahun) };
-    } catch (error) {
-      console.error("Error fetching available years:", error);
       return { data: [] };
     }
   }
