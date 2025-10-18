@@ -16,12 +16,17 @@ class Model_r {
       where.tahun = body.tahun;
     }
 
+    if (body.bulan && body.bulan !== "") {
+      where.bulan = body.bulan;
+    }
+
     try {
       // ambil semua target distribusi (zakat per asnaf + infaq + donasi)
       const q = await Target_distribusi.findAll({
         attributes: [
           "id",
           "tahun",
+          "bulan",
           "tipe",
           "asnaf_id",
           "target_orang",
@@ -38,6 +43,8 @@ class Model_r {
         ],
         where,
         order: [
+          ["tahun", "DESC"],
+          ["bulan", "DESC"],
           ["tipe", "ASC"],
           ["asnaf_id", "ASC"],
         ],
@@ -48,6 +55,8 @@ class Model_r {
         return {
           id: row.id,
           tahun: row.tahun,
+          bulan: row.bulan,
+          bulan_name: this.getBulanName(row.bulan),
           tipe: row.tipe, // zakat / infaq / donasi
           asnaf_id: row.asnaf_id || null,
           asnaf_name: row.Asnaf ? row.Asnaf.name : null,
@@ -105,78 +114,14 @@ class Model_r {
         return {
           state: false,
           message: "Tahun harus dikirim",
-          data: [],
+          data: { infaq: null, donasi: null, zakat: [] },
         };
       }
 
-      const data = await Target_distribusi.findAll({
-        attributes: [
-          "id",
-          "tahun",
-          "tipe",
-          "asnaf_id",
-          "target_orang",
-          "target_rupiah",
-          "createdAt",
-          "updatedAt",
-        ],
-        include: [
-          {
-            model: Asnaf,
-            attributes: ["id", "name"],
-            required: false,
-          },
-        ],
-        where: { tahun: body.tahun },
-        order: [
-          ["tipe", "ASC"],
-          ["asnaf_id", "ASC"],
-        ],
-      });
-
-      if (!data || data.length === 0) {
+      if (!body.bulan) {
         return {
           state: false,
-          message: `Data target distribusi tahun ${body.tahun} tidak ditemukan`,
-          data: [],
-        };
-      }
-
-      const result = data.map((row) => ({
-        id: row.id,
-        tahun: row.tahun,
-        tipe: row.tipe,
-        asnaf_id: row.asnaf_id || null,
-        asnaf_name: row.Asnaf ? row.Asnaf.name : null,
-        target_orang: parseInt(row.target_orang) || 0,
-        target_rupiah: parseInt(row.target_rupiah) || 0,
-        createdAt: row.createdAt,
-        updatedAt: row.updatedAt,
-      }));
-
-      return {
-        state: true,
-        message: `Berhasil ambil detail target distribusi tahun ${body.tahun}`,
-        data: result,
-      };
-    } catch (error) {
-      console.error("ERROR in detail_target_distribusi:", error);
-      return {
-        state: false,
-        message: "Gagal ambil detail target distribusi",
-        data: [],
-      };
-    }
-  }
-
-  async detail_target_distribusi() {
-    const body = this.req.body;
-
-    try {
-      if (!body.tahun) {
-        return {
-          state: false,
-          message: "Tahun harus dikirim",
+          message: "Bulan harus dikirim",
           data: { infaq: null, donasi: null, zakat: [] },
         };
       }
@@ -185,6 +130,7 @@ class Model_r {
         attributes: [
           "id",
           "tahun",
+          "bulan",
           "tipe",
           "asnaf_id",
           "target_orang",
@@ -199,7 +145,7 @@ class Model_r {
             required: false,
           },
         ],
-        where: { tahun: body.tahun },
+        where: { tahun: body.tahun, bulan: body.bulan },
         order: [
           ["tipe", "ASC"],
           ["asnaf_id", "ASC"],
@@ -209,7 +155,9 @@ class Model_r {
       if (!data || data.length === 0) {
         return {
           state: false,
-          message: `Data target distribusi tahun ${body.tahun} tidak ditemukan`,
+          message: `Data target distribusi ${this.getBulanName(body.bulan)} ${
+            body.tahun
+          } tidak ditemukan`,
           data: { infaq: null, donasi: null, zakat: [] },
         };
       }
@@ -224,6 +172,8 @@ class Model_r {
         const base = {
           id: r.id,
           tahun: r.tahun,
+          bulan: r.bulan,
+          bulan_name: this.getBulanName(r.bulan),
           tipe: r.tipe,
           asnaf_id: r.asnaf_id || null,
           asnaf_name: r.Asnaf ? r.Asnaf.name : null,
@@ -240,7 +190,9 @@ class Model_r {
 
       return {
         state: true,
-        message: `Berhasil ambil detail target distribusi tahun ${body.tahun}`,
+        message: `Berhasil ambil detail target distribusi ${this.getBulanName(
+          body.bulan
+        )} ${body.tahun}`,
         data: { infaq, donasi, zakat },
       };
     } catch (error) {
@@ -251,6 +203,24 @@ class Model_r {
         data: { infaq: null, donasi: null, zakat: [] },
       };
     }
+  }
+
+  getBulanName(bulan) {
+    const namaBulan = [
+      "Januari",
+      "Februari",
+      "Maret",
+      "April",
+      "Mei",
+      "Juni",
+      "Juli",
+      "Agustus",
+      "September",
+      "Oktober",
+      "November",
+      "Desember",
+    ];
+    return namaBulan[parseInt(bulan) - 1] || bulan;
   }
 }
 

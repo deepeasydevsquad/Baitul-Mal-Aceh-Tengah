@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import Notification from '@/components/Modal/Notification.vue';
 import Confirmation from '@/components/Modal/Confirmation.vue';
 import BaseButton from '@/components/Button/BaseButton.vue';
@@ -13,6 +13,7 @@ import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
 import FormAdd from '@/modules/TargetDistribusi/Widgets/FormAdd.vue';
 import FormEdit from '@/modules/TargetDistribusi/Widgets/FormEdit.vue';
+import InputText from '@/components/Form/InputText.vue';
 
 // Composable
 import { usePagination } from '@/composables/usePaginations';
@@ -28,7 +29,7 @@ const isTableLoading = ref(false);
 
 // Composable: pagination
 const itemsPerPage = ref<number>(100);
-const totalColumns = ref<number>(5);
+const totalColumns = ref<number>(6);
 
 const { currentPage, perPage, totalRow, totalPages, nextPage, prevPage, pageNow, pages } =
   usePagination(fetchData, { perPage: itemsPerPage.value });
@@ -41,18 +42,38 @@ const { showNotification, notificationType, notificationMessage, displayNotifica
 const { showConfirmDialog, confirmTitle, confirmMessage, displayConfirmation, confirm, cancel } =
   useConfirmation();
 
-// State Data Bank
-const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
-
+// State Data
 interface Data {
   id: number;
   tahun: number;
+  bulan: number;
+  bulan_name: string;
+  tipe: string;
   asnaf_name: string;
   target_orang: number;
   target_rupiah: number;
 }
 
 const datas = ref<Data[]>([]);
+
+// State: Filter
+const filterTahun = ref<string>('');
+const filterBulan = ref<string>('');
+
+const bulanOptions = [
+  { value: 1, label: 'Januari' },
+  { value: 2, label: 'Februari' },
+  { value: 3, label: 'Maret' },
+  { value: 4, label: 'April' },
+  { value: 5, label: 'Mei' },
+  { value: 6, label: 'Juni' },
+  { value: 7, label: 'Juli' },
+  { value: 8, label: 'Agustus' },
+  { value: 9, label: 'September' },
+  { value: 10, label: 'Oktober' },
+  { value: 11, label: 'November' },
+  { value: 12, label: 'Desember' },
+];
 
 // Function: Modal
 const isModalAddOpen = ref(false);
@@ -63,30 +84,37 @@ function openModalAdd() {
   isModalAddOpen.value = true;
 }
 
-function openModalEdit(tahun: any) {
-  selectedTarget.value = tahun;
-  console.log('selectedTarget Parent', selectedTarget.value);
+function openModalEdit(tahun: any, bulan: any) {
+  selectedTarget.value = { tahun, bulan };
   isModalEditOpen.value = true;
 }
 
-// Function: Fetch Data
-const search = ref('');
+// FILTER
+let debounceTimer: number;
+watch([filterTahun, filterBulan], () => {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    fetchData();
+  }, 500);
+});
+// ------------------------------
 
+// Function: Fetch Data
 async function fetchData() {
   isTableLoading.value = true;
   try {
     const response = await list({
-      search: search.value,
+      tahun: filterTahun.value,
+      bulan: filterBulan.value,
       perpage: perPage.value,
       pageNumber: currentPage.value,
     });
 
     datas.value = response.data;
-    const tahunUnik = new Set(datas.value.map((d) => d.tahun));
-    totalRow.value = tahunUnik.size;
-    console.log(datas.value);
+    const uniqueKeys = new Set(datas.value.map((d) => `${d.tahun}-${d.bulan}`));
+    totalRow.value = uniqueKeys.size;
   } catch (error) {
-    displayNotification('Gagal mengambil data bank', 'error');
+    displayNotification('Gagal mengambil data target distribusi', 'error');
   } finally {
     isTableLoading.value = false;
   }
@@ -96,22 +124,40 @@ onMounted(async () => {
   await fetchData();
 });
 
-const groupByTahun = (arr: Data[]) => {
-  return arr.reduce((acc: Record<number, Data[]>, item) => {
-    if (!acc[item.tahun]) acc[item.tahun] = [];
-    acc[item.tahun].push(item);
+// Mengelompokkan data berdasarkan tahun
+const groupedByYear = computed(() => {
+  return datas.value.reduce((acc: Record<string, Data[]>, item) => {
+    const year = item.tahun.toString();
+    if (!acc[year]) {
+      acc[year] = [];
+    }
+    acc[year].push(item);
+    return acc;
+  }, {});
+});
+
+// Helper untuk mengelompokkan data berdasarkan bulan di dalam tahun
+const groupByBulan = (arr: Data[]) => {
+  return arr.reduce((acc: Record<string, Data[]>, item) => {
+    const key = item.bulan.toString();
+    if (!acc[key]) {
+      acc[key] = [];
+    }
+    acc[key].push(item);
     return acc;
   }, {});
 };
 
-async function deleteData(tahun: number) {
+async function deleteData(tahun: number, bulan: number) {
+  const bulanName =
+    datas.value.find((d) => d.tahun === tahun && d.bulan === bulan)?.bulan_name || bulan;
   displayConfirmation(
     'Hapus Data Target',
-    'Apakah Anda yakin ingin menghapus data target ini?',
+    `Apakah Anda yakin ingin menghapus data target ${bulanName} ${tahun}?`,
     async () => {
       try {
         isLoading.value = true;
-        await delete_target({ tahun: tahun });
+        await delete_target({ tahun, bulan });
         displayNotification('Data target berhasil dihapus', 'success');
         await fetchData();
       } catch (error) {
@@ -140,17 +186,23 @@ async function deleteData(tahun: number) {
           Tambah Target
         </BaseButton>
 
-        <!-- Search -->
-        <div class="flex items-center w-full sm:w-auto">
-          <label for="search" class="mr-2 text-sm font-medium text-gray-600">Cari</label>
-          <input
-            id="search"
+        <!-- Filter Section -->
+        <div class="flex items-center gap-2">
+          <InputText
+            v-model="filterTahun"
             type="text"
-            v-model="search"
-            @change="fetchData"
-            placeholder="Cari tahun..."
-            class="w-full sm:w-64 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:border-green-900 focus:ring-2 focus:ring-green-900 transition"
+            placeholder="Cari Tahun..."
+            class="w-36"
+            :label_status="false"
           />
+          <select
+            id="filterBulan"
+            v-model="filterBulan"
+            class="w-40 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:border-green-900 focus:ring-2 focus:ring-green-900 transition"
+          >
+            <option value="">Semua Bulan</option>
+            <option v-for="b in bulanOptions" :key="b.value" :value="b.value">{{ b.label }}</option>
+          </select>
         </div>
       </div>
 
@@ -160,52 +212,98 @@ async function deleteData(tahun: number) {
         <table v-else class="w-full border-collapse bg-white text-sm">
           <thead class="bg-gray-50 text-gray-700 text-center border-b border-gray-300">
             <tr>
-              <th class="w-[20%] px-6 py-3 font-medium">Tahun</th>
+              <th class="w-[15%] px-6 py-3 font-medium">Tahun</th>
+              <th class="w-[15%] px-6 py-3 font-medium">Bulan</th>
               <th class="w-[20%] px-6 py-3 font-medium">Nama</th>
-              <th class="w-[20%] px-6 py-3 font-medium">Target Orang</th>
-              <th class="w-[30%] px-6 py-3 font-medium">Target Rupiah</th>
+              <th class="w-[15%] px-6 py-3 font-medium">Target Orang</th>
+              <th class="w-[25%] px-6 py-3 font-medium">Target Rupiah</th>
               <th class="w-[10%] px-6 py-3 font-medium">Aksi</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
             <template v-if="datas && datas.length">
-              <template v-for="(items, tahun) in groupByTahun(datas)" :key="tahun">
-                <tr
-                  v-for="(data, idx) in items"
-                  :key="data.id"
-                  class="hover:bg-gray-50 transition-colors"
+              <template v-for="(yearData, year, yearIndex) in groupedByYear" :key="year">
+                <template
+                  v-for="(monthData, monthKey, monthIndex) in groupByBulan(yearData)"
+                  :key="monthKey"
                 >
-                  <td
-                    v-if="idx === 0"
-                    :rowspan="items.length"
-                    class="px-6 py-4 text-center font-medium text-gray-800"
+                  <tr
+                    v-for="(item, itemIndex) in monthData"
+                    :key="item.id"
+                    class="hover:bg-gray-50 transition-colors"
                   >
-                    {{ tahun }}
-                  </td>
-                  <td class="px-6 py-4 text-left font-medium text-gray-800">
-                    <template v-if="data.asnaf_name"> {{ data.asnaf_name }} (zakat) </template>
-                    <template v-else>
-                      {{ data.tipe.charAt(0).toUpperCase() + data.tipe.slice(1) }}
-                    </template>
-                  </td>
+                    <!-- Kolom Tahun -->
+                    <td
+                      v-if="monthIndex === 0 && itemIndex === 0"
+                      :rowspan="yearData.length"
+                      class="px-6 py-4 text-center font-medium text-gray-800 align-top"
+                      :class="{ 'border-t border-gray-300': yearIndex !== 0 }"
+                    >
+                      {{ year }}
+                    </td>
+                    <!-- Kolom Bulan -->
+                    <td
+                      v-if="itemIndex === 0"
+                      :rowspan="monthData.length"
+                      class="px-6 py-4 text-center font-medium text-gray-800 align-top"
+                      :class="{ 'border-t border-gray-300': yearIndex !== 0 || monthIndex !== 0 }"
+                    >
+                      {{ item.bulan_name }}
+                    </td>
 
-                  <td class="px-6 py-4 text-center font-medium text-gray-800">
-                    {{ data.target_orang }}
-                  </td>
-                  <td class="px-6 py-4 text-center font-medium text-gray-800">
-                    Rp {{ data.target_rupiah.toLocaleString('id-ID') }}
-                  </td>
-                  <td v-if="idx === 0" :rowspan="items.length" class="px-6 py-4">
-                    <div class="flex justify-center gap-2">
-                      <LightButton @click="openModalEdit(tahun)">
-                        <EditIcon />
-                      </LightButton>
-                      <DangerButton @click="deleteData(tahun)">
-                        <DeleteIcon />
-                      </DangerButton>
-                    </div>
-                  </td>
-                </tr>
+                    <!-- Kolom Data -->
+                    <td
+                      class="px-6 py-4 text-left font-medium text-gray-800"
+                      :class="{
+                        'border-t border-gray-300':
+                          (itemIndex === 0 && monthIndex !== 0) ||
+                          (itemIndex === 0 && yearIndex !== 0),
+                      }"
+                    >
+                      <template v-if="item.asnaf_name"> {{ item.asnaf_name }} (zakat) </template>
+                      <template v-else>
+                        {{ item.tipe.charAt(0).toUpperCase() + item.tipe.slice(1) }}
+                      </template>
+                    </td>
+                    <td
+                      class="px-6 py-4 text-center font-medium text-gray-800"
+                      :class="{
+                        'border-t border-gray-300':
+                          (itemIndex === 0 && monthIndex !== 0) ||
+                          (itemIndex === 0 && yearIndex !== 0),
+                      }"
+                    >
+                      {{ item.target_orang }}
+                    </td>
+                    <td
+                      class="px-6 py-4 text-center font-medium text-gray-800"
+                      :class="{
+                        'border-t border-gray-300':
+                          (itemIndex === 0 && monthIndex !== 0) ||
+                          (itemIndex === 0 && yearIndex !== 0),
+                      }"
+                    >
+                      Rp {{ item.target_rupiah.toLocaleString('id-ID') }}
+                    </td>
+
+                    <!-- Kolom Aksi -->
+                    <td
+                      v-if="itemIndex === 0"
+                      :rowspan="monthData.length"
+                      class="px-6 py-4 align-middle"
+                      :class="{ 'border-t border-gray-300': yearIndex !== 0 || monthIndex !== 0 }"
+                    >
+                      <div class="flex justify-center gap-2">
+                        <LightButton @click="openModalEdit(item.tahun, item.bulan)">
+                          <EditIcon />
+                        </LightButton>
+                        <DangerButton @click="deleteData(item.tahun, item.bulan)">
+                          <DeleteIcon />
+                        </DangerButton>
+                      </div>
+                    </td>
+                  </tr>
+                </template>
               </template>
             </template>
 
@@ -217,7 +315,9 @@ async function deleteData(tahun: number) {
                   class="text-4xl mb-2 text-gray-400"
                 />
                 <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ada data</h3>
-                <p class="text-sm">Belum ada data target distribusi.</p>
+                <p class="text-sm">
+                  Silakan gunakan filter di atas untuk mencari data atau tambah data baru.
+                </p>
               </td>
             </tr>
           </tbody>
@@ -256,7 +356,8 @@ async function deleteData(tahun: number) {
     <!-- Modal FormEdit -->
     <FormEdit
       :is-modal-open="isModalEditOpen"
-      :tahun="selectedTarget"
+      :tahun="selectedTarget?.tahun"
+      :bulan="selectedTarget?.bulan"
       @close="((isModalEditOpen = false), fetchData())"
       @status="
         (payload: any) => {

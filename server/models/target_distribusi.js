@@ -17,6 +17,7 @@ module.exports = (sequelize, DataTypes) => {
   Target_distribusi.init(
     {
       tahun: DataTypes.INTEGER,
+      bulan: DataTypes.INTEGER,
       asnaf_id: DataTypes.INTEGER,
       tipe: DataTypes.ENUM(["infaq", "zakat", "donasi"]),
       target_orang: DataTypes.INTEGER,

@@ -9,6 +9,7 @@ module.exports = {
         // Zakat (asnaf_id 1-6)
         {
           tahun: 2025,
+          bulan: 1,
           asnaf_id: 1,
           tipe: "zakat",
           target_orang: 100,
@@ -18,6 +19,7 @@ module.exports = {
         },
         {
           tahun: 2025,
+          bulan: 1,
           asnaf_id: 2,
           tipe: "zakat",
           target_orang: 80,
@@ -27,6 +29,7 @@ module.exports = {
         },
         {
           tahun: 2025,
+          bulan: 1,
           asnaf_id: 3,
           tipe: "zakat",
           target_orang: 70,
@@ -36,6 +39,7 @@ module.exports = {
         },
         {
           tahun: 2025,
+          bulan: 1,
           asnaf_id: 4,
           tipe: "zakat",
           target_orang: 60,
@@ -45,6 +49,7 @@ module.exports = {
         },
         {
           tahun: 2025,
+          bulan: 1,
           asnaf_id: 5,
           tipe: "zakat",
           target_orang: 50,
@@ -54,6 +59,7 @@ module.exports = {
         },
         {
           tahun: 2025,
+          bulan: 1,
           asnaf_id: 6,
           tipe: "zakat",
           target_orang: 40,
@@ -65,6 +71,7 @@ module.exports = {
         // Infaq (asnaf_id null)
         {
           tahun: 2025,
+          bulan: 1,
           asnaf_id: null,
           tipe: "infaq",
           target_orang: 0,
@@ -76,6 +83,7 @@ module.exports = {
         // Donasi (asnaf_id null)
         {
           tahun: 2025,
+          bulan: 1,
           asnaf_id: null,
           tipe: "donasi",
           target_orang: 0,

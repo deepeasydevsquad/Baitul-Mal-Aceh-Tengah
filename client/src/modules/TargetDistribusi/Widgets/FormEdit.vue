@@ -20,6 +20,7 @@ const { showNotification, notificationType, notificationMessage, displayNotifica
 interface Props {
   isModalOpen: boolean;
   tahun: number;
+  bulan: number;
 }
 const props = defineProps<Props>();
 
@@ -32,6 +33,7 @@ const emit = defineEmits<{
 // State
 const isSubmitting = ref(false);
 const tahun = ref('');
+const bulan = ref('');
 const asnafList = ref<{ id: number; name: string; target_orang: string; target_rupiah: string }[]>(
   [],
 );
@@ -39,9 +41,26 @@ const infaq = ref({ orang: '', rupiah: '' });
 const donasi = ref({ orang: '', rupiah: '' });
 const errors = ref<Record<string, string>>({});
 
+// Daftar Bulan
+const bulanOptions = [
+  { value: 1, label: 'Januari' },
+  { value: 2, label: 'Februari' },
+  { value: 3, label: 'Maret' },
+  { value: 4, label: 'April' },
+  { value: 5, label: 'Mei' },
+  { value: 6, label: 'Juni' },
+  { value: 7, label: 'Juli' },
+  { value: 8, label: 'Agustus' },
+  { value: 9, label: 'September' },
+  { value: 10, label: 'Oktober' },
+  { value: 11, label: 'November' },
+  { value: 12, label: 'Desember' },
+];
+
 // Reset form
 const resetForm = () => {
   tahun.value = '';
+  bulan.value = '';
   infaq.value = { orang: '', rupiah: '' };
   donasi.value = { orang: '', rupiah: '' };
   asnafList.value = [];
@@ -55,6 +74,11 @@ const validateForm = () => {
 
   if (!tahun.value) {
     errors.value.tahun = 'Tahun tidak boleh kosong.';
+    isValid = false;
+  }
+
+  if (!bulan.value) {
+    errors.value.bulan = 'Bulan tidak boleh kosong.';
     isValid = false;
   }
 
@@ -102,6 +126,7 @@ const handleSubmit = async () => {
   try {
     const payload = {
       tahun: tahun.value,
+      bulan: parseInt(bulan.value),
       infaq: {
         target_orang: parseInt(infaq.value.orang) || 0,
         target_rupiah: parseInt(infaq.value.rupiah) || 0,
@@ -134,8 +159,8 @@ const handleSubmit = async () => {
 // Fetch detail data buat edit
 const fetchDetail = async () => {
   try {
-    if (!props.tahun) return;
-    const response = await detail({ tahun: props.tahun });
+    if (!props.tahun || !props.bulan) return;
+    const response = await detail({ tahun: props.tahun, bulan: props.bulan });
 
     if (!response.data) {
       displayNotification('Data target distribusi tidak ditemukan', 'error');
@@ -143,6 +168,7 @@ const fetchDetail = async () => {
     }
 
     tahun.value = props.tahun.toString();
+    bulan.value = props.bulan.toString();
 
     // Infaq
     if (response.data.infaq) {
@@ -232,16 +258,32 @@ onBeforeUnmount(() => document.removeEventListener('keydown', handleEscape));
             </button>
           </div>
 
-          <!-- Tahun -->
-          <div class="max-w-xs">
+          <!-- Tahun & Bulan -->
+          <div class="flex gap-4">
             <InputText
               v-model="tahun"
               label="Tahun"
-              type="text"
+              type="number"
               placeholder="Masukkan tahun"
               :error="errors.tahun"
               class="w-32"
+              disabled
             />
+            <div class="flex flex-col">
+              <label class="text-sm font-medium text-gray-700 mb-1">Bulan</label>
+              <select
+                v-model="bulan"
+                class="w-40 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:border-green-900 focus:ring-2 focus:ring-green-900 transition bg-gray-100"
+                :class="{ 'border-red-500': errors.bulan }"
+                disabled
+              >
+                <option value="">Pilih Bulan</option>
+                <option v-for="b in bulanOptions" :key="b.value" :value="b.value">
+                  {{ b.label }}
+                </option>
+              </select>
+              <span v-if="errors.bulan" class="text-xs text-red-500 mt-1">{{ errors.bulan }}</span>
+            </div>
           </div>
 
           <!-- Infaq -->
@@ -339,7 +381,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', handleEscape));
           <BaseButton
             type="submit"
             variant="primary"
-            :disabled="!tahun.trim() || isSubmitting"
+            :disabled="!tahun || !bulan || isSubmitting"
             @click="handleSubmit"
           >
             <span v-if="isSubmitting">Menyimpan...</span>

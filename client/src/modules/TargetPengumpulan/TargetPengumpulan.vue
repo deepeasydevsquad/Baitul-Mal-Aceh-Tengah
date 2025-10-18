@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import Notification from '@/components/Modal/Notification.vue';
 import Confirmation from '@/components/Modal/Confirmation.vue';
 import BaseButton from '@/components/Button/BaseButton.vue';
@@ -13,6 +13,7 @@ import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
 import FormAdd from '@/modules/TargetPengumpulan/widgets/FormAdd.vue';
 import FormEdit from '@/modules/TargetPengumpulan/widgets/FormEdit.vue';
+import InputText from '@/components/Form/InputText.vue';
 
 // Composable
 import { usePagination } from '@/composables/usePaginations';
@@ -20,11 +21,7 @@ import { useConfirmation } from '@/composables/useConfirmation';
 import { useNotification } from '@/composables/useNotification';
 
 // Service API
-import {
-  get_target_pengumpulan,
-  delete_target_pengumpulan,
-  get_tahun,
-} from '@/service/target_pengumpulan';
+import { list, delete_target } from '@/service/target_pengumpulan';
 
 // State: Loading
 const isLoading = ref(false);
@@ -32,7 +29,7 @@ const isTableLoading = ref(false);
 
 // Composable: pagination
 const itemsPerPage = ref<number>(100);
-const totalColumns = ref<number>(5);
+const totalColumns = ref<number>(6);
 
 const { currentPage, perPage, totalRow, totalPages, nextPage, prevPage, pageNow, pages } =
   usePagination(fetchData, { perPage: itemsPerPage.value });
@@ -45,25 +42,37 @@ const { showNotification, notificationType, notificationMessage, displayNotifica
 const { showConfirmDialog, confirmTitle, confirmMessage, displayConfirmation, confirm, cancel } =
   useConfirmation();
 
-interface TargetPengumpulan {
+// State Data
+interface Data {
   id: number;
   tahun: number;
+  bulan: number;
+  bulan_name: string;
   infaq: number;
   zakat: number;
   donasi: number;
 }
 
-const target_pengumpulan = ref<TargetPengumpulan[]>([]);
+const datas = ref<Data[]>([]);
 
-// Function: Format Rupiah
-const formatRupiah = (amount: number): string => {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
-};
+// State: Filter
+const filterTahun = ref<string>('');
+const filterBulan = ref<string>('');
+
+const bulanOptions = [
+  { value: 1, label: 'Januari' },
+  { value: 2, label: 'Februari' },
+  { value: 3, label: 'Maret' },
+  { value: 4, label: 'April' },
+  { value: 5, label: 'Mei' },
+  { value: 6, label: 'Juni' },
+  { value: 7, label: 'Juli' },
+  { value: 8, label: 'Agustus' },
+  { value: 9, label: 'September' },
+  { value: 10, label: 'Oktober' },
+  { value: 11, label: 'November' },
+  { value: 12, label: 'Desember' },
+];
 
 // Function: Modal
 const isModalAddOpen = ref(false);
@@ -74,96 +83,69 @@ function openModalAdd() {
   isModalAddOpen.value = true;
 }
 
-function openModalEdit(target: any) {
-  selectedTarget.value = target;
+function openModalEdit(tahun: any, bulan: any) {
+  selectedTarget.value = { tahun, bulan };
   isModalEditOpen.value = true;
 }
 
-const searchYear = ref('');
-const availableYears = ref<number[]>([]);
-
-async function fetchAvailableYears() {
-  try {
-    const response = await get_tahun();
-    availableYears.value = response.data;
-  } catch (error: any) {
-    console.error('Fetch years error:', error);
-
-    let errorMessage = 'Gagal memuat opsi filter tahun';
-
-    if (error.response && error.response.data) {
-      errorMessage = error.response.data.error_msg || error.response.data.message || errorMessage;
-    } else if (error.message) {
-      errorMessage = error.message;
-    }
-
-    displayNotification(errorMessage, 'error');
-  }
-}
-
-// Function: Clear search
-const clearSearch = () => {
-  searchYear.value = '';
-  fetchData();
-};
+let debounceTimer: number;
+watch([filterTahun, filterBulan], () => {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    fetchData();
+  }, 500);
+});
 
 async function fetchData() {
   isTableLoading.value = true;
   try {
-    const response = await get_target_pengumpulan({
-      search: searchYear.value,
+    const response = await list({
+      tahun: filterTahun.value,
+      bulan: filterBulan.value,
       perpage: perPage.value,
       pageNumber: currentPage.value,
     });
 
-    target_pengumpulan.value = response.data;
-    totalRow.value = response.total;
-  } catch (error: any) {
-    console.error('Fetch data error:', error);
-
-    let errorMessage = 'Gagal mengambil data target pengumpulan';
-
-    if (error.response && error.response.data) {
-      errorMessage = error.response.data.error_msg || error.response.data.message || errorMessage;
-    } else if (error.message) {
-      errorMessage = error.message;
-    }
-
-    displayNotification(errorMessage, 'error');
+    datas.value = response.data;
+    const uniqueKeys = new Set(datas.value.map((d) => `${d.tahun}-${d.bulan}`));
+    totalRow.value = uniqueKeys.size;
+  } catch (error) {
+    displayNotification('Gagal mengambil data target pengumpulan', 'error');
   } finally {
     isTableLoading.value = false;
   }
 }
 
 onMounted(async () => {
-  await Promise.all([fetchData(), fetchAvailableYears()]);
+  await fetchData();
 });
 
-// Function: Delete Data
-async function deleteData(id: number) {
+// Mengelompokkan data berdasarkan tahun
+const groupedByYear = computed(() => {
+  return datas.value.reduce((acc: Record<string, Data[]>, item) => {
+    const year = item.tahun.toString();
+    if (!acc[year]) {
+      acc[year] = [];
+    }
+    acc[year].push(item);
+    return acc;
+  }, {});
+});
+
+async function deleteData(tahun: number, bulan: number) {
+  const bulanName =
+    datas.value.find((d) => d.tahun === tahun && d.bulan === bulan)?.bulan_name || bulan;
   displayConfirmation(
-    'Hapus Data Target Pengumpulan',
-    'Apakah Anda yakin ingin menghapus data target pengumpulan ini?',
+    'Hapus Data Target',
+    `Apakah Anda yakin ingin menghapus data target ${bulanName} ${tahun}?`,
     async () => {
       try {
         isLoading.value = true;
-        await delete_target_pengumpulan({ id: id });
-        displayNotification('Data target pengumpulan berhasil dihapus', 'success');
-        await Promise.all([fetchData(), fetchAvailableYears()]);
-      } catch (error: any) {
-        console.error('Delete error:', error);
-        
-        let errorMessage = 'Gagal menghapus data target pengumpulan';
-        
-        if (error.response && error.response.data) {
-          errorMessage = error.response.data.error_msg || 
-                        error.response.data.message || 
-                        errorMessage;
-        } else if (error.message) {
-          errorMessage = error.message;
-        }
-        
-        displayNotification(errorMessage, 'error');
+        await delete_target({ tahun, bulan });
+        displayNotification('Data target berhasil dihapus', 'success');
+        await fetchData();
+      } catch (error) {
+        displayNotification('Gagal menghapus data target', 'error');
       } finally {
         isLoading.value = false;
       }
@@ -188,32 +170,23 @@ async function deleteData(id: number) {
           Tambah Target
         </BaseButton>
 
-        <!-- Search by Year -->
-        <div class="flex items-center gap-2 w-full sm:w-auto">
-          <label for="searchYear" class="text-sm font-medium text-gray-600 whitespace-nowrap"
-            >Cari Tahun</label
+        <!-- Filter Section -->
+        <div class="flex items-center gap-2">
+          <InputText
+            v-model="filterTahun"
+            type="text"
+            placeholder="Cari Tahun..."
+            class="w-36"
+            :label_status="false"
+          />
+          <select
+            id="filterBulan"
+            v-model="filterBulan"
+            class="w-40 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:border-green-900 focus:ring-2 focus:ring-green-900 transition"
           >
-          <div class="flex gap-2">
-            <select
-              id="searchYear"
-              v-model="searchYear"
-              @change="fetchData"
-              class="rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:border-green-900 focus:ring-2 focus:ring-green-900 transition min-w-[120px]"
-            >
-              <option value="">Semua Tahun</option>
-              <option v-for="year in availableYears" :key="year" :value="year">
-                {{ year }}
-              </option>
-            </select>
-            <button
-              v-if="searchYear"
-              @click="clearSearch"
-              class="px-3 py-2 text-gray-500 hover:text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
-              title="Clear filter"
-            >
-              <font-awesome-icon icon="fa-solid fa-times" class="text-sm" />
-            </button>
-          </div>
+            <option value="">Semua Bulan</option>
+            <option v-for="b in bulanOptions" :key="b.value" :value="b.value">{{ b.label }}</option>
+          </select>
         </div>
       </div>
 
@@ -224,42 +197,73 @@ async function deleteData(id: number) {
           <thead class="bg-gray-50 text-gray-700 text-center border-b border-gray-300">
             <tr>
               <th class="w-[10%] px-6 py-3 font-medium">Tahun</th>
-              <th class="w-[25%] px-6 py-3 font-medium">Infaq</th>
-              <th class="w-[25%] px-6 py-3 font-medium">Zakat</th>
-              <th class="w-[25%] px-6 py-3 font-medium">Donasi</th>
-              <th class="w-[15%] px-6 py-3 font-medium">Aksi</th>
+              <th class="w-[15%] px-6 py-3 font-medium">Bulan</th>
+              <th class="w-[21%] px-6 py-3 font-medium">Infaq</th>
+              <th class="w-[21%] px-6 py-3 font-medium">Zakat</th>
+              <th class="w-[21%] px-6 py-3 font-medium">Donasi</th>
+              <th class="w-[12%] px-6 py-3 font-medium">Aksi</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
-            <template v-if="target_pengumpulan.length > 0">
-              <tr
-                v-for="data in target_pengumpulan"
-                :key="data.id"
-                class="hover:bg-gray-50 transition-colors"
-              >
-                <td class="px-6 py-4 text-center font-medium text-gray-800">
-                  {{ data.tahun }}
-                </td>
-                <td class="px-6 py-4 text-center font-medium text-gray-800">
-                  {{ formatRupiah(data.infaq) }}
-                </td>
-                <td class="px-6 py-4 text-center font-medium text-gray-800">
-                  {{ formatRupiah(data.zakat) }}
-                </td>
-                <td class="px-6 py-4 text-center font-medium text-gray-800">
-                  {{ formatRupiah(data.donasi) }}
-                </td>
-                <td class="px-6 py-4">
-                  <div class="flex justify-center gap-2">
-                    <LightButton @click="openModalEdit(data)">
-                      <EditIcon />
-                    </LightButton>
-                    <DangerButton @click="deleteData(data.id)">
-                      <DeleteIcon />
-                    </DangerButton>
-                  </div>
-                </td>
-              </tr>
+            <template v-if="datas && datas.length">
+              <template v-for="(yearData, year, yearIndex) in groupedByYear" :key="year">
+                <tr
+                  v-for="(item, itemIndex) in yearData"
+                  :key="item.id"
+                  class="hover:bg-gray-50 transition-colors"
+                >
+                  <!-- Kolom Tahun -->
+                  <td
+                    v-if="itemIndex === 0"
+                    :rowspan="yearData.length"
+                    class="px-6 py-4 text-center font-medium text-gray-800 align-top"
+                    :class="{ 'border-t-2 border-gray-200': yearIndex !== 0 }"
+                  >
+                    {{ year }}
+                  </td>
+
+                  <!-- Kolom Data -->
+                  <td
+                    class="px-6 py-4 text-center font-medium text-gray-800"
+                    :class="{ 'border-t-2 border-gray-200': itemIndex === 0 && yearIndex !== 0 }"
+                  >
+                    {{ item.bulan_name }}
+                  </td>
+                  <td
+                    class="px-6 py-4 text-center font-medium text-gray-800"
+                    :class="{ 'border-t-2 border-gray-200': itemIndex === 0 && yearIndex !== 0 }"
+                  >
+                    Rp {{ item.infaq.toLocaleString('id-ID') }}
+                  </td>
+                  <td
+                    class="px-6 py-4 text-center font-medium text-gray-800"
+                    :class="{ 'border-t-2 border-gray-200': itemIndex === 0 && yearIndex !== 0 }"
+                  >
+                    Rp {{ item.zakat.toLocaleString('id-ID') }}
+                  </td>
+                  <td
+                    class="px-6 py-4 text-center font-medium text-gray-800"
+                    :class="{ 'border-t-2 border-gray-200': itemIndex === 0 && yearIndex !== 0 }"
+                  >
+                    Rp {{ item.donasi.toLocaleString('id-ID') }}
+                  </td>
+
+                  <!-- Kolom Aksi -->
+                  <td
+                    class="px-6 py-4 align-middle"
+                    :class="{ 'border-t-2 border-gray-200': itemIndex === 0 && yearIndex !== 0 }"
+                  >
+                    <div class="flex justify-center gap-2">
+                      <LightButton @click="openModalEdit(item.tahun, item.bulan)">
+                        <EditIcon />
+                      </LightButton>
+                      <DangerButton @click="deleteData(item.tahun, item.bulan)">
+                        <DeleteIcon />
+                      </DangerButton>
+                    </div>
+                  </td>
+                </tr>
+              </template>
             </template>
 
             <!-- Empty State -->
@@ -269,23 +273,10 @@ async function deleteData(id: number) {
                   icon="fa-solid fa-database"
                   class="text-4xl mb-2 text-gray-400"
                 />
-                <h3 class="mt-2 text-sm font-medium text-gray-900">
-                  {{ searchYear ? `Tidak ada data untuk tahun ${searchYear}` : 'Tidak ada data' }}
-                </h3>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ada data</h3>
                 <p class="text-sm">
-                  {{
-                    searchYear
-                      ? 'Coba pilih tahun lain atau hapus filter.'
-                      : 'Belum ada data target pengumpulan.'
-                  }}
+                  Silakan gunakan filter di atas untuk mencari data atau tambah data baru.
                 </p>
-                <button
-                  v-if="searchYear"
-                  @click="clearSearch"
-                  class="mt-2 text-green-600 hover:text-green-800 text-sm font-medium"
-                >
-                  Hapus Filter
-                </button>
               </td>
             </tr>
           </tbody>
@@ -310,35 +301,34 @@ async function deleteData(id: number) {
     <!-- Modal FormAdd -->
     <FormAdd
       :is-modal-open="isModalAddOpen"
-      @close="
-        isModalAddOpen = false;
-        fetchData();
-        fetchAvailableYears();
-      "
+      @close="((isModalAddOpen = false), fetchData())"
       @status="
-        (payload: any) =>
+        (payload: any) => {
           displayNotification(
-            payload.error_msg || 'Tambah Target Pengumpulan gagal',
+            payload.error_msg || 'Tambah Target gagal',
             payload.error ? 'error' : 'success',
-          )
+          );
+        }
       "
     />
 
     <!-- Modal FormEdit -->
     <FormEdit
       :is-modal-open="isModalEditOpen"
-      :selected-target="selectedTarget"
-      @close="
-        isModalEditOpen = false;
-        selectedTarget = null;
-        fetchData();
-      "
+      :tahun="selectedTarget?.tahun"
+      :bulan="selectedTarget?.bulan"
+      @close="isModalEditOpen = false"
       @status="
-        (payload: any) =>
+        (payload) => {
           displayNotification(
-            payload.error_msg || 'Update Target Pengumpulan gagal',
+            payload.error_msg || 'Update Target gagal',
             payload.error ? 'error' : 'success',
-          )
+          );
+          if (!payload.error) {
+            isModalEditOpen = false;
+            fetchData();
+          }
+        }
       "
     />
 
