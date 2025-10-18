@@ -18,15 +18,16 @@ class Model_cud {
     await this.initialize();
     const myDate = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
     const body = this.req.body;
-    console.log("_____________Ddddddddddddddddddddd____________");
+    console.log("_____________Data Kegiatan Kesekretariatan____________");
     console.log(body);
-    console.log("_____________Ddddddddddddddddddddd____________");
+    console.log("_____________Data Kegiatan Kesekretariatan____________");
 
     try {
       const insert = await Kegiatan_keseketariatan.create(
         {
           kode: body.kode,
           nama_kegiatan: body.nama_kegiatan,
+          sumber_dana: body.sumber_dana,
           penerima: body.penerima,
           jenis_penerima: body.jenis_penerima,
           nominal_kegiatan: body.nominal_kegiatan,
@@ -41,7 +42,7 @@ class Model_cud {
         }
       );
 
-      this.message = `Menambahkan Kegiatan Baru dengan Nama Kegiatan: ${body.nama_kegiatan} dan ID Bank: ${insert.id}`;
+      this.message = `Menambahkan Kegiatan Baru dengan Nama Kegiatan: ${body.nama_kegiatan}, Sumber Dana: ${body.sumber_dana}, dan ID: ${insert.id}`;
     } catch (error) {
       this.state = false;
       console.log(error);
