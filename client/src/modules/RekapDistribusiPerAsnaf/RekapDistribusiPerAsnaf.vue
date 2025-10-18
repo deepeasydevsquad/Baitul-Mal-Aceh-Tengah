@@ -81,7 +81,7 @@ async function fetchData() {
 
     const raw = res.data || [];
     if (!raw.length) {
-      displayNotification('Data laporan penyaluran tidak ditemukan', 'info');
+      displayNotification('Data laporan penyaluran tidak ditemukan', 'error');
       return;
     }
 
