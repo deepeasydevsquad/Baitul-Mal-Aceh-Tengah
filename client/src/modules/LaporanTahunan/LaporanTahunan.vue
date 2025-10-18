@@ -6,6 +6,7 @@ import Notification from '@/components/Modal/Notification.vue';
 import Pagination from '@/components/Pagination/Pagination.vue';
 import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
+import Logo from '@/components/Logo/Logo.vue';
 
 // Composable
 import { usePagination } from '@/composables/usePaginations';
@@ -189,6 +190,8 @@ onMounted(async () => {
 
 <template>
   <div class="mx-auto p-4">
+    <div class=""><Logo /></div>
+
     <!-- Header -->
     <LoadingSpinner v-if="isLoading" label="Memuat halaman..." />
     <div v-else class="space-y-4">

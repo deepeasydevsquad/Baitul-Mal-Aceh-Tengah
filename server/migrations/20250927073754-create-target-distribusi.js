@@ -12,6 +12,9 @@ module.exports = {
       tahun: {
         type: Sequelize.INTEGER,
       },
+      bulan: {
+        type: Sequelize.INTEGER,
+      },
       asnaf_id: {
         type: Sequelize.INTEGER,
         allowNull: true,

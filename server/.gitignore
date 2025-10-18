@@ -119,7 +119,6 @@ dist
 # !public/files/sk
 # config/**
 
-uploads/**
 
 # vuepress build output
 .vuepress/dist

@@ -31,6 +31,7 @@ const emit = defineEmits<{
 const form = ref({
   kode: '',
   nama_kegiatan: '',
+  sumber_dana: '',
   penerima: '',
   jenis_penerima: '',
   area_penyaluran: '',
@@ -80,6 +81,7 @@ const resetForm = () => {
   form.value = {
     kode: '',
     nama_kegiatan: '',
+    sumber_dana: '',
     penerima: '',
     jenis_penerima: '',
     area_penyaluran: '',
@@ -109,6 +111,10 @@ const validateForm = () => {
   }
   if (!form.value.nama_kegiatan) {
     errors.value.nama_kegiatan = 'Nama kegiatan wajib diisi'
+    isValid = false
+  }
+  if (!form.value.sumber_dana) {
+    errors.value.sumber_dana = 'Sumber dana wajib dipilih'
     isValid = false
   }
   if (!form.value.penerima) {
@@ -230,6 +236,19 @@ watch(nominalRaw, (val) => {
             :error="errors.nama_kegiatan"
             placeholder="Masukkan nama program kegiatan"
           />
+          
+          <SelectField
+            v-model="form.sumber_dana"
+            label="Sumber Dana"
+            :error="errors.sumber_dana"
+            :options="[
+              { id: '', name: '-- Pilih Sumber Dana --' },
+              { id: 'zakat', name: 'Zakat' },
+              { id: 'infaq', name: 'Infaq' },
+              { id: 'operasional_apbk', name: 'Operasional APBK' },
+            ]"
+          />
+
           <InputText
             v-model="form.penerima"
             label="Nama Penerima"
@@ -310,11 +329,10 @@ watch(nominalRaw, (val) => {
               !(
                 form.kode &&
                 form.nama_kegiatan &&
+                form.sumber_dana &&
                 form.penerima &&
                 form.jenis_penerima &&
                 form.area_penyaluran &&
-                form.kecamatan_id &&
-                form.desa_id &&
                 form.nominal_kegiatan &&
                 form.tanggal_penyaluran
               ) || isSubmitting

@@ -22,7 +22,7 @@ const isTableLoading = ref(false);
 
 // Composable: pagination
 const itemsPerPage = ref<number>(100);
-const totalColumns = ref<number>(6);
+const totalColumns = ref<number>(7);
 
 const { currentPage, perPage, totalRow, totalPages, nextPage, prevPage, pageNow, pages } =
   usePagination(fetchData, { perPage: itemsPerPage.value });
@@ -39,6 +39,7 @@ interface Data {
   id: number;
   kode: string;
   nama_kegiatan: string;
+  sumber_dana: string;
   penerima: string;
   jenis_penerima: string;
   area_penyaluran: string;
@@ -93,6 +94,16 @@ const handleStatus = (payload: any) => {
     payload.error ? 'error' : 'success',
   );
 };
+
+// Helper function untuk format sumber dana
+const formatSumberDana = (sumber: string) => {
+  const mapping: Record<string, string> = {
+    'zakat': 'Zakat',
+    'infaq': 'Infaq',
+    'operasional_apbk': 'Operasional APBK'
+  };
+  return mapping[sumber] || sumber;
+};
 </script>
 
 <template>
@@ -132,10 +143,11 @@ const handleStatus = (payload: any) => {
           <thead class="bg-gray-50 text-gray-700 text-center border-b border-gray-300">
             <tr>
               <th class="w-[10%] px-6 py-3 font-medium">Kode</th>
-              <th class="w-[20%] px-6 py-3 font-medium">Nama Kegiatan</th>
-              <th class="w-[20%] px-6 py-3 font-medium">Info Penerima</th>
-              <th class="w-[20%] px-6 py-3 font-medium">Lokasi</th>
-              <th class="w-[15%] px-6 py-3 font-medium">Nominal</th>
+              <th class="w-[18%] px-6 py-3 font-medium">Nama Kegiatan</th>
+              <th class="w-[12%] px-6 py-3 font-medium">Sumber Dana</th>
+              <th class="w-[18%] px-6 py-3 font-medium">Info Penerima</th>
+              <th class="w-[15%] px-6 py-3 font-medium">Lokasi</th>
+              <th class="w-[12%] px-6 py-3 font-medium">Nominal</th>
               <th class="w-[15%] px-6 py-3 font-medium">Tanggal</th>
             </tr>
           </thead>
@@ -149,13 +161,25 @@ const handleStatus = (payload: any) => {
                 <td class="px-6 py-4 text-center font-medium text-gray-800">
                   {{ data.nama_kegiatan }}
                 </td>
+                <td class="px-6 py-4 text-center font-medium text-gray-800">
+                  <span 
+                    class="inline-flex px-3 py-1 rounded-full text-xs font-semibold"
+                    :class="{
+                      'text-gray-800': data.sumber_dana === 'zakat',
+                      'text-gray-800': data.sumber_dana === 'infaq',
+                      'text-gray-800': data.sumber_dana === 'operasional_apbk'
+                    }"
+                  >
+                    {{ formatSumberDana(data.sumber_dana) }}
+                  </span>
+                </td>
                 <td class="px-6 py-4 text-left font-medium text-gray-800">
                   <div class="grid grid-cols-2 gap-2">
                     <span class="text-gray-500">Nama Penerima</span>
-                    <span>:{{ data.penerima }}</span>
+                    <span>: {{ data.penerima }}</span>
 
                     <span class="text-gray-500">Jenis Penerima</span>
-                    <span>:{{ data.jenis_penerima }}</span>
+                    <span>: {{ data.jenis_penerima }}</span>
                   </div>
                 </td>
 
@@ -176,10 +200,6 @@ const handleStatus = (payload: any) => {
             <!-- Empty State -->
             <tr v-else>
               <td :colspan="totalColumns" class="px-6 py-8 text-center text-gray-500">
-                <!-- <font-awesome-icon
-                  icon="fa-solid fa-database"
-                  class="text-2xl mb-2 text-gray-400"
-                /> -->
                 <p class="text-sm">Belum ada data.</p>
               </td>
             </tr>

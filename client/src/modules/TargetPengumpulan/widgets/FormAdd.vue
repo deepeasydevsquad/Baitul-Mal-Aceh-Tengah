@@ -1,9 +1,8 @@
 <script setup lang="ts">
 // Library
-import { ref, watch, computed, reactive, onMounted } from 'vue';
+import { ref, watch, computed, reactive } from 'vue';
 import BaseButton from '@/components/Button/BaseButton.vue';
-import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
-import { add_target_pengumpulan } from '@/service/target_pengumpulan';
+import { add } from '@/service/target_pengumpulan';
 
 // Props & Emits
 const props = defineProps<{
@@ -17,10 +16,10 @@ const emit = defineEmits<{
 
 // --- State ---
 const isSubmitting = ref(false);
-const isLoadingData = ref(false);
 
 const formData = ref({
   tahun: '',
+  bulan: '',
   infaq: '',
   zakat: '',
   donasi: '',
@@ -28,12 +27,13 @@ const formData = ref({
 
 const errors = reactive({
   tahun: '',
+  bulan: '',
   infaq: '',
   zakat: '',
   donasi: '',
 });
 
-// Generate year options
+// Options
 const currentYear = new Date().getFullYear();
 const yearOptions = computed(() => {
   const years = [];
@@ -43,101 +43,60 @@ const yearOptions = computed(() => {
   return years;
 });
 
-// Format Rupiah functions
-const formatRupiah = (value: string): string => {
-  const numericValue = value.replace(/[^\d]/g, '');
+const bulanOptions = [
+  { value: 1, label: 'Januari' },
+  { value: 2, label: 'Februari' },
+  { value: 3, label: 'Maret' },
+  { value: 4, label: 'April' },
+  { value: 5, label: 'Mei' },
+  { value: 6, label: 'Juni' },
+  { value: 7, label: 'Juli' },
+  { value: 8, label: 'Agustus' },
+  { value: 9, label: 'September' },
+  { value: 10, label: 'Oktober' },
+  { value: 11, label: 'November' },
+  { value: 12, label: 'Desember' },
+];
 
-  if (!numericValue) return '';
-
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(parseInt(numericValue));
-};
-
-const parseRupiahToNumber = (rupiahString: string): number => {
-  const numericString = rupiahString.replace(/[^\d]/g, '');
-  return parseInt(numericString) || 0;
-};
-const selectRef = ref<HTMLSelectElement | null>(null);
-
-const handleSelectFocus = () => {
-  if (!formData.value.tahun) {
-    formData.value.tahun = currentYear.toString();
-  }
-
-  setTimeout(() => {
-    if (selectRef.value) {
-      const select = selectRef.value;
-      const currentYearIndex = yearOptions.value.findIndex((year) => year === currentYear);
-
-      if (currentYearIndex !== -1) {
-        const optionHeight = 24;
-        const visibleOptions = Math.floor(200 / optionHeight);
-        const scrollPosition = Math.max(
-          0,
-          (currentYearIndex - Math.floor(visibleOptions / 2)) * optionHeight,
-        );
-
-        select.scrollTop = scrollPosition;
-      }
-    }
-  }, 10);
-};
-const displayValues = reactive({
-  infaq: '',
-  zakat: '',
-  donasi: '',
-});
+// Rupiah Formatting
+const displayValues = reactive({ infaq: '', zakat: '', donasi: '' });
 
 watch(
   () => formData.value.infaq,
   (newVal) => {
-    if (newVal !== '') {
-      displayValues.infaq = formatRupiah(newVal);
-    } else {
-      displayValues.infaq = '';
-    }
+    displayValues.infaq = formatRupiah(newVal);
   },
 );
-
 watch(
   () => formData.value.zakat,
   (newVal) => {
-    if (newVal !== '') {
-      displayValues.zakat = formatRupiah(newVal);
-    } else {
-      displayValues.zakat = '';
-    }
+    displayValues.zakat = formatRupiah(newVal);
   },
 );
-
 watch(
   () => formData.value.donasi,
   (newVal) => {
-    if (newVal !== '') {
-      displayValues.donasi = formatRupiah(newVal);
-    } else {
-      displayValues.donasi = '';
-    }
+    displayValues.donasi = formatRupiah(newVal);
   },
 );
 
-const handleCurrencyInput = (field: 'infaq' | 'zakat' | 'donasi', event: Event) => {
-  const target = event.target as HTMLInputElement;
-  const rawValue = target.value.replace(/[^\d]/g, '');
-  formData.value[field] = rawValue;
+const formatRupiah = (value: string): string => {
+  const numericValue = value.replace(/[^\d]/g, '');
+  if (!numericValue) return '';
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+  }).format(parseInt(numericValue));
 };
 
+const handleCurrencyInput = (field: 'infaq' | 'zakat' | 'donasi', event: Event) => {
+  formData.value[field] = (event.target as HTMLInputElement).value.replace(/[^\d]/g, '');
+};
+
+// Form Handling
 const resetForm = () => {
-  formData.value = {
-    tahun: '',
-    infaq: '',
-    zakat: '',
-    donasi: '',
-  };
+  formData.value = { tahun: '', bulan: '', infaq: '', zakat: '', donasi: '' };
   displayValues.infaq = '';
   displayValues.zakat = '';
   displayValues.donasi = '';
@@ -147,69 +106,63 @@ const resetForm = () => {
 
 const closeModal = () => {
   if (isSubmitting.value) return;
-  resetForm();
   emit('close');
 };
 
 const validateForm = (): boolean => {
   Object.keys(errors).forEach((key) => (errors[key] = ''));
   let isValid = true;
-
   if (!formData.value.tahun) {
     errors.tahun = 'Tahun harus dipilih';
     isValid = false;
   }
-
+  if (!formData.value.bulan) {
+    errors.bulan = 'Bulan harus dipilih';
+    isValid = false;
+  }
   if (!formData.value.infaq) {
     errors.infaq = 'Infaq tidak boleh kosong';
     isValid = false;
   }
-
   if (!formData.value.zakat) {
     errors.zakat = 'Zakat tidak boleh kosong';
     isValid = false;
   }
-
   if (!formData.value.donasi) {
     errors.donasi = 'Donasi tidak boleh kosong';
     isValid = false;
   }
-
   return isValid;
 };
 
 async function handleSubmit() {
   if (!validateForm() || isSubmitting.value) return;
-
   isSubmitting.value = true;
-
   try {
     const submitData = {
+      ...formData.value,
       tahun: parseInt(formData.value.tahun),
+      bulan: parseInt(formData.value.bulan),
       infaq: parseInt(formData.value.infaq),
       zakat: parseInt(formData.value.zakat),
       donasi: parseInt(formData.value.donasi),
     };
-
-    await add_target_pengumpulan(submitData);
-
+    await add(submitData);
     emit('status', { error: false, error_msg: 'Target pengumpulan berhasil ditambahkan!' });
-    resetForm();
     emit('close');
   } catch (error: any) {
-    console.error('Submit error:', error);
-    
-    let errorMessage = 'Gagal menambahkan target pengumpulan.';
-    
-    if (error.response && error.response.data) {
-      errorMessage = error.response.data.error_msg || 
-                    error.response.data.message || 
-                    errorMessage;
+    let msg = 'Gagal menambahkan target.';
+
+    if (error.response?.data?.message) {
+      msg = error.response.data.message;
+    } else if (error.response?.data?.error_msg) {
+      msg = error.response.data.error_msg;
     } else if (error.message) {
-      errorMessage = error.message;
+      msg = error.message;
     }
-    
-    emit('status', { error: true, error_msg: errorMessage });
+
+    emit('status', { error: true, error_msg: msg });
+  } finally {
     isSubmitting.value = false;
   }
 }
@@ -240,7 +193,7 @@ watch(
     >
       <div class="w-full max-w-lg mx-4 p-6 bg-white rounded-lg shadow-xl">
         <div class="flex justify-between items-center mb-6">
-          <h2 class="text-xl font-bold text-gray-800">Tambah Target</h2>
+          <h2 class="text-xl font-bold text-gray-800">Tambah Target Pengumpulan</h2>
           <button
             @click="closeModal"
             class="text-gray-400 hover:text-gray-600"
@@ -250,35 +203,51 @@ watch(
           </button>
         </div>
 
-        <LoadingSpinner v-if="isLoadingData" label="Memuat data..." />
-        <form v-else @submit.prevent="handleSubmit" class="space-y-4">
-          <!-- Tahun -->
-          <div>
-            <label for="tahun" class="block text-sm font-medium text-gray-700 mb-1"
-              >Tahun <span class="text-red-500">*</span></label
-            >
-            <select
-              id="tahun"
-              ref="selectRef"
-              v-model="formData.tahun"
-              @focus="handleSelectFocus"
-              @click="handleSelectFocus"
-              :class="[
-                'block w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-green-900 focus:border-green-900',
-                errors.tahun ? 'border-red-500' : 'border-gray-300',
-              ]"
-              :disabled="isSubmitting"
-              style="max-height: 200px; overflow-y: auto"
-            >
-              <option value="">Pilih Tahun</option>
-              <option v-for="year in yearOptions" :key="year" :value="year">
-                {{ year }}
-              </option>
-            </select>
-            <p v-if="errors.tahun" class="mt-1 text-xs text-red-600">{{ errors.tahun }}</p>
+        <form @submit.prevent="handleSubmit" class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Tahun -->
+            <div>
+              <label for="tahun" class="block text-sm font-medium text-gray-700 mb-1"
+                >Tahun <span class="text-red-500">*</span></label
+              >
+              <select
+                id="tahun"
+                v-model="formData.tahun"
+                :class="[
+                  'block w-full px-3 py-2 border rounded-md',
+                  errors.tahun ? 'border-red-500' : 'border-gray-300',
+                ]"
+                :disabled="isSubmitting"
+              >
+                <option value="">Pilih Tahun</option>
+                <option v-for="year in yearOptions" :key="year" :value="year">{{ year }}</option>
+              </select>
+              <p v-if="errors.tahun" class="mt-1 text-xs text-red-600">{{ errors.tahun }}</p>
+            </div>
+            <!-- Bulan -->
+            <div>
+              <label for="bulan" class="block text-sm font-medium text-gray-700 mb-1"
+                >Bulan <span class="text-red-500">*</span></label
+              >
+              <select
+                id="bulan"
+                v-model="formData.bulan"
+                :class="[
+                  'block w-full px-3 py-2 border rounded-md',
+                  errors.bulan ? 'border-red-500' : 'border-gray-300',
+                ]"
+                :disabled="isSubmitting"
+              >
+                <option value="">Pilih Bulan</option>
+                <option v-for="b in bulanOptions" :key="b.value" :value="b.value">
+                  {{ b.label }}
+                </option>
+              </select>
+              <p v-if="errors.bulan" class="mt-1 text-xs text-red-600">{{ errors.bulan }}</p>
+            </div>
           </div>
 
-          <!-- Infaq -->
+          <!-- Infaq, Zakat, Donasi -->
           <div>
             <label for="infaq" class="block text-sm font-medium text-gray-700 mb-1"
               >Target Infaq <span class="text-red-500">*</span></label
@@ -289,16 +258,14 @@ watch(
               @input="handleCurrencyInput('infaq', $event)"
               type="text"
               :class="[
-                'block w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-green-900 focus:border-green-900',
+                'block w-full px-3 py-2 border rounded-md',
                 errors.infaq ? 'border-red-500' : 'border-gray-300',
               ]"
-              placeholder="Masukkan target infaq..."
+              placeholder="Rp 0"
               :disabled="isSubmitting"
             />
             <p v-if="errors.infaq" class="mt-1 text-xs text-red-600">{{ errors.infaq }}</p>
           </div>
-
-          <!-- Zakat -->
           <div>
             <label for="zakat" class="block text-sm font-medium text-gray-700 mb-1"
               >Target Zakat <span class="text-red-500">*</span></label
@@ -309,16 +276,14 @@ watch(
               @input="handleCurrencyInput('zakat', $event)"
               type="text"
               :class="[
-                'block w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-green-900 focus:border-green-900',
+                'block w-full px-3 py-2 border rounded-md',
                 errors.zakat ? 'border-red-500' : 'border-gray-300',
               ]"
-              placeholder="Masukkan target zakat..."
+              placeholder="Rp 0"
               :disabled="isSubmitting"
             />
             <p v-if="errors.zakat" class="mt-1 text-xs text-red-600">{{ errors.zakat }}</p>
           </div>
-
-          <!-- Donasi -->
           <div>
             <label for="donasi" class="block text-sm font-medium text-gray-700 mb-1"
               >Target Donasi <span class="text-red-500">*</span></label
@@ -329,10 +294,10 @@ watch(
               @input="handleCurrencyInput('donasi', $event)"
               type="text"
               :class="[
-                'block w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-green-900 focus:border-green-900',
+                'block w-full px-3 py-2 border rounded-md',
                 errors.donasi ? 'border-red-500' : 'border-gray-300',
               ]"
-              placeholder="Masukkan target donasi..."
+              placeholder="Rp 0"
               :disabled="isSubmitting"
             />
             <p v-if="errors.donasi" class="mt-1 text-xs text-red-600">{{ errors.donasi }}</p>
@@ -351,12 +316,15 @@ watch(
               variant="primary"
               :loading="isSubmitting"
               :disabled="
-                !(formData.tahun && formData.infaq && formData.zakat && formData.donasi) ||
+                !formData.tahun ||
+                !formData.bulan ||
+                !formData.infaq ||
+                !formData.zakat ||
+                !formData.donasi ||
                 isSubmitting
               "
+              >Simpan</BaseButton
             >
-              <span>Simpan</span>
-            </BaseButton>
           </div>
         </form>
       </div>

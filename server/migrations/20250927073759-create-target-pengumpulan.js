@@ -12,6 +12,9 @@ module.exports = {
       tahun: {
         type: Sequelize.INTEGER
       },
+      bulan: {
+        type: Sequelize.INTEGER
+      },
       zakat: {
         type: Sequelize.INTEGER
       },

@@ -106,6 +106,7 @@ const arr_router = [
   "rekap_distribusi_kecamatan",
   "donasi_member",
   "survey_lapangan",
+  "logo",
 ];
 
 const arr = {};

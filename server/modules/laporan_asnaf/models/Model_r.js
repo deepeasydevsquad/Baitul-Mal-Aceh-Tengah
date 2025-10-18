@@ -1373,30 +1373,32 @@ class Model_r {
 
   async tanda_tangan() {
     try {
-      var data = {};
-      await Setting.findAll({
+      // default value pakai nama field-nya sendiri
+      let data = {
+        nama_jabatan1: "Nama Jabatan 1",
+        nama_pejabat1: "Nama Pejabat 1",
+        nama_jabatan2: "Nama Jabatan 2",
+        nama_pejabat2: "Nama Pejabat 2",
+        nama_jabatan3: "Nama Jabatan 3",
+        nama_pejabat3: "Nama Pejabat 3",
+      };
+
+      const value = await Setting.findAll({
         where: {
           name: {
-            [Op.in]: [
-              "nama_jabatan1",
-              "nama_pejabat1",
-              "nama_jabatan2",
-              "nama_pejabat2",
-              "nama_jabatan3",
-              "nama_pejabat3",
-            ],
+            [Op.in]: Object.keys(data),
           },
         },
-      }).then(async (value) => {
-        await Promise.all(
-          await value.map(async (e) => {
-            data = { ...data, ...{ [e.name]: e.value } };
-          })
-        );
       });
-      return { error: false, data: data };
+
+      // kalau ada datanya, ganti value default
+      value.forEach((e) => {
+        data[e.name] = e.value || e.name;
+      });
+
+      return { error: false, data };
     } catch (error) {
-      return { error: true };
+      return { error: true, message: error.message };
     }
   }
 }

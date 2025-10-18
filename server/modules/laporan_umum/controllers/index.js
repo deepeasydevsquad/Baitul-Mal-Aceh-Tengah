@@ -1,7 +1,3 @@
-"use strict";
-
-"use strict";
-
 const Model_r = require("../models/model_r");
 
 exports.laporan_umum = async (req, res) => {

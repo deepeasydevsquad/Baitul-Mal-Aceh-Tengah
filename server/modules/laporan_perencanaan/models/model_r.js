@@ -1,5 +1,6 @@
 // modules/laporan_perencanaan/models/model_r.js
-const { Kegiatan, Asnaf } = require("../../../models");
+const { Kegiatan, Asnaf, Program } = require("../../../models");
+const { Op } = require("sequelize");
 
 class Model_r {
   constructor(req) {
@@ -18,7 +19,12 @@ class Model_r {
 
   async list_laporan_perencanaan() {
     try {
+      const { tahun, program } = this.req.body || {};
+      const whereClause = {};
+      if (tahun) whereClause.tahun = tahun;
+
       const kegiatanList = await Kegiatan.findAll({
+        where: whereClause,
         attributes: [
           "id",
           "nama_kegiatan",
@@ -28,11 +34,24 @@ class Model_r {
           "periode_bantuan",
           "program_id",
           "sumber_dana",
+          "tahun",
         ],
         include: [
           {
             model: Asnaf,
             attributes: ["id", "name"],
+          },
+          {
+            model: Program,
+            attributes: ["id", "name"],
+            where: program
+              ? {
+                  [Op.or]: [
+                    { id: program },
+                    { name: { [Op.like]: `%${program}%` } },
+                  ],
+                }
+              : undefined,
           },
         ],
         raw: true,
