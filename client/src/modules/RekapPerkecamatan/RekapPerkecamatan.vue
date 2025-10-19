@@ -287,30 +287,34 @@ onMounted(async () => {
         <table v-else class="w-full border-collapse bg-white text-sm">
           <!-- Header -->
           <thead class="text-gray-700 text-center border-b border-gray-300">
-            <tr class="bg-gray-50 sticky top-0 z-20">
-              <!-- <th
-                rowspan="2"
-                class="w-[20%] px-4 py-3 font-medium border-r border-gray-300 sticky left-0 bg-gray-50 z-30"
-              >
-                NO
-              </th> -->
+            <!-- Baris 1 -->
+            <tr class="bg-gray-50">
               <th
                 rowspan="2"
-                class="w-[20%] px-4 py-3 font-medium border-r border-gray-300 sticky left-0 bg-gray-50 z-30"
+                class="w-[20%] px-4 py-3 font-medium border-r border-gray-300 sticky left-0 top-0 bg-gray-50 z-[50] min-w-[180px]"
               >
                 KECAMATAN
               </th>
-              <th :colspan="bulanNames.length" class="px-4 py-3 font-medium border border-gray-300">
+              <th
+                :colspan="bulanNames.length"
+                class="px-4 py-3 font-medium border border-gray-300 top-0 bg-gray-50 z-[30]"
+              >
                 BULAN
               </th>
-              <th rowspan="2" class="px-4 py-3 font-medium bg-gray-100 min-w-[120px]">JUMLAH</th>
+              <th
+                rowspan="2"
+                class="px-4 py-3 font-medium border border-gray-300 top-0 bg-gray-100 z-[30] min-w-[120px]"
+              >
+                JUMLAH
+              </th>
             </tr>
 
-            <tr class="bg-gray-50 sticky top-[40px] z-10">
+            <!-- Baris 2 -->
+            <tr class="bg-gray-50">
               <th
                 v-for="bulan in bulanNames"
                 :key="bulan"
-                class="px-4 py-3 font-medium border-r border-gray-300 min-w-[100px]"
+                class="px-4 py-3 font-medium border-r border-gray-300 top-[44px] bg-gray-50 z-[30] min-w-[100px]"
               >
                 {{ bulan }}
               </th>
@@ -318,7 +322,7 @@ onMounted(async () => {
           </thead>
 
           <!-- Body -->
-          <tbody v-if="filteredKecamatanList.length > 0">
+          <tbody v-if="filteredKecamatanList.length > 0" class="divide-y divide-gray-100">
             <!-- Data per Kecamatan -->
             <tr
               v-for="item in filteredKecamatanList"
@@ -358,20 +362,6 @@ onMounted(async () => {
               </td>
               <td class="px-4 py-3 text-right font-normal border-gray-200 bg-gray-100">
                 {{ formatRupiah(calculateGrandTotal()) }}
-              </td>
-            </tr>
-          </tbody>
-
-          <!-- Empty State -->
-          <tbody v-else>
-            <tr>
-              <td colspan="14" class="px-6 py-8 text-center text-gray-500">
-                <font-awesome-icon
-                  icon="fa-solid fa-database"
-                  class="text-4xl mb-2 text-gray-400"
-                />
-                <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ada data</h3>
-                <p class="text-sm">Belum ada data rekap penyaluran.</p>
               </td>
             </tr>
           </tbody>

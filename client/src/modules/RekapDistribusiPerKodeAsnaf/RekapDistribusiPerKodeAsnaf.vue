@@ -425,35 +425,28 @@ watch(selectedYear, fetchData);
         <table v-else class="w-full border-collapse bg-white text-sm">
           <!-- Header -->
           <thead class="text-gray-700 text-center border-b border-gray-300">
-            <tr class="bg-gray-50 sticky top-0 z-20">
+            <tr class="bg-gray-50 top-0 z-20">
               <th
                 rowspan="2"
-                class="w-[5%] px-4 py-3 font-medium border-r border-gray-300 sticky left-0 bg-gray-50 z-30"
+                class="px-4 py-3 font-medium border border-gray-300 left-0 bg-gray-50 z-30 min-w-[180px]"
               >
-                NO
-              </th>
-              <th
-                rowspan="2"
-                class="w-[15%] px-4 py-3 font-medium border-r border-gray-300 sticky left-[60px] bg-gray-50 z-30"
-              >
-                ASNAF
-              </th>
-              <th
-                rowspan="2"
-                class="w-[10%] px-4 py-3 font-medium border-r border-gray-300 sticky left-[220px] bg-gray-50 z-30"
-              >
-                KODE
+                KODE / ASNAF
               </th>
               <th :colspan="months.length" class="px-4 py-3 font-medium border border-gray-300">
                 BULAN
               </th>
-              <th rowspan="2" class="px-4 py-3 font-medium bg-gray-100 min-w-[120px]">JUMLAH</th>
+              <th
+                rowspan="2"
+                class="px-4 py-3 font-medium bg-gray-100 min-w-[120px] border border-gray-300"
+              >
+                JUMLAH
+              </th>
             </tr>
-            <tr class="bg-gray-50 sticky top-[48px] z-10">
+            <tr class="bg-gray-50 top-[48px] z-10">
               <th
                 v-for="m in months"
                 :key="m.key"
-                class="px-4 py-3 font-medium border-r border-gray-300 min-w-[100px]"
+                class="px-4 py-3 font-medium border border-gray-300 min-w-[100px]"
               >
                 {{ m.label }}
               </th>
@@ -461,86 +454,57 @@ watch(selectedYear, fetchData);
           </thead>
 
           <!-- Body -->
-          <tbody v-if="filteredRows.length > 0">
-            <template v-for="(row, index) in filteredRows" :key="`asnaf_${row.asnaf_id}`">
-              <!-- Baris pertama untuk kegiatan pertama -->
-              <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                <td
-                  :rowspan="row.kegiatan.length"
-                  class="px-4 py-3 font-normal text-center text-gray-800 border-r border-gray-300 sticky left-0 bg-white z-10"
-                >
-                  {{ index + 1 }}
-                </td>
-                <td
-                  :rowspan="row.kegiatan.length"
-                  class="px-4 py-3 font-normal text-gray-800 border-r border-gray-300 sticky left-[60px] bg-white z-10"
-                >
-                  {{ row.asnaf }}
-                </td>
-                <td
-                  class="px-4 py-3 font-normal text-center text-gray-800 border-r border-gray-300 sticky left-[220px] bg-white z-10"
-                >
-                  {{ row.kegiatan[0]?.kode || '-' }}
-                </td>
-                <td
-                  v-for="m in months"
-                  :key="`${row.asnaf_id}_0_${m.key}`"
-                  class="px-4 py-3 text-right border-r border-gray-100"
-                >
-                  {{ formatRupiah(row.kegiatan[0]?.values[m.key] || 0) }}
-                </td>
-                <td
-                  :rowspan="row.kegiatan.length"
-                  class="px-4 py-3 text-right font-normal bg-gray-100"
-                >
-                  {{ formatRupiah(row.total) }}
-                </td>
-              </tr>
-
-              <!-- Baris tambahan untuk kegiatan kedua dan seterusnya -->
-              <tr
-                v-for="(kegiatan, kIdx) in row.kegiatan.slice(1)"
-                :key="`${row.asnaf_id}_${kIdx + 1}`"
-                class="border-b border-gray-200 hover:bg-gray-50 transition-colors"
+          <tbody v-if="filteredRows.length > 0" class="divide-y divide-gray-100">
+            <!-- Baris pertama untuk kegiatan pertama -->
+            <tr
+              class="even:bg-gray-50 hover:bg-indigo-50 transition-colors"
+              v-for="(row, index) in filteredRows"
+              :key="`asnaf_${row.asnaf_id}`"
+            >
+              <td class="px-6 py-4 text-left font-medium text-gray-700 left-0 bg-inherit">
+                <b>#{{ row.kegiatan[0]?.kode || '-' }}</b>
+                <br />
+                {{ row.asnaf }}
+              </td>
+              <td
+                v-for="m in months"
+                :key="`${row.asnaf_id}_0_${m.key}`"
+                class="px-4 py-3 text-right"
               >
-                <td
-                  class="px-4 py-3 font-normal text-center text-gray-800 border-r border-gray-300 sticky left-[220px] bg-white z-10"
-                >
-                  {{ kegiatan.kode }}
-                </td>
-                <td
-                  v-for="m in months"
-                  :key="`${row.asnaf_id}_${kIdx + 1}_${m.key}`"
-                  class="px-4 py-3 text-right border-r border-gray-100"
-                >
-                  {{ formatRupiah(kegiatan.values[m.key] || 0) }}
-                </td>
-              </tr>
-            </template>
+                {{ formatRupiah(row.kegiatan[0]?.values[m.key] || 0) }}
+              </td>
+              <td
+                :rowspan="row.kegiatan.length"
+                class="px-4 py-3 text-right font-normal bg-gray-100 border border-gray-300"
+              >
+                {{ formatRupiah(row.total) }}
+              </td>
+            </tr>
 
             <!-- Grand Total -->
+          </tbody>
+          <tfoot>
             <tr class="border border-gray-200 bg-gray-100">
               <td
-                colspan="3"
-                class="px-4 py-3 font-bold text-gray-800 border-r border-gray-200 sticky left-0 bg-gray-100 z-10"
+                class="px-6 py-4 text-left font-bold text-gray-700 left-0 bg-gray-100 border border-gray-300"
               >
-                TOTAL KESELURUHAN
+                Total
               </td>
               <td
                 v-for="m in months"
                 :key="`total-${m.key}`"
-                class="px-4 py-3 text-right font-bold border-r border-gray-200"
+                class="px-4 py-3 text-right font-medium border border-gray-300"
               >
                 {{ formatRupiah(calculateGrandTotalBulan(m.key)) }}
               </td>
-              <td class="px-4 py-3 text-right font-bold border-gray-200">
+              <td class="px-4 py-3 text-right font-medium border-gray-200">
                 {{ formatRupiah(calculateGrandTotal()) }}
               </td>
             </tr>
-          </tbody>
+          </tfoot>
 
           <!-- Empty State -->
-          <tbody v-else>
+          <!-- <tbody v-else>
             <tr>
               <td colspan="16" class="px-6 py-8 text-center text-gray-500">
                 <font-awesome-icon
@@ -551,7 +515,7 @@ watch(selectedYear, fetchData);
                 <p class="text-sm">Belum ada data rekap penyaluran.</p>
               </td>
             </tr>
-          </tbody>
+          </tbody> -->
         </table>
       </div>
     </div>
