@@ -29,6 +29,17 @@ exports.detail_donasi = async (req, res) => {
   }
 };
 
+exports.kode_pembayaran = async (req, res) => {
+  if (!(await handleValidationErrors(req, res))) return;
+  try {
+    const model = new Model_r(req);
+    const data = await model.generateKode();
+    return res.status(200).json(data); // pake return
+  } catch (error) {
+    return handleServerError(res, error); // kasih full error object
+  }
+};
+
 exports.daftar_donatur = async (req, res) => {
   if (!(await handleValidationErrors(req, res))) return;
   console.log("controller item");

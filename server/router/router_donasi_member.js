@@ -107,6 +107,12 @@ router.post(
 );
 
 router.get(
+  "/donasi_member/kode_pembayaran",
+  authenticateTokenAdministrator,
+  controllers.kode_pembayaran
+);
+
+router.get(
   "/donasi_member/profile",
   authenticateTokenAdministrator,
   controllers.getMemberProfile
@@ -138,6 +144,11 @@ router.post(
       .isString()
       .withMessage("Invoice harus berupa teks")
       .custom(validation.check_invoice_exists),
+    body("kode")
+      .notEmpty()
+      .withMessage("kode donasi harus diisi")
+      .isInt()
+      .withMessage("kode donasi harus berupa angka"),
   ],
   controllers.add
 );

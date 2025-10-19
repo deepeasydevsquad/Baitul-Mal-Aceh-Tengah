@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, watch, reactive } from 'vue';
+import { ref, watch, reactive, computed } from 'vue';
 import BaseButton from '@/components/Button/BaseButton.vue';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
-import { getMemberProfile, getInfaqBanks, addInfaq } from '@/service/infaq_member';
+import { getMemberProfile, getInfaqBanks, addInfaq, kode_pembayaran } from '@/service/infaq_member';
 
 const props = defineProps<{
   isModalOpen: boolean;
@@ -17,6 +17,7 @@ const isBankLoading = ref(false);
 
 // Interface dan state untuk daftar bank
 interface Bank {
+  kode: number;
   bankName: string;
   accountName: string;
   accountNumber: string;
@@ -37,6 +38,17 @@ const serverErrors = reactive({
   nominal: '',
   general: '',
 });
+
+const kodePembayaran = ref(0); // default value 3 digit juga biar konsisten
+
+const generateKodePembayaran = async () => {
+  try {
+    const res = await kode_pembayaran(); // panggil helper yang tadi kita buat
+    kodePembayaran.value = res.data;
+  } catch (error) {
+    console.error('Gagal generate kode pembayaran:', error);
+  }
+};
 
 // Fungsi untuk generate invoice
 const generateInvoice = () => {
@@ -87,6 +99,7 @@ watch(
       resetForm();
       fetchMemberProfile();
       fetchInfaqBanks();
+      generateKodePembayaran();
     }
   },
 );
@@ -120,6 +133,7 @@ const handleConfirmPayment = async () => {
   try {
     await addInfaq({
       nominal: formData.value.nominal,
+      kode: kodePembayaran.value,
       invoice: generatedInvoice.value,
     });
 
@@ -157,6 +171,13 @@ const resetForm = () => {
   serverErrors.general = '';
   isLoading.value = false;
 };
+
+const totalPembayaran = computed(() => {
+  if (!formData.value.nominal) return 0;
+  const nominal = formData.value.nominal;
+  const kode = Number(kodePembayaran.value) || 0;
+  return nominal - (nominal % 1000) + kode; // gabung kode ke 3 digit terakhir
+});
 
 // Format input nominal menjadi format angka
 const formatNominal = (event: Event) => {
@@ -310,9 +331,7 @@ const formatNominal = (event: Event) => {
             <div class="text-center">
               <p class="text-gray-700">
                 Silakan lakukan pembayaran Infaq anda sebesar
-                <strong class="text-lg"
-                  >Rp {{ formData.nominal?.toLocaleString('id-ID') ?? '0' }}</strong
-                >
+                <strong class="text-lg">Rp {{ totalPembayaran.toLocaleString('id-ID') }}</strong>
                 ke nomor rekening di bawah ini.
               </p>
             </div>

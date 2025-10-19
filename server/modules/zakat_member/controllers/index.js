@@ -29,6 +29,20 @@ controllers.getZakatList = async (req, res) => {
   }
 };
 
+controllers.kode_pembayaran = async (req, res) => {
+  try {
+    const model_r = new Model_r(req);
+    const kode = await model_r.generateKode();
+    res.status(200).json({
+      error: false,
+      message: "kode pembayaran berhasil di buat",
+      data: kode,
+    });
+  } catch (error) {
+    handleServerError(res, error);
+  }
+};
+
 controllers.getMemberProfile = async (req, res) => {
   try {
     const model_r = new Model_r(req);
@@ -78,8 +92,7 @@ controllers.addZakat = async (req, res) => {
   }
 
   try {
-    const { tipe, nominal, invoice } = req.body;
-    const kode = Math.floor(100 + Math.random() * 900);
+    const { tipe, nominal, invoice, kode } = req.body;
 
     const model_cud = new Model_cud(req);
     const newZakat = await model_cud.addZakat(tipe, nominal, invoice, kode);
