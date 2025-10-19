@@ -10,6 +10,16 @@ export const getInfaqList = async (params: any) => {
   }
 };
 
+export const kode_pembayaran = async () => {
+  try {
+    const response = await api.get('/infaq_member/kode_pembayaran');
+    return response.data;
+  } catch (error) {
+    console.error('Gagal mengambil profil member:', error);
+    throw error;
+  }
+};
+
 export const getMemberProfile = async () => {
   try {
     const response = await api.get('/infaq_member/profile');
@@ -30,7 +40,11 @@ export const getInfaqBanks = async () => {
   }
 };
 
-export const addInfaq = async (data: { nominal: number | null; invoice: string }) => {
+export const addInfaq = async (data: {
+  nominal: number | null;
+  invoice: string | null;
+  kode: number;
+}) => {
   try {
     const response = await api.post('/infaq_member/add', data);
     return response.data;

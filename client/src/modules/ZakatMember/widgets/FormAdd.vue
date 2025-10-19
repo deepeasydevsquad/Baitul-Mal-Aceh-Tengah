@@ -1,8 +1,14 @@
 <script setup lang="ts">
-import { ref, watch, reactive } from 'vue';
+import { ref, watch, reactive, computed } from 'vue';
 import BaseButton from '@/components/Button/BaseButton.vue';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
-import { getMemberProfile, getZakatBanks, getTipeZakat, addZakat } from '@/service/zakat_member';
+import {
+  getMemberProfile,
+  getZakatBanks,
+  getTipeZakat,
+  addZakat,
+  kode_pembayaran,
+} from '@/service/zakat_member';
 
 const props = defineProps<{
   isModalOpen: boolean;
@@ -48,6 +54,17 @@ const serverErrors = reactive({
   nominal: '',
   general: '',
 });
+
+const kodePembayaran = ref(0); // default value 3 digit juga biar konsisten
+
+const generateKodePembayaran = async () => {
+  try {
+    const res = await kode_pembayaran(); // panggil helper yang tadi kita buat
+    kodePembayaran.value = res.data;
+  } catch (error) {
+    console.error('Gagal generate kode pembayaran:', error);
+  }
+};
 
 // Fungsi untuk generate invoice
 const generateInvoice = (tipe: string) => {
@@ -133,6 +150,7 @@ watch(
       fetchMemberProfile();
       fetchZakatBanks();
       fetchTipeZakat();
+      generateKodePembayaran();
     }
   },
 );
@@ -174,6 +192,7 @@ const handleConfirmPayment = async () => {
       tipe: formData.value.tipe,
       nominal: formData.value.nominal,
       invoice: generatedInvoice.value,
+      kode: kodePembayaran.value,
     });
 
     emit('status', {
@@ -213,6 +232,13 @@ const resetForm = () => {
   serverErrors.general = '';
   isLoading.value = false;
 };
+
+const totalPembayaran = computed(() => {
+  if (!formData.value.nominal) return 0;
+  const nominal = formData.value.nominal;
+  const kode = Number(kodePembayaran.value) || 0;
+  return nominal - (nominal % 1000) + kode; // gabung kode ke 3 digit terakhir
+});
 
 // Format input nominal menjadi format angka
 const formatNominal = (event: Event) => {
@@ -418,9 +444,7 @@ const getTipeZakatLabel = (tipe: string) => {
             <div class="text-center">
               <p class="text-gray-700">
                 Silakan lakukan pembayaran Zakat anda sebesar
-                <strong class="text-lg">
-                  Rp {{ formData.nominal?.toLocaleString('id-ID') ?? '0' }}
-                </strong>
+                <strong class="text-lg">Rp {{ totalPembayaran.toLocaleString('id-ID') }}</strong>
                 ke nomor rekening di bawah ini.
               </p>
             </div>

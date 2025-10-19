@@ -6,13 +6,30 @@ const {
 } = require("../../../models");
 const { Op } = require("sequelize");
 const moment = require("moment");
-
+const { kode_pembayaran_zakat_infaq } = require("../../../helper/randomHelper");
 class Model_r {
   constructor(req) {
     this.req = req;
+    this.kode_pembayaran = null;
+  }
+
+  async initialize() {
+    this.kode_pembayaran = await kode_pembayaran_zakat_infaq();
+  }
+
+  async generateKode() {
+    try {
+      await this.initialize();
+      const kode = this.kode_pembayaran;
+      return kode;
+    } catch (error) {
+      console.error("Error in initialize method:", error);
+      return null;
+    }
   }
 
   async getInfaqList(search, perpage, pageNumber) {
+    const kode_pembayaran = this.kode_pembayaran;
     try {
       const userSession = this.req.user;
 
@@ -54,6 +71,7 @@ class Model_r {
           "id",
           "invoice",
           "nominal",
+          "kode",
           "status",
           "konfirmasi_pembayaran",
           "createdAt",
@@ -66,7 +84,7 @@ class Model_r {
       const formattedData = rows.map((item) => ({
         id: item.id,
         invoice: item.invoice,
-        nominal: item.nominal,
+        nominal: Number(item.nominal + item.kode),
         status: item.status,
         konfirmasi_pembayaran: item.konfirmasi_pembayaran,
         tanggal_pembayaran: moment(item.createdAt).format(

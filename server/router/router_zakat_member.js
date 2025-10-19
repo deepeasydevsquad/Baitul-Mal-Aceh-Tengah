@@ -15,6 +15,12 @@ router.post(
 );
 
 router.get(
+  "/zakat_member/kode_pembayaran",
+  authenticateTokenAdministrator,
+  controllers.kode_pembayaran
+);
+
+router.get(
   "/zakat_member/profile",
   authenticateTokenAdministrator,
   controllers.getMemberProfile
@@ -57,6 +63,11 @@ router.post(
       .isString()
       .withMessage("Invoice harus berupa teks")
       .custom(validation.check_invoice_exists),
+    body("kode")
+      .notEmpty()
+      .withMessage("kode harus diisi")
+      .isString()
+      .withMessage("kode harus berupa teks"),
   ],
   controllers.addZakat
 );

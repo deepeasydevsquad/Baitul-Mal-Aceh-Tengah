@@ -1,4 +1,9 @@
-const { Op, Setting } = require("../models");
+const {
+  Op,
+  Setting,
+  Riwayat_pengumpulan,
+  Riwayat_donasi,
+} = require("../models");
 const axios = require("axios");
 
 const helper = {};

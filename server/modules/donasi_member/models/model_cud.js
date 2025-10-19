@@ -48,7 +48,7 @@ class Model_cud {
           member_id: this.member_id,
           invoice: body.invoice,
           nominal: body.nominal,
-          kode: await this.kode(),
+          kode: body.kode,
           status: "process",
           konfirmasi_pembayaran: "belum_dikirim",
           createdAt: myDate,
