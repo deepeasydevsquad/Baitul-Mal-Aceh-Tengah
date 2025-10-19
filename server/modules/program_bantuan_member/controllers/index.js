@@ -20,6 +20,7 @@ exports.list = async (req, res) => {
 
 exports.list_bantuan = async (req, res) => {
   if (!(await handleValidationErrors(req, res))) return;
+
   try {
     const model = new Model_r(req);
     const data = await model.get_program_by_tipe();

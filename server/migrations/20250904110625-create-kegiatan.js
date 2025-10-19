@@ -75,6 +75,14 @@ module.exports = {
       tahun: {
         type: Sequelize.INTEGER,
       },
+      start_date: {
+        allowNull: true,
+        type: Sequelize.DATE,
+      },
+      end_date: {
+        allowNull: true,
+        type: Sequelize.DATE,
+      },
       banner: {
         type: Sequelize.STRING,
       },

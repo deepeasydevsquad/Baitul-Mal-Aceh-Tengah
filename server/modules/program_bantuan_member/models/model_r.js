@@ -6,6 +6,7 @@ const {
   Sequelize,
   Op,
 } = require("../../../models");
+const moment = require("moment");
 
 class Model_r {
   constructor(req) {
@@ -121,6 +122,26 @@ class Model_r {
         ? parseInt(body.pageNumber, 10)
         : 1;
 
+    const filterTanggal =
+      body.type_date?.start && body.type_date?.end
+        ? {
+            [Op.and]: [
+              // Cari kegiatan yang start_date-nya <= input end_date
+              {
+                start_date: {
+                  [Op.lte]: moment(body.type_date.end).format("YYYY-MM-DD"),
+                },
+              },
+              // Dan end_date-nya >= input start_date
+              {
+                end_date: {
+                  [Op.gte]: moment(body.type_date.start).format("YYYY-MM-DD"),
+                },
+              },
+            ],
+          }
+        : {};
+
     try {
       console.log("🚀 Mulai eksekusi query Program.findAll() ...");
 
@@ -133,6 +154,7 @@ class Model_r {
           {
             model: Kegiatan,
             attributes: ["id", "nama_kegiatan", "desc", "banner"],
+            where: filterTanggal,
             required: true, // ubah ke false dulu kalau mau ngetes tanpa filter relasi
             include: [
               {

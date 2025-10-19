@@ -59,6 +59,40 @@ validation.check_nama_program_kegiatan_bantuan = async (value, { req }) => {
 
   return true;
 };
+validation.check_start_end_date = (req, res, next) => {
+  const body = req.body;
+  const tahun = parseInt(body.tahun);
+  const start_date = body.start_date; // format: YYYY-MM-DD
+  const end_date = body.end_date;
+
+  // Validasi field wajib
+  if (!start_date || !end_date) {
+    throw new Error("Tanggal awal dan akhir harus diisi");
+  }
+
+  if (!tahun) {
+    throw new Error("Tahun harus diisi");
+  }
+
+  // Validasi format date
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+  if (!dateRegex.test(start_date) || !dateRegex.test(end_date)) {
+    throw new Error("Format tanggal tidak valid (gunakan YYYY-MM-DD)");
+  }
+
+  if (start_date > end_date) {
+    throw new Error("Tanggal akhir harus lebih besar dari tanggal awal");
+  }
+
+  const startYear = new Date(start_date).getFullYear();
+  const endYear = new Date(end_date).getFullYear();
+
+  if (startYear !== tahun || endYear !== tahun) {
+    throw new Error(`Tanggal awal dan akhir harus berada di tahun ${tahun}`);
+  }
+
+  next();
+};
 
 const uploadPath = path.join(
   __dirname,
@@ -103,12 +137,10 @@ validation.check_dimensions = (isRequired = true) => {
   return async (req, res, next) => {
     if (!req.file) {
       if (isRequired) {
-        return res
-          .status(400)
-          .json({
-            error: true,
-            error_msg: "Banner program kegiatan wajib diupload",
-          });
+        return res.status(400).json({
+          error: true,
+          error_msg: "Banner program kegiatan wajib diupload",
+        });
       } else {
         return next();
       }
@@ -118,21 +150,17 @@ validation.check_dimensions = (isRequired = true) => {
       const metadata = await sharp(req.file.path).metadata();
       if (metadata.width !== 602 || metadata.height !== 330) {
         fs.unlinkSync(req.file.path); // hapus file invalid
-        return res
-          .status(400)
-          .json({
-            error: true,
-            error_msg: "Ukuran gambar harus 602x330 piksel",
-          });
+        return res.status(400).json({
+          error: true,
+          error_msg: "Ukuran gambar harus 602x330 piksel",
+        });
       }
       next();
     } catch (err) {
-      return res
-        .status(500)
-        .json({
-          error: true,
-          error_msg: `Gagal memproses gambar: ${err.message}`,
-        });
+      return res.status(500).json({
+        error: true,
+        error_msg: `Gagal memproses gambar: ${err.message}`,
+      });
     }
   };
 };

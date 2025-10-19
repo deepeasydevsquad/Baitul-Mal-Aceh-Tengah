@@ -1,28 +1,28 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue';
-import Notification from '@/components/Modal/Notification.vue';
-import DangerButton from '@/components/Button/DangerButton.vue';
 import BaseButton from '@/components/Button/BaseButton.vue';
+import DangerButton from '@/components/Button/DangerButton.vue';
+import InputCKEditor from '@/components/Form/InputCKEditor.vue';
+import InputCurrency from '@/components/Form/InputCurrency.vue';
+import InputDateRange from '@/components/Form/InputDateRange.vue';
 import InputFile from '@/components/Form/InputFile.vue';
 import InputText from '@/components/Form/InputText.vue';
-import InputCurrency from '@/components/Form/InputCurrency.vue';
-import InputCKEditor from '@/components/Form/InputCKEditor.vue';
 import SelectField from '@/components/Form/SelectField.vue';
 import DeleteIcon from '@/components/Icons/DeleteIcon.vue';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
+import Notification from '@/components/Modal/Notification.vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
 // Composable
 import { useNotification } from '@/composables/useNotification';
 
 // Service
 import {
-  get_filter_type,
-  get_daftar_kecamatan,
-  get_daftar_desa,
   add_program_bantuan,
+  get_daftar_desa,
+  get_daftar_kecamatan,
+  get_filter_type,
 } from '@/service/program_kegiatan_bantuan';
-import { FORMERR } from 'dns';
 
 // State: loading
 const isLoading = ref(false);
@@ -83,8 +83,6 @@ async function fetchData() {
   }
 }
 
-async function fetchDataKecamatan() {}
-
 // Function: Reset form
 const resetForm = () => {
   form.value = {
@@ -101,11 +99,12 @@ const resetForm = () => {
     kecamatan_penyaluran: [{ kecamatan_id: '', kuota: 0 }],
     jenis_penyaluran: '',
     tahun: 0,
+    date_range: null,
     banner: null,
     desc: '',
   };
 
-  // Reset errors
+  previewUrl.value = null;
   errors.value = {};
 };
 
@@ -122,6 +121,7 @@ const errors = ref<Record<string, string>>({
   area_penyaluran: '',
   jenis_penyaluran: '',
   tahun: '',
+  date_range: '',
   banner: '',
   desc: '',
 });
@@ -164,6 +164,12 @@ const validateForm = () => {
 
   if (!form.value.jumlah_dana) {
     errors.value.jumlah_dana = 'Jumlah dana wajib diisi.';
+    isValid = false;
+  }
+
+  if (form.value.jumlah_dana < form.value.jumlah_maksimal_nominal_bantuan) {
+    errors.value.jumlah_maksimal_nominal_bantuan =
+      'Jumlah dana tidak boleh kurang dari jumlah maksimal nominal bantuan.';
     isValid = false;
   }
 
@@ -223,6 +229,29 @@ const validateForm = () => {
     isValid = false;
   }
 
+  if (form.value.status_tampil) {
+    const hasStartDate = form.value.date_range?.start;
+    const hasEndDate = form.value.date_range?.end;
+
+    // Jika salah satu terisi, wajib isi keduanya
+    if (hasStartDate || hasEndDate) {
+      if (!hasStartDate || !hasEndDate) {
+        errors.value.date_range = 'Tanggal mulai dan akhir harus diisi keduanya.';
+        isValid = false;
+      } else {
+        // Validasi tahun harus sesuai dengan input tahun penyaluran
+        const startYear = new Date(form.value.date_range.start).getFullYear();
+        const endYear = new Date(form.value.date_range.end).getFullYear();
+        const inputYear = Number(form.value.tahun);
+
+        if (startYear !== inputYear || endYear !== inputYear) {
+          errors.value.date_range = `Periode harus di tahun ${inputYear}.`;
+          isValid = false;
+        }
+      }
+    }
+  }
+
   console.log(errors.value);
 
   return isValid;
@@ -263,6 +292,7 @@ const form = ref<{
   kecamatan_penyaluran: { kecamatan_id: string | number; kuota: number }[];
   jenis_penyaluran: string;
   tahun: number;
+  date_range: { start: string | null; end: string | null } | null;
   banner: File | null;
   desc: string;
 }>({
@@ -279,6 +309,7 @@ const form = ref<{
   kecamatan_penyaluran: [{ kecamatan_id: '', kuota: 0 }],
   jenis_penyaluran: '',
   tahun: 0,
+  date_range: null,
   banner: null,
   desc: '',
 });
@@ -307,7 +338,12 @@ const handleSubmit = async () => {
       if (form.value.jenis_penyaluran === 'volume') {
         formData.append('jumlah_target_penerima', value);
       } else {
-        formData.append('jumlah_target_penerima', 0);
+        formData.append('jumlah_target_penerima', '0');
+      }
+    } else if (key === 'date_range') {
+      if (value && typeof value === 'object') {
+        formData.append('start_date', value.start || null);
+        formData.append('end_date', value.end || null);
       }
     } else {
       formData.append(key, value);
@@ -324,7 +360,7 @@ const handleSubmit = async () => {
     displayNotification(error.response.data.error_msg || error.response.data.message, 'error');
   } finally {
     isSubmitting.value = false;
-    // closeModal()
+    // closeModal();
   }
 };
 
@@ -357,10 +393,12 @@ watch(
       if (!form.value.desa_penyaluran?.length) {
         form.value.desa_penyaluran = [{ desa_id: '', kuota: 0 }];
       }
+      console.log(form.value.desa_penyaluran);
     } else if (val === 'kecamatan') {
       if (!form.value.kecamatan_penyaluran?.length) {
         form.value.kecamatan_penyaluran = [{ kecamatan_id: '', kuota: 0 }];
       }
+      console.log(form.value.kecamatan_penyaluran);
     } else {
       form.value.desa_penyaluran = [];
       form.value.kecamatan_penyaluran = [];
@@ -491,6 +529,7 @@ function openImageInNewTab() {
                 id="asnaf_id"
                 v-model="form.asnaf_id"
                 label="Daftar Asnaf"
+                :disabled="form.sumber_dana !== 'zakat'"
                 :options="filteredAsnafOptions"
                 required
                 :error="errors.asnaf_id"
@@ -508,7 +547,7 @@ function openImageInNewTab() {
             </div>
 
             <!-- Status Tampil -->
-            <div class="col-span-2 flex flex-col justify-center">
+            <div class="col-span-2 flex flex-col">
               <label class="mb-1 text-sm font-semibold text-gray-600">
                 Tampilkan di Halaman Depan (Optional)
               </label>
@@ -521,6 +560,21 @@ function openImageInNewTab() {
                 />
                 <label for="status_tampil" class="text-sm text-gray-600">Tampilkan</label>
               </div>
+            </div>
+
+            <!-- Date Range - Muncul kalau checkbox checked -->
+            <div v-if="form.status_tampil" class="col-span-2">
+              <InputDateRange
+                id="date_range"
+                v-model="form.date_range"
+                :year="form.tahun"
+                label="Periode Penyaluran (Optional)"
+                :columns="1"
+                :start-span="1"
+                :end-span="1"
+                :error="errors.date_range"
+                note="Kosongkan jika tampil tanpa batasan waktu"
+              />
             </div>
 
             <!-- Dana -->
@@ -554,7 +608,7 @@ function openImageInNewTab() {
             </div>
 
             <!-- Jumlah Penerima & Maksimal Bantuan -->
-            <div class="col-span-3">
+            <div :class="form.status_tampil ? 'col-span-2' : 'col-span-3'">
               <InputText
                 id="jumlah_target_penerima"
                 v-model="form.jumlah_target_penerima"
@@ -564,7 +618,7 @@ function openImageInNewTab() {
                 :error="errors.jumlah_target_penerima"
               />
             </div>
-            <div class="col-span-3">
+            <div :class="form.status_tampil ? 'col-span-2' : 'col-span-3'">
               <InputCurrency
                 id="jumlah_maksimal_nominal_bantuan"
                 v-model="form.jumlah_maksimal_nominal_bantuan"
@@ -749,6 +803,7 @@ function openImageInNewTab() {
                 form.area_penyaluran.trim() &&
                 form.jenis_penyaluran.trim() &&
                 form.tahun &&
+                (form.status_tampil ? form.date_range?.start && form.date_range?.end : true) &&
                 (form.banner || form.desc.trim())
               ) || isSubmitting
             "
