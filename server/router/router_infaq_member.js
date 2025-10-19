@@ -15,6 +15,12 @@ router.post(
 );
 
 router.get(
+  "/infaq_member/kode_pembayaran",
+  authenticateTokenAdministrator,
+  controllers.kode_pembayaran
+);
+
+router.get(
   "/infaq_member/profile",
   authenticateTokenAdministrator,
   controllers.getMemberProfile
@@ -44,6 +50,11 @@ router.post(
       .isString()
       .withMessage("Invoice harus berupa teks")
       .custom(validation.check_invoice_exists),
+    body("kode")
+      .notEmpty()
+      .withMessage("kode Infaq harus diisi")
+      .isInt()
+      .withMessage("kode Infaq harus berupa angka"),
   ],
   controllers.addInfaq
 );

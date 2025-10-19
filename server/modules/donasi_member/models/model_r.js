@@ -10,15 +10,29 @@ const {
 const moment = require("moment");
 
 const { get_member_id } = require("../../../helper/memberHelper");
+const { kode_pembayaran_donasi } = require("../../../helper/randomHelper");
 
 class Model_r {
   constructor(req) {
     this.req = req;
     this.member_id = null;
+    this.kode_pembayaran = null;
   }
 
   async initialize() {
+    this.kode_pembayaran = await kode_pembayaran_donasi();
     this.member_id = await get_member_id(this.req);
+  }
+
+  async generateKode() {
+    try {
+      await this.initialize();
+      const kode = this.kode_pembayaran;
+      return kode;
+    } catch (error) {
+      console.error("Error in initialize method:", error);
+      return null;
+    }
   }
 
   async daftar_donasi() {
@@ -262,26 +276,42 @@ class Model_r {
   async detail_konfirmasi() {
     const body = this.req.body;
     await this.initialize();
+
     try {
       const data = await Riwayat_donasi.findOne({
         where: {
           program_donasi_id: body.program_donasi_id,
           member_id: this.member_id,
-          konfirmasi_pembayaran: "belum_dikirim", // cari yg belum terkirim
+          konfirmasi_pembayaran: "belum_dikirim",
         },
         attributes: [
           "invoice",
           "nominal",
+          "kode",
           "status",
           "createdAt",
           "konfirmasi_pembayaran",
         ],
       });
 
-      return data;
+      if (!data) return null; // kalo ga ada data
+
+      // 🧩 Mapping hasil data
+      const mapped = {
+        invoice: data.invoice,
+        nominal: data.nominal,
+        nominal_rupiah: Number(data.nominal + data.kode).toLocaleString(
+          "id-ID"
+        ),
+        status: data.status,
+        createdAt: data.createdAt,
+        konfirmasi_pembayaran: data.konfirmasi_pembayaran,
+      };
+
+      return mapped;
     } catch (error) {
       console.error("Error detail_konfirmasi:", error);
-      return [];
+      return null;
     }
   }
 
@@ -354,7 +384,7 @@ class Model_r {
           member_id: this.member_id,
           program_donasi_id: body.program_donasi_id,
         },
-        attributes: ["id", "invoice", "nominal", "status", "createdAt"],
+        attributes: ["id", "invoice", "nominal", "kode", "status", "createdAt"],
         limit,
         offset,
         order: [["createdAt", "DESC"]],
@@ -363,7 +393,7 @@ class Model_r {
       const data = rows.map((item) => ({
         id: item.id,
         invoice: item.invoice,
-        nominal: item.nominal,
+        nominal: Number(item.nominal + item.kode),
         status: item.status,
         waktu_donasi: moment(item.createdAt).format("YYYY-MM-DD HH:mm:ss"),
       }));

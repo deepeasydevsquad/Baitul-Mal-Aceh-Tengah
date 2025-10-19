@@ -7,9 +7,27 @@ const {
 const { Op } = require("sequelize");
 const moment = require("moment");
 
+const { kode_pembayaran_zakat_infaq } = require("../../../helper/randomHelper");
+
 class Model_r {
   constructor(req) {
     this.req = req;
+    this.kode_pembayaran = null;
+  }
+
+  async initialize() {
+    this.kode_pembayaran = await kode_pembayaran_zakat_infaq();
+  }
+
+  async generateKode() {
+    try {
+      await this.initialize();
+      const kode = this.kode_pembayaran;
+      return kode;
+    } catch (error) {
+      console.error("Error in initialize method:", error);
+      return null;
+    }
   }
 
   async getZakatList(search, perpage, pageNumber) {
@@ -54,6 +72,7 @@ class Model_r {
           "id",
           "invoice",
           "tipe",
+          "kode",
           "nominal",
           "status",
           "konfirmasi_pembayaran",
@@ -71,7 +90,7 @@ class Model_r {
           .split("_")
           .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
           .join(" "),
-        nominal: item.nominal,
+        nominal: Number(item.nominal + item.kode),
         status: item.status,
         konfirmasi_pembayaran: item.konfirmasi_pembayaran,
         tanggal_pembayaran: moment(item.createdAt).format(
