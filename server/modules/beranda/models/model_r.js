@@ -24,240 +24,308 @@ class Model_r {
     console.log("tahun", tahun);
     console.log("__________DDDDDDD________");
 
-    // ambil target pengumpulan, kasih default 0 kalau ga ada
-    const target_pengumpulan = (await Target_pengumpulan.findOne({
-      where: { tahun: tahun },
-      attributes: ["zakat", "infaq", "donasi"],
-    })) || { zakat: 0, infaq: 0, donasi: 0 };
+    var target_pengumpulan = { zakat: {}, infaq: {}, donasi: {} };
+    var realisasi_pengumpulan = { zakat: {}, infaq: {}, donasi: {} };
+    for (let month = 1; month <= 12; month++) {
+      target_pengumpulan.zakat[month] = 0;
+      target_pengumpulan.infaq[month] = 0;
+      target_pengumpulan.donasi[month] = 0;
+      realisasi_pengumpulan.zakat[month] = 0;
+      realisasi_pengumpulan.infaq[month] = 0;
+      realisasi_pengumpulan.donasi[month] = 0;
+    }
+
+    // mengambil target pengumpulan donasi, zakat dan infaq
+    await Target_pengumpulan.findAll({ where: { tahun: tahun } }).then(
+      async (value) => {
+        await Promise.all(
+          await value.map(async (e) => {
+            target_pengumpulan.zakat[e.bulan] = e.zakat;
+            target_pengumpulan.infaq[e.bulan] = e.infaq;
+            target_pengumpulan.donasi[e.bulan] = e.donasi;
+          })
+        );
+      }
+    );
+
+    // mengamnbil riwayat pengumpulan infaq dan zakat
+    await Riwayat_pengumpulan.findAll({
+      where: {
+        status: "success",
+        createdAt: {
+          [Op.gte]: new Date(Date.UTC(tahun, 0, 1)),
+          [Op.lt]: new Date(Date.UTC(tahun + 1, 0, 1)),
+        },
+      },
+    }).then(async (value) => {
+      await Promise.all(
+        await value.map(async (e) => {
+          var monthNumber = moment(e.updatedAt).format("M");
+          var nominal = e.nominal + e.kode;
+          if (tipe == "infaq") {
+            realisasi_pengumpulan.infaq[monthNumber] =
+              realisasi_pengumpulan.infaq[monthNumber] + nominal;
+          } else {
+            realisasi_pengumpulan.zakat[monthNumber] =
+              realisasi_pengumpulan.zakat[monthNumber] + nominal;
+          }
+        })
+      );
+    });
+
+    // mengambil riwayat pengumpulan donasi
+    await Riwayat_donasi.findAll({
+      where: {
+        status: "success",
+        createdAt: {
+          [Op.gte]: new Date(Date.UTC(tahun, 0, 1)),
+          [Op.lt]: new Date(Date.UTC(tahun + 1, 0, 1)),
+        },
+      },
+    }).then(async (value) => {
+      await Promise.all(
+        await value.map(async (e) => {
+          var monthNumber = moment(e.updatedAt).format("M");
+          var nominal = e.nominal + e.kode;
+          realisasi_pengumpulan.donasi[monthNumber] =
+            realisasi_pengumpulan.donasi[monthNumber] + nominal;
+        })
+      );
+    });
+
+    // const target_pengumpulan = (await Target_pengumpulan.findOne({
+    //   where: { tahun: tahun },
+    //   attributes: ["zakat", "infaq", "donasi"],
+    // })) || { zakat: 0, infaq: 0, donasi: 0 };
 
     // Sum semua tipe zakat per tahun
-    const realisasi_zakat_pengumpulan =
-      (await Riwayat_pengumpulan.sum("nominal", {
-        where: {
-          tipe: { [Op.like]: "zakat%" },
-          status: "success",
-          createdAt: {
-            [Op.gte]: new Date(Date.UTC(tahun, 0, 1)),
-            [Op.lt]: new Date(Date.UTC(tahun + 1, 0, 1)),
-          },
-        },
-      })) || 0;
-
-    // Sum tipe infaq per tahun
-    const realisasi_infaq_pengumpulan =
-      (await Riwayat_pengumpulan.sum("nominal", {
-        where: {
-          tipe: { [Op.like]: "%infaq%" },
-          status: "success",
-          createdAt: {
-            [Op.gte]: new Date(Date.UTC(tahun, 0, 1)),
-            [Op.lt]: new Date(Date.UTC(tahun + 1, 0, 1)),
-          },
-        },
-      })) || 0;
-
-    // Sum donasi per tahun
-    const donasiResult = await Riwayat_donasi.findAll({
-      attributes: [[Sequelize.fn("SUM", Sequelize.col("nominal")), "total"]],
-      include: [
-        {
-          model: Program_donasi,
-          where: { tahun: tahun },
-          attributes: [],
-        },
-      ],
-      raw: true,
-    });
-
-    const realisasi_donasi_pengumpulan = Number(donasiResult[0]?.total) || 0;
-
-    // Total target distribusi per tipe, default 0
-    const total_target_zakat =
-      (await Target_distribusi.sum("target_rupiah", {
-        where: { tahun, tipe: "zakat" },
-      })) || 0;
-
-    const total_target_infaq =
-      (await Target_distribusi.sum("target_rupiah", {
-        where: { tahun, tipe: "infaq" },
-      })) || 0;
-
-    const total_target_donasi =
-      (await Target_distribusi.sum("target_rupiah", {
-        where: { tahun, tipe: "donasi" },
-      })) || 0;
-
-    // ambil data zakat
-    const zakatData = await Kegiatan.findAll({
-      where: { tahun, sumber_dana: "zakat" },
-      include: [
-        {
-          model: Permohonan,
-          include: [
-            {
-              model: Realisasi_permohonan,
-              where: { status_realisasi: "sudah_direalisasi" },
-              attributes: ["biaya_disetujui"],
-            },
-          ],
-        },
-      ],
-    });
-
-    // ambil data infaq
-    const infaqData = await Kegiatan.findAll({
-      where: { tahun, sumber_dana: "infaq" },
-      include: [
-        {
-          model: Permohonan,
-          include: [
-            {
-              model: Realisasi_permohonan,
-              where: { status_realisasi: "sudah_direalisasi" },
-              attributes: ["biaya_disetujui"],
-            },
-          ],
-        },
-      ],
-    });
-
-    // function helper buat nge-sum biaya_disejutui
-    function sumDistribusi(data) {
-      return data.reduce((total, kegiatan) => {
-        if (kegiatan.Permohonans) {
-          kegiatan.Permohonans.forEach((perm) => {
-            if (perm.Realisasi_permohonans) {
-              perm.Realisasi_permohonans.forEach((real) => {
-                total += real.biaya_disetujui || 0;
-              });
-            }
-          });
-        }
-        return total;
-      }, 0);
-    }
-
-    const realisasi_zakat_distribusi = sumDistribusi(zakatData);
-    const realisasi_infaq_distribusi = sumDistribusi(infaqData);
-
-    // const realisasi_donasi_distribusi =
-    //   (await Program_donasi.sum("target_donasi_terkumpul", {
-    //     where: { tahun },
+    // const realisasi_zakat_pengumpulan =
+    //   (await Riwayat_pengumpulan.sum("nominal", {
+    //     where: {
+    //       tipe: { [Op.ne]: "infaq" },
+    //       status: "success",
+    //       createdAt: {
+    //         [Op.gte]: new Date(Date.UTC(tahun, 0, 1)),
+    //         [Op.lt]: new Date(Date.UTC(tahun + 1, 0, 1)),
+    //       },
+    //     },
     //   })) || 0;
 
-    const realisasi_donasi_distribusi = 0;
+    // // Sum tipe infaq per tahun
+    // const realisasi_infaq_pengumpulan =
+    //   (await Riwayat_pengumpulan.sum("nominal", {
+    //     where: {
+    //       tipe: { [Op.like]: "%infaq%" },
+    //       status: "success",
+    //       createdAt: {
+    //         [Op.gte]: new Date(Date.UTC(tahun, 0, 1)),
+    //         [Op.lt]: new Date(Date.UTC(tahun + 1, 0, 1)),
+    //       },
+    //     },
+    //   })) || 0;
 
-    const data_perbulan_zakat_dan_infaq = await Riwayat_pengumpulan.findAll({
-      attributes: [
-        [Sequelize.fn("MONTH", Sequelize.col("createdAt")), "bulan"],
-        [Sequelize.fn("SUM", Sequelize.col("nominal")), "total"],
-      ],
-      where: Sequelize.where(
-        Sequelize.fn("YEAR", Sequelize.col("createdAt")),
-        tahun
-      ),
-      group: [Sequelize.fn("MONTH", Sequelize.col("createdAt"))],
-      raw: true,
-    });
+    // // Sum donasi per tahun
+    // const donasiResult = await Riwayat_donasi.findAll({
+    //   attributes: [[Sequelize.fn("SUM", Sequelize.col("nominal")), "total"]],
+    //   include: [
+    //     {
+    //       model: Program_donasi,
+    //       where: { tahun: tahun },
+    //       attributes: [],
+    //     },
+    //   ],
+    //   raw: true,
+    // });
 
-    // ambil total donasi per bulan
-    const data_perbulan_donasi = await Riwayat_donasi.findAll({
-      attributes: [
-        [Sequelize.fn("MONTH", Sequelize.col("createdAt")), "bulan"],
-        [Sequelize.fn("SUM", Sequelize.col("nominal")), "total"],
-      ],
-      where: Sequelize.where(
-        Sequelize.fn("YEAR", Sequelize.col("createdAt")),
-        tahun
-      ),
-      group: [Sequelize.fn("MONTH", Sequelize.col("createdAt"))],
-      raw: true,
-    });
+    // const realisasi_donasi_pengumpulan = Number(donasiResult[0]?.total) || 0;
 
-    // fungsi biar tetap lengkap 12 bulan
-    function generateBulanLengkap(data) {
-      const hasil = [];
-      for (let i = 1; i <= 12; i++) {
-        const bulanData = data.find((d) => d.bulan === i);
-        hasil.push({
-          bulan: i,
-          total: bulanData ? parseInt(bulanData.total) : 0,
-        });
-      }
-      return hasil;
-    }
+    // // Total target distribusi per tipe, default 0
+    // const total_target_zakat =
+    //   (await Target_distribusi.sum("target_rupiah", {
+    //     where: { tahun, tipe: "zakat" },
+    //   })) || 0;
 
-    // bikin jadi array lengkap
-    const zakatInfaq = generateBulanLengkap(data_perbulan_zakat_dan_infaq);
-    const donasi = generateBulanLengkap(data_perbulan_donasi);
+    // const total_target_infaq =
+    //   (await Target_distribusi.sum("target_rupiah", {
+    //     where: { tahun, tipe: "infaq" },
+    //   })) || 0;
 
-    // gabungin total per bulan
-    const totalGabungan = zakatInfaq.map((z, index) => ({
-      bulan: z.bulan,
-      total: z.total + donasi[index].total,
-    }));
+    // const total_target_donasi =
+    //   (await Target_distribusi.sum("target_rupiah", {
+    //     where: { tahun, tipe: "donasi" },
+    //   })) || 0;
 
-    const data_target_perbulan = await Riwayat_pengumpulan.findAll({
-      attributes: [
-        [Sequelize.fn("MONTH", Sequelize.col("createdAt")), "bulan"],
-        [Sequelize.fn("SUM", Sequelize.col("nominal")), "total"],
-      ],
-      where: Sequelize.where(
-        Sequelize.fn("YEAR", Sequelize.col("createdAt")),
-        tahun
-      ),
-      group: [Sequelize.fn("MONTH", Sequelize.col("createdAt"))],
-      raw: true,
-    });
+    // // ambil data zakat
+    // const zakatData = await Kegiatan.findAll({
+    //   where: { tahun, sumber_dana: "zakat" },
+    //   include: [
+    //     {
+    //       model: Permohonan,
+    //       include: [
+    //         {
+    //           model: Realisasi_permohonan,
+    //           where: { status_realisasi: "sudah_direalisasi" },
+    //           attributes: ["biaya_disetujui"],
+    //         },
+    //       ],
+    //     },
+    //   ],
+    // });
 
-    // Konversi ke integer/number
-    const dataKonversi = data_target_perbulan.map((item) => ({
-      bulan: parseInt(item.bulan),
-      total: parseFloat(item.total), // atau parseInt jika tidak ada desimal
-    }));
+    // // ambil data infaq
+    // const infaqData = await Kegiatan.findAll({
+    //   where: { tahun, sumber_dana: "infaq" },
+    //   include: [
+    //     {
+    //       model: Permohonan,
+    //       include: [
+    //         {
+    //           model: Realisasi_permohonan,
+    //           where: { status_realisasi: "sudah_direalisasi" },
+    //           attributes: ["biaya_disetujui"],
+    //         },
+    //       ],
+    //     },
+    //   ],
+    // });
 
-    const data = {
-      pengumpulan: {
-        dataKonversi,
-        totalGabungan,
-      },
-      infaq: {
-        target_pengumpulan: target_pengumpulan.infaq,
-        realisasi_pengumpulan: realisasi_infaq_pengumpulan,
-        persentase_pengumpulan: target_pengumpulan.infaq
-          ? (realisasi_infaq_pengumpulan / target_pengumpulan.infaq) * 100
-          : 0,
-        target_distribusi: total_target_infaq,
-        realisasi_distribusi: realisasi_infaq_distribusi,
-        persentase_distribusi: total_target_infaq
-          ? (realisasi_infaq_distribusi / total_target_infaq) * 100
-          : 0,
-      },
-      zakat: {
-        target_pengumpulan: target_pengumpulan.zakat,
-        realisasi_pengumpulan: realisasi_zakat_pengumpulan,
-        persentase_pengumpulan: target_pengumpulan.zakat
-          ? (realisasi_zakat_pengumpulan / target_pengumpulan.zakat) * 100
-          : 0,
-        target_distribusi: total_target_zakat,
-        realisasi_distribusi: realisasi_zakat_distribusi,
-        persentase_distribusi: total_target_zakat
-          ? (realisasi_zakat_distribusi / total_target_zakat) * 100
-          : 0,
-      },
-      donasi: {
-        target_pengumpulan: target_pengumpulan.donasi,
-        realisasi_pengumpulan: realisasi_donasi_pengumpulan,
-        persentase_pengumpulan: target_pengumpulan.donasi
-          ? (realisasi_donasi_pengumpulan / target_pengumpulan.donasi) * 100
-          : 0,
-        target_distribusi: total_target_donasi,
-        realisasi_distribusi: realisasi_donasi_distribusi,
-        persentase_distribusi: total_target_donasi
-          ? (realisasi_donasi_distribusi / total_target_donasi) * 100
-          : 0,
-      },
-    };
+    // // function helper buat nge-sum biaya_disejutui
+    // function sumDistribusi(data) {
+    //   return data.reduce((total, kegiatan) => {
+    //     if (kegiatan.Permohonans) {
+    //       kegiatan.Permohonans.forEach((perm) => {
+    //         if (perm.Realisasi_permohonans) {
+    //           perm.Realisasi_permohonans.forEach((real) => {
+    //             total += real.biaya_disetujui || 0;
+    //           });
+    //         }
+    //       });
+    //     }
+    //     return total;
+    //   }, 0);
+    // }
+
+    // const realisasi_zakat_distribusi = sumDistribusi(zakatData);
+    // const realisasi_infaq_distribusi = sumDistribusi(infaqData);
+
+    // // const realisasi_donasi_distribusi =
+    // //   (await Program_donasi.sum("target_donasi_terkumpul", {
+    // //     where: { tahun },
+    // //   })) || 0;
+
+    // const realisasi_donasi_distribusi = 0;
+
+    // const data_perbulan_zakat_dan_infaq = await Riwayat_pengumpulan.findAll({
+    //   attributes: [
+    //     [Sequelize.fn("MONTH", Sequelize.col("createdAt")), "bulan"],
+    //     [Sequelize.fn("SUM", Sequelize.col("nominal")), "total"],
+    //   ],
+    //   where: Sequelize.where(
+    //     Sequelize.fn("YEAR", Sequelize.col("createdAt")),
+    //     tahun
+    //   ),
+    //   group: [Sequelize.fn("MONTH", Sequelize.col("createdAt"))],
+    //   raw: true,
+    // });
+
+    // // ambil total donasi per bulan
+    // const data_perbulan_donasi = await Riwayat_donasi.findAll({
+    //   attributes: [
+    //     [Sequelize.fn("MONTH", Sequelize.col("createdAt")), "bulan"],
+    //     [Sequelize.fn("SUM", Sequelize.col("nominal")), "total"],
+    //   ],
+    //   where: Sequelize.where(
+    //     Sequelize.fn("YEAR", Sequelize.col("createdAt")),
+    //     tahun
+    //   ),
+    //   group: [Sequelize.fn("MONTH", Sequelize.col("createdAt"))],
+    //   raw: true,
+    // });
+
+    // // fungsi biar tetap lengkap 12 bulan
+    // function generateBulanLengkap(data) {
+    //   const hasil = [];
+    //   for (let i = 1; i <= 12; i++) {
+    //     const bulanData = data.find((d) => d.bulan === i);
+    //     hasil.push({
+    //       bulan: i,
+    //       total: bulanData ? parseInt(bulanData.total) : 0,
+    //     });
+    //   }
+    //   return hasil;
+    // }
+
+    // // bikin jadi array lengkap
+    // const zakatInfaq = generateBulanLengkap(data_perbulan_zakat_dan_infaq);
+    // const donasi = generateBulanLengkap(data_perbulan_donasi);
+
+    // // gabungin total per bulan
+    // const totalGabungan = zakatInfaq.map((z, index) => ({
+    //   bulan: z.bulan,
+    //   total: z.total + donasi[index].total,
+    // }));
+
+    // const data_target_perbulan = await Riwayat_pengumpulan.findAll({
+    //   attributes: [
+    //     [Sequelize.fn("MONTH", Sequelize.col("createdAt")), "bulan"],
+    //     [Sequelize.fn("SUM", Sequelize.col("nominal")), "total"],
+    //   ],
+    //   where: Sequelize.where(
+    //     Sequelize.fn("YEAR", Sequelize.col("createdAt")),
+    //     tahun
+    //   ),
+    //   group: [Sequelize.fn("MONTH", Sequelize.col("createdAt"))],
+    //   raw: true,
+    // });
+
+    // // Konversi ke integer/number
+    // const dataKonversi = data_target_perbulan.map((item) => ({
+    //   bulan: parseInt(item.bulan),
+    //   total: parseFloat(item.total), // atau parseInt jika tidak ada desimal
+    // }));
+
+    // const data = {
+    //   pengumpulan: {
+    //     dataKonversi,
+    //     totalGabungan,
+    //   },
+    //   infaq: {
+    //     target_pengumpulan: target_pengumpulan.infaq,
+    //     realisasi_pengumpulan: realisasi_infaq_pengumpulan,
+    //     persentase_pengumpulan: target_pengumpulan.infaq
+    //       ? (realisasi_infaq_pengumpulan / target_pengumpulan.infaq) * 100
+    //       : 0,
+    //     target_distribusi: total_target_infaq,
+    //     realisasi_distribusi: realisasi_infaq_distribusi,
+    //     persentase_distribusi: total_target_infaq
+    //       ? (realisasi_infaq_distribusi / total_target_infaq) * 100
+    //       : 0,
+    //   },
+    //   zakat: {
+    //     target_pengumpulan: target_pengumpulan.zakat,
+    //     realisasi_pengumpulan: realisasi_zakat_pengumpulan,
+    //     persentase_pengumpulan: target_pengumpulan.zakat
+    //       ? (realisasi_zakat_pengumpulan / target_pengumpulan.zakat) * 100
+    //       : 0,
+    //     target_distribusi: total_target_zakat,
+    //     realisasi_distribusi: realisasi_zakat_distribusi,
+    //     persentase_distribusi: total_target_zakat
+    //       ? (realisasi_zakat_distribusi / total_target_zakat) * 100
+    //       : 0,
+    //   },
+    //   donasi: {
+    //     target_pengumpulan: target_pengumpulan.donasi,
+    //     realisasi_pengumpulan: realisasi_donasi_pengumpulan,
+    //     persentase_pengumpulan: target_pengumpulan.donasi
+    //       ? (realisasi_donasi_pengumpulan / target_pengumpulan.donasi) * 100
+    //       : 0,
+    //     target_distribusi: total_target_donasi,
+    //     realisasi_distribusi: realisasi_donasi_distribusi,
+    //     persentase_distribusi: total_target_donasi
+    //       ? (realisasi_donasi_distribusi / total_target_donasi) * 100
+    //       : 0,
+    //   },
+    // };
 
     return data;
   }
