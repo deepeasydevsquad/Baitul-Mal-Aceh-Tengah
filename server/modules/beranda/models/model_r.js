@@ -17,332 +17,13 @@ class Model_r {
     this.req = req;
   }
 
-  async laporan_pertahun() {
-    try {
-      const tahun = this.req.body?.tahun ? parseInt(this.req.body.tahun) : null;
-
-      // Kalo ga ada tahun, ambil semua tahun yang ada
-      if (!tahun) {
-        return await this.laporan_semua_tahun();
-      }
-
-      // Kalo ada tahun, proses seperti biasa
-      return await this.laporan_per_tahun(tahun);
-    } catch (error) {
-      console.error(error);
-      return this.getEmptyData();
-    }
-  }
-
-  // Function untuk laporan semua tahun
-  async laporan_semua_tahun() {
-    try {
-      console.log("🔥 MASUK LAPORAN SEMUA TAHUN");
-
-      // Cari tahun terawal dan terakhir dari data
-      const minMaxTahun = await Riwayat_pengumpulan.findOne({
-        attributes: [
-          [
-            Sequelize.fn(
-              "MIN",
-              Sequelize.fn("YEAR", Sequelize.col("createdAt"))
-            ),
-            "minTahun",
-          ],
-          [
-            Sequelize.fn(
-              "MAX",
-              Sequelize.fn("YEAR", Sequelize.col("createdAt"))
-            ),
-            "maxTahun",
-          ],
-        ],
-        raw: true,
-      });
-      console.log("✅ 1. minMaxTahun:", minMaxTahun);
-
-      const tahunMin = minMaxTahun?.minTahun || new Date().getFullYear();
-      const tahunMax = minMaxTahun?.maxTahun || new Date().getFullYear();
-
-      // Ambil semua target pengumpulan
-      const allTargetPengumpulan = await Target_pengumpulan.findAll({
-        attributes: ["tahun", "zakat", "infaq", "donasi"],
-        raw: true,
-      });
-      console.log(
-        "✅ 2. allTargetPengumpulan:",
-        allTargetPengumpulan.length,
-        "rows"
-      );
-
-      // Sum realisasi zakat untuk semua tahun
-      const realisasi_zakat_pengumpulan =
-        (await Riwayat_pengumpulan.sum("nominal", {
-          where: {
-            tipe: { [Op.like]: "zakat%" },
-            status: "success",
-          },
-        })) || 0;
-      console.log(
-        "✅ 3. realisasi_zakat_pengumpulan:",
-        realisasi_zakat_pengumpulan
-      );
-
-      // Sum realisasi infaq untuk semua tahun
-      const realisasi_infaq_pengumpulan =
-        (await Riwayat_pengumpulan.sum("nominal", {
-          where: {
-            tipe: { [Op.like]: "%infaq%" },
-            status: "success",
-          },
-        })) || 0;
-      console.log(
-        "✅ 4. realisasi_infaq_pengumpulan:",
-        realisasi_infaq_pengumpulan
-      );
-
-      // Sum donasi untuk semua tahun
-      const realisasi_donasi_pengumpulan =
-        (await Riwayat_donasi.sum("nominal")) || 0;
-      console.log(
-        "✅ 5. realisasi_donasi_pengumpulan:",
-        realisasi_donasi_pengumpulan
-      );
-
-      // Total target distribusi semua tahun
-      const total_target_zakat =
-        (await Target_distribusi.sum("target_rupiah", {
-          where: { tipe: "zakat" },
-        })) || 0;
-      console.log("✅ 6. total_target_zakat:", total_target_zakat);
-
-      const total_target_infaq =
-        (await Target_distribusi.sum("target_rupiah", {
-          where: { tipe: "infaq" },
-        })) || 0;
-      console.log("✅ 7. total_target_infaq:", total_target_infaq);
-
-      const total_target_donasi =
-        (await Target_distribusi.sum("target_rupiah", {
-          where: { tipe: "donasi" },
-        })) || 0;
-      console.log("✅ 8. total_target_donasi:", total_target_donasi);
-
-      // Ambil semua data distribusi zakat
-      console.log("⏳ 9. Fetching zakatData...");
-      const zakatData = await Kegiatan.findAll({
-        where: { sumber_dana: "zakat" },
-        include: [
-          {
-            model: Permohonan,
-            required: false, // TAMBAHKAN INI BIAR GA ERROR KALO GA ADA DATA
-            include: [
-              {
-                model: Realisasi_permohonan,
-                required: false, // TAMBAHKAN INI
-                where: { status_realisasi: "sudah_direalisasi" },
-                attributes: ["biaya_disetujui"],
-              },
-            ],
-          },
-        ],
-      });
-      console.log("✅ 9. zakatData:", zakatData.length, "rows");
-
-      // Ambil semua data distribusi infaq
-      console.log("⏳ 10. Fetching infaqData...");
-      const infaqData = await Kegiatan.findAll({
-        where: { sumber_dana: "infaq" },
-        include: [
-          {
-            model: Permohonan,
-            required: false, // TAMBAHKAN INI
-            include: [
-              {
-                model: Realisasi_permohonan,
-                required: false, // TAMBAHKAN INI
-                where: { status_realisasi: "sudah_direalisasi" },
-                attributes: ["biaya_disetujui"],
-              },
-            ],
-          },
-        ],
-      });
-      console.log("✅ 10. infaqData:", infaqData.length, "rows");
-
-      function sumDistribusi(data) {
-        return data.reduce((total, kegiatan) => {
-          if (kegiatan.Permohonans) {
-            kegiatan.Permohonans.forEach((perm) => {
-              if (perm.Realisasi_permohonans) {
-                perm.Realisasi_permohonans.forEach((real) => {
-                  total += real.biaya_disetujui || 0;
-                });
-              }
-            });
-          }
-          return total;
-        }, 0);
-      }
-
-      const realisasi_zakat_distribusi = sumDistribusi(zakatData);
-      const realisasi_infaq_distribusi = sumDistribusi(infaqData);
-      console.log(
-        "✅ 11. realisasi_zakat_distribusi:",
-        realisasi_zakat_distribusi
-      );
-      console.log(
-        "✅ 12. realisasi_infaq_distribusi:",
-        realisasi_infaq_distribusi
-      );
-
-      // const realisasi_donasi_distribusi =
-      //   (await Program_donasi.sum("target_donasi_terkumpul")) || 0;
-      // console.log(
-      //   "✅ 13. realisasi_donasi_distribusi:",
-      //   realisasi_donasi_distribusi
-      // );
-
-      const realisasi_donasi_distribusi = 0;
-
-      // Ambil data per tahun untuk chart
-      console.log("⏳ 14. Fetching data_per_tahun...");
-      const data_per_tahun = await Riwayat_pengumpulan.findAll({
-        attributes: [
-          [Sequelize.fn("YEAR", Sequelize.col("createdAt")), "tahun"],
-          [Sequelize.fn("SUM", Sequelize.col("nominal")), "total"],
-        ],
-        group: [Sequelize.fn("YEAR", Sequelize.col("createdAt"))],
-        order: [[Sequelize.fn("YEAR", Sequelize.col("createdAt")), "ASC"]],
-        raw: true,
-      });
-      console.log("✅ 14. data_per_tahun:", data_per_tahun);
-
-      // Tambahkan donasi per tahun
-      console.log("⏳ 15. Fetching donasi_per_tahun...");
-      const donasi_per_tahun = await Riwayat_donasi.findAll({
-        attributes: [
-          [Sequelize.fn("YEAR", Sequelize.col("createdAt")), "tahun"],
-          [Sequelize.fn("SUM", Sequelize.col("nominal")), "total"],
-        ],
-        group: [Sequelize.fn("YEAR", Sequelize.col("createdAt"))],
-        order: [[Sequelize.fn("YEAR", Sequelize.col("createdAt")), "ASC"]],
-        raw: true,
-      });
-      console.log("✅ 15. donasi_per_tahun:", donasi_per_tahun);
-
-      // Gabungkan data per tahun
-      const tahunSet = new Set([
-        ...data_per_tahun.map((d) => d.tahun),
-        ...donasi_per_tahun.map((d) => d.tahun),
-      ]);
-
-      const totalPerTahun = Array.from(tahunSet)
-        .sort()
-        .map((tahun) => {
-          const zakatInfaq =
-            data_per_tahun.find((d) => d.tahun === tahun)?.total || 0;
-          const donasi =
-            donasi_per_tahun.find((d) => d.tahun === tahun)?.total || 0;
-          return {
-            tahun: tahun,
-            total: parseInt(zakatInfaq) + parseInt(donasi),
-          };
-        });
-      console.log("✅ 16. totalPerTahun:", totalPerTahun);
-
-      // Total semua target pengumpulan
-      const total_target_pengumpulan = allTargetPengumpulan.reduce(
-        (sum, t) => sum + (t.zakat || 0) + (t.infaq || 0) + (t.donasi || 0),
-        0
-      );
-
-      const data = {
-        pengumpulan: {
-          totalPerTahun, // untuk chart
-        },
-        infaq: {
-          target_pengumpulan: allTargetPengumpulan.reduce(
-            (sum, t) => sum + (t.infaq || 0),
-            0
-          ),
-          realisasi_pengumpulan: realisasi_infaq_pengumpulan,
-          persentase_pengumpulan: allTargetPengumpulan.reduce(
-            (sum, t) => sum + (t.infaq || 0),
-            0
-          )
-            ? (realisasi_infaq_pengumpulan /
-                allTargetPengumpulan.reduce(
-                  (sum, t) => sum + (t.infaq || 0),
-                  0
-                )) *
-              100
-            : 0,
-          target_distribusi: total_target_infaq,
-          realisasi_distribusi: realisasi_infaq_distribusi,
-          persentase_distribusi: total_target_infaq
-            ? (realisasi_infaq_distribusi / total_target_infaq) * 100
-            : 0,
-        },
-        zakat: {
-          target_pengumpulan: allTargetPengumpulan.reduce(
-            (sum, t) => sum + (t.zakat || 0),
-            0
-          ),
-          realisasi_pengumpulan: realisasi_zakat_pengumpulan,
-          persentase_pengumpulan: allTargetPengumpulan.reduce(
-            (sum, t) => sum + (t.zakat || 0),
-            0
-          )
-            ? (realisasi_zakat_pengumpulan /
-                allTargetPengumpulan.reduce(
-                  (sum, t) => sum + (t.zakat || 0),
-                  0
-                )) *
-              100
-            : 0,
-          target_distribusi: total_target_zakat,
-          realisasi_distribusi: realisasi_zakat_distribusi,
-          persentase_distribusi: total_target_zakat
-            ? (realisasi_zakat_distribusi / total_target_zakat) * 100
-            : 0,
-        },
-        donasi: {
-          target_pengumpulan: allTargetPengumpulan.reduce(
-            (sum, t) => sum + (t.donasi || 0),
-            0
-          ),
-          realisasi_pengumpulan: realisasi_donasi_pengumpulan,
-          persentase_pengumpulan: allTargetPengumpulan.reduce(
-            (sum, t) => sum + (t.donasi || 0),
-            0
-          )
-            ? (realisasi_donasi_pengumpulan /
-                allTargetPengumpulan.reduce(
-                  (sum, t) => sum + (t.donasi || 0),
-                  0
-                )) *
-              100
-            : 0,
-          target_distribusi: total_target_donasi,
-          realisasi_distribusi: realisasi_donasi_distribusi,
-          persentase_distribusi: total_target_donasi
-            ? (realisasi_donasi_distribusi / total_target_donasi) * 100
-            : 0,
-        },
-      };
-
-      console.log("🎉 FINAL DATA:", JSON.stringify(data, null, 2));
-      return data;
-    } catch (error) {
-      console.error("❌ ERROR di laporan_semua_tahun:", error.message);
-      console.error(error.stack);
-      return this.getEmptyData();
-    }
-  }
-
   // Function untuk laporan per tahun (code asli)
-  async laporan_per_tahun(tahun) {
+  async laporan_pertahun() {
+    const tahun = this.req.body.tahun;
+    console.log("__________DDDDDDD________");
+    console.log("tahun", tahun);
+    console.log("__________DDDDDDD________");
+
     // ambil target pengumpulan, kasih default 0 kalau ga ada
     const target_pengumpulan = (await Target_pengumpulan.findOne({
       where: { tahun: tahun },
@@ -516,8 +197,28 @@ class Model_r {
       total: z.total + donasi[index].total,
     }));
 
+    const data_target_perbulan = await Riwayat_pengumpulan.findAll({
+      attributes: [
+        [Sequelize.fn("MONTH", Sequelize.col("createdAt")), "bulan"],
+        [Sequelize.fn("SUM", Sequelize.col("nominal")), "total"],
+      ],
+      where: Sequelize.where(
+        Sequelize.fn("YEAR", Sequelize.col("createdAt")),
+        tahun
+      ),
+      group: [Sequelize.fn("MONTH", Sequelize.col("createdAt"))],
+      raw: true,
+    });
+
+    // Konversi ke integer/number
+    const dataKonversi = data_target_perbulan.map((item) => ({
+      bulan: parseInt(item.bulan),
+      total: parseFloat(item.total), // atau parseInt jika tidak ada desimal
+    }));
+
     const data = {
       pengumpulan: {
+        dataKonversi,
         totalGabungan,
       },
       infaq: {

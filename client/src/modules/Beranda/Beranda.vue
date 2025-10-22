@@ -11,6 +11,7 @@ import { useNotification } from '@/composables/useNotification';
 
 // Service API
 import { get_beranda } from '@/service/beranda';
+import BaseButton from '@/components/Button/BaseButton.vue';
 
 // State
 const isLoading = ref(false);
@@ -47,13 +48,14 @@ interface ApiData {
   pengumpulan: {
     totalGabungan?: PengumpulanBulanan[];
     totalPerTahun?: PengumpulanTahunan[];
+    dataKonversi?: PengumpulanBulanan[];
   };
 }
 
 const apiData = ref<ApiData | null>(null);
 
-// Tahun filter
-const tahun = ref<string>('0');
+// Tahun filter - default tahun sekarang
+const tahun = ref<string>(new Date().getFullYear().toString());
 
 // bikin array 5 tahun terakhir termasuk tahun sekarang
 const tahunOptions = ref<number[]>(
@@ -63,9 +65,6 @@ const tahunOptions = ref<number[]>(
 // Helper
 const formatRupiah = (val: number) =>
   new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(val);
-
-// Cek apakah sedang lihat semua tahun
-const isSemuaTahun = computed(() => tahun.value === '0');
 
 // Total ringkasan
 const totalPengumpulan = computed(() => {
@@ -136,7 +135,8 @@ async function fetchData() {
   console.log('Fetching data untuk tahun:', tahun.value);
   isTableLoading.value = true;
   try {
-    const response = await get_beranda({ tahun: tahun.value });
+    const response = await get_beranda({ tahun: parseInt(tahun.value) });
+
     const resData = response;
 
     if (!resData) {
@@ -151,32 +151,8 @@ async function fetchData() {
       pengumpulan: resData.pengumpulan,
     };
 
-    // Chart Pengumpulan - beda handling untuk semua tahun vs per tahun
-    if (isSemuaTahun.value && resData.pengumpulan.totalPerTahun) {
-      // Mode Semua Tahun → chart per tahun
-      const dataTahunan = resData.pengumpulan.totalPerTahun;
-
-      seriesPengumpulan.value = [
-        {
-          name: 'Pengumpulan',
-          data: dataTahunan.map((item: PengumpulanTahunan) => item.total),
-        },
-      ];
-
-      chartOptionsPengumpulan.value = {
-        chart: { type: 'line', height: 200, foreColor: '#000', toolbar: { show: true } },
-        stroke: { curve: 'smooth', width: 3 },
-        markers: { size: 5 },
-        xaxis: {
-          categories: dataTahunan.map((item: PengumpulanTahunan) => item.tahun.toString()),
-        },
-        yaxis: { labels: { formatter: (val: number) => formatRupiah(val) } },
-        tooltip: { y: { formatter: (val: number) => formatRupiah(val) } },
-        dataLabels: { enabled: false },
-        title: { text: 'Pengumpulan Per Tahun', align: 'left' },
-      };
-    } else if (resData.pengumpulan.totalGabungan) {
-      // Mode Per Tahun → chart per bulan
+    // Chart Pengumpulan Per Bulan dengan 2 garis (Realisasi & Target)
+    if (resData.pengumpulan.totalGabungan) {
       const namaBulan = [
         'Jan',
         'Feb',
@@ -192,30 +168,109 @@ async function fetchData() {
         'Des',
       ];
 
-      const dataBulanan = resData.pengumpulan.totalGabungan;
+      const dataBulanan = resData.pengumpulan.totalGabungan || [];
+      const dataTarget = resData.pengumpulan.dataKonversi || [];
+
+      // Buat array 12 bulan dengan nilai default 0
+      const realisasiPerBulan = Array(12).fill(0);
+      const targetPerBulan = Array(12).fill(0);
+
+      // Isi data realisasi (totalGabungan)
+      dataBulanan.forEach((item: PengumpulanBulanan) => {
+        if (item.bulan >= 1 && item.bulan <= 12) {
+          realisasiPerBulan[item.bulan - 1] = Number(item.total) || 0;
+        }
+      });
+
+      // Isi data target (dataKonversi)
+      dataTarget.forEach((item: PengumpulanBulanan) => {
+        if (item.bulan >= 1 && item.bulan <= 12) {
+          targetPerBulan[item.bulan - 1] = Number(item.total) || 0;
+        }
+      });
+
+      console.log('Data Realisasi per bulan:', realisasiPerBulan);
+      console.log('Data Target per bulan:', targetPerBulan);
 
       seriesPengumpulan.value = [
         {
-          name: 'Pengumpulan',
-          data: dataBulanan.map((item: PengumpulanBulanan) => item.total),
+          name: 'Realisasi',
+          data: realisasiPerBulan,
+        },
+        {
+          name: 'Target',
+          data: targetPerBulan,
         },
       ];
 
       chartOptionsPengumpulan.value = {
-        chart: { type: 'line', height: 200, foreColor: '#000', toolbar: { show: true } },
-        stroke: { curve: 'smooth', width: 3 },
-        markers: { size: 5 },
-        xaxis: {
-          categories: dataBulanan.map((item: PengumpulanBulanan) => namaBulan[item.bulan - 1]),
+        chart: {
+          type: 'line',
+          height: 300,
+          foreColor: '#000',
+          toolbar: { show: true },
         },
-        yaxis: { labels: { formatter: (val: number) => formatRupiah(val) } },
-        tooltip: { y: { formatter: (val: number) => formatRupiah(val) } },
+        colors: ['#10b981', '#f59e0b'],
+        stroke: {
+          curve: 'smooth',
+          width: 3,
+          dashArray: [0, 5], // realisasi solid, target dash
+        },
+        markers: {
+          size: 5,
+          hover: {
+            size: 7,
+          },
+        },
+        xaxis: {
+          categories: namaBulan,
+          labels: {
+            style: {
+              fontSize: '12px',
+            },
+          },
+        },
+        yaxis: {
+          labels: {
+            formatter: (val: number) => {
+              if (val >= 1000000) {
+                return 'Rp ' + (val / 1000000).toFixed(1) + 'jt';
+              }
+              return formatRupiah(val);
+            },
+          },
+        },
+        tooltip: {
+          y: {
+            formatter: (val: number) => formatRupiah(val),
+          },
+        },
         dataLabels: { enabled: false },
-        title: { text: `Pengumpulan Per Bulan - Tahun ${tahun.value}`, align: 'left' },
+        legend: {
+          show: true,
+          position: 'top',
+          horizontalAlign: 'right',
+          fontSize: '13px',
+          markers: {
+            width: 12,
+            height: 12,
+          },
+        },
+        grid: {
+          borderColor: '#f1f1f1',
+        },
+        title: {
+          text: `Pengumpulan & Target Per Bulan - Tahun ${tahun.value}`,
+          align: 'left',
+          style: {
+            fontSize: '16px',
+            fontWeight: 600,
+          },
+        },
       };
     }
 
-    // Chart Distribusi → bar (sama untuk semua mode)
+    // Chart Distribusi → bar
     seriesDistribusi.value = [
       { name: 'Zakat', data: [apiData.value.zakat.realisasi_distribusi] },
       { name: 'Infaq', data: [apiData.value.infaq.realisasi_distribusi] },
@@ -223,15 +278,76 @@ async function fetchData() {
     ];
 
     chartOptionsDistribusi.value = {
-      chart: { type: 'bar', foreColor: '#000', toolbar: { show: true } },
-      plotOptions: { bar: { horizontal: false, columnWidth: '45%', borderRadius: 6 } },
-      dataLabels: { enabled: false },
-      xaxis: {
-        categories: [isSemuaTahun.value ? 'Semua Tahun' : 'Tahun ' + tahun.value],
+      chart: {
+        type: 'bar',
+        height: 300,
+        foreColor: '#000',
+        toolbar: { show: true },
       },
-      yaxis: { labels: { formatter: (val: number) => formatRupiah(val) } },
-      tooltip: { y: { formatter: (val: number) => formatRupiah(val) } },
-      title: { text: 'Distribusi', align: 'left' },
+      colors: ['#3b82f6', '#10b981', '#f59e0b'],
+      plotOptions: {
+        bar: {
+          horizontal: false,
+          columnWidth: '50%',
+          borderRadius: 8,
+          dataLabels: {
+            position: 'top',
+          },
+        },
+      },
+      dataLabels: {
+        enabled: true,
+        formatter: (val: number) => {
+          if (val >= 1000000) {
+            return (val / 1000000).toFixed(1) + 'jt';
+          }
+          return val;
+        },
+        offsetY: -20,
+        style: {
+          fontSize: '11px',
+          colors: ['#000'],
+        },
+      },
+      xaxis: {
+        categories: ['Tahun ' + tahun.value],
+        labels: {
+          style: {
+            fontSize: '12px',
+          },
+        },
+      },
+      yaxis: {
+        labels: {
+          formatter: (val: number) => {
+            if (val >= 1000000) {
+              return 'Rp ' + (val / 1000000).toFixed(1) + 'jt';
+            }
+            return formatRupiah(val);
+          },
+        },
+      },
+      tooltip: {
+        y: {
+          formatter: (val: number) => formatRupiah(val),
+        },
+      },
+      legend: {
+        position: 'top',
+        horizontalAlign: 'right',
+        fontSize: '13px',
+      },
+      grid: {
+        borderColor: '#f1f1f1',
+      },
+      title: {
+        text: 'Distribusi Per Kategori',
+        align: 'left',
+        style: {
+          fontSize: '16px',
+          fontWeight: 600,
+        },
+      },
     };
   } catch (err) {
     console.error(err);
@@ -240,6 +356,11 @@ async function fetchData() {
     isTableLoading.value = false;
   }
 }
+
+const cetak_laporan = (tahun: string) => {
+  const printUrl = `/beranda/${tahun}`;
+  window.open(printUrl, '_blank');
+};
 
 onMounted(fetchData);
 </script>
@@ -250,18 +371,33 @@ onMounted(fetchData);
 
     <div v-else class="space-y-4">
       <!-- Tahun filter -->
-      <div class="flex items-center gap-4 mb-4">
-        <label for="tahun" class="font-medium text-gray-700">Tahun:</label>
-        <select
-          id="tahun"
-          v-model="tahun"
-          @change="fetchData"
-          class="border rounded-lg px-3 py-2 text-sm focus:ring focus:ring-blue-300"
-        >
-          <option value="0">Semua Tahun</option>
-          <option v-for="t in tahunOptions" :key="t" :value="t">{{ t }}</option>
-        </select>
-        <Logo />
+
+      <div class="flex items-center justify-between mb-4">
+        <!-- Kiri: Tombol & Select -->
+        <div class="flex items-center gap-4">
+          <div class="flex items-center gap-2">
+            <BaseButton @click="cetak_laporan(tahun)" class="flex items-center justify-center">
+              <span>Cetak</span>
+            </BaseButton>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <label for="tahun" class="font-medium text-gray-700">Tahun:</label>
+            <select
+              id="tahun"
+              v-model="tahun"
+              @change="fetchData"
+              class="border rounded-lg px-3 py-2 text-sm focus:ring focus:ring-blue-300"
+            >
+              <option v-for="t in tahunOptions" :key="t" :value="t">{{ t }}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Kanan: Logo -->
+        <div class="flex-shrink-0">
+          <Logo />
+        </div>
       </div>
 
       <!-- Ringkasan total -->
@@ -282,27 +418,27 @@ onMounted(fetchData);
 
       <!-- Chart -->
       <div class="grid grid-cols-2 gap-4 mt-6">
-        <div class="p-2 rounded-xl border shadow bg-white">
+        <div class="p-4 rounded-xl border shadow bg-white">
           <VueApexCharts
             v-if="seriesPengumpulan.length > 0"
             type="line"
-            height="200"
+            height="300"
             :options="chartOptionsPengumpulan"
             :series="seriesPengumpulan"
           />
-          <div v-else class="flex items-center justify-center h-[200px] text-gray-500">
+          <div v-else class="flex items-center justify-center h-[300px] text-gray-500">
             Tidak ada data
           </div>
         </div>
-        <div class="p-2 rounded-xl border shadow bg-white">
+        <div class="p-4 rounded-xl border shadow bg-white">
           <VueApexCharts
             v-if="seriesDistribusi.length > 0"
             type="bar"
-            height="200"
+            height="300"
             :options="chartOptionsDistribusi"
             :series="seriesDistribusi"
           />
-          <div v-else class="flex items-center justify-center h-[200px] text-gray-500">
+          <div v-else class="flex items-center justify-center h-[300px] text-gray-500">
             Tidak ada data
           </div>
         </div>

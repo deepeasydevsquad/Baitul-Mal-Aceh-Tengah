@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { defineProps, defineEmits, ref, onMounted } from 'vue';
-import { list_program } from '@/service/program_bantuan_member';
+import BaseButton from '@/components/Button/BaseButton.vue';
+import InputDateRange from '@/components/Form/InputDateRange.vue';
 import PermohonanMember from '@/modules/PermohonanMember/PermohonanMember.vue';
+import { list_program } from '@/service/program_bantuan_member';
+import { defineEmits, defineProps, onMounted, ref } from 'vue';
 
 const props = defineProps({
   programName: {
@@ -44,12 +46,24 @@ const normalizeResponseData = (respData: any): Program[] => {
   return [];
 };
 
+// Function: Fetch data
+const filter_date_range = ref({
+  start: null,
+  end: null,
+});
+
+const resetFilter = () => {
+  filter_date_range.value = { start: null, end: null };
+  fetchData();
+};
+
 const fetchData = async () => {
   try {
     const response = await list_program({
       name: props.programName,
       page: currentPage.value,
       perpage: perPage.value,
+      type_date: filter_date_range.value,
     });
 
     const normalized = normalizeResponseData(response?.data);
@@ -66,6 +80,7 @@ const fetchData = async () => {
     }
 
     data.value = normalized;
+    console.log(data.value);
     imageErrors.value.clear();
   } catch (error) {
     console.error('Error fetching data:', error);
@@ -143,6 +158,22 @@ const formatRupiah = (value: number) =>
     <h2 class="text-2xl font-extrabold text-green-900 mb-6 text-center uppercase tracking-wide">
       {{ programName }}
     </h2>
+
+    <div class="pb-4 flex gap-3 items-end">
+      <InputDateRange
+        id="date_range"
+        v-model="filter_date_range"
+        label="Filter Periode"
+        :columns="4"
+        :start-span="2"
+        :end-span="2"
+        class="w-full"
+      />
+
+      <BaseButton @click="fetchData"> Cari </BaseButton>
+
+      <BaseButton variant="secondary" @click="resetFilter"> Reset </BaseButton>
+    </div>
 
     <!-- Card List - Grid 4 kolom x 2 baris -->
     <div v-if="data.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

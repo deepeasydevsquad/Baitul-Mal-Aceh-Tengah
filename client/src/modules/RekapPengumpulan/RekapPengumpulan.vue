@@ -166,13 +166,13 @@ async function downloadPDF() {
     document.body.appendChild(tempContainer);
 
     // Fix sticky positions untuk PDF
-    const stickyElements = tempContainer.querySelectorAll('[class*="sticky"]');
-    stickyElements.forEach((el) => {
-      const htmlEl = el as HTMLElement;
-      htmlEl.style.position = 'relative';
-      htmlEl.style.left = '0';
-      htmlEl.style.top = '0';
-    });
+    // const stickyElements = tempContainer.querySelectorAll('[class*="sticky"]');
+    // stickyElements.forEach((el) => {
+    //   const htmlEl = el as HTMLElement;
+    //   htmlEl.style.position = 'relative';
+    //   htmlEl.style.left = '0';
+    //   htmlEl.style.top = '0';
+    // });
 
     // Force table layout fixed untuk konsistensi
     const table = tempContainer.querySelector('table');
@@ -251,7 +251,7 @@ watch(selectedYear, fetchData);
 </script>
 
 <template>
-  <div class="p-6">
+  <div class="p-4">
     <!-- Filter Section -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
       <!-- Kiri: Tombol Download -->
@@ -309,24 +309,30 @@ watch(selectedYear, fetchData);
       <SkeletonTable v-if="isLoading" :columns="months.length + 2" :rows="8" />
 
       <div v-else-if="filteredRows.length > 0" id="table-for-pdf">
-        <table
-          class="min-w-full table-auto border-collapse bg-white shadow-md rounded-xl overflow-hidden text-sm"
-        >
+        <table class="w-full border-collapse bg-white text-sm">
           <thead class="text-gray-700 text-center border-b border-gray-300">
-            <tr class="bg-gray-50 sticky top-0 z-20">
+            <tr class="bg-gray-50">
               <th
                 rowspan="2"
-                class="w-[20%] px-4 py-3 font-medium border-r border-gray-300 sticky left-0 bg-gray-50 z-30"
+                class="w-[20%] px-4 py-3 font-medium border-r border-gray-300 sticky left-0 top-0 bg-gray-50 z-[50] min-w-[180px]"
               >
                 JENIS PENGUMPULAN
               </th>
-              <th :colspan="bulanNames.length" class="px-4 py-3 font-medium border border-gray-300">
+              <th
+                :colspan="bulanNames.length"
+                class="px-4 py-3 font-medium border border-gray-300 top-0 bg-gray-50 z-[30]"
+              >
                 BULAN
               </th>
-              <th rowspan="2" class="px-4 py-3 font-medium bg-gray-100 min-w-[120px]">JUMLAH</th>
+              <th
+                rowspan="2"
+                class="px-4 py-3 font-medium border border-gray-300 top-0 bg-gray-100 z-[30] min-w-[120px]"
+              >
+                JUMLAH
+              </th>
             </tr>
 
-            <tr class="bg-gray-50 sticky top-[40px] z-10">
+            <tr class="bg-gray-50 top-[40px] z-10">
               <th
                 v-for="bulan in bulanNames"
                 :key="bulan"
@@ -337,7 +343,7 @@ watch(selectedYear, fetchData);
             </tr>
           </thead>
 
-          <tbody>
+          <tbody class="divide-y divide-gray-100">
             <tr
               v-for="(r, i) in filteredRows"
               :key="r.label"
@@ -348,10 +354,12 @@ watch(selectedYear, fetchData);
                   : 'even:bg-gray-50 hover:bg-indigo-50',
               ]"
             >
-              <td class="px-6 py-3 text-left font-medium text-gray-700 sticky left-0 bg-inherit">
+              <td
+                class="px-4 py-3 text-gray-700 border-r border-gray-300 sticky left-0 z-10"
+                :class="r.label === 'Total' ? ' bg-gray-200 font-bold' : 'bg-white font-normal'"
+              >
                 {{ r.label }}
               </td>
-
               <td
                 v-for="m in months"
                 :key="m.key"
@@ -359,10 +367,9 @@ watch(selectedYear, fetchData);
               >
                 {{ formatRupiah(r.values[m.key]) }}
               </td>
-
               <td
                 class="px-6 py-3 text-right whitespace-nowrap"
-                :class="r.label === 'Total' ? 'bg-gray-300' : 'bg-gray-100'"
+                :class="r.label === 'Total' ? 'text-gray-700 bg-gray-300' : 'bg-gray-100'"
               >
                 {{ formatRupiah(r.total) }}
               </td>

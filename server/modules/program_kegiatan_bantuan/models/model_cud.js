@@ -30,9 +30,9 @@ class Model_cud {
     const myDate = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
     const body = this.req.body;
 
-    // console.log("_____________Ddddddddddddddddddddd____________");
-    // console.log(body);
-    // console.log("_____________Ddddddddddddddddddddd____________");
+    console.log("_____________Ddddddddddddddddddddd____________");
+    console.log(body);
+    console.log("_____________Ddddddddddddddddddddd____________");
 
     try {
       const insert = await Kegiatan.create(
@@ -51,6 +51,12 @@ class Model_cud {
           area_penyaluran: body.area_penyaluran,
           jenis_penyaluran: body.jenis_penyaluran,
           tahun: body.tahun,
+          start_date: body.start_date
+            ? moment(body.start_date).format("YYYY-MM-DD")
+            : null,
+          end_date: body.end_date
+            ? moment(body.end_date).format("YYYY-MM-DD")
+            : null,
           name: body.name,
           banner: body.bannerPath ? body.bannerPath : null,
           desc: body.desc,
@@ -63,10 +69,10 @@ class Model_cud {
       );
       const promises = [];
 
-      // console.log("_____________SEBELUM Ddddddddddddddddddddd____________");
-      // console.log(body.kecamatan_penyaluran);
-      // console.log(body.desa_penyaluran);
-      // console.log("_____________Ddddddddddddddddddddd____________");
+      console.log("_____________SEBELUM Ddddddddddddddddddddd____________");
+      console.log(body.kecamatan_penyaluran);
+      console.log(body.desa_penyaluran);
+      console.log("_____________Ddddddddddddddddddddd____________");
 
       if (
         typeof body.desa_penyaluran === "string" &&
@@ -82,10 +88,10 @@ class Model_cud {
         body.kecamatan_penyaluran = JSON.parse(body.kecamatan_penyaluran);
       }
 
-      // console.log("_____________SAEUDAH Ddddddddddddddddddddd____________");
-      // console.log(body.kecamatan_penyaluran);
-      // console.log(body.desa_penyaluran);
-      // console.log("_____________Ddddddddddddddddddddd____________");
+      console.log("_____________SAEUDAH Ddddddddddddddddddddd____________");
+      console.log(body.kecamatan_penyaluran);
+      console.log(body.desa_penyaluran);
+      console.log("_____________Ddddddddddddddddddddd____________");
 
       // Desa
       if (body.desa_penyaluran && Array.isArray(body.desa_penyaluran)) {
@@ -94,7 +100,7 @@ class Model_cud {
             Desa_area_kegiatan.create(
               {
                 kegiatan_id: insert.id,
-                desa_id: desa.id_desa,
+                desa_id: desa.desa_id,
                 kuota: desa.kuota,
                 createdAt: myDate,
                 updatedAt: myDate,
@@ -117,7 +123,7 @@ class Model_cud {
             Kecamatan_area_kegiatan.create(
               {
                 kegiatan_id: insert.id,
-                kecamatan_id: kec.id_kecamatan,
+                kecamatan_id: kec.kecamatan_id,
                 kuota: kec.kuota,
                 createdAt: myDate,
                 updatedAt: myDate,
@@ -203,6 +209,8 @@ class Model_cud {
           area_penyaluran: body.area_penyaluran,
           jenis_penyaluran: body.jenis_penyaluran,
           tahun: body.tahun,
+          start_date: moment(body.start_date).format("YYYY-MM-DD"),
+          end_date: moment(body.end_date).format("YYYY-MM-DD"),
           name: body.name,
           banner: newBanner,
           desc: body.desc,

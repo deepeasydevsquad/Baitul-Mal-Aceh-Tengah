@@ -229,7 +229,7 @@ async function downloadPDF() {
 </script>
 
 <template>
-  <div class="p-6">
+  <div class="p-4">
     <!-- Filter Section -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
       <!-- Kiri: Tombol Download -->

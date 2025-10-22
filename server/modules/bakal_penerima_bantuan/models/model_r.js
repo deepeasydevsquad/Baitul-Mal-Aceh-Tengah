@@ -6,7 +6,6 @@ const {
   Permohonan,
   Member,
   Kegiatan,
-  Kriteria,
   Syarat_kegiatan,
   Syarat,
   Bank,
@@ -88,7 +87,7 @@ class Model_r {
     }
   }
 
-  async permohonan_bantuan() {
+  async bakal_penerima_bantuan() {
     const body = this.req.body;
     const limit = parseInt(body.perpage, 10) || 10;
     const page =
@@ -106,11 +105,15 @@ class Model_r {
       : {};
 
     const typeFilterKegiatan = {};
+    const typeFilterRealisasi = {};
     if (body.type_kegiatan) {
       typeFilterKegiatan.id = body.type_kegiatan;
     }
     if (body.type_status_kegiatan) {
       typeFilterKegiatan.status_kegiatan = body.type_status_kegiatan;
+    }
+    if (body.type_status_realisasi) {
+      typeFilterRealisasi.status_realisasi = body.type_status_realisasi;
     }
 
     try {
@@ -126,8 +129,14 @@ class Model_r {
           "status",
           "biaya_disetujui",
           "nominal_realisasi",
+          "tipe",
+          "tanggal_realisasi",
+          "bukti_transfer",
+          "berita_acara",
+          "mou",
           "bulan",
         ],
+        where: { ...typeFilterRealisasi, status: "approve" },
         include: [
           {
             model: Permohonan,
@@ -238,6 +247,7 @@ class Model_r {
           paginatedResult.map((r) => r.Permohonan?.Kegiatan?.id).filter(Boolean)
         ),
       ];
+
       const desaIds = [
         ...new Set(
           paginatedResult
@@ -247,12 +257,7 @@ class Model_r {
       ];
 
       // STEP 6: Query tambahan (parallel)
-      const [kriteria, desa, sisaDanaList] = await Promise.all([
-        Kriteria.findAll({
-          where: { kegiatan_id: kegiatanIds },
-          attributes: ["id", "kegiatan_id", "name"],
-          raw: true,
-        }),
+      const [desa, sisaDanaList] = await Promise.all([
         get_info_lokasi_list(desaIds),
         Promise.all(
           kegiatanIds.map(async (id) => ({
@@ -267,12 +272,6 @@ class Model_r {
         sisaDanaList.map((d) => [d.id, d.sisa])
       );
 
-      const kriteriaByKegiatan = kriteria.reduce((acc, k) => {
-        if (!acc[k.kegiatan_id]) acc[k.kegiatan_id] = [];
-        acc[k.kegiatan_id].push({ id: k.id, name: k.name });
-        return acc;
-      }, {});
-
       const desaById = desa.reduce((acc, d) => {
         acc[d.id] = {
           desa_name: d.desa_name,
@@ -285,13 +284,21 @@ class Model_r {
       const finalData = paginatedResult.map((r) => {
         const kegiatanId = r.Permohonan?.Kegiatan?.id;
         const desaId = r.Permohonan?.Member?.desa_id;
-        const sisa_jumlah_dana = sisaDanaMap[kegiatanId] || 0;
 
         return {
-          id: r.id,
+          id: r.id, // id realisasi
           bulan: r.bulan,
           status: r.status,
+          status_realisasi: r.status_realisasi,
+          tipe: r.tipe,
+          bukti_transfer: r.bukti_transfer,
+          mou: r.mou,
+          berita_acara: r.berita_acara,
+          tanggal_realisasi: r.tanggal_realisasi
+            ? moment(r.tanggal_realisasi).format("YYYY-MM-DD")
+            : null,
           biaya_disetujui: r.biaya_disetujui,
+          nominal_realisasi: r.nominal_realisasi,
           Permohonan: {
             id: r.Permohonan?.id,
             bank_name: r.Permohonan?.Bank?.name,
@@ -305,13 +312,12 @@ class Model_r {
             Kegiatan: {
               id: r.Permohonan?.Kegiatan?.id,
               nama_kegiatan: r.Permohonan?.Kegiatan?.nama_kegiatan,
-              sisa_jumlah_dana,
               jumlah_dana: r.Permohonan?.Kegiatan?.jumlah_dana,
               sumber_dana: r.Permohonan?.Kegiatan?.sumber_dana,
+              sisa_dana: sisaDanaMap[kegiatanId],
               area_penyaluran: r.Permohonan?.Kegiatan?.area_penyaluran,
               status_kegiatan: r.Permohonan?.Kegiatan?.status_kegiatan,
               tahun: r.Permohonan?.Kegiatan?.tahun,
-              kriteria: kriteriaByKegiatan[kegiatanId] || [],
             },
           },
         };
@@ -327,273 +333,156 @@ class Model_r {
     }
   }
 
-  async list_kegiatan() {
+  async get_info_permohonan() {
+    const body = this.req.body;
+
     try {
-      // STEP 1: Ambil semua kegiatan tahun ini yg sedang berlangsung
-      const allKegiatan = await Permohonan.findAll({
-        attributes: ["kegiatan_id"],
-        include: [
-          {
-            model: Kegiatan,
-            attributes: [
-              "id",
-              "nama_kegiatan",
-              "tahun",
-              "area_penyaluran",
-              "status_kegiatan",
-            ],
-            where: {
-              tahun: moment().format("YYYY"),
-              status_kegiatan: "sedang_berlangsung",
-            },
-            required: true,
-          },
-        ],
-      });
-
-      // STEP 2: Helper buat filter kuota
-      async function filterKuota(modelArea, kegiatanId) {
-        // total kapasitas kuota
-        const total = await modelArea.findOne({
-          attributes: [
-            [sequelize.fn("SUM", sequelize.col("kuota")), "total_kuota"],
-          ],
-          where: { kegiatan_id: kegiatanId },
-          raw: true,
-        });
-
-        const totalKuota = Number(total?.total_kuota || 0);
-
-        // total terpakai (permohonan yg sudah direalisasi)
-        const used = await Realisasi_permohonan.count({
-          where: {
-            status_realisasi: "sudah_direalisasi", // field yg menandakan udah kepake
-          },
-          include: [
-            {
-              model: Permohonan,
-              where: { kegiatan_id: kegiatanId },
-              required: true,
-              attributes: [], // agar tidak mengambil data redundant
-            },
-          ],
-        });
-
-        return totalKuota - used > 0;
-      }
-
-      // STEP 3: Filter kegiatan paralel
-      const results = await Promise.all(
-        allKegiatan.map(async (p) => {
-          const kegiatan = p.Kegiatan;
-          const area = kegiatan.area_penyaluran;
-
-          if (area === "desa") {
-            const ok = await filterKuota(Desa_area_kegiatan, kegiatan.id);
-            return ok ? kegiatan.id : null;
-          } else if (area === "kecamatan") {
-            const ok = await filterKuota(Kecamatan_area_kegiatan, kegiatan.id);
-            return ok ? kegiatan.id : null;
-          } else {
-            return kegiatan.id;
-          }
-        })
-      );
-
-      let finalIds = results.filter(Boolean);
-      finalIds = [...new Set(finalIds)];
-
-      if (!finalIds.length) {
-        return { data: [], total: 0 };
-      }
-
-      // STEP 4: Ambil detail kegiatan final
-      const kegiatan = await Kegiatan.findAndCountAll({
-        attributes: ["id", "nama_kegiatan", "tahun", "area_penyaluran"],
-        order: [["nama_kegiatan", "ASC"]],
-        where: { id: finalIds },
-      });
-
-      return {
-        data: kegiatan.rows.map((e) => ({
-          id: e.id,
-          name: `(${e.tahun}) ${e.nama_kegiatan}`,
-        })),
-        total: kegiatan.count,
-      };
-    } catch (error) {
-      console.error("Error fetching info for kegiatan:", error);
-      return { data: [], total: 0 };
-    }
-  }
-
-  async list_bank() {
-    try {
-      const banks = await Bank.findAndCountAll({ attributes: ["id", "name"] });
-      return {
-        data: banks.rows.map((e) => ({
-          id: e.id,
-          name: e.name,
-        })),
-        total: banks.count,
-      };
-    } catch (error) {
-      console.error("Error fetching info for bank:", error);
-      return { banks: [], members: [] };
-    }
-  }
-
-  async list_member() {
-    try {
-      const permohonan = await Realisasi_permohonan.findAll({
-        attributes: [],
-        where: {
-          status_realisasi: "belum_direalisasi",
-        },
+      const dataRealisasi = await Realisasi_permohonan.findOne({
+        where: { id: body.id, status_realisasi: "belum_direalisasi" },
+        attributes: ["id", "biaya_disetujui"],
+        raw: true,
+        nest: true,
         include: [
           {
             model: Permohonan,
-            attributes: ["member_id"],
             required: true,
+            include: [
+              {
+                model: Member,
+                attributes: ["id", "fullname"],
+                required: true,
+              },
+              {
+                model: Kegiatan,
+                attributes: ["id", "nama_kegiatan"],
+                required: true,
+              },
+            ],
           },
         ],
       });
-      const memberIds = permohonan
-        .map((r) => r.Permohonan.member_id)
-        .filter(Boolean); // untuk exclude member yang sudah ada permohonan di tahun yang sama
-      console.log(memberIds);
-      const members = await Member.findAndCountAll({
-        attributes: ["id", "fullname", "tipe"],
-        order: [["fullname", "ASC"]],
+
+      return {
+        id: dataRealisasi.id,
+        kegiatan_id: dataRealisasi.Permohonan.kegiatan_id,
+        biaya_disetujui: dataRealisasi.biaya_disetujui,
+        member_name: dataRealisasi.Permohonan.Member.fullname,
+        kegiatan_name: dataRealisasi.Permohonan.Kegiatan.nama_kegiatan,
+      };
+    } catch (error) {}
+  }
+
+  async get_info_upload_berita_acara() {
+    const body = this.req.body;
+
+    try {
+      console.log(body);
+      const dataRealisasi = await Realisasi_permohonan.findOne({
+        where: { id: body.id, status_realisasi: "sudah_direalisasi" },
+        attributes: ["id"],
+        raw: true,
+        nest: true,
+        include: [
+          {
+            model: Permohonan,
+            required: true,
+            include: [
+              {
+                model: Member,
+                attributes: ["id", "fullname"],
+                required: true,
+              },
+              {
+                model: Kegiatan,
+                attributes: ["id", "nama_kegiatan"],
+                required: true,
+              },
+            ],
+          },
+        ],
+      });
+
+      console.log(dataRealisasi);
+
+      return {
+        id: dataRealisasi.id,
+        kegiatan_id: dataRealisasi.Permohonan.kegiatan_id,
+        member_name: dataRealisasi.Permohonan.Member.fullname,
+        kegiatan_name: dataRealisasi.Permohonan.Kegiatan.nama_kegiatan,
+      };
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      return null;
+    }
+  }
+
+  async list_belum_upload_berita_acara() {
+    const body = this.req.body;
+
+    try {
+      const whereKegiatan = {};
+      if (body.kegiatan_id) {
+        whereKegiatan.id = body.kegiatan_id;
+      } else {
+        whereKegiatan.tahun = moment().year();
+        whereKegiatan.status_kegiatan = "sedang_berlangsung";
+      }
+
+      // Query: ambil realisasi yang sudah approve tapi belum upload berita acara
+      const result = await Realisasi_permohonan.findAll({
         where: {
-          id: { [Op.notIn]: memberIds },
-          tipe: "perorangan",
+          status: "approve",
+          status_realisasi: "sudah_direalisasi",
+          berita_acara: null,
+          [Op.or]: [
+            { bukti_transfer: { [Op.not]: null } },
+            { mou: { [Op.not]: null } },
+          ],
         },
-      });
-
-      return {
-        data: members.rows.map((e) => ({ id: e.id, name: e.fullname })),
-        total: members.count,
-      };
-    } catch (error) {
-      console.error("Error fetching info for member:", error);
-      return { data: [], total: 0 };
-    }
-  }
-
-  async list_kriteria_syarat() {
-    const body = this.req.body;
-
-    try {
-      const [kriteria, syarat] = await Promise.all([
-        Kriteria.findAndCountAll({
-          attributes: ["id", "name"],
-          where: { kegiatan_id: body.kegiatan_id },
-          order: [["name", "ASC"]],
-        }),
-        Syarat_kegiatan.findAndCountAll({
-          attributes: ["id"],
-          where: { kegiatan_id: body.kegiatan_id },
-          include: [{ model: Syarat, attributes: ["name", "path"] }],
-          order: [[Syarat, "name", "ASC"]],
-          raw: true,
-          nest: true,
-        }),
-      ]);
-
-      return {
-        data: {
-          kriteria: kriteria.rows.map((e) => ({ id: e.id, name: e.name })),
-          syarat: syarat.rows.map((e) => ({
-            id: e.id,
-            name: e.Syarat.name,
-            path: e.Syarat.path,
-          })),
-        },
-      };
-    } catch (error) {
-      console.error("Error fetching info for syarat:", error);
-      return { data: [], total: 0 };
-    }
-  }
-
-  async get_info_edit() {
-    const body = this.req.body;
-    try {
-      const realisasi = await Realisasi_permohonan.findByPk(body.id, {
-        attributes: ["id", "permohonan_id"],
-      });
-      const permohonan = await this.info_permohonan(realisasi.permohonan_id);
-      const member = await this.info_member(permohonan.member_id);
-
-      // --- Ambil syarat
-      const syaratData = await Syarat_kegiatan.findAll({
-        attributes: ["id", "kegiatan_id"],
-        where: { kegiatan_id: permohonan.kegiatan_id },
-        include: [{ model: Syarat, attributes: ["id", "name", "path"] }],
-        order: [[Syarat, "name", "ASC"]],
+        attributes: ["id", "biaya_disetujui", "bulan"],
+        include: [
+          {
+            model: Permohonan,
+            required: true,
+            attributes: ["id"],
+            include: [
+              {
+                model: Member,
+                required: true,
+                attributes: ["id", "fullname", "nomor_ktp"],
+              },
+              {
+                model: Kegiatan,
+                required: true,
+                where: whereKegiatan,
+                attributes: ["id", "nama_kegiatan", "tahun"],
+              },
+            ],
+          },
+        ],
+        order: [["id", "ASC"]],
         raw: true,
         nest: true,
       });
 
-      // --- Ambil validasi
-      const validasiData = await Validasi_syarat_permohonan.findAll({
-        attributes: ["id", "file_name", "path"],
-        where: { realisasi_permohonan_id: body.id },
-        raw: true,
-        nest: true,
-      });
+      // Format data untuk frontend
+      const data = result.map((r) => ({
+        id: r.id,
+        nama_pemohon: r.Permohonan?.Member?.fullname || "-",
+        nomor_ktp: r.Permohonan?.Member?.nomor_ktp || "-",
+        nominal_bantuan: r.biaya_disetujui || 0,
+        nama_kegiatan: r.Permohonan?.Kegiatan?.nama_kegiatan || "-",
+        tahun: r.Permohonan?.Kegiatan?.tahun || moment().year(),
+        bulan: r.bulan,
+      }));
 
-      // --- Index validasi by file_name (path)
-      const validasiByPath = {};
-      validasiData.forEach((v) => {
-        validasiByPath[v.file_name] = {
-          id: v.id,
-          path: v.path,
-        };
-      });
-
-      console.log("===========================");
-      console.log(syaratData);
-      console.log(validasiByPath);
-      console.log("===========================");
-
-      // --- Gabung syarat + validasi
-      const syarat = syaratData.map((e) => {
-        const v = validasiByPath[e.Syarat.path] || {}; // ambil validasi kalau ada
-        return {
-          id: v.id || null,
-          name: e.Syarat.name,
-          path: e.Syarat.path,
-          file_path: v.path || null,
-        };
-      });
-
-      return { permohonan, member, syarat };
-    } catch (error) {
-      console.error("Error fetching info for permohonan:", error);
-      return null;
-    }
-  }
-
-  async get_info_persetujuan() {
-    const body = this.req.body;
-
-    try {
-      const permohonan = await this.info_permohonan(body.id);
-      const kegiatan = await this.info_kegiatan(permohonan.kegiatan_id);
-      const sisa_dana = await this.sisa_dana(permohonan.kegiatan_id);
-
-      let data = {
-        jumlah_maksimal_nominal_bantuan:
-          kegiatan.jumlah_maksimal_nominal_bantuan,
-        sisa_dana,
+      return {
+        data,
+        total: data.length,
       };
-
-      return data;
     } catch (error) {
-      console.error("Error fetching info for permohonan:", error);
-      return null;
+      console.error("Error list belum upload berita acara:", error);
+      return { data: [], total: 0 };
     }
   }
 

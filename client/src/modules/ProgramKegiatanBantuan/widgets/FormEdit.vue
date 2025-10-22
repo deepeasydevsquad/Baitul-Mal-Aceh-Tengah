@@ -1,27 +1,28 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue';
-import Notification from '@/components/Modal/Notification.vue';
-import DangerButton from '@/components/Button/DangerButton.vue';
 import BaseButton from '@/components/Button/BaseButton.vue';
+import DangerButton from '@/components/Button/DangerButton.vue';
+import InputCKEditor from '@/components/Form/InputCKEditor.vue';
+import InputCurrency from '@/components/Form/InputCurrency.vue';
+import InputDateRange from '@/components/Form/InputDateRange.vue';
 import InputFile from '@/components/Form/InputFile.vue';
 import InputText from '@/components/Form/InputText.vue';
-import InputCurrency from '@/components/Form/InputCurrency.vue';
-import InputCKEditor from '@/components/Form/InputCKEditor.vue';
 import SelectField from '@/components/Form/SelectField.vue';
 import DeleteIcon from '@/components/Icons/DeleteIcon.vue';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
+import Notification from '@/components/Modal/Notification.vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
 // Composable
 import { useNotification } from '@/composables/useNotification';
 
 // Service
 import {
-  get_filter_type,
-  get_daftar_kecamatan,
-  get_daftar_desa,
-  get_info_edit_program_bantuan,
   edit_program_bantuan,
+  get_daftar_desa,
+  get_daftar_kecamatan,
+  get_filter_type,
+  get_info_edit_program_bantuan,
 } from '@/service/program_kegiatan_bantuan';
 
 // State: loading
@@ -87,6 +88,8 @@ async function fetchData() {
 
     dataKecamatan.value = responseKecamatan.data;
     dataDesa.value = responseDesa.data;
+
+    console.log(form.value);
   } catch (error) {
     console.error(error);
   } finally {
@@ -111,9 +114,12 @@ const resetForm = () => {
     kecamatan_penyaluran: [{ kecamatan_id: '', kuota: 0 }],
     jenis_penyaluran: '',
     tahun: 0,
+    date_range: { start: null, end: null },
     banner: null,
     desc: '',
   };
+
+  previewUrl.value = null;
 
   // Reset errors
   errors.value = {};
@@ -184,6 +190,12 @@ const validateForm = () => {
     isValid = false;
   }
 
+  if (form.value.jumlah_dana < form.value.jumlah_maksimal_nominal_bantuan) {
+    errors.value.jumlah_maksimal_nominal_bantuan =
+      'Jumlah dana tidak boleh kurang dari jumlah maksimal nominal bantuan.';
+    isValid = false;
+  }
+
   if (!form.value.jenis_penyaluran) {
     errors.value.jenis_penyaluran = 'Jenis penyaluran wajib diisi.';
     isValid = false;
@@ -240,6 +252,29 @@ const validateForm = () => {
     isValid = false;
   }
 
+  if (form.value.status_tampil) {
+    const hasStartDate = form.value.date_range?.start;
+    const hasEndDate = form.value.date_range?.end;
+
+    // Jika salah satu terisi, wajib isi keduanya
+    if (hasStartDate || hasEndDate) {
+      if (!hasStartDate || !hasEndDate) {
+        errors.value.date_range = 'Tanggal mulai dan akhir harus diisi keduanya.';
+        isValid = false;
+      } else {
+        // Validasi tahun harus sesuai dengan input tahun penyaluran
+        const startYear = new Date(form.value.date_range.start).getFullYear();
+        const endYear = new Date(form.value.date_range.end).getFullYear();
+        const inputYear = Number(form.value.tahun);
+
+        if (startYear !== inputYear || endYear !== inputYear) {
+          errors.value.date_range = `Periode harus di tahun ${inputYear}.`;
+          isValid = false;
+        }
+      }
+    }
+  }
+
   console.log(errors.value);
 
   return isValid;
@@ -288,6 +323,7 @@ const form = ref<{
   kecamatan_penyaluran: { kecamatan_id: string | number; kuota: number }[];
   jenis_penyaluran: string;
   tahun: number;
+  date_range: { start: string | null; end: string | null } | null;
   banner: File | null;
   desc: string;
 }>({
@@ -305,6 +341,7 @@ const form = ref<{
   kecamatan_penyaluran: [{ kecamatan_id: '', kuota: 0 }],
   jenis_penyaluran: '',
   tahun: 0,
+  date_range: null,
   banner: null,
   desc: '',
 });
@@ -336,6 +373,17 @@ const handleSubmit = async () => {
       } else {
         formData.append('jumlah_target_penerima', 0);
       }
+    } else if (key === 'date_range') {
+      if (value && typeof value === 'object') {
+        formData.append('start_date', value.start || null);
+        formData.append('end_date', value.end || null);
+      }
+    } else if (key === 'asnaf_id') {
+      if (form.value.sumber_dana === 'zakat') {
+        formData.append('asnaf_id', value);
+      } else {
+        formData.append('asnaf_id', '');
+      }
     } else {
       formData.append(key, value);
     }
@@ -351,7 +399,7 @@ const handleSubmit = async () => {
     displayNotification(error.response.data.error_msg || error.response.data.message, 'error');
   } finally {
     isSubmitting.value = false;
-    closeModal();
+    // closeModal();
   }
 };
 
@@ -437,7 +485,7 @@ function openImageInNewTab() {
       <div v-else class="relative w-full max-w-4xl rounded-2xl bg-white p-6 shadow-2xl space-y-6">
         <!-- Header -->
         <div class="flex items-center justify-between">
-          <h2 id="modal-title" class="text-xl font-bold text-gray-800">Tambah Program Bantuan</h2>
+          <h2 id="modal-title" class="text-xl font-bold text-gray-800">Edit Program Bantuan</h2>
           <button
             class="text-lg text-gray-400 hover:text-gray-600"
             @click="closeModal"
@@ -522,6 +570,7 @@ function openImageInNewTab() {
                 id="asnaf_id"
                 v-model="form.asnaf_id"
                 label="Kategori Asnaf"
+                :disabled="form.sumber_dana !== 'zakat'"
                 :options="filteredAsnafOptions"
                 required
                 :error="errors.asnaf_id"
@@ -539,7 +588,7 @@ function openImageInNewTab() {
             </div>
 
             <!-- Status Tampil -->
-            <div class="col-span-2 flex flex-col justify-center">
+            <div class="col-span-2 flex flex-col">
               <label class="mb-1 text-sm font-semibold text-gray-600">
                 Tampilkan di Halaman Depan (Optional)
               </label>
@@ -552,6 +601,21 @@ function openImageInNewTab() {
                 />
                 <label for="status_tampil" class="text-sm text-gray-600">Tampilkan</label>
               </div>
+            </div>
+
+            <!-- Date Range - Muncul kalau checkbox checked -->
+            <div v-if="form.status_tampil" class="col-span-2">
+              <InputDateRange
+                id="date_range"
+                v-model="form.date_range"
+                :year="form.tahun"
+                label="Periode Penyaluran (Optional)"
+                :columns="1"
+                :start-span="1"
+                :end-span="1"
+                :error="errors.date_range"
+                note="Kosongkan jika tampil tanpa batasan waktu"
+              />
             </div>
 
             <!-- Dana -->
@@ -585,7 +649,7 @@ function openImageInNewTab() {
             </div>
 
             <!-- Jumlah Penerima & Maksimal Bantuan -->
-            <div class="col-span-3">
+            <div :class="form.status_tampil ? 'col-span-2' : 'col-span-3'">
               <InputText
                 id="jumlah_target_penerima"
                 v-model="form.jumlah_target_penerima"
@@ -595,7 +659,7 @@ function openImageInNewTab() {
                 :error="errors.jumlah_target_penerima"
               />
             </div>
-            <div class="col-span-3">
+            <div :class="form.status_tampil ? 'col-span-2' : 'col-span-3'">
               <InputCurrency
                 id="jumlah_maksimal_nominal_bantuan"
                 v-model="form.jumlah_maksimal_nominal_bantuan"
@@ -769,7 +833,6 @@ function openImageInNewTab() {
             variant="primary"
             :disabled="
               !(
-                form.asnaf_id &&
                 form.program_id &&
                 form.nama_kegiatan.trim() &&
                 form.jumlah_dana &&
@@ -778,6 +841,7 @@ function openImageInNewTab() {
                 form.area_penyaluran.trim() &&
                 form.jenis_penyaluran.trim() &&
                 form.tahun &&
+                (form.status_tampil ? form.date_range?.start && form.date_range?.end : true) &&
                 (form.banner || form.desc.trim())
               ) || isSubmitting
             "

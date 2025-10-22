@@ -237,8 +237,8 @@ class Model_r {
           id: item.id,
           asnaf_id: item.asnaf_id,
           program_id: item.program_id,
-          kategori_asnaf: item.Asnaf.name,
-          kategori_program: item.Program.name,
+          kategori_asnaf: item.Asnaf?.name || null,
+          kategori_program: item.Program?.name || null,
           kode: item.kode,
           nama_kegiatan: item.nama_kegiatan,
           slug: item.slug,
@@ -280,6 +280,8 @@ class Model_r {
           "area_penyaluran",
           "jenis_penyaluran",
           "tahun",
+          "start_date",
+          "end_date",
           "banner",
           "desc",
         ],
@@ -308,7 +310,7 @@ class Model_r {
 
       return {
         id: result.id,
-        asnaf_id: result.asnaf_id,
+        asnaf_id: result.asnaf_id || "",
         program_id: result.program_id,
         kode: result.kode,
         nama_kegiatan: result.nama_kegiatan,
@@ -322,6 +324,13 @@ class Model_r {
         kecamatan_penyaluran: kecamatan_penyaluran,
         jenis_penyaluran: result.jenis_penyaluran,
         tahun: result.tahun,
+        date_range:
+          result.start_date && result.end_date
+            ? {
+                start: moment(result.start_date).format("YYYY-MM-DD"),
+                end: moment(result.end_date).format("YYYY-MM-DD"),
+              }
+            : null,
         banner: result.banner,
         desc: result.desc,
       };
