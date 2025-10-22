@@ -2,8 +2,9 @@
 // Library
 import BaseButton from '@/components/Button/BaseButton.vue';
 import InputCurrency from '@/components/Form/InputCurrency.vue';
-import TextArea from '@/components/Form/TextArea.vue';
-import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
+import InputDate from '@/components/Form/InputDate.vue';
+import InputFile from '@/components/Form/InputFile.vue';
+import SelectField from '@/components/Form/SelectField.vue';
 import Confirmation from '@/components/Modal/Confirmation.vue';
 import Notification from '@/components/Modal/Notification.vue';
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
@@ -13,10 +14,7 @@ import { useConfirmation } from '@/composables/useConfirmation';
 import { useNotification } from '@/composables/useNotification';
 
 // Service
-import {
-  approve_permohonan,
-  get_info_approve_permohonan,
-} from '@/service/validasi_permohonan_bantuan';
+import { get_info_permohonan, upload_realisasi_bantuan } from '@/service/bakal_penerima_bantuan';
 
 // Composable: notification & confirmation
 const { showNotification, notificationType, notificationMessage, displayNotification } =
@@ -27,7 +25,7 @@ const { showConfirmDialog, confirmTitle, confirmMessage, displayConfirmation, co
 
 interface Props {
   isModalOpen: boolean;
-  selectedValidasiPermohonanBantuan: any;
+  selectedData: any;
 }
 
 const props = defineProps<Props>();
@@ -42,14 +40,21 @@ const isLoading = ref(false);
 const currentStep = ref(1);
 const sendWaOption = ref<boolean | null>(null);
 
-// Data awal
-const InitialData = ref<any>(null);
-
 // Form
 const form = ref({
-  biaya_disetujui: 0,
-  catatan: '',
+  tanggal_realisasi: '',
+  nominal_realisasi: 0,
+  tipe: null,
+  bukti_transfer: null as File | null,
+  mou: null as File | null,
 });
+
+// Options
+const tipeOptions = ref([
+  { id: null, name: 'Pilih Tipe' },
+  { id: 'transfer', name: 'Transfer' },
+  { id: 'bantuan_langsung', name: 'Bantuan Langsung' },
+]);
 
 // Function: Close modal
 const closeModal = () => {
@@ -63,39 +68,14 @@ const resetForm = () => {
   currentStep.value = 1;
   sendWaOption.value = null;
   form.value = {
-    biaya_disetujui: 0,
-    catatan: '',
+    tanggal_realisasi: '',
+    nominal_realisasi: 0,
+    tipe: null,
+    bukti_transfer: null,
+    mou: null,
   };
   errors.value = {};
-  InitialData.value = null;
 };
-
-// Function: Fetch data
-async function fetchData() {
-  if (!props.selectedValidasiPermohonanBantuan?.realisasi_id) {
-    displayNotification('Data tidak valid silahkan tutup dan buka kembali', 'error');
-    return;
-  }
-
-  isLoading.value = true;
-  try {
-    const response = await get_info_approve_permohonan(
-      props.selectedValidasiPermohonanBantuan.realisasi_id,
-    );
-
-    if (response.error) {
-      displayNotification(response.error_msg || 'Gagal memuat data', 'error');
-      return;
-    }
-
-    InitialData.value = response.data;
-  } catch (error: any) {
-    displayNotification('Gagal memuat data', 'error');
-    console.error('Error fetching data:', error);
-  } finally {
-    isLoading.value = false;
-  }
-}
 
 // Function: Step 1 - Pilih WA atau tidak
 const handleStep1 = (withWa: boolean) => {
@@ -109,79 +89,143 @@ const backToStep1 = () => {
   sendWaOption.value = null;
 };
 
+// Function Fetch Data
+interface PermohonanItem {
+  id: number;
+  kegiatan_id: number;
+  biaya_disetujui: number;
+  member_name: string;
+  kegiatan_name: string;
+}
+
+const dataPermohonan = ref<PermohonanItem>({
+  id: 0,
+  kegiatan_id: 0,
+  biaya_disetujui: 0,
+  member_name: '',
+  kegiatan_name: '',
+});
+
+async function fetchData() {
+  isLoading.value = true;
+  try {
+    const response = await get_info_permohonan(props.selectedData.id);
+
+    dataPermohonan.value = response.data;
+    console.log(dataPermohonan.value);
+  } catch (error: any) {
+    displayNotification(error.response.data.error_msg || error.response.data.message, 'error');
+  } finally {
+    isLoading.value = false;
+  }
+}
+
 // Function: Validate form
 const errors = ref<Record<string, string>>({
-  biaya_disetujui: '',
+  tanggal_realisasi: '',
+  nominal_realisasi: '',
+  bukti_transfer: '',
+  mou: '',
 });
 
 const validateForm = () => {
   let isValid = true;
   errors.value = {};
 
-  // Validate biaya disetujui
-  if (!form.value.biaya_disetujui || form.value.biaya_disetujui <= 0) {
-    errors.value.biaya_disetujui = 'Biaya disetujui harus lebih dari 0';
+  // Validate tanggal realisasi
+  if (!form.value.tanggal_realisasi) {
+    errors.value.tanggal_realisasi = 'Tanggal realisasi harus diisi';
     isValid = false;
   }
 
-  // Cek apakah melebihi sisa dana
-  if (form.value.biaya_disetujui > (InitialData.value?.sisa_dana || 0)) {
-    errors.value.biaya_disetujui = `Biaya melebihi sisa dana (${formatToRupiah(InitialData.value?.sisa_dana || 0)})`;
+  // Validate nominal realisasi
+  if (!form.value.nominal_realisasi || form.value.nominal_realisasi <= 0) {
+    errors.value.nominal_realisasi = 'Nominal realisasi harus lebih dari 0';
     isValid = false;
   }
 
-  // Cek apakah melebihi maksimal bantuan
-  if (
-    InitialData.value?.kegiatan?.maksimal_bantuan &&
-    form.value.biaya_disetujui > InitialData.value.kegiatan.maksimal_bantuan
-  ) {
-    errors.value.biaya_disetujui = `Biaya melebihi maksimal bantuan (${formatToRupiah(InitialData.value.kegiatan.maksimal_bantuan)})`;
+  // Validate nominal tidak melebihi biaya disetujui
+  if (form.value.nominal_realisasi > (props.selectedData?.biaya_disetujui || 0)) {
+    errors.value.nominal_realisasi = `Nominal tidak boleh melebihi biaya disetujui`;
     isValid = false;
+  }
+
+  // Validate file upload
+  if (form.value.tipe === 'transfer') {
+    if (!form.value.bukti_transfer) {
+      errors.value.bukti_transfer = 'Bukti transfer harus diupload';
+      ``;
+      isValid = false;
+    }
+  } else {
+    if (!form.value.mou) {
+      errors.value.mou = 'MOU harus diupload';
+      isValid = false;
+    }
   }
 
   return isValid;
 };
 
-// Function: Handle submit (Step 2)
+// Function: Handle file upload
+const handleFileUpload = (file: File | null, field: 'bukti_transfer' | 'mou') => {
+  if (field === 'bukti_transfer') {
+    form.value.bukti_transfer = file;
+    errors.value.bukti_transfer = '';
+  } else {
+    form.value.mou = file;
+    errors.value.mou = '';
+  }
+};
+
+// Function: Handle submit
 const isSubmitting = ref(false);
 
 const handleSubmit = async () => {
   if (!validateForm()) return;
 
   const confirmMsg = sendWaOption.value
-    ? 'Permohonan akan disetujui dan notifikasi WhatsApp akan dikirim ke pemohon. Lanjutkan?'
-    : 'Permohonan akan disetujui tanpa mengirim notifikasi WhatsApp. Lanjutkan?';
+    ? 'Realisasi bantuan akan disimpan dan notifikasi WhatsApp akan dikirim. Lanjutkan?'
+    : 'Realisasi bantuan akan disimpan tanpa mengirim notifikasi WhatsApp. Lanjutkan?';
 
-  displayConfirmation('Konfirmasi Persetujuan Permohonan', confirmMsg, async () => {
+  displayConfirmation('Konfirmasi Realisasi Bantuan', confirmMsg, async () => {
     isSubmitting.value = true;
 
-    const payload = {
-      id: props.selectedValidasiPermohonanBantuan.realisasi_id,
-      biaya_disetujui: form.value.biaya_disetujui,
-      catatan: form.value.catatan.trim(),
-      send_wa: sendWaOption.value || false,
-    };
+    const formData = new FormData();
+    formData.append('id', props.selectedData.id);
+    formData.append('tanggal_realisasi', form.value.tanggal_realisasi);
+    formData.append('nominal_realisasi', form.value.nominal_realisasi.toString());
+    formData.append('tipe', form.value.tipe);
+    formData.append('send_wa', sendWaOption.value ? 'true' : 'false');
+
+    if (form.value.tipe === 'transfer' && form.value.bukti_transfer) {
+      formData.append('bukti_realisasi', form.value.bukti_transfer);
+    } else if (form.value.tipe === 'bantuan_langsung' && form.value.mou) {
+      formData.append('bukti_realisasi', form.value.mou);
+    }
+
+    console.log(formData);
 
     try {
-      const response = await approve_permohonan(payload);
+      const response = await upload_realisasi_bantuan(formData);
 
       if (response.error) {
-        displayNotification(response.error_msg || 'Gagal menyetujui permohonan', 'error');
+        displayNotification(response.error_msg || 'Gagal menyimpan realisasi', 'error');
       } else {
         emit('status', {
           error_msg:
             response.error_msg ||
-            `Permohonan berhasil disetujui${sendWaOption.value ? ' dan notifikasi WA terkirim' : ''}`,
+            `Realisasi berhasil disimpan${sendWaOption.value ? ' dan notifikasi WA terkirim' : ''}`,
           error: false,
         });
         closeModal();
       }
     } catch (error: any) {
-      console.error('Error approve permohonan:', error);
+      console.error('Error upload realisasi:', error);
       displayNotification(
         error.response?.data?.error_msg ||
           error.response?.data?.message ||
-          'Gagal menyetujui permohonan',
+          'Gagal menyimpan realisasi',
         'error',
       );
     } finally {
@@ -189,15 +233,6 @@ const handleSubmit = async () => {
       closeModal();
     }
   });
-};
-
-// Computed: Format rupiah helper (jika belum ada global)
-const formatToRupiah = (value: number) => {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0,
-  }).format(value);
 };
 
 // Function: Handle escape
@@ -213,11 +248,12 @@ onBeforeUnmount(() => {
   document.removeEventListener('keydown', handleEscape);
 });
 
-// Watch: Handler
+// Watch: Fetch data when modal opens
 watch(
   () => props.isModalOpen,
   (newVal) => {
     if (newVal) {
+      resetForm();
       fetchData();
     }
   },
@@ -240,23 +276,22 @@ watch(
       aria-modal="true"
       aria-labelledby="modal-title"
     >
-      <LoadingSpinner v-if="isLoading" label="Memuat data..." />
-      <div v-else class="relative max-w-2xl w-full bg-white shadow-2xl rounded-2xl p-6 space-y-6">
+      <div class="relative max-w-2xl w-full bg-white shadow-2xl rounded-2xl p-6 space-y-6">
         <!-- Header -->
         <div class="flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <div>
-              <h2 id="modal-title" class="text-xl font-bold text-gray-800">
-                {{ currentStep === 1 ? 'Setujui Permohonan' : 'Input Biaya Disetujui' }}
-              </h2>
-              <p class="text-sm text-gray-500">
-                {{
-                  currentStep === 1
-                    ? 'Pilih metode pemberitahuan'
-                    : 'Masukkan jumlah bantuan yang disetujui'
-                }}
-              </p>
-            </div>
+          <div>
+            <h2 id="modal-title" class="text-xl font-bold text-gray-800">
+              {{
+                currentStep === 1
+                  ? 'Realisasi Bantuan'
+                  : `Realisasi Bantuan - ${dataPermohonan?.kegiatan_name || ''}`
+              }}
+            </h2>
+            <p class="text-sm text-gray-500">
+              {{
+                currentStep === 1 ? 'Pilih metode pemberitahuan' : 'Lengkapi data realisasi bantuan'
+              }}
+            </p>
           </div>
           <button
             class="text-gray-400 text-lg hover:text-gray-600"
@@ -295,39 +330,29 @@ watch(
             >
               2
             </div>
-            <span class="text-xs font-semibold text-gray-600">Input Biaya</span>
+            <span class="text-xs font-semibold text-gray-600">Input Data</span>
           </div>
         </div>
 
-        <!-- Info Permohonan -->
-        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 shadow-sm">
+        <!-- Info Pemohon -->
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
           <h3 class="font-semibold text-blue-800 text-sm mb-3 flex items-center gap-2">
-            <font-awesome-icon icon="fa-solid fa-circle-info" />
-            Informasi Permohonan
+            <font-awesome-icon icon="fa-solid fa-user" />
+            Informasi Pemohon
           </h3>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-xs text-blue-800">
+          <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-xs text-blue-800">
             <p>
-              <span class="font-semibold text-blue-900">Pemohon:</span>
-              {{ InitialData?.member?.name || '-' }}
+              <span class="font-semibold">Nama:</span>
+              {{ dataPermohonan?.member_name || '-' }}
             </p>
             <p>
-              <span class="font-semibold text-blue-900">Kegiatan:</span>
-              {{ InitialData?.kegiatan?.name || '-' }}
+              <span class="font-semibold">Kegiatan:</span>
+              {{ dataPermohonan?.kegiatan_name || '-' }}
             </p>
             <p>
-              <span class="font-semibold text-blue-900">Lokasi:</span>
-              {{ InitialData?.lokasi?.desa || '-' }}, {{ InitialData?.lokasi?.kecamatan || '-' }}
-            </p>
-            <p>
-              <span class="font-semibold text-blue-900">Sisa Dana:</span>
-              <span class="font-bold text-green-700">
-                {{ formatToRupiah(InitialData?.sisa_dana || 0) }}</span
-              >
-            </p>
-            <p v-if="InitialData?.kegiatan?.maksimal_bantuan">
-              <span class="font-semibold text-blue-900">Maksimal Bantuan:</span>
-              <span class="font-bold text-orange-600">{{
-                formatToRupiah(InitialData.kegiatan.maksimal_bantuan)
+              <span class="font-semibold">Biaya Disetujui:</span>
+              <span class="font-bold text-green-700">{{
+                $formatToRupiah(dataPermohonan?.biaya_disetujui || 0)
               }}</span>
             </p>
           </div>
@@ -336,10 +361,10 @@ watch(
         <!-- STEP 1: Pilih Metode Pemberitahuan -->
         <div v-if="currentStep === 1" class="space-y-4">
           <div class="text-center">
-            <p class="text-sm text-gray-600 mb-2">
-              Apakah Anda ingin mengirim notifikasi WhatsApp ke pemohon?
+            <p class="text-sm text-gray-600 mb-4">
+              Apakah Anda ingin mengirim notifikasi WhatsApp setelah realisasi?
             </p>
-            <div class="flex flex-col gap-3 mx-auto">
+            <div class="flex flex-col gap-3">
               <button
                 @click="handleStep1(true)"
                 class="flex items-center justify-between px-6 py-4 bg-green-50 border-2 border-green-300 rounded-lg hover:bg-green-100 hover:border-green-400 transition-all group"
@@ -349,7 +374,7 @@ watch(
                     <font-awesome-icon icon="fa-brands fa-whatsapp" class="text-white text-lg" />
                   </div>
                   <div class="text-left">
-                    <p class="font-bold text-gray-800">Approve + Kirim WhatsApp</p>
+                    <p class="font-bold text-gray-800">Realisasi + Kirim WhatsApp</p>
                     <p class="text-xs text-gray-600">Pemohon akan menerima notifikasi WhatsApp</p>
                   </div>
                 </div>
@@ -368,7 +393,7 @@ watch(
                     <font-awesome-icon icon="fa-solid fa-check" class="text-white text-lg" />
                   </div>
                   <div class="text-left">
-                    <p class="font-bold text-gray-800">Approve Saja</p>
+                    <p class="font-bold text-gray-800">Realisasi Saja</p>
                     <p class="text-xs text-gray-600">Tanpa mengirim notifikasi WhatsApp</p>
                   </div>
                 </div>
@@ -381,35 +406,71 @@ watch(
           </div>
 
           <div class="flex justify-center">
-            <BaseButton @click="closeModal" type="button" :full-width="true" variant="secondary">
+            <BaseButton @click="closeModal" type="button" variant="secondary" class="w-full">
               <font-awesome-icon icon="fa-solid fa-xmark" class="mr-2" />
               Batal
             </BaseButton>
           </div>
         </div>
 
-        <!-- STEP 2: Input Biaya Disetujui -->
+        <!-- STEP 2: Input Data Realisasi -->
         <div v-if="currentStep === 2" class="space-y-4">
-          <!-- Form Input -->
-          <div class="space-y-4">
-            <InputCurrency
-              id="biaya_disetujui"
-              v-model.number="form.biaya_disetujui"
-              label="Jumlah Bantuan Disetujui"
-              placeholder="Masukkan jumlah bantuan"
-              :error="errors.biaya_disetujui"
+          <div class="space-y-4 max-h-[50vh] overflow-y-auto p-1">
+            <!-- Tanggal Realisasi -->
+            <InputDate
+              id="tanggal_realisasi"
+              v-model="form.tanggal_realisasi"
+              label="Tanggal Realisasi"
+              :error="errors.tanggal_realisasi"
               :required="true"
             />
 
-            <TextArea
-              v-if="sendWaOption"
-              id="catatan"
-              v-model="form.catatan"
-              k
-              label="Catatan (Opsional)"
-              placeholder="Tambahkan catatan jika diperlukan..."
-              note="Catatan ini akan dikirim ke WhatsApp pemohon"
-              :rows="3"
+            <!-- Nominal Realisasi -->
+            <InputCurrency
+              id="nominal_realisasi"
+              v-model.number="form.nominal_realisasi"
+              label="Nominal Realisasi"
+              placeholder="Masukkan nominal realisasi"
+              note="Nominal Realisasi Harus Sama Dengan Nominal Bantuan."
+              :error="errors.nominal_realisasi"
+              :required="true"
+            />
+
+            <!-- Pilih Tipe Realisasi -->
+            <SelectField
+              id="tipe"
+              v-model="form.tipe"
+              :options="tipeOptions"
+              label="Pilih Tipe Realisasi"
+              placeholder="Pilih tipe realisasi"
+              :error="errors.tipe"
+              :required="true"
+            />
+
+            <!-- Upload Bukti Transfer (jika tipe = transfer) -->
+            <InputFile
+              v-if="form.tipe === 'transfer'"
+              id="bukti_transfer"
+              label="Upload Bukti Transfer"
+              accept=".jpg,.jpeg,.png"
+              :max-size="1000"
+              note="Ukuran file berkas maksimal 1MB"
+              :error="errors.bukti_transfer"
+              :required="true"
+              @file-selected="(file) => handleFileUpload(file, 'bukti_transfer')"
+            />
+
+            <!-- Upload MOU (jika tipe = bantuan_langsung) -->
+            <InputFile
+              v-if="form.tipe === 'bantuan_langsung'"
+              id="mou"
+              label="Upload MOU"
+              accept=".jpg,.jpeg,.png"
+              :max-size="1000"
+              note="Ukuran file berkas maksimal 1MB"
+              :error="errors.mou"
+              :required="true"
+              @file-selected="(file) => handleFileUpload(file, 'mou')"
             />
           </div>
 
@@ -429,25 +490,6 @@ watch(
             </span>
           </div>
 
-          <!-- Warning Box -->
-          <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-            <div class="flex items-start gap-3">
-              <font-awesome-icon
-                icon="fa-solid fa-circle-check"
-                class="text-green-600 text-lg mt-0.5"
-              />
-              <div class="text-xs text-green-800">
-                <p class="font-semibold mb-1">Perhatian!</p>
-                <p>
-                  Permohonan akan disetujui dengan biaya
-                  <strong>{{ formatToRupiah(form.biaya_disetujui) }}</strong
-                  >. Status akan berubah menjadi <strong>"Disetujui"</strong> dan permohonan tidak
-                  akan muncul lagi di daftar validasi.
-                </p>
-              </div>
-            </div>
-          </div>
-
           <!-- Actions -->
           <div class="flex justify-between gap-3">
             <BaseButton
@@ -463,13 +505,13 @@ watch(
             <BaseButton
               type="button"
               variant="success"
-              :disabled="!form.biaya_disetujui || form.biaya_disetujui <= 0 || isSubmitting"
+              :disabled="isSubmitting"
               @click="handleSubmit"
             >
-              <span v-if="isSubmitting">Memproses... </span>
+              <span v-if="isSubmitting">Menyimpan...</span>
               <span v-else>
                 <font-awesome-icon icon="fa-solid fa-check" class="mr-2" />
-                Setujui Permohonan
+                {{ sendWaOption ? 'Realisasi Bantuan & Kirim WA' : 'Realisasi Bantuan' }}
               </span>
             </BaseButton>
           </div>
@@ -485,7 +527,7 @@ watch(
     :confirmMessage="confirmMessage"
   >
     <BaseButton variant="secondary" @click="cancel">Batal</BaseButton>
-    <BaseButton variant="success" @click="confirm">Ya, Setujui</BaseButton>
+    <BaseButton variant="success" @click="confirm">Ya, Simpan</BaseButton>
   </Confirmation>
 
   <!-- Notification -->

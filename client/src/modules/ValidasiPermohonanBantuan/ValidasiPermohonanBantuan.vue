@@ -55,7 +55,7 @@ const { showConfirmDialog, confirmTitle, confirmMessage, displayConfirmation, co
 
 interface ValidasiPermohonanBantuan {
   realisasi_id: number;
-  periode_bulan: number;
+  periode_bulan: number | null;
   status_realisasi: string;
   status: string;
   permohonan_id: number;
@@ -91,7 +91,7 @@ interface ValidasiPermohonanBantuan {
   syarat_rejected: number;
   syarat_process: number;
   syarat_pending: number;
-  all_syarat_approved: boolean;
+  can_approve_permohonan: boolean;
 }
 
 const dataValidasiPermohonanBantuan = ref<ValidasiPermohonanBantuan[]>([]);
@@ -153,7 +153,7 @@ async function approveSyarat(realisasi_id: number, syarat: any) {
           id: realisasi_id,
           validasi_id: syarat.validasi_id,
         });
-        console.log('Reject syarat:', syarat);
+        console.log('Approve syarat:', syarat);
         displayNotification(response.error_msg || 'Syarat berhasil disetujui', 'success');
       } catch (error: any) {
         console.error('Error updating file:', error);
@@ -231,8 +231,8 @@ onMounted(async () => {
             type="text"
             v-model="search"
             @change="fetchData"
-            placeholder="Cari permohonan bantuan . . ."
-            class="w-full sm:w-84 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:border-green-900 focus:ring-2 focus:ring-green-900 transition"
+            placeholder="Cari Nama / NIK Pemohon . . ."
+            class="w-full sm:w-86 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:border-green-900 focus:ring-2 focus:ring-green-900 transition"
           />
         </div>
       </div>
@@ -465,7 +465,6 @@ onMounted(async () => {
                               </button>
                               <button
                                 v-if="syarat.status_validasi !== 'approve'"
-                                      
                                 @click="approveSyarat(data.realisasi_id, syarat)"
                                 class="w-6 p-1 bg-green-500 text-white hover:bg-green-100 rounded transition-colors"
                                 title="Approve"
@@ -524,7 +523,7 @@ onMounted(async () => {
                       <font-awesome-icon icon="fa-brands fa-whatsapp" />
                     </LightButton>
                     <ButtonGreen
-                      v-if="data.all_syarat_approved"
+                      v-if="data.can_approve_permohonan"
                       @click="openModalSetujui(data)"
                       title="Approve Permohonan"
                     >

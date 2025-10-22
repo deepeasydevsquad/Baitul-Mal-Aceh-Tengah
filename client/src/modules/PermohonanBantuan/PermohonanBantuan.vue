@@ -3,7 +3,6 @@
 import BaseButton from '@/components/Button/BaseButton.vue';
 import DangerButton from '@/components/Button/DangerButton.vue';
 import LightButton from '@/components/Button/LightButton.vue';
-import YellowButton from '@/components/Button/YellowButton.vue';
 import BaseSelect from '@/components/Form/BaseSelect.vue';
 import DeleteIcon from '@/components/Icons/DeleteIcon.vue';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
@@ -49,6 +48,7 @@ const { showConfirmDialog, confirmTitle, confirmMessage, displayConfirmation, co
 
 interface permohonanBantuan {
   id: number;
+  status: string;
   biaya_disetujui: number;
   nominal_realisasi: number;
   Permohonan: {
@@ -100,7 +100,7 @@ function openModalEditStatus(datas: any) {
 
 // Function: Fetch Data
 const kegiatanOption = ref<{ value: string; label: string }[]>([]);
-const statusRealisasiOption = ref<{ value: string; label: string }[]>([
+const statusKegiataniOption = ref<{ value: string; label: string }[]>([
   { value: 'selesai', label: 'Selesai' },
   { value: 'sedang_berlangsung', label: 'Sedang Berlangsung' },
 ]);
@@ -201,7 +201,7 @@ function formatAreaPenyaluran(area: string): string {
           <!-- Status Kegiatan -->
           <BaseSelect
             v-model="selectedStatusKegiatan"
-            :options="statusRealisasiOption"
+            :options="statusKegiataniOption"
             placeholder="Semua Status"
             @change="fetchData"
           />
@@ -212,8 +212,8 @@ function formatAreaPenyaluran(area: string): string {
             type="text"
             v-model="search"
             @change="fetchData"
-            placeholder="Cari Nama / NIK Pemohon..."
-            class="w-full sm:w-64 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:border-green-900 focus:ring-2 focus:ring-green-900 transition"
+            placeholder="Cari Nama / NIK Pemohon . . ."
+            class="w-full sm:w-86 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:border-green-900 focus:ring-2 focus:ring-green-900 transition"
           />
         </div>
       </div>
@@ -229,7 +229,7 @@ function formatAreaPenyaluran(area: string): string {
               <th class="w-[10%] px-4 py-3 font-medium">Aksi</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-100 text-xs align-top">
+          <tbody class="divide-y divide-gray-100 text-sm align-top">
             <template v-if="dataPermohonanBantuan.length > 0">
               <tr
                 v-for="data in dataPermohonanBantuan"
@@ -245,14 +245,14 @@ function formatAreaPenyaluran(area: string): string {
                         <h3 class="text-white font-bold text-base">
                           {{ data.Permohonan.member_name }}
                         </h3>
-                        <p class="text-white text-xs mt-1">
+                        <p class="text-white text-sm mt-1">
                           {{ data.Permohonan.desa_name || '-' }},
                           {{ data.Permohonan.kecamatan_name || '-' }}
                         </p>
                       </div>
                       <div class="text-right">
                         <span
-                          class="inline-block px-2 py-1 bg-white/20 text-white rounded text-xs font-semibold"
+                          class="inline-block px-2 py-1 bg-white/20 text-white rounded text-sm font-semibold"
                         >
                           {{
                             data.Permohonan.member_tipe === 'perorangan' ? 'PERORANGAN' : 'INSTANSI'
@@ -266,14 +266,14 @@ function formatAreaPenyaluran(area: string): string {
                   <div class="grid grid-cols-2 gap-3">
                     <!-- Info Kegiatan -->
                     <div class="bg-white rounded-lg p-3 space-y-2 shadow-md">
-                      <h4 class="font-semibold text-gray-800 text-xs mb-2 flex items-center gap-2">
+                      <h4 class="font-semibold text-gray-800 text-sm mb-2 flex items-center gap-2">
                         <font-awesome-icon
                           icon="fa-solid fa-calendar-days"
                           class="text-green-600"
                         />
                         Info Kegiatan
                       </h4>
-                      <div class="space-y-1 text-xs">
+                      <div class="space-y-1 text-sm">
                         <div class="flex justify-between gap-2">
                           <span class="text-gray-600">Kegiatan:</span>
                           <span class="font-semibold text-gray-800 text-right">{{
@@ -335,14 +335,14 @@ function formatAreaPenyaluran(area: string): string {
 
                     <!-- Info Bank -->
                     <div class="bg-white rounded-lg p-3 space-y-2 shadow-md">
-                      <h4 class="font-semibold text-gray-800 text-xs mb-2 flex items-center gap-2">
+                      <h4 class="font-semibold text-gray-800 text-sm mb-2 flex items-center gap-2">
                         <font-awesome-icon
                           icon="fa-solid fa-building-columns"
                           class="text-green-600"
                         />
                         Info Bank
                       </h4>
-                      <div class="space-y-1 text-xs">
+                      <div class="space-y-1 text-sm">
                         <div class="flex justify-between">
                           <span class="text-gray-600">Bank:</span>
                           <span class="font-semibold text-gray-800">{{
@@ -367,7 +367,7 @@ function formatAreaPenyaluran(area: string): string {
 
                   <!-- Info Realisasi -->
                   <div class="mt-3 bg-white border border-gray-100 rounded-lg p-3 shadow-md">
-                    <div class="flex justify-between items-center text-xs">
+                    <div class="flex justify-between items-center text-sm">
                       <div class="flex items-center gap-2">
                         <font-awesome-icon
                           icon="fa-solid fa-money-bill-wave"
@@ -375,16 +375,16 @@ function formatAreaPenyaluran(area: string): string {
                         />
                         <span class="font-semibold text-gray-700">Biaya Disetujui:</span>
                       </div>
-                      <span v-if="data.biaya_disetujui" class="font-bold text-green-700">
+                      <span v-if="data.biaya_disetujui" class="font-bold text-green-700 text-lg">
                         {{ $formatToRupiah(data.biaya_disetujui) }}
                       </span>
-                      <span v-else class="font-bold text-red-700">
+                      <span v-else class="font-bold text-red-700 text-md">
                         {{ 'Belum disetujui' }}
                       </span>
                     </div>
                     <div
                       v-if="data.nominal_realisasi"
-                      class="flex justify-between items-center text-xs mt-2 pt-2 border-t border-green-200"
+                      class="flex justify-between items-center text-sm mt-2 pt-2 border-t border-green-200"
                     >
                       <div class="flex items-center gap-2">
                         <font-awesome-icon icon="fa-solid fa-check-circle" class="text-green-600" />
@@ -400,7 +400,7 @@ function formatAreaPenyaluran(area: string): string {
                 <!-- Kolom Kriteria -->
                 <td class="px-4 py-4">
                   <div class="bg-gray-50 rounded-lg p-4">
-                    <h4 class="font-semibold text-gray-800 text-xs mb-3 flex items-center gap-2">
+                    <h4 class="font-semibold text-gray-800 text-sm mb-3 flex items-center gap-2">
                       <font-awesome-icon icon="fa-solid fa-list-check" class="text-green-600" />
                       Kriteria Persyaratan ({{ data.Permohonan.Kegiatan.kriteria.length }})
                     </h4>
@@ -408,7 +408,7 @@ function formatAreaPenyaluran(area: string): string {
                       <li
                         v-for="kriteria in data.Permohonan.Kegiatan.kriteria"
                         :key="kriteria.id"
-                        class="flex items-start gap-2 text-xs"
+                        class="flex items-start gap-2 text-sm"
                       >
                         <span
                           class="inline-block w-2 h-2 bg-green-500 rounded-full mt-1 flex-shrink-0"
@@ -418,7 +418,7 @@ function formatAreaPenyaluran(area: string): string {
                     </ul>
                     <div
                       v-if="data.Permohonan.Kegiatan.kriteria.length === 0"
-                      class="text-center text-gray-400 text-xs py-4"
+                      class="text-center text-gray-400 text-sm py-4"
                     >
                       <font-awesome-icon icon="fa-solid fa-inbox" class="text-2xl mb-2" />
                       <p>Tidak ada kriteria</p>

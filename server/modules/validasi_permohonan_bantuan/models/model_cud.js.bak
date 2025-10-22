@@ -2,9 +2,8 @@ const {
   sequelize,
   Realisasi_permohonan,
   Validasi_syarat_permohonan,
-  Permohonan,
 } = require("../../../models");
-const Model_r = require("../models/model_r");
+const Model_r = require("./model_r");
 const { writeLog } = require("../../../helper/writeLogHelper");
 const { sendWhatsApp } = require("../../../helper/waSenderHelper");
 const { convertToRP } = require("../../../helper/currencyHelper");
@@ -23,7 +22,7 @@ class Model_cud {
   }
 
   // ========================================
-  // 1. EDIT FILE (Upload ulang file yang ditolak)
+  // 1. EDIT FILE
   // ========================================
   async edit_file() {
     await this.initialize();
@@ -57,7 +56,7 @@ class Model_cud {
         {
           file_name: file[0].basename,
           path: file[0].path,
-          status: "process", // Reset ke process (perlu validasi ulang)
+          status: "process", // Reset status jadi process lagi
           alasan_penolakan: null, // Reset alasan penolakan
           updatedAt: myDate,
         },
@@ -72,11 +71,10 @@ class Model_cud {
       );
       const info_member = await model_r.info_member(info_permohonan.member_id);
 
-      this.message = `Memperbarui file syarat permohonan untuk ${info_member.fullname} dengan file baru: ${file[0].basename}`;
+      this.message = `Memperbarui file syarat permohonan untuk ${info_member.fullname} dengan file baru: ${file.basename}`;
     } catch (error) {
       this.state = false;
       console.error("Error editing file:", error);
-      this.message = error.message;
     }
   }
 
@@ -123,7 +121,6 @@ class Model_cud {
     } catch (error) {
       this.state = false;
       console.error("Error approve berkas:", error);
-      this.message = error.message;
     }
   }
 
@@ -166,16 +163,17 @@ class Model_cud {
         .filter((item) => item.trim() !== "")
         .join(" ")} untuk ${info_member.fullname} - Kegiatan: ${
         info_kegiatan.nama_kegiatan
+      }
+      ${body.alasan_penolakan ? ` - Alasan: ${body.alasan_penolakan}` : ""}
       } - Alasan: ${body.alasan_penolakan}`;
     } catch (error) {
       this.state = false;
       console.error("Error reject berkas:", error);
-      this.message = error.message;
     }
   }
 
   // ========================================
-  // 4. TOLAK PERMOHONAN (Tolak seluruh permohonan)
+  // 4. TOLAK PERMOHONAN
   // ========================================
   async reject_permohonan() {
     await this.initialize();
@@ -194,27 +192,14 @@ class Model_cud {
       );
       const info_member = await model_r.info_member(info_permohonan.member_id);
 
-      // Update status realisasi jadi reject_permohonan
+      // Update status realisasi jadi reject_berkas
       await Realisasi_permohonan.update(
         {
-          status: "reject_berkas", // Status ditolak total
+          status: "reject_berkas",
           updatedAt: myDate,
         },
         {
           where: { id: body.id },
-          transaction: this.t,
-        }
-      );
-
-      // Update status permohonan jadi terhenti
-      await Permohonan.update(
-        {
-          status: "terhenti",
-          alasan_penolakan: body.alasan_penolakan,
-          updatedAt: myDate,
-        },
-        {
-          where: { id: info_realisasi.permohonan_id },
           transaction: this.t,
         }
       );
@@ -235,12 +220,12 @@ class Model_cud {
     } catch (error) {
       this.state = false;
       console.error("Error reject permohonan:", error);
-      this.message = error.message;
+      throw error;
     }
   }
 
   // ========================================
-  // 5. APPROVE PERMOHONAN (dengan auto generate bulan berikutnya)
+  // 5. APPROVE PERMOHONAN
   // ========================================
   async approve_permohonan() {
     await this.initialize();
@@ -261,7 +246,7 @@ class Model_cud {
       );
       const info_member = await model_r.info_member(info_permohonan.member_id);
 
-      // Update status realisasi saat ini jadi approve
+      // Update status realisasi jadi approve
       await Realisasi_permohonan.update(
         {
           status: "approve",
@@ -274,98 +259,7 @@ class Model_cud {
         }
       );
 
-      // ========================================
-      // AUTO GENERATE BULAN BERIKUTNYA (KHUSUS BULANAN)
-      // ========================================
-      if (info_kegiatan.periode_bantuan === "bulanan" && info_realisasi.bulan) {
-        const bulanSekarang = info_realisasi.bulan;
-        const bulanBerikutnya = bulanSekarang + 1;
-
-        console.log("=== AUTO GENERATE BULANAN ===");
-        console.log("Bulan sekarang yang diapprove:", bulanSekarang);
-        console.log("Generate dari bulan:", bulanBerikutnya, "sampai 12");
-
-        // Generate hanya jika bulan berikutnya <= 12
-        if (bulanBerikutnya <= 12) {
-          // Ambil file validasi dari realisasi yang baru diapprove (sebagai template)
-          const templateFiles = await Validasi_syarat_permohonan.findAll({
-            where: { realisasi_permohonan_id: body.id },
-            attributes: ["file_name", "path"],
-            raw: true,
-          });
-
-          // Generate realisasi untuk bulan berikutnya hingga bulan 12
-          const bulansToGenerate = Array.from(
-            { length: 12 - bulanBerikutnya + 1 },
-            (_, i) => i + bulanBerikutnya
-          );
-
-          console.log("Bulan yang akan digenerate:", bulansToGenerate);
-
-          for (const bulan of bulansToGenerate) {
-            // 1. Buat permohonan baru untuk bulan ini
-            const newPermohonan = await Permohonan.create(
-              {
-                member_id: info_permohonan.member_id,
-                kegiatan_id: info_permohonan.kegiatan_id,
-                bank_id: info_permohonan.bank_id,
-                nomor_akun_bank: info_permohonan.nomor_akun_bank,
-                nama_akun_bank: info_permohonan.nama_akun_bank,
-                status: "sedang_berlangsung",
-                createdAt: myDate,
-                updatedAt: myDate,
-              },
-              { transaction: this.t }
-            );
-
-            // 2. Buat realisasi dengan status "process" (bukan process_lapangan)
-            const newRealisasi = await Realisasi_permohonan.create(
-              {
-                permohonan_id: newPermohonan.id,
-                status: "process", // status process (sudah melewati tahap lapangan)
-                status_realisasi: "belum_direalisasi",
-                bulan: bulan,
-                createdAt: myDate,
-                updatedAt: myDate,
-              },
-              { transaction: this.t }
-            );
-
-            // 3. Copy file validasi dari template
-            await Promise.all(
-              templateFiles.map((file) =>
-                Validasi_syarat_permohonan.create(
-                  {
-                    realisasi_permohonan_id: newRealisasi.id,
-                    file_name: file.file_name,
-                    path: file.path,
-                    status: "approve", // Langsung approve karena sudah divalidasi di bulan pertama
-                    createdAt: myDate,
-                    updatedAt: myDate,
-                  },
-                  { transaction: this.t }
-                )
-              )
-            );
-
-            console.log(
-              `Generated bulan ${bulan} dengan realisasi_id: ${newRealisasi.id}`
-            );
-          }
-
-          console.log(
-            `=== AUTO GENERATE SELESAI: ${bulansToGenerate.length} bulan ===`
-          );
-        } else {
-          console.log(
-            "Tidak ada bulan berikutnya untuk digenerate (sudah bulan 12)"
-          );
-        }
-      }
-
-      // ========================================
-      // KIRIM WHATSAPP (OPSIONAL)
-      // ========================================
+      // Jika send_wa = true, kirim WA
       if (body.send_wa) {
         const message = `Halo *${
           info_member.fullname
@@ -385,17 +279,11 @@ class Model_cud {
         info_member.fullname
       } - Kegiatan: ${info_kegiatan.nama_kegiatan} dengan biaya Rp ${
         body.biaya_disetujui
-      }${body.send_wa ? " (dengan notifikasi WA)" : ""}${
-        info_kegiatan.periode_bantuan === "bulanan" && info_realisasi.bulan < 12
-          ? ` dan menggenerate ${
-              12 - info_realisasi.bulan
-            } permohonan bulan berikutnya`
-          : ""
-      }`;
+      }${body.send_wa ? " (dengan notifikasi WA)" : ""}`;
     } catch (error) {
       this.state = false;
       console.error("Error approve permohonan:", error);
-      this.message = error.message;
+      throw error;
     }
   }
 

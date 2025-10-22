@@ -57,14 +57,19 @@ validation.check_berkas = async (value) => {
     throw new Error("Belum ada berkas yang diunggah untuk permohonan ini.");
   }
 
-  const berkasBelumApprove = await Validasi_syarat_permohonan.count({
-    where: {
-      realisasi_permohonan_id: value,
-      status: { [Op.ne]: "approve" }, // Not equal to 'approve'
-    },
+  const allValidasi = await Validasi_syarat_permohonan.findAll({
+    where: { realisasi_permohonan_id: value },
+    attributes: ["id", "status"],
+    raw: true,
   });
 
-  if (berkasBelumApprove > 0) {
+  const rejected = allValidasi.some((v) => v.status === "reject");
+  if (rejected) {
+    throw new Error("Ada berkas yang ditolak. Harap perbaiki terlebih dahulu.");
+  }
+
+  const allApproved = allValidasi.every((v) => v.status === "approve");
+  if (!allApproved) {
     throw new Error(
       "Masih ada berkas yang belum disetujui. Harap approve semua berkas terlebih dahulu."
     );
