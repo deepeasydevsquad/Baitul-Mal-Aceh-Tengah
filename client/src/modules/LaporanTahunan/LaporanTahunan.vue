@@ -14,6 +14,8 @@ import { useNotification } from '@/composables/useNotification';
 
 // Service API
 import { get_laporan_tahunan } from '@/service/laporan_tahunan';
+import BaseButton from '@/components/Button/BaseButton.vue';
+import CetakIcon from '@/components/Icons/CetakIcon.vue';
 
 // State: Loading
 const isLoading = ref(false);
@@ -183,6 +185,13 @@ async function fetchData() {
   }
 }
 
+const tahun = ref<string>(new Date().getFullYear().toString());
+
+const cetak_laporan = (tahun: string) => {
+  const printUrl = `/laporan-tahunan/${tahun}`;
+  window.open(printUrl, '_blank');
+};
+
 onMounted(async () => {
   await fetchData();
 });
@@ -190,7 +199,13 @@ onMounted(async () => {
 
 <template>
   <div class="mx-auto p-4">
-    <div class=""><Logo /></div>
+    <div class="flex items-center justify-between">
+      <BaseButton @click="cetak_laporan(tahun)" class="flex items-center justify-center">
+        <span>Cetak</span>
+      </BaseButton>
+
+      <Logo />
+    </div>
 
     <!-- Header -->
     <LoadingSpinner v-if="isLoading" label="Memuat halaman..." />

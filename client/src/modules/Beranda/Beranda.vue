@@ -11,6 +11,7 @@ import { useNotification } from '@/composables/useNotification';
 
 // Service API
 import { get_beranda } from '@/service/beranda';
+import BaseButton from '@/components/Button/BaseButton.vue';
 
 // State
 const isLoading = ref(false);
@@ -356,6 +357,11 @@ async function fetchData() {
   }
 }
 
+const cetak_laporan = (tahun: string) => {
+  const printUrl = `/beranda/${tahun}`;
+  window.open(printUrl, '_blank');
+};
+
 onMounted(fetchData);
 </script>
 
@@ -365,17 +371,33 @@ onMounted(fetchData);
 
     <div v-else class="space-y-4">
       <!-- Tahun filter -->
-      <div class="flex items-center gap-4 mb-4">
-        <label for="tahun" class="font-medium text-gray-700">Tahun:</label>
-        <select
-          id="tahun"
-          v-model="tahun"
-          @change="fetchData"
-          class="border rounded-lg px-3 py-2 text-sm focus:ring focus:ring-blue-300"
-        >
-          <option v-for="t in tahunOptions" :key="t" :value="t">{{ t }}</option>
-        </select>
-        <Logo />
+
+      <div class="flex items-center justify-between mb-4">
+        <!-- Kiri: Tombol & Select -->
+        <div class="flex items-center gap-4">
+          <div class="flex items-center gap-2">
+            <BaseButton @click="cetak_laporan(tahun)" class="flex items-center justify-center">
+              <span>Cetak</span>
+            </BaseButton>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <label for="tahun" class="font-medium text-gray-700">Tahun:</label>
+            <select
+              id="tahun"
+              v-model="tahun"
+              @change="fetchData"
+              class="border rounded-lg px-3 py-2 text-sm focus:ring focus:ring-blue-300"
+            >
+              <option v-for="t in tahunOptions" :key="t" :value="t">{{ t }}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Kanan: Logo -->
+        <div class="flex-shrink-0">
+          <Logo />
+        </div>
       </div>
 
       <!-- Ringkasan total -->
