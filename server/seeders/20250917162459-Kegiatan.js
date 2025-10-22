@@ -22,6 +22,8 @@ module.exports = {
           jenis_penyaluran: "langsung",
           status_kegiatan: "selesai",
           tahun: 2025,
+          start_date: "2025-01-01",
+          end_date: "2025-12-31",
           banner: "pendidikan-2023.png",
           periode_bantuan: "bulanan",
           desc: "Program bantuan biaya pendidikan untuk siswa/siswi yatim dan dhuafa di seluruh kabupaten (2023).",
@@ -29,7 +31,7 @@ module.exports = {
           updatedAt: new Date(),
         },
         {
-          asnaf_id: 2,
+          asnaf_id: null,
           program_id: 2,
           kode: "PEND-002",
           satuan: "orang",
@@ -44,6 +46,8 @@ module.exports = {
           jenis_penyaluran: "langsung",
           status_kegiatan: "sedang_berlangsung",
           tahun: 2025,
+          start_date: "2025-01-01",
+          end_date: "2025-12-31",
           banner: `${Math.floor(Math.random() * 10) + 1}.png`,
           desc: `Program bantuan biaya pendidikan untuk siswa/siswi yatim dan dhuafa di seluruh kabupaten ${
             Math.floor(Math.random() * 10) + 1
@@ -68,6 +72,8 @@ module.exports = {
           jenis_penyaluran: "volume",
           status_kegiatan: "sedang_berlangsung",
           tahun: 2025,
+          start_date: "2025-01-01",
+          end_date: "2025-12-31",
           banner: "pendidikan-2025.png",
           periode_bantuan: "tahunan",
           desc: "Program beasiswa penuh untuk anak yatim berprestasi di seluruh kecamatan (2025).",
@@ -90,6 +96,8 @@ module.exports = {
           jenis_penyaluran: "langsung",
           status_kegiatan: "sedang_berlangsung",
           tahun: 2025,
+          start_date: "2025-01-01",
+          end_date: "2025-12-31",
           banner: "ekonomi-2025.png",
           periode_bantuan: "tahunan",
           desc: "Program pelatihan kewirausahaan untuk meningkatkan ekonomi pemuda dhuafa di wilayah kecamatan (2025).",
@@ -97,7 +105,7 @@ module.exports = {
           updatedAt: new Date(),
         },
         {
-          asnaf_id: 5,
+          asnaf_id: null,
           program_id: 5,
           kode: "PEND-005",
           satuan: "orang",
@@ -112,6 +120,8 @@ module.exports = {
           jenis_penyaluran: "langsung",
           status_kegiatan: "sedang_berlangsung",
           tahun: 2025,
+          start_date: "2025-01-01",
+          end_date: "2025-12-31",
           banner: "kesehatan-2025.png",
           periode_bantuan: "bulanan",
           desc: "Program bantuan sosial dan kesehatan untuk lansia dhuafa di seluruh kabupaten (2025).",
@@ -120,7 +130,7 @@ module.exports = {
         },
 
         {
-          asnaf_id: 3,
+          asnaf_id: null,
           program_id: 6,
           kode: "PEND-005",
           satuan: "orang",
@@ -135,6 +145,8 @@ module.exports = {
           jenis_penyaluran: "langsung",
           status_kegiatan: "sedang_berlangsung",
           tahun: 2025,
+          start_date: "2025-01-01",
+          end_date: "2025-12-31",
           banner: `${Math.floor(Math.random() * 10) + 1}.png`,
           desc: `Program bantuan biaya pendidikan untuk siswa/siswi yatim dan dhuafa di seluruh kecamatan ${
             Math.floor(Math.random() * 10) + 1

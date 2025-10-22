@@ -114,9 +114,15 @@ router.post(
       .withMessage("Tahun Tidak Boleh Kosong")
       .isInt()
       .withMessage("Tahun Harus Angka"),
+    body("start_date")
+      .optional()
+      .isString()
+      .withMessage("Start Date Harus Date"),
+    body("end_date").optional().isString().withMessage("End Date Harus Date"),
     body("name").optional(),
     body("desc").optional(),
   ],
+  validation.check_start_end_date,
   validationHelper.handleFileErrors,
   controllers.add
 );
@@ -231,9 +237,15 @@ router.post(
       .withMessage("Tahun Tidak Boleh Kosong")
       .isInt()
       .withMessage("Tahun Harus Angka"),
+    body("start_date")
+      .optional()
+      .isString()
+      .withMessage("Start Date Harus Date"),
+    body("end_date").optional().isString().withMessage("End Date Harus Date"),
     body("name").optional(),
     body("desc").optional(),
   ],
+  validation.check_start_end_date,
   validationHelper.handleFileErrors,
   controllers.edit
 );
