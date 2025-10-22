@@ -1,64 +1,67 @@
 <script setup lang="ts">
-import { ref, onMounted, nextTick, watch } from 'vue';
+import { initTooltips } from 'flowbite';
+import { nextTick, onMounted, ref, watch } from 'vue';
 import {
-  useSelectedTab,
-  useGlobalTab,
   useGlobalActiveTab,
+  useGlobalTab,
+  useSelectedTab,
   useTabTerpilih,
 } from '../../../../stores/sidebar';
-import { initTooltips } from 'flowbite';
-import Surveyor from '@/modules/Surveyor/Surveyor.vue';
-import syarat from '@/modules/Syarat/syarat.vue';
-import SystemLogSurveyor from '@/modules/SystemLogSurveyor/SystemLogSurveyor.vue';
+
+// components
+import BakalPenerimaBantuan from '@/modules/BakalPenerimaBantuan/BakalPenerimaBantuan.vue';
 import Bank from '@/modules/Bank/Bank.vue';
-import RequestKeanggotaan from '@/modules/RequestKeanggotaan/RequestKeanggotaan.vue';
-import RunningText from '@/modules/RunningText/RunningText.vue';
 import BankPengumpulan from '@/modules/BankPengumpulan/BankPengumpulan.vue';
-import PengaturanUmum from '@/modules/PengaturanUmum/PengaturanUmum.vue';
-import GrupAkses from '@/modules/GrupAkses/GrupAkses.vue';
-import DaftarPengguna from '@/modules/DaftarPengguna/DaftarPengguna.vue';
-import KegiatanKeseketariatan from '@/modules/KegiatanKeseketariatan/KegiatanKeseketariatan.vue';
-import TemplatePesanWhatsapp from '@/modules/TemplatePesanWhatsapp/TemplatePesanWhatsapp.vue';
-import DaftarKeanggotaan from '@/modules/DaftarKeanggotaan/DaftarKeanggotaan.vue';
-import kecamatan from '@/modules/Kecamatan/Kecamatan.vue';
-import SystemLog from '@/modules/SystemLog/SystemLog.vue';
-import PengaturanWhatsapp from '@/modules/PengaturanWhatsapp/PengaturanWhatsapp.vue';
-import LaporanUmum from '@/modules/DaftarLaporanUmum/LaporanUmum.vue';
-import ProgramKegiatanBantuan from '@/modules/ProgramKegiatanBantuan/ProgramKegiatanBantuan.vue';
-import DaftarProgram from '@/modules/DaftarProgram/DaftarProgram.vue';
-import LaporanAsnafFakir from '@/modules/LaporanAsnaf/LaporanAsnafFakir.vue';
-import ProgramDonasi from '@/modules/ProgramDonasi/ProgramDonasi.vue';
-import DaftarTab from '@/modules/DaftarTab/DaftarTab.vue';
-import desa from '../../../Desa/Desa.vue';
-import RiwayatDonasi from '@/modules/RiwayatDonasi/RiwayatDonasi.vue';
+import Beranda from '@/modules/Beranda/Beranda.vue';
 import DaftarAsnaf from '@/modules/DaftarAsnaf/DaftarAsnaf.vue';
-import LaporanAsnafMiskin from '@/modules/LaporanAsnaf/LaporanAsnafMIskin.vue';
+import DaftarKeanggotaan from '@/modules/DaftarKeanggotaan/DaftarKeanggotaan.vue';
+import LaporanUmum from '@/modules/DaftarLaporanUmum/LaporanUmum.vue';
+import DaftarPengguna from '@/modules/DaftarPengguna/DaftarPengguna.vue';
+import DaftarProgram from '@/modules/DaftarProgram/DaftarProgram.vue';
+import DaftarTab from '@/modules/DaftarTab/DaftarTab.vue';
+import desa from '@/modules/Desa/Desa.vue';
+import GrupAkses from '@/modules/GrupAkses/GrupAkses.vue';
+import kecamatan from '@/modules/Kecamatan/Kecamatan.vue';
+import KegiatanKeseketariatan from '@/modules/KegiatanKeseketariatan/KegiatanKeseketariatan.vue';
+import Kriteria from '@/modules/Kriteria/Kriteria.vue';
+import LaporanAsnafFakir from '@/modules/LaporanAsnaf/LaporanAsnafFakir.vue';
 import LaporanAsnafFisabilillah from '@/modules/LaporanAsnaf/LaporanAsnafFisabilillah.vue';
 import LaporanAsnafGharim from '@/modules/LaporanAsnaf/LaporanAsnafGharim.vue';
-import LaporanAsnafMuallaf from '@/modules/LaporanAsnaf/LaporanAsnafMuallaf.vue';
 import LaporanAsnafIbnuSabil from '@/modules/LaporanAsnaf/LaporanAsnafIbnuSabil.vue';
-import RiwayatZakat from '@/modules/RiwayatZakat/RiwayatZakat.vue';
-import UrutanBagianMonev from '@/modules/UrutanBagianMonev/UrutanBagianMonev.vue';
-import RiwayatInfaq from '@/modules/RiwayatInfaq/RiwayatInfaq.vue';
-import RiwayatPesanWhatsapp from '@/modules/RiwayatPesanWhatsapp/RiwayatPesanWhatsapp.vue';
-import PermohonanBantuan from '@/modules/PermohonanBantuan/PermohonanBantuan.vue';
-import ValidasiPermohonanBantuan from '@/modules/ValidasiPermohonanBantuan/ValidasiPermohonanBantuan.vue';
-import Penetapan from '@/modules/Penetapan/Penetapan.vue';
-import LaporanTahunan from '@/modules/LaporanTahunan/LaporanTahunan.vue';
-import PertanyaanMonev from '@/modules/PertanyaanMonev/PertanyaanMonev.vue';
-import RekapPengumpulan from '@/modules/RekapPengumpulan/RekapPengumpulan.vue';
-import LaporanPerencanaan from '@/modules/LaporanPerencanaan/LaporanPerencanaan.vue';
-import TargetPengumpulan from '@/modules/TargetPengumpulan/TargetPengumpulan.vue';
-import TargetDistribusi from '@/modules/TargetDistribusi/TargetDistribusi.vue';
-import RekapDistribusiPerAsnaf from '@/modules/RekapDistribusiPerAsnaf/RekapDistribusiPerAsnaf.vue';
+import LaporanAsnafMiskin from '@/modules/LaporanAsnaf/LaporanAsnafMIskin.vue';
+import LaporanAsnafMuallaf from '@/modules/LaporanAsnaf/LaporanAsnafMuallaf.vue';
 import LaporanKesekretariatan from '@/modules/LaporanKesekretariatan/LaporanKesekretariatan.vue';
-import Beranda from '@/modules/Beranda/Beranda.vue';
+import LaporanPengumpulan from '@/modules/LaporanPengumpulan/LaporanPengumpulan.vue';
+import LaporanPerencanaan from '@/modules/LaporanPerencanaan/LaporanPerencanaan.vue';
+import LaporanTahunan from '@/modules/LaporanTahunan/LaporanTahunan.vue';
 import Monev from '@/modules/Monev/Monev.vue';
+import Penetapan from '@/modules/Penetapan/Penetapan.vue';
+import PengaturanUmum from '@/modules/PengaturanUmum/PengaturanUmum.vue';
+import PengaturanWhatsapp from '@/modules/PengaturanWhatsapp/PengaturanWhatsapp.vue';
+import PermohonanBantuan from '@/modules/PermohonanBantuan/PermohonanBantuan.vue';
+import PertanyaanMonev from '@/modules/PertanyaanMonev/PertanyaanMonev.vue';
+import ProgramDonasi from '@/modules/ProgramDonasi/ProgramDonasi.vue';
+import ProgramKegiatanBantuan from '@/modules/ProgramKegiatanBantuan/ProgramKegiatanBantuan.vue';
+import RekapDistribusiPerAsnaf from '@/modules/RekapDistribusiPerAsnaf/RekapDistribusiPerAsnaf.vue';
+import RekapDistribusiPerKodeAsnaf from '@/modules/RekapDistribusiPerKodeAsnaf/RekapDistribusiPerKodeAsnaf.vue';
+import RekapPengumpulan from '@/modules/RekapPengumpulan/RekapPengumpulan.vue';
 import RekapPengumpulanPerKecamatan from '@/modules/RekapPengumpulanPerKecamatan/RekapPengumpulanPerKecamatan.vue';
 import RekapPerkecamatan from '@/modules/RekapPerkecamatan/RekapPerkecamatan.vue';
-import RekapDistribusiPerKodeAsnaf from '@/modules/RekapDistribusiPerKodeAsnaf/RekapDistribusiPerKodeAsnaf.vue';
-import LaporanPengumpulan from '@/modules/LaporanPengumpulan/LaporanPengumpulan.vue';
-import Kriteria from '@/modules/Kriteria/Kriteria.vue';
+import RequestKeanggotaan from '@/modules/RequestKeanggotaan/RequestKeanggotaan.vue';
+import RiwayatDonasi from '@/modules/RiwayatDonasi/RiwayatDonasi.vue';
+import RiwayatInfaq from '@/modules/RiwayatInfaq/RiwayatInfaq.vue';
+import RiwayatPesanWhatsapp from '@/modules/RiwayatPesanWhatsapp/RiwayatPesanWhatsapp.vue';
+import RiwayatZakat from '@/modules/RiwayatZakat/RiwayatZakat.vue';
+import RunningText from '@/modules/RunningText/RunningText.vue';
+import Surveyor from '@/modules/Surveyor/Surveyor.vue';
+import syarat from '@/modules/Syarat/syarat.vue';
+import SystemLog from '@/modules/SystemLog/SystemLog.vue';
+import SystemLogSurveyor from '@/modules/SystemLogSurveyor/SystemLogSurveyor.vue';
+import TargetDistribusi from '@/modules/TargetDistribusi/TargetDistribusi.vue';
+import TargetPengumpulan from '@/modules/TargetPengumpulan/TargetPengumpulan.vue';
+import TemplatePesanWhatsapp from '@/modules/TemplatePesanWhatsapp/TemplatePesanWhatsapp.vue';
+import UrutanBagianMonev from '@/modules/UrutanBagianMonev/UrutanBagianMonev.vue';
+import ValidasiPermohonanBantuan from '@/modules/ValidasiPermohonanBantuan/ValidasiPermohonanBantuan.vue';
 
 const tabComponents = {
   pengaturan_whatsapp: PengaturanWhatsapp,
@@ -115,6 +118,7 @@ const tabComponents = {
   rekap_distribusi_kode_asnaf: RekapDistribusiPerKodeAsnaf,
   laporan_pengumpulan: LaporanPengumpulan,
   kriteria: Kriteria,
+  bakal_penerima_bantuan: BakalPenerimaBantuan,
 };
 
 const selectedTab = useSelectedTab();

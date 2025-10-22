@@ -290,7 +290,7 @@ class Model_r {
             "realisasi_permohonan_id",
             "file_name",
             "path",
-            "status", // process, approve, reject
+            "status", // process_lapangan, process, approve, reject
             "alasan_penolakan",
           ],
           raw: true,
@@ -378,6 +378,9 @@ class Model_r {
         const rejectedCount = syarat_persyaratan.filter(
           (s) => s.status_validasi === "reject"
         ).length;
+        const processLapanganCount = syarat_persyaratan.filter(
+          (s) => s.status_validasi === "process_lapangan"
+        ).length;
         const processCount = syarat_persyaratan.filter(
           (s) => s.status_validasi === "process"
         ).length;
@@ -387,14 +390,10 @@ class Model_r {
 
         // Flag untuk enable button approve permohonan
         // Hanya bisa approve jika semua berkas sudah approve DAN status realisasi = process
-        // const canApprovePermohonan =
-        //   approvedCount === totalSyarat &&
-        //   totalSyarat > 0 &&
-        //   r.status === "process";
-
-        // Hanya bisa approve jika semua berkas sudah approve
-        const canApprovePermohonan =
+        const allSyaratApproved =
           approvedCount === totalSyarat && totalSyarat > 0;
+        const canApprovePermohonan =
+          allSyaratApproved && r.status === "process";
 
         return {
           // === INFO REALISASI ===
@@ -433,11 +432,15 @@ class Model_r {
           total_syarat: totalSyarat,
           syarat_approved: approvedCount,
           syarat_rejected: rejectedCount,
-          syarat_process: processCount, // Berkas yang sedang diprocess
+          syarat_process_lapangan: processLapanganCount, // Berkas di tahap validasi lapangan
+          syarat_process: processCount, // Berkas sudah melewati validasi lapangan
           syarat_pending: pendingCount, // Belum upload
 
           // === FLAG UNTUK UI ===
+          all_syarat_approved: allSyaratApproved, // Semua berkas sudah approve
           can_approve_permohonan: canApprovePermohonan, // Bisa klik tombol approve permohonan
+          is_process_lapangan: r.status === "process_lapangan", // Masih di tahap validasi lapangan
+          is_ready_for_approval: r.status === "process", // Siap untuk approve permohonan
         };
       });
 
