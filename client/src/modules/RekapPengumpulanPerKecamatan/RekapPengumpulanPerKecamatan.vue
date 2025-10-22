@@ -297,14 +297,19 @@ async function downloadPDF() {
             <tr class="bg-gray-50 sticky top-0 z-20">
               <th
                 rowspan="2"
-                class="w-[20%] px-4 py-3 font-medium border-r border-gray-300 sticky left-0 bg-gray-50 z-30"
+                class="w-[20%] px-4 py-3 font-medium border-r border-gray-300 sticky left-0 bg-gray-50 z-30 min-w-[180px]"
               >
                 KECAMATAN
               </th>
               <th :colspan="bulanNames.length" class="px-4 py-3 font-medium border border-gray-300">
                 BULAN
               </th>
-              <th rowspan="2" class="px-4 py-3 font-medium bg-gray-100 min-w-[120px]">JUMLAH</th>
+              <th
+                rowspan="2"
+                class="px-4 py-3 border border-gray-300 font-medium bg-gray-100 min-w-[120px]"
+              >
+                JUMLAH
+              </th>
             </tr>
 
             <tr class="bg-gray-50 sticky top-[40px] z-10">
@@ -318,7 +323,7 @@ async function downloadPDF() {
             </tr>
           </thead>
 
-          <tbody>
+          <tbody class="divide-y divide-gray-100">
             <tr
               v-for="r in filteredRows"
               :key="r.nama_kecamatan"
@@ -336,11 +341,39 @@ async function downloadPDF() {
                 {{ formatRupiah(r.monthly[m.key] ?? 0) }}
               </td>
 
-              <td class="px-6 py-3 text-right whitespace-nowrap bg-gray-100 font-semibold">
+              <td
+                class="px-6 py-3 text-right whitespace-nowrap border border-gray-300 bg-gray-100 font-semibold"
+              >
                 {{ formatRupiah(r.total ?? 0) }}
               </td>
             </tr>
           </tbody>
+          <tfoot>
+            <tr>
+              <td
+                class="px-6 py-3 text-left whitespace-nowrap border border-gray-300 bg-gray-100 font-semibold"
+              >
+                Total
+              </td>
+              <td
+                v-for="m in months"
+                :key="m.key"
+                class="px-6 py-3 text-right whitespace-nowrap border border-gray-300 bg-gray-100 font-semibold"
+              >
+                {{
+                  // Hitung total per bulan
+                  formatRupiah(
+                    filteredRows.reduce((acc, curr) => acc + (curr.monthly[m.key] || 0), 0),
+                  )
+                }}
+              </td>
+              <td
+                class="px-6 py-3 text-right whitespace-nowrap border border-gray-300 bg-gray-100 font-semibold"
+              >
+                {{ formatRupiah(filteredRows.reduce((acc, curr) => acc + (curr.total || 0), 0)) }}
+              </td>
+            </tr>
+          </tfoot>
         </table>
 
         <!-- Empty State -->
