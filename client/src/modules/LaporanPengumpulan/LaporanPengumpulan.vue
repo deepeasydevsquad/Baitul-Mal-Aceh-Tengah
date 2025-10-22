@@ -6,6 +6,7 @@ import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
 import { useNotification } from '@/composables/useNotification';
 import { get_laporan_pengumpulan } from '@/service/laporan_pengumpulan';
 import Logo from '@/components/Logo/Logo.vue';
+import BaseButton from '@/components/Button/BaseButton.vue';
 
 const isLoading = ref(false);
 const isTableLoading = ref(false);
@@ -250,6 +251,11 @@ function setupCharts() {
   donasiChart.value = makeLineChart('Pengumpulan Donasi: Target vs Realisasi', donasiData);
 }
 
+const cetak_laporan = (tahun: number) => {
+  const printUrl = `/laporan-pengumpulan/${tahun}`;
+  window.open(printUrl, '_blank');
+};
+
 // Watch untuk perubahan tahun
 watch(selectedYear, () => {
   fetchData();
@@ -265,6 +271,11 @@ onMounted(fetchData);
     <div v-else class="space-y-4">
       <!-- Header dengan Dropdown Tahun -->
       <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2 mr-4">
+          <BaseButton @click="cetak_laporan(selectedYear)" class="flex items-center justify-center">
+            <span>Cetak</span>
+          </BaseButton>
+        </div>
         <div class="flex items-center gap-2">
           <label class="text-sm text-gray-600">Tahun:</label>
           <select

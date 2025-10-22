@@ -1,3 +1,6 @@
+import Beranda from '@/modules/Cetak/Beranda.vue';
+import LaporanPengumpulan from '@/modules/Cetak/LaporanPengumpulan.vue';
+import LaporanTahunan from '@/modules/Cetak/LaporanTahunan.vue';
 import Register from '@/modules/Register/Register.vue';
 import AdministratorAreaView from '@/views/AdministratorView.vue';
 import homeView from '@/views/HomeView.vue';
@@ -65,6 +68,36 @@ const router = createRouter({
       component: SurveyLapanganView,
       meta: {
         title: 'Apakah Anda Suka dengan Survey Lapangan ini?',
+        description:
+          'Member Area Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah memberikan akses mudah untuk melihat data zakat, status permohonan, serta laporan transaksi secara aman dan transparan',
+      },
+    },
+    {
+      path: '/laporan-tahunan/:tahun',
+      name: 'laporan-tahunan',
+      component: LaporanTahunan,
+      meta: {
+        title: 'Laporan Tahunan || Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah',
+        description:
+          'Member Area Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah memberikan akses mudah untuk melihat data zakat, status permohonan, serta laporan transaksi secara aman dan transparan',
+      },
+    },
+    {
+      path: '/laporan-pengumpulan/:tahun',
+      name: 'laporan-pengumpulan',
+      component: LaporanPengumpulan,
+      meta: {
+        title: 'Laporan Pengumpulan || Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah',
+        description:
+          'Member Area Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah memberikan akses mudah untuk melihat data zakat, status permohonan, serta laporan transaksi secara aman dan transparan',
+      },
+    },
+    {
+      path: '/beranda/:tahun',
+      name: 'beranda',
+      component: Beranda,
+      meta: {
+        title: 'Beranda || Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah',
         description:
           'Member Area Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah memberikan akses mudah untuk melihat data zakat, status permohonan, serta laporan transaksi secara aman dan transparan',
       },
