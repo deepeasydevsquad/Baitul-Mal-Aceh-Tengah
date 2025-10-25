@@ -1,5 +1,6 @@
 import Beranda from '@/modules/Cetak/Beranda.vue';
 import LaporanPengumpulan from '@/modules/Cetak/LaporanPengumpulan.vue';
+import LaporanPerencanaan from '@/modules/Cetak/LaporanPerencanaan.vue';
 import LaporanTahunan from '@/modules/Cetak/LaporanTahunan.vue';
 import Register from '@/modules/Register/Register.vue';
 import AdministratorAreaView from '@/views/AdministratorView.vue';
@@ -88,6 +89,16 @@ const router = createRouter({
       component: LaporanPengumpulan,
       meta: {
         title: 'Laporan Pengumpulan || Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah',
+        description:
+          'Member Area Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah memberikan akses mudah untuk melihat data zakat, status permohonan, serta laporan transaksi secara aman dan transparan',
+      },
+    },
+    {
+      path: '/laporan-perencanaan/:tahun/:program/:perpage/:currentpage',
+      name: 'laporan-perencanaan',
+      component: LaporanPerencanaan,
+      meta: {
+        title: 'Laporan Perencanaan || Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah',
         description:
           'Member Area Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah memberikan akses mudah untuk melihat data zakat, status permohonan, serta laporan transaksi secara aman dan transparan',
       },
