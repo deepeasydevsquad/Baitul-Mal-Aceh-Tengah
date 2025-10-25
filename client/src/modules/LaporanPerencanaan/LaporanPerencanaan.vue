@@ -99,142 +99,10 @@ watch([selectedYear, selectedProgram], async () => {
 
 const isDownloading = ref(false);
 
-// ==================== DOWNLOAD PDF ====================
-async function downloadPDF() {
-  if (isDownloading.value) return;
-  if (datas.value.length === 0) {
-    displayNotification('Tidak ada data untuk diunduh', 'error');
-    return;
-  }
-
-  isDownloading.value = true;
-
-  try {
-    // Buat table baru dengan inline styles aja (no Tailwind)
-    const tableHTML = `
-      <div style="padding: 20px; background: #fff; font-family: Arial, sans-serif;">
-        <table style="width: 100%; border-collapse: collapse; background: #fff; font-size: 12px;">
-          <thead style="background: #f9fafb; color: #374151; text-align: center;">
-            <tr>
-              <th rowspan="2" style="width: 20%; padding: 12px; font-weight: 500; border: 1px solid #d1d5db;">Asnaf</th>
-              <th colspan="2" style="width: 20%; padding: 12px; font-weight: 500; border: 1px solid #d1d5db;">Rencana</th>
-              <th colspan="4" style="width: 40%; padding: 12px; font-weight: 500; border: 1px solid #d1d5db;">Rincihan Perhitungan (Murni)</th>
-              <th rowspan="2" style="width: 10%; padding: 12px; font-weight: 500; border: 1px solid #d1d5db;">%</th>
-              <th rowspan="2" style="width: 10%; padding: 12px; font-weight: 500; border: 1px solid #d1d5db;">Ket</th>
-            </tr>
-            <tr>
-              <th style="padding: 12px; font-weight: 500; border: 1px solid #d1d5db;">Jumlah</th>
-              <th style="padding: 12px; font-weight: 500; border: 1px solid #d1d5db;">Satuan</th>
-              <th style="padding: 12px; font-weight: 500; border: 1px solid #d1d5db;">Vol</th>
-              <th style="padding: 12px; font-weight: 500; border: 1px solid #d1d5db;">Satuan</th>
-              <th style="padding: 12px; font-weight: 500; border: 1px solid #d1d5db;">Jumlah Satuan</th>
-              <th style="padding: 12px; font-weight: 500; border: 1px solid #d1d5db;">Jumlah</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${datas.value
-              .map(
-                (asnaf) => `
-              <tr style="background: #f3f4f6; text-align: center;">
-                <td colspan="6" style="padding: 8px; font-weight: 600; color: #374151; text-align: left; border: 1px solid #d1d5db;">${asnaf.nama}</td>
-                <td style="padding: 8px; font-weight: 600; color: #374151; border: 1px solid #d1d5db;">${formatRupiah(asnaf.total)}</td>
-                <td style="padding: 8px; font-weight: 600; color: #374151; border: 1px solid #d1d5db;">100 %</td>
-                <td colspan="2" style="border: 1px solid #d1d5db;"></td>
-              </tr>
-              ${asnaf.program
-                .map(
-                  (prog) => `
-                <tr style="text-align: center;">
-                  <td style="padding: 8px; color: #4b5563; text-align: left; border: 1px solid #d1d5db;">${prog.uraian}</td>
-                  <td style="padding: 8px; color: #4b5563; border: 1px solid #d1d5db;">${prog.rencana.jumlah}</td>
-                  <td style="padding: 8px; color: #4b5563; border: 1px solid #d1d5db;">${prog.rencana.satuan}</td>
-                  <td style="padding: 8px; color: #4b5563; border: 1px solid #d1d5db;">${prog.rincian.vol}</td>
-                  <td style="padding: 8px; color: #4b5563; border: 1px solid #d1d5db;">${prog.rincian.satuan}</td>
-                  <td style="padding: 8px; color: #4b5563; border: 1px solid #d1d5db;">${formatRupiah(prog.rincian.jumlah_satuan)}</td>
-                  <td style="padding: 8px; color: #4b5563; border: 1px solid #d1d5db;">${formatRupiah(prog.rincian.satuan == 'tahun' ? prog.rincian.jumlah_satuan * prog.rencana.jumlah : prog.rincian.jumlah_satuan * prog.rincian.vol)}</td>
-                  <td style="padding: 8px; color: #4b5563; border: 1px solid #d1d5db;">${prog.persentase}</td>
-                  <td style="padding: 8px; color: #4b5563; border: 1px solid #d1d5db;">${prog.ket}</td>
-                </tr>
-              `,
-                )
-                .join('')}
-            `,
-              )
-              .join('')}
-            <tr style="background: #e5e7eb; text-align: center; font-weight: bold;">
-              <td colspan="6" style="padding: 8px; text-align: left; border: 1px solid #d1d5db;">Total</td>
-              <td style="padding: 8px; border: 1px solid #d1d5db;">${grandTotal.value}</td>
-              <td colspan="2" style="border: 1px solid #d1d5db;"></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    `;
-
-    // Bikin temporary container
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = tableHTML;
-    tempDiv.style.position = 'absolute';
-    tempDiv.style.left = '-9999px';
-    tempDiv.style.width = 'max-content';
-    document.body.appendChild(tempDiv);
-
-    // Tunggu render
-    await new Promise((resolve) => setTimeout(resolve, 200));
-
-    // Capture pake html2canvas
-    const canvas = await html2canvas(tempDiv, {
-      scale: 2,
-      useCORS: true,
-      logging: false,
-      backgroundColor: '#ffffff',
-    });
-
-    // Hapus temp element
-    document.body.removeChild(tempDiv);
-
-    const imgData = canvas.toDataURL('image/png');
-
-    // Buat PDF A4 Landscape
-    const pdf = new jsPDF({
-      orientation: 'landscape',
-      unit: 'mm',
-      format: 'a4',
-      compress: true,
-    });
-
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
-
-    // Convert px to mm
-    const imgWidthMM = (canvas.width * 25.4) / 96;
-    const imgHeightMM = (canvas.height * 25.4) / 96;
-
-    // Scale untuk fit ke lebar A4
-    const scale = pdfWidth / imgWidthMM;
-    const scaledHeight = imgHeightMM * scale;
-
-    // Split ke multiple pages jika perlu
-    let yPosition = 0;
-    while (yPosition < scaledHeight) {
-      if (yPosition > 0) pdf.addPage();
-
-      pdf.addImage(imgData, 'PNG', 0, -yPosition, pdfWidth, scaledHeight, '', 'FAST');
-
-      yPosition += pdfHeight;
-    }
-
-    // Download
-    const currentDate = new Date().toISOString().split('T')[0];
-    pdf.save(`Laporan_Perencanaan_${currentDate}.pdf`);
-    displayNotification('PDF berhasil diunduh', 'success');
-  } catch (error: any) {
-    console.error('❌ Error generating PDF:', error);
-    displayNotification('Gagal mengunduh PDF: ' + error.message, 'error');
-  } finally {
-    isDownloading.value = false;
-  }
-}
+const cetak_laporan = () => {
+  const printUrl = `/laporan-perencanaan/${selectedYear.value}/${selectedProgram.value == '' ? 'semua' : selectedProgram.value}/${perPage.value}/${currentPage.value}`;
+  window.open(printUrl, '_blank');
+};
 </script>
 
 <template>
@@ -264,13 +132,21 @@ async function downloadPDF() {
             <option v-for="prog in programOptions" :key="prog" :value="prog">{{ prog }}</option>
           </select>
         </div>
+        <div class="flex items-end justify-between gap-4 mb-0">
+          <BaseButton
+            @click="cetak_laporan()"
+            variant="primary"
+            type="button"
+            :disabled="isDownloading"
+          >
+            Cetak
+          </BaseButton>
+        </div>
       </div>
 
       <div class="flex items-end justify-between gap-4 mb-0">
-        <BaseButton @click="downloadPDF" variant="primary" type="button" :disabled="isDownloading">
-          <font-awesome-icon icon="fa-solid fa-download" class="mr-2" />
-          {{ isDownloading ? 'Downloading...' : 'Download PDF' }}
-        </BaseButton>
+        <!-- <font-awesome-icon icon="fa-solid fa-download" class="mr-2" />
+          {{ isDownloading ? 'Downloading...' : 'Download PDF' }} -->
       </div>
     </div>
     <LoadingSpinner v-if="isLoading" label="Memuat halaman..." />
