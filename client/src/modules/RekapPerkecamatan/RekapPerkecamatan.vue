@@ -224,8 +224,7 @@ onMounted(async () => {
     <div v-else class="space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <BaseButton @click="downloadExcel()" variant="primary" :loading="isLoading" type="button">
-          <font-awesome-icon icon="fa-solid fa-download" class="mr-2" />
-          Download Rekap Distribusi Per Kecamatan
+          Cetak
         </BaseButton>
         <!-- Filters -->
         <div class="flex flex-col sm:flex-row gap-3">

@@ -325,11 +325,7 @@ watch(selectedYear, fetchData);
           type="button"
           :disabled="isDownloading || isLoading"
         >
-          <font-awesome-icon
-            :icon="isDownloading ? 'fa-solid fa-spinner' : 'fa-solid fa-download'"
-            :class="{ 'animate-spin': isDownloading, 'mr-2': true }"
-          />
-          {{ isDownloading ? 'Mengunduh...' : 'Download PDF' }}
+          Cetak
         </BaseButton>
       </div>
 
@@ -406,7 +402,6 @@ watch(selectedYear, fetchData);
                 :key="r.label"
                 class="even:bg-gray-50 hover:bg-indigo-50 transition-colors"
               >
-                <!-- px-6 py-4 text-center font-medium text-gray-800 -->
                 <td class="px-6 py-4 text-left font-medium text-gray-700 sticky left-0 bg-inherit">
                   {{ r.label }}
                 </td>
@@ -418,7 +413,7 @@ watch(selectedYear, fetchData);
                   {{ formatRupiah(r.values[m.key]) }}
                 </td>
                 <td
-                  class="px-4 py-3 text-right font-semibold bg-gray-100 whitespace-nowrap italic text-yellow-500 border border-gray-300"
+                  class="px-4 py-3 text-right font-medium bg-gray-100 whitespace-nowrap italic text-gray-700"
                 >
                   {{ formatRupiah(r.total) }}
                 </td>
@@ -426,15 +421,13 @@ watch(selectedYear, fetchData);
             </tbody>
             <tfoot>
               <tr>
-                <td
-                  class="px-6 py-4 text-left font-bold text-gray-700 sticky left-0 bg-gray-100 border border-gray-300"
-                >
+                <td class="px-6 py-4 text-left font-medium text-gray-700 sticky left-0 bg-gray-100">
                   Total
                 </td>
                 <td
                   v-for="m in months"
                   :key="m.key"
-                  class="px-4 py-3 text-right font-bold bg-gray-100 whitespace-nowrap italic text-yellow-500 border border-gray-300"
+                  class="px-4 py-3 text-right font-medium bg-gray-100 whitespace-nowrap italic text-gray-700"
                 >
                   {{
                     formatRupiah(
@@ -444,7 +437,7 @@ watch(selectedYear, fetchData);
                 </td>
 
                 <td
-                  class="px-4 py-3 text-right font-bold bg-gray-100 whitespace-nowrap italic text-yellow-500 border border-gray-300"
+                  class="px-4 py-3 text-right font-medium bg-gray-100 whitespace-nowrap italic text-gray-700"
                 >
                   {{ formatRupiah(rowsNominal.reduce((acc, curr) => acc + (curr.total || 0), 0)) }}
                 </td>
@@ -495,7 +488,7 @@ watch(selectedYear, fetchData);
                 <th
                   v-for="bulan in bulanNames"
                   :key="bulan"
-                  class="px-4 py-3 font-medium border-r border-gray-300 min-w-[100px]"
+                  class="px-4 py-3 font-medium min-w-[100px]"
                 >
                   {{ bulan }}
                 </th>
@@ -517,30 +510,26 @@ watch(selectedYear, fetchData);
                 >
                   {{ r.values[m.key] || '-' }}
                 </td>
-                <td
-                  class="px-4 py-3 text-center font-semibold bg-gray-100 min-w-[120px] border border-gray-300"
-                >
+                <td class="px-4 py-3 text-center font-medium bg-gray-100 min-w-[120px]">
                   {{ r.total }}
                 </td>
               </tr>
             </tbody>
             <tfoot>
               <tr>
-                <td
-                  class="px-6 py-4 text-left font-bold text-gray-700 sticky left-0 bg-gray-100 border border-gray-300"
-                >
+                <td class="px-6 py-4 text-left font-medium text-gray-700 sticky left-0 bg-gray-100">
                   Total
                 </td>
                 <td
                   v-for="m in months"
                   :key="m.key"
-                  class="px-4 py-3 text-center font-bold bg-gray-100 whitespace-nowrap italic text-yellow-500 border border-gray-300"
+                  class="px-4 py-3 text-center font-medium bg-gray-100 italic text-gray-700"
                 >
                   {{ rowsPenerima.reduce((acc, curr) => acc + (curr.values[m.key] || 0), 0) }}
                 </td>
 
                 <td
-                  class="px-4 py-3 text-center font-bold bg-gray-100 whitespace-nowrap italic text-yellow-500 border border-gray-300"
+                  class="px-4 py-3 text-center font-medium bg-gray-100 whitespace-nowrap italic text-gray-700"
                 >
                   {{ rowsPenerima.reduce((acc, curr) => acc + (curr.total || 0), 0) }}
                 </td>

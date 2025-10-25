@@ -361,8 +361,7 @@ watch(selectedYear, fetchData);
       <!-- Header Controls -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <BaseButton @click="downloadPDF" variant="primary" :loading="isDownloading" type="button">
-          <font-awesome-icon icon="fa-solid fa-download" class="mr-2" />
-          Download PDF
+          Cetak
         </BaseButton>
 
         <!-- Filters -->
@@ -475,47 +474,27 @@ watch(selectedYear, fetchData);
               </td>
               <td
                 :rowspan="row.kegiatan.length"
-                class="px-4 py-3 text-right font-normal bg-gray-100 border border-gray-300"
+                class="px-4 py-3 text-right font-normal bg-gray-100"
               >
                 {{ formatRupiah(row.total) }}
               </td>
             </tr>
-
-            <!-- Grand Total -->
           </tbody>
           <tfoot>
             <tr class="border border-gray-200 bg-gray-100">
-              <td
-                class="px-6 py-4 text-left font-bold text-gray-700 left-0 bg-gray-100 border border-gray-300"
-              >
-                Total
-              </td>
+              <td class="px-6 py-4 text-left font-bold text-gray-700 left-0 bg-gray-100">Total</td>
               <td
                 v-for="m in months"
                 :key="`total-${m.key}`"
-                class="px-4 py-3 text-right font-medium border border-gray-300"
+                class="px-4 py-3 text-right font-medium"
               >
                 {{ formatRupiah(calculateGrandTotalBulan(m.key)) }}
               </td>
-              <td class="px-4 py-3 text-right font-medium border-gray-200">
+              <td class="px-4 py-3 text-right font-medium">
                 {{ formatRupiah(calculateGrandTotal()) }}
               </td>
             </tr>
           </tfoot>
-
-          <!-- Empty State -->
-          <!-- <tbody v-else>
-            <tr>
-              <td colspan="16" class="px-6 py-8 text-center text-gray-500">
-                <font-awesome-icon
-                  icon="fa-solid fa-database"
-                  class="text-4xl mb-2 text-gray-400"
-                />
-                <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ada data</h3>
-                <p class="text-sm">Belum ada data rekap penyaluran.</p>
-              </td>
-            </tr>
-          </tbody> -->
         </table>
       </div>
     </div>

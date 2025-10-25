@@ -262,11 +262,7 @@ watch(selectedYear, fetchData);
           type="button"
           :disabled="isDownloading || isLoading"
         >
-          <font-awesome-icon
-            :icon="isDownloading ? 'fa-solid fa-spinner' : 'fa-solid fa-download'"
-            :class="{ 'animate-spin': isDownloading, 'mr-2': true }"
-          />
-          {{ isDownloading ? 'Mengunduh...' : 'Download PDF' }}
+          Cetak
         </BaseButton>
       </div>
 
@@ -350,13 +346,13 @@ watch(selectedYear, fetchData);
               :class="[
                 'transition-colors',
                 r.label === 'Total'
-                  ? 'bg-gray-200 font-bold'
+                  ? 'bg-gray-100 font-normal'
                   : 'even:bg-gray-50 hover:bg-indigo-50',
               ]"
             >
               <td
-                class="px-4 py-3 text-gray-700 border-r border-gray-300 sticky left-0 z-10"
-                :class="r.label === 'Total' ? ' bg-gray-200 font-bold' : 'bg-white font-normal'"
+                class="px-4 py-3 text-gray-700 border-r border-gray-100 sticky left-0 z-10"
+                :class="r.label === 'Total' ? ' bg-gray-100 font-normal' : 'bg-white font-normal'"
               >
                 {{ r.label }}
               </td>
@@ -369,7 +365,7 @@ watch(selectedYear, fetchData);
               </td>
               <td
                 class="px-6 py-3 text-right whitespace-nowrap"
-                :class="r.label === 'Total' ? 'text-gray-700 bg-gray-300' : 'bg-gray-100'"
+                :class="r.label === 'Total' ? 'text-gray-700 bg-gray-100' : 'bg-gray-100'"
               >
                 {{ formatRupiah(r.total) }}
               </td>

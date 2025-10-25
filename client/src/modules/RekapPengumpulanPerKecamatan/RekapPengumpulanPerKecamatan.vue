@@ -240,11 +240,7 @@ async function downloadPDF() {
           type="button"
           :disabled="isDownloading || isLoading"
         >
-          <font-awesome-icon
-            :icon="isDownloading ? 'fa-solid fa-spinner' : 'fa-solid fa-download'"
-            :class="{ 'animate-spin': isDownloading, 'mr-2': true }"
-          />
-          {{ isDownloading ? 'Mengunduh...' : 'Download PDF' }}
+          Cetak
         </BaseButton>
       </div>
 
@@ -342,7 +338,7 @@ async function downloadPDF() {
               </td>
 
               <td
-                class="px-6 py-3 text-right whitespace-nowrap border border-gray-300 bg-gray-100 font-semibold"
+                class="px-6 py-3 text-right whitespace-nowrap border border-gray-300 bg-gray-100 font-medium"
               >
                 {{ formatRupiah(r.total ?? 0) }}
               </td>
@@ -351,14 +347,14 @@ async function downloadPDF() {
           <tfoot>
             <tr>
               <td
-                class="px-6 py-3 text-left whitespace-nowrap border border-gray-300 bg-gray-100 font-semibold"
+                class="px-6 py-3 text-left whitespace-nowrap border border-gray-300 bg-gray-100 font-medium"
               >
                 Total
               </td>
               <td
                 v-for="m in months"
                 :key="m.key"
-                class="px-6 py-3 text-right whitespace-nowrap border border-gray-300 bg-gray-100 font-semibold"
+                class="px-6 py-3 text-right whitespace-nowrap border border-gray-300 bg-gray-100 font-medium"
               >
                 {{
                   // Hitung total per bulan
@@ -368,7 +364,7 @@ async function downloadPDF() {
                 }}
               </td>
               <td
-                class="px-6 py-3 text-right whitespace-nowrap border border-gray-300 bg-gray-100 font-semibold"
+                class="px-6 py-3 text-right whitespace-nowrap border border-gray-300 bg-gray-100 font-medium"
               >
                 {{ formatRupiah(filteredRows.reduce((acc, curr) => acc + (curr.total || 0), 0)) }}
               </td>
