@@ -76,8 +76,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div
-    class="print-area font-sans"
+  <div class="print-area font-sans"
     style="color: black; font-size: 8pt; line-height: 1.3; background: white"
   >
     <!-- Header -->
@@ -90,7 +89,6 @@ onMounted(async () => {
         <Logos />
       </div>
     </div>
-
     <!-- Tabel -->
     <table class="w-full border-collapse text-[7pt]" style="table-layout: fixed">
       <thead class="border border-black text-center">
@@ -176,7 +174,7 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.print-area {
+  .print-area {
   max-width: 297mm;
   margin: 0 auto;
   padding: 15mm;
