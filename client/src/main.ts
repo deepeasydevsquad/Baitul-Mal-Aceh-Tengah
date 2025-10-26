@@ -133,6 +133,7 @@ import {
   faPlaneArrival,
   faPlaneCircleCheck,
   faPlus,
+  faPrint,
   faQrcode,
   faQuestionCircle,
   faRightFromBracket,
@@ -169,6 +170,7 @@ import { faCcVisa, faWhatsapp } from '@fortawesome/free-brands-svg-icons';
 // Tambahkan semua icon ke library FontAwesome
 library.add(
   // Solid Icons
+  faPrint,
   faUser,
   faUserCheck,
   faHome,
