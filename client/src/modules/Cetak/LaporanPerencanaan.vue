@@ -80,7 +80,7 @@ onMounted(async () => {
 
 <template>
   <div
-    class="bg-white max-w-[297mm] mx-auto p-[12mm] font-sans print:p-[10mm] print:m-0 print:shadow-none print-area"
+    class="bg-white max-w-[297mm] min-h-[210mm] mx-auto p-[12mm] font-sans print:p-[10mm] print:m-0 print:shadow-none print-area"
     style="color: black; font-size: 9pt; line-height: 1.3"
   >
     <!-- Header dengan Logo -->
@@ -95,7 +95,7 @@ onMounted(async () => {
       </div>
     </div>
     <div class="flex justify-between items-start mb-4">
-      <table class="w-full border-collapse bg-white text-sm">
+      <table class="max-w-[297mm] border-collapse bg-white text-sm">
         <!-- Header -->
         <thead class="bg-gray-50 text-gray-700 text-center border-b border-gray-300">
           <tr>
@@ -180,43 +180,45 @@ onMounted(async () => {
     </div>
   </div>
 </template>
+
 <style scoped>
-@media screen {
-  body {
-    background-color: #f3f4f6;
-  }
-
-  .print-area {
-    width: 297mm; /* Lebar untuk landscape */
-    min-height: 210mm; /* Tinggi untuk landscape */
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-    margin: 20px auto;
-    background: white;
-  }
-}
-</style>
-
-<style>
+/* Style print */
 @media print {
   @page {
-    size: A4 landscape;
-    margin: 12mm;
+    size: A4 landscape; /* atur ukuran kertas A4 landscape */
+    margin: 1mm; /* margin dokumen */
   }
 
-  html,
   body {
-    margin: 0;
-    padding: 0;
-    background: white;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
-  .print-area {
-    width: 297mm; /* Pastikan sesuai A4 landscape */
-    height: 210mm;
-    margin: 0;
-    padding: 0;
-    box-shadow: none;
-    background: white;
+  button {
+    display: none;
+  }
+
+  .print-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #ccc;
+  }
+
+  .print-content {
+    margin-top: 10px; /* biar gak nabrak header */
+    margin-bottom: 10px; /* biar gak ketiban footer */
+  }
+
+  .print-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-top: 1px solid #ccc;
+    padding-top: 5px;
   }
 }
 </style>
