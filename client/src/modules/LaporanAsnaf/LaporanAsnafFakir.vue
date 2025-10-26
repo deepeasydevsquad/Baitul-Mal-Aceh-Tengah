@@ -128,7 +128,7 @@ watch(selectedTahun, fetchData);
 
 // Function: Cetak Laporan
 const cetak_laporan = () => {
-  const printUrl = `/laporan-asnaf-fakir/${selectedTahun.value}`;
+  const printUrl = `/cetak-laporan-asnaf-fakir/${selectedTahun.value}`;
   window.open(printUrl, '_blank');
 };
 </script>

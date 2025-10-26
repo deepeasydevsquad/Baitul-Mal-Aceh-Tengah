@@ -2,6 +2,7 @@ import Beranda from '@/modules/Cetak/Beranda.vue';
 import LaporanPengumpulan from '@/modules/Cetak/LaporanPengumpulan.vue';
 import LaporanPerencanaan from '@/modules/Cetak/LaporanPerencanaan.vue';
 import LaporanTahunan from '@/modules/Cetak/LaporanTahunan.vue';
+import CetakLaporanAsnafFakir from '@/modules/LaporanAsnaf/CetakAsnaf/CetakLaporanAsnafFakir.vue';
 import Register from '@/modules/Register/Register.vue';
 import AdministratorAreaView from '@/views/AdministratorView.vue';
 import homeView from '@/views/HomeView.vue';
@@ -9,7 +10,6 @@ import LoginAdminView from '@/views/LoginAdminView.vue';
 import MemberAreaView from '@/views/MemberAreaView.vue';
 import SurveyLapanganView from '@/views/SurveyLapanganView.vue';
 import { createRouter, createWebHistory } from 'vue-router';
-import LaporanAsnafFakir from '../modules/LaporanAsnaf/CetakAsnaf/LaporanAsnafFakir.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -115,11 +115,11 @@ const router = createRouter({
       },
     },
     {
-      path: '/laporan-asnaf-fakir/:tahun',
-      name: 'laporan-asnaf-fakir',
-      component: LaporanAsnafFakir,
+      path: '/cetak-laporan-asnaf-fakir/:tahun',
+      name: 'cetak-laporan-asnaf-fakir',
+      component: CetakLaporanAsnafFakir,
       meta: {
-        title: 'Laporan Asnaf Fakir || Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah',
+        title: 'Cetak Laporan Asnaf Fakir || Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah',
         description:
           'Member Area Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah memberikan akses mudah untuk melihat data zakat, status permohonan, serta laporan transaksi secara aman dan transparan',
       },
