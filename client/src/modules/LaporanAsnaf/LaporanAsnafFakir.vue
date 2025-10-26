@@ -1,18 +1,18 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted, watch, computed } from 'vue';
-import Notification from '@/components/Modal/Notification.vue';
 import BaseButton from '@/components/Button/BaseButton.vue';
-import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
+import Notification from '@/components/Modal/Notification.vue';
 import Pagination from '@/components/Pagination/Pagination.vue';
+import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
+import { onMounted, ref, watch } from 'vue';
 
 // Composable
 import { useNotification } from '@/composables/useNotification';
 import { usePagination } from '@/composables/usePaginations';
 
 // Service API
-import { get_laporan_asnaf, get_tahun, download_excel_asnaf } from '@/service/laporan_asnaf';
+import { get_laporan_asnaf, get_tahun } from '@/service/laporan_asnaf';
 
 // State: Loading
 const isLoading = ref(false);
@@ -92,28 +92,28 @@ async function fetchData() {
 }
 
 // Function: Download Excel
-async function downloadExcel() {
-  try {
-    const response = await download_excel_asnaf(selectedTahun.value, 'Fakir');
+// async function downloadExcel() {
+//   try {
+//     const response = await download_excel_asnaf(selectedTahun.value, 'Fakir');
 
-    const blob = new Blob([response.data]);
-    const url = window.URL.createObjectURL(blob);
+//     const blob = new Blob([response.data]);
+//     const url = window.URL.createObjectURL(blob);
 
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `Laporan_Asnaf_Fakir_${selectedTahun.value}.xlsx`;
+//     const link = document.createElement('a');
+//     link.href = url;
+//     link.download = `Laporan_Asnaf_Fakir_${selectedTahun.value}.xlsx`;
 
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+//     document.body.appendChild(link);
+//     link.click();
+//     document.body.removeChild(link);
 
-    window.URL.revokeObjectURL(url);
-    displayNotification('Download berhasil', 'success');
-  } catch (error) {
-    console.error('Download error:', error);
-    displayNotification('Gagal mendownload file', 'error');
-  }
-}
+//     window.URL.revokeObjectURL(url);
+//     displayNotification('Download berhasil', 'success');
+//   } catch (error) {
+//     console.error('Download error:', error);
+//     displayNotification('Gagal mendownload file', 'error');
+//   }
+// }
 
 // Lifecycle Hooks
 onMounted(async () => {
@@ -125,6 +125,12 @@ onMounted(async () => {
 
 // Watcher untuk memuat ulang data ketika tahun diganti
 watch(selectedTahun, fetchData);
+
+// Function: Cetak Laporan
+const cetak_laporan = () => {
+  const printUrl = `/laporan-asnaf-fakir/${selectedTahun.value}`;
+  window.open(printUrl, '_blank');
+};
 </script>
 
 <template>
@@ -133,9 +139,9 @@ watch(selectedTahun, fetchData);
     <LoadingSpinner v-if="isLoading" label="Memuat halaman..." />
     <div v-else class="space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <BaseButton @click="downloadExcel" variant="primary" type="button">
-          <font-awesome-icon icon="fa-solid fa-download" class="mr-2" />
-          Download Excel Asnaf Fakir
+        <BaseButton @click="cetak_laporan" variant="primary" type="button">
+          <font-awesome-icon icon="fa-solid fa-print" class="mr-2" />
+          Cetak
         </BaseButton>
         <select
           v-model="selectedTahun"
