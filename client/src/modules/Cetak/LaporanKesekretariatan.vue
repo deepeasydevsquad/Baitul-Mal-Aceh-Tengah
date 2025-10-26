@@ -55,13 +55,13 @@ onMounted(async () => {
       document.head.appendChild(style);
     }
 
-    // setTimeout(() => {
-    //   window.print();
-    //   document.title = oldTitle;
-    //   setTimeout(() => {
-    //     window.close();
-    //   }, 400);
-    // }, 1000);
+    setTimeout(() => {
+      window.print();
+      document.title = oldTitle;
+      setTimeout(() => {
+        window.close();
+      }, 400);
+    }, 1000);
   } catch (error) {
     console.error('Error saat mounting:', error);
   }
