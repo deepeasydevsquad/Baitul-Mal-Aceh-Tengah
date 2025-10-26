@@ -92,28 +92,33 @@ async function fetchData() {
 }
 
 // Function: Download Excel
-async function downloadExcel() {
-  try {
-    const response = await download_excel_asnaf(selectedTahun.value, 'Muallaf');
+// async function downloadExcel() {
+//   try {
+//     const response = await download_excel_asnaf(selectedTahun.value, 'Muallaf');
 
-    const blob = new Blob([response.data]);
-    const url = window.URL.createObjectURL(blob);
+//     const blob = new Blob([response.data]);
+//     const url = window.URL.createObjectURL(blob);
 
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `Laporan_Asnaf_Muallaf_${selectedTahun.value}.xlsx`;
+//     const link = document.createElement('a');
+//     link.href = url;
+//     link.download = `Laporan_Asnaf_Muallaf_${selectedTahun.value}.xlsx`;
 
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+//     document.body.appendChild(link);
+//     link.click();
+//     document.body.removeChild(link);
 
-    window.URL.revokeObjectURL(url);
-    displayNotification('Download berhasil', 'success');
-  } catch (error) {
-    console.error('Download error:', error);
-    displayNotification('Gagal mendownload file', 'error');
-  }
-}
+//     window.URL.revokeObjectURL(url);
+//     displayNotification('Download berhasil', 'success');
+//   } catch (error) {
+//     console.error('Download error:', error);
+//     displayNotification('Gagal mendownload file', 'error');
+//   }
+// }
+
+const cetak_laporan = () => {
+  const printUrl = `/cetak-laporan-asnaf-mualaf/${selectedTahun.value}`;
+  window.open(printUrl, '_blank');
+};
 
 // Lifecycle Hooks
 onMounted(async () => {
@@ -133,9 +138,9 @@ watch(selectedTahun, fetchData);
     <LoadingSpinner v-if="isLoading" label="Memuat halaman..." />
     <div v-else class="space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <BaseButton @click="downloadExcel" variant="primary" type="button">
-          <font-awesome-icon icon="fa-solid fa-download" class="mr-2" />
-          Download Excel Asnaf Muallaf
+        <BaseButton @click="cetak_laporan" variant="primary" type="button">
+          <font-awesome-icon icon="fa-solid fa-print" class="mr-2" />
+          Cetak
         </BaseButton>
         <select
           v-model="selectedTahun"

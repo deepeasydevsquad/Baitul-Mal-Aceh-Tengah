@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // Library
 import { ref, onMounted, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import Notification from '@/components/Modal/Notification.vue';
 import BaseButton from '@/components/Button/BaseButton.vue';
 import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
@@ -14,6 +15,8 @@ import {
   daftar_rekap_distribusi_kecamatan,
   download_rekap_perkecamatan,
 } from '@/service/rekap_distribusi_kecamatan';
+
+const router = useRouter();
 
 // State: Loading
 const isLoading = ref(false);
@@ -175,6 +178,12 @@ async function fetchData() {
   }
 }
 
+// Function: Open Print Page
+const cetak_laporan = (tahun: string) => {
+  const printUrl = `/rekap-distribusi-perkecamatan/${tahun}`;
+  window.open(printUrl, '_blank');
+};
+
 // Function: Download Excel
 async function downloadExcel() {
   try {
@@ -223,9 +232,17 @@ onMounted(async () => {
     <LoadingSpinner v-if="isLoading" label="Memuat halaman..." />
     <div v-else class="space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <BaseButton @click="downloadExcel()" variant="primary" :loading="isLoading" type="button">
-          Cetak
-        </BaseButton>
+        <div class="flex gap-2">
+          <BaseButton
+            @click="cetak_laporan(selectedYear)"
+            variant="primary"
+            :loading="isLoading"
+            type="button"
+          >
+            <font-awesome-icon icon="fa-solid fa-print" class="mr-2" />
+            Cetak
+          </BaseButton>
+        </div>
         <!-- Filters -->
         <div class="flex flex-col sm:flex-row gap-3">
           <div class="flex items-center">
@@ -266,21 +283,7 @@ onMounted(async () => {
           </div>
         </div>
       </div>
-      <!-- Info Message -->
-      <div
-        v-if="filteredKecamatanList.length === 0 && !isTableLoading"
-        class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4"
-      >
-        <p class="text-sm text-yellow-700">
-          {{
-            searchKecamatan
-              ? `Kecamatan "${searchKecamatan}" tidak ditemukan`
-              : 'Rekap Penyaluran Per Kecamatan Tidak Ditemukan'
-          }}
-        </p>
-      </div>
 
-      <!-- Table -->
       <div class="overflow-x-auto rounded-xl border border-gray-200 shadow">
         <SkeletonTable v-if="isTableLoading" :columns="15" :rows="10" />
         <table v-else class="w-full border-collapse bg-white text-sm">
@@ -377,40 +380,3 @@ onMounted(async () => {
     />
   </div>
 </template>
-
-<style scoped>
-/* Sticky column styling */
-.sticky {
-  position: sticky;
-  left: 0;
-  z-index: 10;
-}
-
-/* Improve table readability */
-table {
-  border-spacing: 0;
-}
-
-/* Smooth scrolling */
-.overflow-x-auto {
-  scrollbar-width: thin;
-  scrollbar-color: #cbd5e0 #f7fafc;
-}
-
-.overflow-x-auto::-webkit-scrollbar {
-  height: 8px;
-}
-
-.overflow-x-auto::-webkit-scrollbar-track {
-  background: #f7fafc;
-}
-
-.overflow-x-auto::-webkit-scrollbar-thumb {
-  background: #cbd5e0;
-  border-radius: 4px;
-}
-
-.overflow-x-auto::-webkit-scrollbar-thumb:hover {
-  background: #a0aec0;
-}
-</style>
