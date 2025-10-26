@@ -3,6 +3,7 @@ import LaporanPengumpulan from '@/modules/Cetak/LaporanPengumpulan.vue';
 import LaporanPerencanaan from '@/modules/Cetak/LaporanPerencanaan.vue';
 import LaporanTahunan from '@/modules/Cetak/LaporanTahunan.vue';
 import Register from '@/modules/Register/Register.vue';
+import CetakRekapPengumpulanPerkecamatan from '@/modules/RekapPengumpulanPerKecamatan/CetakRekapPengumpulanPerkecamatan.vue';
 import CetakRekapPengumpulan from '@/modules/RekapPengumpulan/CetakRekapPengumpulan.vue';
 import CetakRekapDistribusiPerKodeAsnaf from '@/modules/RekapDistribusiPerKodeAsnaf/CetakRekapDistribusiPerKodeAsnaf.vue';
 import AdministratorAreaView from '@/views/AdministratorView.vue';
@@ -116,6 +117,15 @@ const router = createRouter({
       },
     },
     {
+      path: '/rekap-pengumpulan-perkecamatan/:tahun',
+      name: 'rekap-pengumpulan-perkecamatan',
+      component: CetakRekapPengumpulanPerkecamatan,
+      meta: {
+        title:
+          'Rekap Pengumpulan Perkecamatan || Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah',
+      }
+   },
+   {
       path: '/rekap-pengumpulan/:tahun',
       name: 'cetak-rekap-pengumpulan',
       component: CetakRekapPengumpulan,
