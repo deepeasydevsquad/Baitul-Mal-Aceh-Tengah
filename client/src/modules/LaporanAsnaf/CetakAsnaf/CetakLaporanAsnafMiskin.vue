@@ -6,7 +6,7 @@ import { useRoute } from 'vue-router';
 
 const route = useRoute();
 const tahun = route.params.tahun as string;
-const asnafId = 4; // ID untuk Asnaf Gharim
+const asnafId = 2; // ID untuk Asnaf Gharim
 
 // Fungsi untuk parse format rupiah string ke number
 const parseRupiah = (val: string | number): number => {
