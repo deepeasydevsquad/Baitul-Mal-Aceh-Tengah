@@ -1,8 +1,20 @@
 import Beranda from '@/modules/Cetak/Beranda.vue';
+import LaporanKesekretariatan from '@/modules/Cetak/LaporanKesekretariatan.vue';
 import LaporanPengumpulan from '@/modules/Cetak/LaporanPengumpulan.vue';
 import LaporanPerencanaan from '@/modules/Cetak/LaporanPerencanaan.vue';
 import LaporanTahunan from '@/modules/Cetak/LaporanTahunan.vue';
+import CetakLaporanAsnafFakir from '@/modules/LaporanAsnaf/CetakAsnaf/CetakLaporanAsnafFakir.vue';
+import CetakLaporanAsnafFilsabilillah from '@/modules/LaporanAsnaf/CetakAsnaf/CetakLaporanAsnafFilsabilillah.vue';
+import CetakLaporanAsnafGharim from '@/modules/LaporanAsnaf/CetakAsnaf/CetakLaporanAsnafGharim.vue';
+import CetakLaporanAsnafMiskin from '@/modules/LaporanAsnaf/CetakAsnaf/CetakLaporanAsnafMiskin.vue';
+import CetakLaporanAsnafIbnuSabil from '@/modules/LaporanAsnaf/CetakAsnaf/CetakLaporanAsnafIbnuSabil.vue';
+import CetakLaporanAsnafMualaf from '@/modules/LaporanAsnaf/CetakAsnaf/CetakLaporanAsnafMualaf.vue';
 import Register from '@/modules/Register/Register.vue';
+import CetakRekapDistribusiPerAsnaf from '@/modules/RekapDistribusiPerAsnaf/CetakRekapDistribusiPerAsnaf.vue';
+import CetakRekapDistribusiPerkecamatan from '@/modules/RekapPerkecamatan/CetakRekapDistribusiPerkecamatan.vue';
+import CetakRekapPengumpulanPerkecamatan from '@/modules/RekapPengumpulanPerKecamatan/CetakRekapPengumpulanPerkecamatan.vue';
+import CetakRekapPengumpulan from '@/modules/RekapPengumpulan/CetakRekapPengumpulan.vue';
+import CetakRekapDistribusiPerKodeAsnaf from '@/modules/RekapDistribusiPerKodeAsnaf/CetakRekapDistribusiPerKodeAsnaf.vue';
 import AdministratorAreaView from '@/views/AdministratorView.vue';
 import homeView from '@/views/HomeView.vue';
 import LoginAdminView from '@/views/LoginAdminView.vue';
@@ -109,6 +121,130 @@ const router = createRouter({
       component: Beranda,
       meta: {
         title: 'Beranda || Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah',
+        description:
+          'Member Area Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah memberikan akses mudah untuk melihat data zakat, status permohonan, serta laporan transaksi secara aman dan transparan',
+      },
+    },
+    {
+      path: '/cetak-laporan-asnaf-fakir/:tahun',
+      name: 'cetak-laporan-asnaf-fakir',
+      component: CetakLaporanAsnafFakir,
+      meta: {
+        title: 'Cetak Laporan Asnaf Fakir || Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah',
+      description:
+          '',
+      }
+    },
+    {
+      path: '/cetak-laporan-asnaf-filsabilillah/:tahun',
+      name: 'cetak-laporan-asnaf-filsabilillah',
+      component: CetakLaporanAsnafFilsabilillah,
+      meta: {
+        title:
+          'Cetak Laporan Asnaf Filsabilillah || Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah',
+       description:
+          '',
+      }
+    },
+    {
+      path: '/cetak-laporan-asnaf-gharim/:tahun',
+      name: 'cetak-laporan-asnaf-gharim',
+      component: CetakLaporanAsnafGharim,
+      meta: {
+        title: 'Cetak Laporan Asnaf Gharim || Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah',
+        description:
+          '',
+      }
+    },
+    {
+      path: '/cetak-laporan-asnaf-miskin/:tahun',
+      name: 'cetak-laporan-asnaf-miskin',
+      component: CetakLaporanAsnafMiskin,
+      meta: {
+        title:
+          'Cetak Laporan Asnaf MiskinCetakLaporanAsnafMiskin || Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah',
+        description: ''
+      }
+    },
+    {
+      path: '/cetak-laporan-asnaf-ibnu-sabil/:tahun',
+      name: 'cetak-laporan-asnaf-ibnu-sabil',
+      component: CetakLaporanAsnafIbnuSabil,
+      meta: {
+        title:
+          'Cetak Laporan Asnaf Ibnu Sabil || Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah',
+        description:
+          '',
+      }
+    },
+    {
+      path: '/cetak-laporan-asnaf-mualaf/:tahun',
+      name: 'cetak-laporan-asnaf-mualaf',
+      component: CetakLaporanAsnafMualaf,
+      meta: {
+        title: 'Cetak Laporan Asnaf Mualaf || Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah',
+      description:
+          '',
+      }
+    },
+    {
+      path: '/rekap-distribusi-per-asnaf/:tahun',
+      name: 'rekap-per-asnaf',
+      component: CetakRekapDistribusiPerAsnaf,
+      meta: {
+        title: 'Cetak Rekap Per Asnaf || Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah',
+      description:
+          'Member Area Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah memberikan akses mudah untuk melihat data zakat, status permohonan, serta laporan transaksi secara aman dan transparan',
+      }
+    },
+    {
+      path: '/rekap-distribusi-perkecamatan/:tahun',
+      name: 'rekap-distribusi-perkecamatan',
+      component: CetakRekapDistribusiPerkecamatan,
+      meta: {
+        title:
+          'Rekap Distribusi Perkecamatan || Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah',
+        description:
+          '',
+      }
+    },
+    {
+        path: '/cetak-laporan-kesekretariatan/:tahun',
+      name: 'cetak-laporan-kesekretariatan',
+      component: LaporanKesekretariatan,
+      meta: {
+        title:
+          'Cetak Laporan Kesekretariatan || Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah',
+        description:
+          'Member Area Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah memberikan akses mudah untuk melihat data zakat, status permohonan, serta laporan transaksi secara aman dan transparan',
+      }
+    },
+    {
+      path: '/rekap-pengumpulan-perkecamatan/:tahun',
+      name: 'rekap-pengumpulan-perkecamatan',
+      component: CetakRekapPengumpulanPerkecamatan,
+      meta: {
+        title:
+          'Rekap Pengumpulan Perkecamatan || Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah',
+      }
+   },
+   {
+      path: '/rekap-pengumpulan/:tahun',
+      name: 'cetak-rekap-pengumpulan',
+      component: CetakRekapPengumpulan,
+      meta: {
+        title: 'Cetak Rekap Pengumpulan || Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah',
+        description:
+          'Member Area Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah memberikan akses mudah untuk melihat data zakat, status permohonan, serta laporan transaksi secara aman dan transparan',
+      }
+    }, 
+    {
+      path: '/rekap-distribusi-per-kode-asnaf/:tahun',
+      name: 'cetak-rekap-distribusi-per-kode-asnaf',
+      component: CetakRekapDistribusiPerKodeAsnaf,
+      meta: {
+        title:
+          'Cetak Rekap Distribusi Per Kode Asnaf || Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah',
         description:
           'Member Area Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah memberikan akses mudah untuk melihat data zakat, status permohonan, serta laporan transaksi secara aman dan transparan',
       },

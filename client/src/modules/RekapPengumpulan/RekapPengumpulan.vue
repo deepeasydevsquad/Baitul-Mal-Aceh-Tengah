@@ -1,12 +1,10 @@
 <script setup lang="ts">
-import { onMounted, ref, watch, computed } from 'vue';
-import { list } from '@/service/rekap_pengumpulan';
-import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
-import Notification from '@/components/Modal/Notification.vue';
-import { useNotification } from '@/composables/useNotification';
 import BaseButton from '@/components/Button/BaseButton.vue';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import Notification from '@/components/Modal/Notification.vue';
+import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
+import { useNotification } from '@/composables/useNotification';
+import { list } from '@/service/rekap_pengumpulan';
+import { computed, onMounted, ref, watch } from 'vue';
 
 const isLoading = ref(false);
 const isDownloading = ref(false);
@@ -115,139 +113,26 @@ async function fetchData() {
   }
 }
 
-// Rupiah formatter
-function formatRupiah(value: any) {
-  const safeValue = Number(value) || 0;
-  return 'Rp ' + safeValue.toLocaleString('id-ID');
-}
-
-function fixOklchColors(element: HTMLElement) {
-  const all = element.querySelectorAll('*');
-  all.forEach((el) => {
-    const htmlEl = el as HTMLElement;
-    const style = window.getComputedStyle(htmlEl);
-
-    if (style.color.includes('oklch')) htmlEl.style.color = '#000000';
-    if (style.backgroundColor.includes('oklch')) htmlEl.style.backgroundColor = '#ffffff';
-    if (style.borderColor.includes('oklch')) htmlEl.style.borderColor = '#d1d5db';
-  });
-}
-
-// Download PDF
-async function downloadPDF() {
-  if (isDownloading.value) return;
-  if (filteredRows.value.length === 0) {
-    displayNotification('Tidak ada data untuk diunduh', 'error');
-    return;
-  }
-
-  isDownloading.value = true;
-
-  try {
-    const tableWrapper = document.getElementById('table-for-pdf');
-    if (!tableWrapper) {
-      displayNotification('Tabel tidak ditemukan', 'error');
-      isDownloading.value = false;
-      return;
-    }
-
-    // Clone table untuk PDF
-    const clonedTable = tableWrapper.cloneNode(true) as HTMLElement;
-
-    // Buat temporary container
-    const tempContainer = document.createElement('div');
-    tempContainer.style.position = 'absolute';
-    tempContainer.style.left = '-9999px';
-    tempContainer.style.top = '0';
-    tempContainer.style.width = 'max-content';
-    tempContainer.style.background = '#ffffff';
-    tempContainer.appendChild(clonedTable);
-
-    document.body.appendChild(tempContainer);
-
-    // Fix sticky positions untuk PDF
-    // const stickyElements = tempContainer.querySelectorAll('[class*="sticky"]');
-    // stickyElements.forEach((el) => {
-    //   const htmlEl = el as HTMLElement;
-    //   htmlEl.style.position = 'relative';
-    //   htmlEl.style.left = '0';
-    //   htmlEl.style.top = '0';
-    // });
-
-    // Force table layout fixed untuk konsistensi
-    const table = tempContainer.querySelector('table');
-    if (table) {
-      (table as HTMLElement).style.tableLayout = 'fixed';
-    }
-
-    // Fix warna oklch
-    fixOklchColors(tempContainer);
-
-    // Tunggu layout settle
-    await new Promise((resolve) => setTimeout(resolve, 300));
-
-    // Capture ke canvas
-    const canvas = await html2canvas(tempContainer, {
-      scale: 2,
-      useCORS: true,
-      logging: false,
-      backgroundColor: '#ffffff',
-      windowWidth: tempContainer.scrollWidth,
-      windowHeight: tempContainer.scrollHeight,
-    });
-
-    // Remove temporary container
-    document.body.removeChild(tempContainer);
-
-    const imgData = canvas.toDataURL('image/png');
-
-    // Buat PDF A4 Landscape
-    const pdf = new jsPDF({
-      orientation: 'landscape',
-      unit: 'mm',
-      format: 'a4',
-      compress: true,
-    });
-
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
-
-    // Convert px to mm
-    const imgWidthMM = (canvas.width * 25.4) / 96;
-    const imgHeightMM = (canvas.height * 25.4) / 96;
-
-    // Scale untuk fit ke lebar A4
-    const scale = pdfWidth / imgWidthMM;
-    const scaledHeight = imgHeightMM * scale;
-
-    // Split ke multiple pages jika perlu
-    let yPosition = 0;
-    while (yPosition < scaledHeight) {
-      if (yPosition > 0) pdf.addPage();
-
-      pdf.addImage(imgData, 'PNG', 0, -yPosition, pdfWidth, scaledHeight, '', 'FAST');
-
-      yPosition += pdfHeight;
-    }
-
-    // Download
-    const yearLabel = selectedYear.value === '0' ? 'Semua_Tahun' : selectedYear.value;
-    pdf.save(`Rekap_Pengumpulan_${yearLabel}.pdf`);
-    displayNotification('PDF berhasil diunduh', 'success');
-  } catch (error: any) {
-    console.error('❌ Error generating PDF:', error);
-    displayNotification('Gagal mengunduh PDF: ' + error.message, 'error');
-  } finally {
-    isDownloading.value = false;
-  }
-}
-
 onMounted(async () => {
   generateYears();
   await fetchData();
 });
 
 watch(selectedYear, fetchData);
+
+// Cetak Laporan
+function cetak_laporan() {
+  isDownloading.value = true;
+  try {
+    const printUrl = `/rekap-pengumpulan/${selectedYear.value}`;
+    window.open(printUrl, '_blank');
+  } catch (error) {
+    console.error('Error saat mengunduh PDF:', error);
+    displayNotification('Gagal mengunduh PDF: ' + error.message, 'error');
+  } finally {
+    isDownloading.value = false;
+  }
+}
 </script>
 
 <template>
@@ -257,16 +142,13 @@ watch(selectedYear, fetchData);
       <!-- Kiri: Tombol Download -->
       <div class="flex items-center">
         <BaseButton
-          @click="downloadPDF"
+          @click="cetak_laporan"
           variant="primary"
           type="button"
           :disabled="isDownloading || isLoading"
         >
-          <font-awesome-icon
-            :icon="isDownloading ? 'fa-solid fa-spinner' : 'fa-solid fa-download'"
-            :class="{ 'animate-spin': isDownloading, 'mr-2': true }"
-          />
-          {{ isDownloading ? 'Mengunduh...' : 'Download PDF' }}
+          <font-awesome-icon icon="fa-solid fa-print" class="mr-2" />
+          Cetak
         </BaseButton>
       </div>
 
@@ -350,13 +232,13 @@ watch(selectedYear, fetchData);
               :class="[
                 'transition-colors',
                 r.label === 'Total'
-                  ? 'bg-gray-200 font-bold'
+                  ? 'bg-gray-100 font-normal'
                   : 'even:bg-gray-50 hover:bg-indigo-50',
               ]"
             >
               <td
-                class="px-4 py-3 text-gray-700 border-r border-gray-300 sticky left-0 z-10"
-                :class="r.label === 'Total' ? ' bg-gray-200 font-bold' : 'bg-white font-normal'"
+                class="px-4 py-3 text-gray-700 border-r border-gray-100 sticky left-0 z-10"
+                :class="r.label === 'Total' ? ' bg-gray-100 font-normal' : 'bg-white font-normal'"
               >
                 {{ r.label }}
               </td>
@@ -365,13 +247,13 @@ watch(selectedYear, fetchData);
                 :key="m.key"
                 class="px-6 py-3 text-right tabular-nums whitespace-nowrap"
               >
-                {{ formatRupiah(r.values[m.key]) }}
+                {{ $formatToRupiah(r.values[m.key]) }}
               </td>
               <td
                 class="px-6 py-3 text-right whitespace-nowrap"
-                :class="r.label === 'Total' ? 'text-gray-700 bg-gray-300' : 'bg-gray-100'"
+                :class="r.label === 'Total' ? 'text-gray-700 bg-gray-100' : 'bg-gray-100'"
               >
-                {{ formatRupiah(r.total) }}
+                {{ $formatToRupiah(r.total) }}
               </td>
             </tr>
           </tbody>

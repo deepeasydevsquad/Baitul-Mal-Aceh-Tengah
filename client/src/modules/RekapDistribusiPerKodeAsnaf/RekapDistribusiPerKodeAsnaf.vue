@@ -1,13 +1,11 @@
 <script setup lang="ts">
-import { ref, onMounted, watch, computed } from 'vue';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import Notification from '@/components/Modal/Notification.vue';
-import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
 import BaseButton from '@/components/Button/BaseButton.vue';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
+import Notification from '@/components/Modal/Notification.vue';
+import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
 import { useNotification } from '@/composables/useNotification';
 import { list_rekap_distribusi_per_kode_asnaf } from '@/service/rekap_distribusi_per_kode_asnaf';
+import { computed, onMounted, ref, watch } from 'vue';
 
 // ==================== STATE ====================
 const isLoading = ref(false);
@@ -201,157 +199,23 @@ async function fetchData() {
   }
 }
 
-// ==================== DOWNLOAD PDF ====================
-async function downloadPDF() {
-  if (isDownloading.value) return;
-  if (filteredRows.value.length === 0) {
-    displayNotification('Tidak ada data untuk diunduh', 'error');
-    return;
-  }
+// ==================== LIFECYCLE ====================
+onMounted(fetchData);
+watch(selectedYear, fetchData);
 
+// Ganti fungsi downloadPDF dengan ini
+function cetak_laporan() {
   isDownloading.value = true;
-
   try {
-    const doc = new jsPDF({
-      orientation: 'landscape',
-      unit: 'mm',
-      format: 'a4',
-    });
-
-    // Header
-    doc.setFontSize(16);
-    doc.setFont('helvetica', 'bold');
-    doc.text('REKAP PENYALURAN PER KODE ASNAF', doc.internal.pageSize.getWidth() / 2, 15, {
-      align: 'center',
-    });
-
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`Tahun: ${selectedYear.value}`, doc.internal.pageSize.getWidth() / 2, 22, {
-      align: 'center',
-    });
-
-    // Prepare table data
-    const tableHead = [
-      [
-        { content: 'NO', rowSpan: 2, styles: { halign: 'center', valign: 'middle' } },
-        { content: 'ASNAF', rowSpan: 2, styles: { halign: 'center', valign: 'middle' } },
-        { content: 'KODE', rowSpan: 2, styles: { halign: 'center', valign: 'middle' } },
-        { content: 'BULAN', colSpan: 12, styles: { halign: 'center' } },
-        { content: 'JUMLAH', rowSpan: 2, styles: { halign: 'center', valign: 'middle' } },
-      ],
-      [...months.map((m) => ({ content: m.label, styles: { halign: 'center' } }))],
-    ];
-
-    const tableBody: any[] = [];
-    let rowNumber = 1;
-
-    filteredRows.value.forEach((row) => {
-      const firstKegiatan = row.kegiatan[0];
-      const firstRow = [
-        {
-          content: rowNumber.toString(),
-          rowSpan: row.kegiatan.length,
-          styles: { halign: 'center', valign: 'middle' },
-        },
-        { content: row.asnaf, rowSpan: row.kegiatan.length, styles: { valign: 'middle' } },
-        { content: firstKegiatan?.kode || '-', styles: { halign: 'center' } },
-        ...months.map((m) => ({
-          content: 'Rp ' + formatRupiahPlain(firstKegiatan?.values[m.key] || 0),
-          styles: { halign: 'right' },
-        })),
-        {
-          content: 'Rp ' + formatRupiahPlain(row.total),
-          rowSpan: row.kegiatan.length,
-          styles: { halign: 'right', valign: 'middle', fillColor: [243, 244, 246] },
-        },
-      ];
-      tableBody.push(firstRow);
-
-      for (let i = 1; i < row.kegiatan.length; i++) {
-        const kegiatan = row.kegiatan[i];
-        const additionalRow = [
-          { content: kegiatan.kode, styles: { halign: 'center' } },
-          ...months.map((m) => ({
-            content: 'Rp ' + formatRupiahPlain(kegiatan.values[m.key] || 0),
-            styles: { halign: 'right' },
-          })),
-        ];
-        tableBody.push(additionalRow);
-      }
-
-      rowNumber++;
-    });
-
-    // Grand Total Row
-    const grandTotalRow = [
-      {
-        content: 'TOTAL KESELURUHAN',
-        colSpan: 3,
-        styles: { halign: 'center', fontStyle: 'bold', fillColor: [243, 244, 246] },
-      },
-      ...months.map((m) => ({
-        content: 'Rp ' + formatRupiahPlain(calculateGrandTotalBulan(m.key)),
-        styles: { halign: 'right', fontStyle: 'bold', fillColor: [243, 244, 246] },
-      })),
-      {
-        content: 'Rp ' + formatRupiahPlain(calculateGrandTotal()),
-        styles: { halign: 'right', fontStyle: 'bold', fillColor: [243, 244, 246] },
-      },
-    ];
-    tableBody.push(grandTotalRow);
-
-    // Generate table using autoTable
-    autoTable(doc, {
-      head: tableHead,
-      body: tableBody,
-      startY: 28,
-      theme: 'grid',
-      styles: {
-        fontSize: 7,
-        cellPadding: 2,
-        lineColor: [200, 200, 200],
-        lineWidth: 0.1,
-      },
-      headStyles: {
-        fillColor: [249, 250, 251],
-        textColor: [55, 65, 81],
-        fontStyle: 'bold',
-        halign: 'center',
-      },
-      columnStyles: {
-        0: { cellWidth: 10 },
-        1: { cellWidth: 30 },
-        2: { cellWidth: 15 },
-        16: { cellWidth: 25 },
-      },
-      didDrawPage: (data: any) => {
-        // Footer
-        const pageCount = doc.internal.pages.length - 1;
-        doc.setFontSize(8);
-        doc.setFont('helvetica', 'normal');
-        doc.text(
-          `Halaman ${data.pageNumber} dari ${pageCount}`,
-          doc.internal.pageSize.getWidth() / 2,
-          doc.internal.pageSize.getHeight() - 10,
-          { align: 'center' },
-        );
-      },
-    });
-
-    doc.save(`Rekap_Penyaluran_Asnaf_${selectedYear.value}.pdf`);
-    displayNotification('PDF berhasil diunduh', 'success');
-  } catch (error: any) {
-    console.error('❌ Error generating PDF:', error);
-    displayNotification('Gagal mengunduh PDF: ' + error.message, 'error');
+    const printUrl = `/rekap-distribusi-per-kode-asnaf/${selectedYear.value}`;
+    window.open(printUrl, '_blank');
+  } catch (error) {
+    console.error('Error saat mencetak laporan:', error);
+    displayNotification('Gagal mencetak laporan: ' + error.message, 'error');
   } finally {
     isDownloading.value = false;
   }
 }
-
-// ==================== LIFECYCLE ====================
-onMounted(fetchData);
-watch(selectedYear, fetchData);
 </script>
 
 <template>
@@ -360,9 +224,9 @@ watch(selectedYear, fetchData);
     <div v-else class="space-y-4">
       <!-- Header Controls -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <BaseButton @click="downloadPDF" variant="primary" :loading="isDownloading" type="button">
-          <font-awesome-icon icon="fa-solid fa-download" class="mr-2" />
-          Download PDF
+        <BaseButton @click="cetak_laporan" variant="primary" :loading="isDownloading" type="button">
+          <font-awesome-icon icon="fa-solid fa-print" class="mr-2"></font-awesome-icon>
+          Cetak
         </BaseButton>
 
         <!-- Filters -->
@@ -475,47 +339,27 @@ watch(selectedYear, fetchData);
               </td>
               <td
                 :rowspan="row.kegiatan.length"
-                class="px-4 py-3 text-right font-normal bg-gray-100 border border-gray-300"
+                class="px-4 py-3 text-right font-normal bg-gray-100"
               >
                 {{ formatRupiah(row.total) }}
               </td>
             </tr>
-
-            <!-- Grand Total -->
           </tbody>
           <tfoot>
             <tr class="border border-gray-200 bg-gray-100">
-              <td
-                class="px-6 py-4 text-left font-bold text-gray-700 left-0 bg-gray-100 border border-gray-300"
-              >
-                Total
-              </td>
+              <td class="px-6 py-4 text-left font-bold text-gray-700 left-0 bg-gray-100">Total</td>
               <td
                 v-for="m in months"
                 :key="`total-${m.key}`"
-                class="px-4 py-3 text-right font-medium border border-gray-300"
+                class="px-4 py-3 text-right font-medium"
               >
                 {{ formatRupiah(calculateGrandTotalBulan(m.key)) }}
               </td>
-              <td class="px-4 py-3 text-right font-medium border-gray-200">
+              <td class="px-4 py-3 text-right font-medium">
                 {{ formatRupiah(calculateGrandTotal()) }}
               </td>
             </tr>
           </tfoot>
-
-          <!-- Empty State -->
-          <!-- <tbody v-else>
-            <tr>
-              <td colspan="16" class="px-6 py-8 text-center text-gray-500">
-                <font-awesome-icon
-                  icon="fa-solid fa-database"
-                  class="text-4xl mb-2 text-gray-400"
-                />
-                <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ada data</h3>
-                <p class="text-sm">Belum ada data rekap penyaluran.</p>
-              </td>
-            </tr>
-          </tbody> -->
         </table>
       </div>
     </div>

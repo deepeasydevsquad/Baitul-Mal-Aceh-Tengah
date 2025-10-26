@@ -1,21 +1,21 @@
 <script setup lang="ts">
 import { onMounted, ref, watch, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { list } from '@/service/rekap_pengumpulan_per_kecamatan';
 import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
 import Notification from '@/components/Modal/Notification.vue';
 import { useNotification } from '@/composables/useNotification';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import BaseButton from '@/components/Button/BaseButton.vue';
 
+const router = useRouter();
 const isLoading = ref(false);
-const selectedYear = ref('0'); // ubah ke string untuk konsistensi dengan options
+const selectedYear = ref('0');
 const years = ref<string[]>([]);
 
 function generateYears() {
   const currentYear = new Date().getFullYear();
   const startYear = 2020;
-  const yearList = ['0']; // 0 untuk "Pilih Semua Tahun"
+  const yearList = ['0'];
 
   for (let year = currentYear; year >= startYear; year--) {
     yearList.push(year.toString());
@@ -60,7 +60,6 @@ const rows = ref<any[]>([]);
 const { showNotification, notificationType, notificationMessage, displayNotification } =
   useNotification();
 
-// Computed untuk filter berdasarkan pencarian kecamatan
 const filteredRows = computed(() => {
   if (!searchKecamatan.value.trim()) {
     return rows.value;
@@ -77,7 +76,6 @@ async function fetchData() {
     const res = await list({ year: yearParam || new Date().getFullYear() });
     const data = res.data || [];
 
-    // Format hasil berdasarkan kecamatan
     const groupedByKecamatan = data.reduce((acc, item) => {
       if (!acc[item.nama_kecamatan]) {
         acc[item.nama_kecamatan] = {
@@ -107,125 +105,15 @@ onMounted(async () => {
 
 watch(selectedYear, fetchData);
 
-// Rupiah formatter
 function formatRupiah(value: any) {
   const safeValue = Number(value) || 0;
   return 'Rp ' + safeValue.toLocaleString('id-ID');
 }
 
-function fixOklchColors(element: HTMLElement) {
-  const all = element.querySelectorAll('*');
-  all.forEach((el) => {
-    const htmlEl = el as HTMLElement;
-    const style = window.getComputedStyle(htmlEl);
-
-    if (style.color.includes('oklch')) htmlEl.style.color = '#000000';
-    if (style.backgroundColor.includes('oklch')) htmlEl.style.backgroundColor = '#ffffff';
-    if (style.borderColor.includes('oklch')) htmlEl.style.borderColor = '#d1d5db';
-  });
-}
-
-const isDownloading = ref(false);
-
-// Download PDF
-async function downloadPDF() {
-  if (isDownloading.value) return;
-  if (filteredRows.value.length === 0) {
-    displayNotification('Tidak ada data untuk diunduh', 'error');
-    return;
-  }
-
-  isDownloading.value = true;
-
-  try {
-    const tableWrapper = document.getElementById('table-for-pdf');
-    if (!tableWrapper) {
-      displayNotification('Tabel tidak ditemukan', 'error');
-      isDownloading.value = false;
-      return;
-    }
-
-    // Clone table untuk PDF
-    const clonedTable = tableWrapper.cloneNode(true) as HTMLElement;
-
-    // Buat temporary container
-    const tempContainer = document.createElement('div');
-    tempContainer.style.position = 'absolute';
-    tempContainer.style.left = '-9999px';
-    tempContainer.style.top = '0';
-    tempContainer.style.width = 'max-content';
-    tempContainer.style.background = '#ffffff';
-    tempContainer.appendChild(clonedTable);
-
-    document.body.appendChild(tempContainer);
-
-    // Remove sticky positions dari clone
-    const stickyElements = tempContainer.querySelectorAll('[class*="sticky"]');
-    stickyElements.forEach((el) => {
-      (el as HTMLElement).style.position = 'static';
-    });
-
-    // Fix warna oklch
-    fixOklchColors(tempContainer);
-
-    // Tunggu layout settle
-    await new Promise((resolve) => setTimeout(resolve, 300));
-
-    // Capture ke canvas
-    const canvas = await html2canvas(tempContainer, {
-      scale: 2,
-      useCORS: true,
-      logging: false,
-      backgroundColor: '#ffffff',
-      windowWidth: tempContainer.scrollWidth,
-      windowHeight: tempContainer.scrollHeight,
-    });
-
-    // Remove temporary container
-    document.body.removeChild(tempContainer);
-
-    const imgData = canvas.toDataURL('image/png');
-
-    // Buat PDF A4 Landscape
-    const pdf = new jsPDF({
-      orientation: 'landscape',
-      unit: 'mm',
-      format: 'a4',
-      compress: true,
-    });
-
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
-
-    // Convert px to mm
-    const imgWidthMM = (canvas.width * 25.4) / 96;
-    const imgHeightMM = (canvas.height * 25.4) / 96;
-
-    // Scale untuk fit ke lebar A4
-    const scale = pdfWidth / imgWidthMM;
-    const scaledHeight = imgHeightMM * scale;
-
-    // Split ke multiple pages jika perlu
-    let yPosition = 0;
-    while (yPosition < scaledHeight) {
-      if (yPosition > 0) pdf.addPage();
-
-      pdf.addImage(imgData, 'PNG', 0, -yPosition, pdfWidth, scaledHeight, '', 'FAST');
-
-      yPosition += pdfHeight;
-    }
-
-    // Download
-    const yearLabel = selectedYear.value === '0' ? 'Semua_Tahun' : selectedYear.value;
-    pdf.save(`Rekap_Pengumpulan_Kecamatan_${yearLabel}.pdf`);
-    displayNotification('PDF berhasil diunduh', 'success');
-  } catch (error: any) {
-    console.error('❌ Error generating PDF:', error);
-    displayNotification('Gagal mengunduh PDF: ' + error.message, 'error');
-  } finally {
-    isDownloading.value = false;
-  }
-}
+const cetak_laporan = (tahun: string) => {
+  const printUrl = `/rekap-pengumpulan-perkecamatan/${tahun}`;
+  window.open(printUrl, '_blank');
+};
 </script>
 
 <template>
@@ -235,16 +123,13 @@ async function downloadPDF() {
       <!-- Kiri: Tombol Download -->
       <div class="flex items-center">
         <BaseButton
-          @click="downloadPDF"
+          @click="cetak_laporan(selectedYear)"
           variant="primary"
           type="button"
-          :disabled="isDownloading || isLoading"
+          :disabled="isLoading"
         >
-          <font-awesome-icon
-            :icon="isDownloading ? 'fa-solid fa-spinner' : 'fa-solid fa-download'"
-            :class="{ 'animate-spin': isDownloading, 'mr-2': true }"
-          />
-          {{ isDownloading ? 'Mengunduh...' : 'Download PDF' }}
+          <font-awesome-icon icon="fa-solid fa-print" class="mr-2" />
+          Cetak
         </BaseButton>
       </div>
 
@@ -289,7 +174,7 @@ async function downloadPDF() {
     <div class="overflow-x-auto">
       <SkeletonTable v-if="isLoading" :columns="months.length + 2" :rows="5" />
 
-      <div v-else-if="filteredRows.length > 0" id="table-for-pdf">
+      <div v-else-if="filteredRows.length > 0">
         <table
           class="min-w-full table-auto border-collapse bg-white shadow-md rounded-xl overflow-hidden text-sm"
         >
@@ -342,7 +227,7 @@ async function downloadPDF() {
               </td>
 
               <td
-                class="px-6 py-3 text-right whitespace-nowrap border border-gray-300 bg-gray-100 font-semibold"
+                class="px-6 py-3 text-right whitespace-nowrap border border-gray-300 bg-gray-100 font-medium"
               >
                 {{ formatRupiah(r.total ?? 0) }}
               </td>
@@ -351,32 +236,29 @@ async function downloadPDF() {
           <tfoot>
             <tr>
               <td
-                class="px-6 py-3 text-left whitespace-nowrap border border-gray-300 bg-gray-100 font-semibold"
+                class="px-6 py-3 text-left whitespace-nowrap border border-gray-300 bg-gray-100 font-medium"
               >
                 Total
               </td>
               <td
                 v-for="m in months"
                 :key="m.key"
-                class="px-6 py-3 text-right whitespace-nowrap border border-gray-300 bg-gray-100 font-semibold"
+                class="px-6 py-3 text-right whitespace-nowrap border border-gray-300 bg-gray-100 font-medium"
               >
                 {{
-                  // Hitung total per bulan
                   formatRupiah(
                     filteredRows.reduce((acc, curr) => acc + (curr.monthly[m.key] || 0), 0),
                   )
                 }}
               </td>
               <td
-                class="px-6 py-3 text-right whitespace-nowrap border border-gray-300 bg-gray-100 font-semibold"
+                class="px-6 py-3 text-right whitespace-nowrap border border-gray-300 bg-gray-100 font-medium"
               >
                 {{ formatRupiah(filteredRows.reduce((acc, curr) => acc + (curr.total || 0), 0)) }}
               </td>
             </tr>
           </tfoot>
         </table>
-
-        <!-- Empty State -->
       </div>
       <div v-else class="flex flex-col items-center justify-center py-16 text-gray-500">
         <font-awesome-icon icon="fa-solid fa-box-open" class="text-5xl mb-3 text-gray-400" />
