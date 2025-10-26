@@ -4,6 +4,8 @@ import LaporanPerencanaan from '@/modules/Cetak/LaporanPerencanaan.vue';
 import LaporanTahunan from '@/modules/Cetak/LaporanTahunan.vue';
 import Register from '@/modules/Register/Register.vue';
 import CetakRekapPengumpulanPerkecamatan from '@/modules/RekapPengumpulanPerKecamatan/CetakRekapPengumpulanPerkecamatan.vue';
+import CetakRekapPengumpulan from '@/modules/RekapPengumpulan/CetakRekapPengumpulan.vue';
+import CetakRekapDistribusiPerKodeAsnaf from '@/modules/RekapDistribusiPerKodeAsnaf/CetakRekapDistribusiPerKodeAsnaf.vue';
 import AdministratorAreaView from '@/views/AdministratorView.vue';
 import homeView from '@/views/HomeView.vue';
 import LoginAdminView from '@/views/LoginAdminView.vue';
@@ -121,6 +123,25 @@ const router = createRouter({
       meta: {
         title:
           'Rekap Pengumpulan Perkecamatan || Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah',
+      }
+   },
+   {
+      path: '/rekap-pengumpulan/:tahun',
+      name: 'cetak-rekap-pengumpulan',
+      component: CetakRekapPengumpulan,
+      meta: {
+        title: 'Cetak Rekap Pengumpulan || Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah',
+        description:
+          'Member Area Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah memberikan akses mudah untuk melihat data zakat, status permohonan, serta laporan transaksi secara aman dan transparan',
+      }
+    }, 
+    {
+      path: '/rekap-distribusi-per-kode-asnaf/:tahun',
+      name: 'cetak-rekap-distribusi-per-kode-asnaf',
+      component: CetakRekapDistribusiPerKodeAsnaf,
+      meta: {
+        title:
+          'Cetak Rekap Distribusi Per Kode Asnaf || Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah',
         description:
           'Member Area Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah memberikan akses mudah untuk melihat data zakat, status permohonan, serta laporan transaksi secara aman dan transparan',
       },
