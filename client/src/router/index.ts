@@ -1,4 +1,5 @@
 import Beranda from '@/modules/Cetak/Beranda.vue';
+import LaporanKesekretariatan from '@/modules/Cetak/LaporanKesekretariatan.vue';
 import LaporanPengumpulan from '@/modules/Cetak/LaporanPengumpulan.vue';
 import LaporanPerencanaan from '@/modules/Cetak/LaporanPerencanaan.vue';
 import LaporanTahunan from '@/modules/Cetak/LaporanTahunan.vue';
@@ -115,6 +116,17 @@ const router = createRouter({
         description:
           'Member Area Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah memberikan akses mudah untuk melihat data zakat, status permohonan, serta laporan transaksi secara aman dan transparan',
       },
+    },
+    {
+       path: '/cetak-laporan-kesekretariatan/:tahun',
+      name: 'cetak-laporan-kesekretariatan',
+      component: LaporanKesekretariatan,
+      meta: {
+        title:
+          'Cetak Laporan Kesekretariatan || Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah',
+        description:
+          'Member Area Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah memberikan akses mudah untuk melihat data zakat, status permohonan, serta laporan transaksi secara aman dan transparan',
+      }
     },
     {
       path: '/rekap-pengumpulan-perkecamatan/:tahun',
