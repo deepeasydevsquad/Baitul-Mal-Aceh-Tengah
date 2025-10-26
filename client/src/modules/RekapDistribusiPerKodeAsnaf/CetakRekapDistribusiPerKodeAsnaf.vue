@@ -194,7 +194,7 @@ onMounted(async () => {
       <table class="w-full border-collapse text-[6.5pt] mt-5" style="table-layout: auto">
         <thead class="border border-black text-center">
           <tr>
-            <th rowspan="2" class="border border-black px-2 py-1 w-[5%]">NO</th>
+            <!-- <th rowspan="2" class="border border-black px-2 py-1 w-[5%]">NO</th> -->
             <th rowspan="2" class="border border-black px-2 py-1 w-[15%]">ASNAF</th>
             <th rowspan="2" class="border border-black px-2 py-1 w-[8%]">KODE</th>
             <th colspan="12" class="border border-black px-2 py-1">BULAN</th>
@@ -212,12 +212,12 @@ onMounted(async () => {
             <template v-for="(row, index) in rowsNominal" :key="row.asnaf_id">
               <!-- Baris pertama dengan asnaf -->
               <tr class="text-[6pt] text-black" style="page-break-inside: avoid">
-                <td
+                <!-- <td
                   :rowspan="row.kegiatan.length"
                   class="border border-black px-2 py-1 text-center font-bold"
                 >
                   {{ index + 1 }}
-                </td>
+                </td> -->
                 <td
                   :rowspan="row.kegiatan.length"
                   class="border border-black px-2 py-1 text-left font-bold"
@@ -262,7 +262,7 @@ onMounted(async () => {
 
             <!-- Grand Total -->
             <tr class="font-bold text-black bg-gray-200">
-              <td colspan="3" class="border border-black px-2 py-1 text-center">
+              <td colspan="2" class="border border-black px-2 py-1 text-center">
                 TOTAL KESELURUHAN
               </td>
               <td
