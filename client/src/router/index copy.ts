@@ -2,8 +2,8 @@ import Beranda from '@/modules/Cetak/Beranda.vue';
 import LaporanPengumpulan from '@/modules/Cetak/LaporanPengumpulan.vue';
 import LaporanPerencanaan from '@/modules/Cetak/LaporanPerencanaan.vue';
 import LaporanTahunan from '@/modules/Cetak/LaporanTahunan.vue';
+import CetakLaporanAsnafFilsabilillah from '@/modules/LaporanAsnaf/CetakAsnaf/CetakLaporanAsnafFilsabilillah.vue';
 import Register from '@/modules/Register/Register.vue';
-import CetakRekapDistribusiPerKodeAsnaf from '@/modules/RekapDistribusiPerKodeAsnaf/CetakRekapDistribusiPerKodeAsnaf.vue';
 import AdministratorAreaView from '@/views/AdministratorView.vue';
 import homeView from '@/views/HomeView.vue';
 import LoginAdminView from '@/views/LoginAdminView.vue';
@@ -115,12 +115,12 @@ const router = createRouter({
       },
     },
     {
-      path: '/rekap-distribusi-per-kode-asnaf/:tahun',
-      name: 'cetak-rekap-distribusi-per-kode-asnaf',
-      component: CetakRekapDistribusiPerKodeAsnaf,
+      path: '/cetak-laporan-asnaf-filsabilillah/:tahun',
+      name: 'cetak-laporan-asnaf-filsabilillah',
+      component: CetakLaporanAsnafFilsabilillah,
       meta: {
         title:
-          'Cetak Rekap Distribusi Per Kode Asnaf || Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah',
+          'Cetak Laporan Asnaf Filsabilillah || Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah',
         description:
           'Member Area Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah memberikan akses mudah untuk melihat data zakat, status permohonan, serta laporan transaksi secara aman dan transparan',
       },
