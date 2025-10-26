@@ -70,72 +70,74 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div
-    class="print-area font-sans"
-    style="color: black; font-size: 8pt; line-height: 1.3; background: white"
-  >
-    <!-- Header -->
-    <div class="flex justify-between items-start mb-3">
-      <div>
-        <h1 class="text-lg font-bold mb-1">Laporan Penyaluran Asnaf Fakir</h1>
-        <p class="text-sm">Tahun: {{ tahun === '0' ? 'Semua Tahun' : tahun }}</p>
+  <div class="min-h-screen p-4">
+    <div
+      class="print-area font-sans"
+      style="color: black; font-size: 8pt; line-height: 1.3; background: white"
+    >
+      <!-- Header -->
+      <div class="flex justify-between items-start mb-3">
+        <div>
+          <h1 class="text-lg font-bold mb-1">Laporan Penyaluran Asnaf Fakir</h1>
+          <p class="text-sm">Tahun: {{ tahun === '0' ? 'Semua Tahun' : tahun }}</p>
+        </div>
+        <div class="flex-shrink-0 scale-90 origin-top-right">
+          <Logos />
+        </div>
       </div>
-      <div class="flex-shrink-0 scale-90 origin-top-right">
-        <Logos />
-      </div>
+  
+      <!-- Tabel -->
+      <table class="w-full border-collapse text-[7pt] mt-5" style="table-layout: fixed">
+        <thead class="border border-black text-center">
+          <tr>
+            <th class="border border-black w-[10%] px-2 py-1">Tanggal</th>
+            <th class="border border-black w-[25%] px-2 py-1">Uraian</th>
+            <th class="border border-black w-[12%] px-2 py-1">NIK</th>
+            <th class="border border-black w-[20%] px-2 py-1">Alamat</th>
+            <th class="border border-black w-[8%] px-2 py-1">Kec</th>
+            <th class="border border-black w-[10%] px-2 py-1">Kode Akun</th>
+            <th class="border border-black w-[15%] px-2 py-1">Kredit</th>
+          </tr>
+        </thead>
+  
+        <tbody>
+          <template v-if="laporanData.length > 0">
+            <tr
+              v-for="(row, index) in laporanData"
+              :key="index"
+              class="text-[6.5pt] text-black"
+              style="page-break-inside: avoid"
+            >
+              <td class="border border-black px-2 py-1 text-center whitespace-nowrap">
+                {{ row[1] }}
+              </td>
+              <td class="border border-black px-2 py-1 text-left">{{ row[2] }}</td>
+              <td class="border border-black px-2 py-1 text-center">{{ row[3] }}</td>
+              <td class="border border-black px-2 py-1 text-left">{{ row[4] }}</td>
+              <td class="border border-black px-2 py-1 text-center">{{ row[5] }}</td>
+              <td class="border border-black px-2 py-1 text-center">{{ row[6] }}</td>
+              <td class="border border-black px-2 py-1 text-right whitespace-nowrap">
+                {{ row[7] }}
+              </td>
+            </tr>
+  
+            <!-- Grand Total -->
+            <tr class="font-bold text-black bg-gray-100">
+              <td colspan="6" class="border border-black px-2 py-1 text-right">Total</td>
+              <td class="border border-black px-2 py-1 text-right">
+                {{ $formatToRupiah(grandTotal) }}
+              </td>
+            </tr>
+          </template>
+  
+          <tr v-else>
+            <td colspan="7" class="border border-black px-2 py-3 text-center text-gray-700">
+              Laporan Penyaluran Asnaf Fakir Tidak Ditemukan
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-
-    <!-- Tabel -->
-    <table class="w-full border-collapse text-[7pt] mt-5" style="table-layout: fixed">
-      <thead class="border border-black text-center">
-        <tr>
-          <th class="border border-black w-[10%] px-2 py-1">Tanggal</th>
-          <th class="border border-black w-[25%] px-2 py-1">Uraian</th>
-          <th class="border border-black w-[12%] px-2 py-1">NIK</th>
-          <th class="border border-black w-[20%] px-2 py-1">Alamat</th>
-          <th class="border border-black w-[8%] px-2 py-1">Kec</th>
-          <th class="border border-black w-[10%] px-2 py-1">Kode Akun</th>
-          <th class="border border-black w-[15%] px-2 py-1">Kredit</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <template v-if="laporanData.length > 0">
-          <tr
-            v-for="(row, index) in laporanData"
-            :key="index"
-            class="text-[6.5pt] text-black"
-            style="page-break-inside: avoid"
-          >
-            <td class="border border-black px-2 py-1 text-center whitespace-nowrap">
-              {{ row[1] }}
-            </td>
-            <td class="border border-black px-2 py-1 text-left">{{ row[2] }}</td>
-            <td class="border border-black px-2 py-1 text-center">{{ row[3] }}</td>
-            <td class="border border-black px-2 py-1 text-left">{{ row[4] }}</td>
-            <td class="border border-black px-2 py-1 text-center">{{ row[5] }}</td>
-            <td class="border border-black px-2 py-1 text-center">{{ row[6] }}</td>
-            <td class="border border-black px-2 py-1 text-right whitespace-nowrap">
-              {{ row[7] }}
-            </td>
-          </tr>
-
-          <!-- Grand Total -->
-          <tr class="font-bold text-black bg-gray-100">
-            <td colspan="6" class="border border-black px-2 py-1 text-right">Total</td>
-            <td class="border border-black px-2 py-1 text-right">
-              {{ $formatToRupiah(grandTotal) }}
-            </td>
-          </tr>
-        </template>
-
-        <tr v-else>
-          <td colspan="7" class="border border-black px-2 py-3 text-center text-gray-700">
-            Laporan Penyaluran Asnaf Fakir Tidak Ditemukan
-          </td>
-        </tr>
-      </tbody>
-    </table>
   </div>
 </template>
 
