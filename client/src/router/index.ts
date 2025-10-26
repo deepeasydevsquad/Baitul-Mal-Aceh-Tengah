@@ -3,6 +3,7 @@ import LaporanKesekretariatan from '@/modules/Cetak/LaporanKesekretariatan.vue';
 import LaporanPengumpulan from '@/modules/Cetak/LaporanPengumpulan.vue';
 import LaporanPerencanaan from '@/modules/Cetak/LaporanPerencanaan.vue';
 import LaporanTahunan from '@/modules/Cetak/LaporanTahunan.vue';
+import CetakLaporanAsnafMiskin from '@/modules/LaporanAsnaf/CetakAsnaf/CetakLaporanAsnafMiskin.vue';
 import CetakLaporanAsnafIbnuSabil from '@/modules/LaporanAsnaf/CetakAsnaf/CetakLaporanAsnafIbnuSabil.vue';
 import CetakLaporanAsnafMualaf from '@/modules/LaporanAsnaf/CetakAsnaf/CetakLaporanAsnafMualaf.vue';
 import Register from '@/modules/Register/Register.vue';
@@ -120,6 +121,16 @@ const router = createRouter({
         description:
           'Member Area Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah memberikan akses mudah untuk melihat data zakat, status permohonan, serta laporan transaksi secara aman dan transparan',
       },
+    },
+    {
+      path: '/cetak-laporan-asnaf-miskin/:tahun',
+      name: 'cetak-laporan-asnaf-miskin',
+      component: CetakLaporanAsnafMiskin,
+      meta: {
+        title:
+          'Cetak Laporan Asnaf MiskinCetakLaporanAsnafMiskin || Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah',
+        description: ''
+      }
     },
     {
       path: '/cetak-laporan-asnaf-ibnu-sabil/:tahun',
