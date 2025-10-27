@@ -22,8 +22,13 @@ async function fetchData() {
   try {
     const response = await get_laporan_asnaf(tahun, asnafId);
 
+    console.log('-----response');
+    console.log(response.data);
+    console.log(response.data.data);
+    console.log('-----response');
+
     // Flatten data dari response
-    const flattenedData = response.data.data.flatMap((group: any) => group.data);
+    const flattenedData = response.data.data.list.flatMap((group: any) => group.data);
     laporanData.value = flattenedData;
 
     // Hitung grand total
@@ -59,9 +64,9 @@ onMounted(async () => {
     setTimeout(() => {
       window.print();
       document.title = oldTitle;
-      setTimeout(() => {
-        window.close();
-      }, 400);
+      // setTimeout(() => {
+      //   window.close();
+      // }, 400);
     }, 1000);
   } catch (error) {
     console.error('Error saat mounting:', error);
@@ -85,7 +90,7 @@ onMounted(async () => {
           <Logos />
         </div>
       </div>
-  
+
       <!-- Tabel -->
       <table class="w-full border-collapse text-[7pt] mt-5" style="table-layout: fixed">
         <thead class="border border-black text-center">
@@ -99,7 +104,7 @@ onMounted(async () => {
             <th class="border border-black w-[15%] px-2 py-1">Kredit</th>
           </tr>
         </thead>
-  
+
         <tbody>
           <template v-if="laporanData.length > 0">
             <tr
@@ -120,7 +125,7 @@ onMounted(async () => {
                 {{ row[7] }}
               </td>
             </tr>
-  
+
             <!-- Grand Total -->
             <tr class="font-bold text-black bg-gray-100">
               <td colspan="6" class="border border-black px-2 py-1 text-right">Total</td>
@@ -129,11 +134,20 @@ onMounted(async () => {
               </td>
             </tr>
           </template>
-  
+
           <tr v-else>
             <td colspan="7" class="border border-black px-2 py-3 text-center text-gray-700">
               Laporan Penyaluran Asnaf Fakir Tidak Ditemukan
             </td>
+          </tr>
+        </tbody>
+      </table>
+      <table class="w-full border-collapse text-[7pt] mt-5" style="table-layout: fixed">
+        <tbody>
+          <tr>
+            <td style="border: none">Kolom 1</td>
+            <td>Kolom 2</td>
+            <td>Kolom 3</td>
           </tr>
         </tbody>
       </table>
