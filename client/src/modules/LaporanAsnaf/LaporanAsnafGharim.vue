@@ -67,7 +67,7 @@ async function fetchData() {
   isTableLoading.value = true;
   try {
     const response = await get_laporan_asnaf(selectedTahun.value, asnafId);
-    const flattenedData = response.data.data.flatMap((group: any) => group.data);
+    const flattenedData = response.data.data.list.flatMap((group: any) => group.data);
 
     allLaporanRows.value = flattenedData;
     totalRow.value = flattenedData.length;

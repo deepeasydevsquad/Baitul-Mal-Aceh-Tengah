@@ -1,18 +1,18 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted, watch, computed } from 'vue';
-import Notification from '@/components/Modal/Notification.vue';
 import BaseButton from '@/components/Button/BaseButton.vue';
-import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
+import Notification from '@/components/Modal/Notification.vue';
 import Pagination from '@/components/Pagination/Pagination.vue';
+import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
+import { onMounted, ref, watch } from 'vue';
 
 // Composable
 import { useNotification } from '@/composables/useNotification';
 import { usePagination } from '@/composables/usePaginations';
 
 // Service API
-import { get_laporan_asnaf, get_tahun, download_excel_asnaf } from '@/service/laporan_asnaf';
+import { get_laporan_asnaf, get_tahun } from '@/service/laporan_asnaf';
 
 // State: Loading
 const isLoading = ref(false);
@@ -67,7 +67,7 @@ async function fetchData() {
   isTableLoading.value = true;
   try {
     const response = await get_laporan_asnaf(selectedTahun.value, asnafId);
-    const flattenedData = response.data.data.flatMap((group: any) => group.data);
+    const flattenedData = response.data.data.list.flatMap((group: any) => group.data);
 
     allLaporanRows.value = flattenedData;
     totalRow.value = flattenedData.length;
