@@ -17,9 +17,7 @@
     </div>
 
     <!-- Kanan: Nomor halaman -->
-    <div class="text-right">
-      <span class="text-[9pt] font-medium"> Halaman <span class="page-number"></span> </span>
-    </div>
+    <div class="text-right"></div>
   </footer>
 </template>
 
