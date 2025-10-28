@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Logos from '@/components/Logo/Logo.vue';
+import FooterCetak from '@/modules/FooterCetak/FooterCetak.vue';
 import { get_laporan_kesekretariatan } from '@/service/laporan_kesekretariatan';
 import { nextTick, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
@@ -49,7 +50,7 @@ onMounted(async () => {
       const style = document.createElement('style');
       style.id = styleId;
       style.textContent = `
-        @page { size: A4 landscape; margin: 10mm; }
+        @page { size: A4 landscape; margin: 15mm 12mm; }
         body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
       `;
       document.head.appendChild(style);
@@ -72,21 +73,21 @@ onMounted(async () => {
   <div class="min-h-screen p-4">
     <div
       class="print-area font-sans"
-      style="color: black; font-size: 8pt; line-height: 1.3; background: white"
+      style="color: black; font-size: 9pt; line-height: 1.3; background: white"
     >
       <!-- Header -->
-      <div class="flex justify-between items-start mb-3">
+      <div class="flex justify-between items-start mb-4">
         <div>
-          <h1 class="text-lg font-bold mb-1">Laporan Kesekretariatan</h1>
-          <p class="text-sm">Tahun: {{ tahun === '0' ? 'Semua Tahun' : tahun }}</p>
+          <h1 class="text-2xl font-bold text-gray-900 mb-1">Laporan Kesekretariatan</h1>
+          <p class="text-sm text-gray-700">Tahun: {{ tahun === '0' ? 'Semua Tahun' : tahun }}</p>
         </div>
-        <div class="flex-shrink-0 scale-90 origin-top-right">
+        <div class="flex-shrink-0">
           <Logos />
         </div>
       </div>
 
       <!-- Tabel -->
-      <table class="w-full border-collapse text-[7pt] mt-5" style="table-layout: fixed">
+      <table class="w-full border-collapse text-[8pt] mb-4" style="table-layout: fixed">
         <thead class="border border-black text-center">
           <tr>
             <th class="border border-black w-[10%] px-2 py-1">Tanggal</th>
@@ -104,7 +105,7 @@ onMounted(async () => {
             <tr
               v-for="(row, index) in laporanData"
               :key="index"
-              class="text-[6.5pt] text-black"
+              class="text-[7pt] text-black"
               style="page-break-inside: avoid"
             >
               <td class="border border-black px-2 py-1 text-center whitespace-nowrap">
@@ -136,6 +137,9 @@ onMounted(async () => {
           </tr>
         </tbody>
       </table>
+
+      <!-- Footer -->
+      <FooterCetak />
     </div>
   </div>
 </template>
@@ -145,7 +149,7 @@ onMounted(async () => {
   max-width: 297mm;
   min-height: 210mm;
   margin: 0 auto;
-  padding: 15mm;
+  padding: 10mm;
   background: white;
 }
 
@@ -154,15 +158,15 @@ onMounted(async () => {
     background: #f3f4f6;
   }
   .print-area {
-    box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
-    margin-top: 20px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    margin: 20px auto;
   }
 }
 
 @media print {
   @page {
     size: A4 landscape;
-    margin: 0 !important;
+    margin: 15mm 12mm;
   }
 
   * {
@@ -175,6 +179,14 @@ onMounted(async () => {
     margin: 0 !important;
     padding: 0 !important;
     background: white !important;
+  }
+
+  .print-area {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-shadow: none;
+    margin: 0 !important;
+    padding: 8mm 10mm !important;
   }
 
   table {

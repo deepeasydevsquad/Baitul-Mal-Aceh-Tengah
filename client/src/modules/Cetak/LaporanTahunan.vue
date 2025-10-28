@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router';
 import VueApexCharts from 'vue3-apexcharts';
 import Logos from '@/components/Logo/Logo.vue';
 import { get_laporan_tahunan } from '@/service/laporan_tahunan';
+import FooterCetak from '../FooterCetak/FooterCetak.vue';
 
 const route = useRoute();
 const tahun = route.params.tahun;
@@ -97,7 +98,18 @@ async function fetchData() {
           borderRadius: 6,
         },
       },
-      dataLabels: { enabled: false },
+      dataLabels: {
+        enabled: true,
+        formatter: (val: number) => {
+          if (val === 0) return '';
+          return formatMiliar(val);
+        },
+        style: {
+          fontSize: '9px',
+          colors: ['#fff'],
+        },
+        offsetY: -5,
+      },
       xaxis: {
         categories: datas.value.map((d) => d.tahun),
         title: {
@@ -171,11 +183,11 @@ onMounted(async () => {
 
 <template>
   <div
-    class="bg-white max-w-[210mm] mx-auto p-[15mm] font-sans print:p-[10mm] print:m-0 print:shadow-none print-area"
-    style="color: black; font-size: 10pt; line-height: 1.4"
+    class="bg-white max-w-[297mm] mx-auto p-[10mm] font-sans print:p-[10mm] print:m-0 print:shadow-none print-area"
+    style="color: black; font-size: 9pt; line-height: 1.3"
   >
     <!-- Header dengan Logo -->
-    <div class="flex justify-between items-start mb-6">
+    <div class="flex justify-between items-start mb-4">
       <div>
         <h1 class="text-2xl font-bold text-gray-900 mb-2">Laporan Tahunan</h1>
         <p class="text-sm text-gray-600">Periode: {{ tahun }}</p>
@@ -186,7 +198,7 @@ onMounted(async () => {
     </div>
 
     <!-- Ringkasan -->
-    <div class="grid grid-cols-3 gap-4 mb-6">
+    <div class="grid grid-cols-3 gap-4 mb-4">
       <div class="p-3 rounded-lg bg-green-50 text-center border border-green-200">
         <h3 class="font-semibold text-gray-700 text-sm mb-1">Total Pengumpulan</h3>
         <p class="text-base font-bold text-gray-900">{{ formatRupiah(totalPengumpulan) }}</p>
@@ -202,7 +214,7 @@ onMounted(async () => {
     </div>
 
     <!-- Tabel Data -->
-    <div class="mb-6 overflow-hidden border border-gray-300 rounded-lg">
+    <div class="mb-4 overflow-hidden border border-gray-300 rounded-lg">
       <table class="w-full border-collapse bg-white text-xs">
         <thead class="bg-gray-100 text-gray-900 text-center border-b-2 border-gray-400">
           <tr>
@@ -254,12 +266,13 @@ onMounted(async () => {
     </div>
 
     <!-- Chart -->
-    <div class="grid grid-cols-2 gap-4 page-break-avoid">
+    <div class="grid grid-cols-2 gap-4 mb-4 page-break-avoid">
       <div class="p-3 rounded-lg border border-gray-300 bg-white">
         <h3 class="font-bold text-sm mb-2 text-gray-900">Grafik Pengumpulan</h3>
         <VueApexCharts
           type="bar"
-          height="280"
+          height="240"
+          style="max-height: 200px; overflow: hidden"
           :options="chartOptionsPengumpulan"
           :series="seriesPengumpulan"
         />
@@ -268,12 +281,15 @@ onMounted(async () => {
         <h3 class="font-bold text-sm mb-2 text-gray-900">Grafik Distribusi</h3>
         <VueApexCharts
           type="bar"
-          height="280"
+          height="240"
           :options="chartOptionsDistribusi"
           :series="seriesDistribusi"
         />
       </div>
     </div>
+
+    <!-- Footer -->
+    <FooterCetak />
   </div>
 </template>
 
@@ -284,8 +300,8 @@ onMounted(async () => {
   }
 
   .print-area {
-    width: 210mm;
-    min-height: 297mm;
+    width: 297mm;
+    min-height: 210mm;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
     margin: 20px auto;
   }
@@ -293,29 +309,86 @@ onMounted(async () => {
 
 @media print {
   @page {
-    size: A4;
-    margin: 15mm;
+    size: A4 landscape;
+    margin: 10mm 8mm;
+  }
+
+  /* --- Hapus node Vue devtools dan teleport --- */
+  #teleport-target,
+  [data-v-app],
+  .v-overlay,
+  .v-tooltip,
+  .v-toast,
+  .v-modal,
+  .v-dialog,
+  .devtools-overlay,
+  .v-overlay__scrim,
+  [data-v-inspector],
+  [data-vue-devtools],
+  .__vue-devtools-overlay__,
+  #__vue-inspector {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* --- Hilangkan after/before node kosong --- */
+  html::after,
+  body::after,
+  html::before,
+  body::before {
+    content: none !important;
+    display: none !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   html,
   body {
-    margin: 0;
-    padding: 0;
+    margin: 0 !important;
+    padding: 0 !important;
     background: white;
+    overflow: hidden !important;
+    height: 100% !important;
+    max-height: 100% !important;
   }
 
+  /* --- Area Cetak --- */
   .print-area {
-    width: 210mm;
-    box-shadow: none;
-    margin: 0;
-    padding: 0;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: auto !important;
+    height: auto !important;
+    box-shadow: none !important;
+    margin: 0 auto !important;
+    padding: 6mm 8mm !important;
+    overflow: hidden !important;
+    page-break-inside: avoid !important;
   }
 
+  /* --- Hindari pemisahan elemen dalam 1 halaman --- */
   .page-break-avoid {
-    page-break-inside: avoid;
+    page-break-inside: avoid !important;
+    page-break-after: auto !important;
+  }
+
+  /* --- Footer --- */
+  footer,
+  .footer-laporan {
+    page-break-before: avoid !important;
+    page-break-after: avoid !important;
+  }
+
+  /* --- Perbaiki warna print --- */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 }
 
+/* --- Warna teks chart Apex --- */
 :deep(.apexcharts-text),
 :deep(.apexcharts-legend-text),
 :deep(.apexcharts-xaxis-label),
