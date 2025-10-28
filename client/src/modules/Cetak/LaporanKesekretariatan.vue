@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
 import Logos from '@/components/Logo/Logo.vue';
 import FooterCetak from '@/modules/FooterCetak/FooterCetak.vue';
 import { get_laporan_kesekretariatan } from '@/service/laporan_kesekretariatan';
@@ -16,9 +17,11 @@ const parseRupiah = (val: string | number): number => {
 };
 
 const laporanData = ref<any[]>([]);
+const isLoading = ref<boolean>(true);
 const grandTotal = ref<number>(0);
 
 async function fetchData() {
+  isLoading.value = true;
   try {
     const response = await get_laporan_kesekretariatan(tahun);
 
@@ -34,6 +37,8 @@ async function fetchData() {
     console.error('Error fetching data:', error);
     laporanData.value = [];
     grandTotal.value = 0;
+  } finally {
+    isLoading.value = false;
   }
 }
 
@@ -50,7 +55,8 @@ onMounted(async () => {
       const style = document.createElement('style');
       style.id = styleId;
       style.textContent = `
-        @page { size: A4 landscape; margin: 15mm 12mm; }
+        @page { size: A4 landscape; margin: 5mm
+ 12mm; }
         body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
       `;
       document.head.appendChild(style);
@@ -70,9 +76,12 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="min-h-screen p-4">
+  <div v-if="isLoading" class="bg-white min-h-screen flex items-center justify-center">
+    <LoadingSpinner label="Memuat halaman..." />
+  </div>
+  <div v-else class="min-h-screen p-4 print:p-0 print:m-0">
     <div
-      class="print-area font-sans"
+      class="print-area font-sans flex flex-col"
       style="color: black; font-size: 9pt; line-height: 1.3; background: white"
     >
       <!-- Header -->
@@ -139,7 +148,9 @@ onMounted(async () => {
       </table>
 
       <!-- Footer -->
-      <FooterCetak />
+      <div class="mt-auto">
+        <FooterCetak />
+      </div>
     </div>
   </div>
 </template>
@@ -149,7 +160,7 @@ onMounted(async () => {
   max-width: 297mm;
   min-height: 210mm;
   margin: 0 auto;
-  padding: 10mm;
+  padding: 5mm;
   background: white;
 }
 
@@ -158,15 +169,15 @@ onMounted(async () => {
     background: #f3f4f6;
   }
   .print-area {
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-    margin: 20px auto;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
+    margin-top: 20px;
   }
 }
 
 @media print {
   @page {
     size: A4 landscape;
-    margin: 15mm 12mm;
+    margin: 0 !important;
   }
 
   * {
@@ -179,14 +190,6 @@ onMounted(async () => {
     margin: 0 !important;
     padding: 0 !important;
     background: white !important;
-  }
-
-  .print-area {
-    width: 100% !important;
-    max-width: 100% !important;
-    box-shadow: none;
-    margin: 0 !important;
-    padding: 8mm 10mm !important;
   }
 
   table {

@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { ref, onMounted, nextTick } from 'vue';
-import { useRoute } from 'vue-router';
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
 import Logos from '@/components/Logo/Logo.vue';
+import FooterCetak from '@/modules/FooterCetak/FooterCetak.vue';
 import { daftar_rekap_distribusi_kecamatan } from '@/service/rekap_distribusi_kecamatan';
+import { nextTick, onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
 
 const route = useRoute();
 const tahun = route.params.tahun as string;
@@ -107,172 +109,220 @@ async function fetchData() {
   }
 }
 
-onMounted(async () => {
-  await fetchData();
-  await nextTick();
+const handlePrint = () => {
+  const oldTitle = document.title;
+  document.title = `Rekap Distribusi Per Kecamatan Tahun ${tahun === '0' ? 'Semua Tahun' : 'Per Tahun ' + tahun}`;
 
-  if (kecamatanList.value.length > 0) {
+  const styleId = 'print-style';
+  let styleElement: HTMLStyleElement | null = null;
+
+  // Cek apakah style sudah ada
+  if (!document.getElementById(styleId)) {
+    styleElement = document.createElement('style');
+    styleElement.id = styleId;
+    styleElement.textContent = `
+      @page {
+        size: A4 landscape;
+      }
+      body {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+    `;
+    document.head.appendChild(styleElement);
+  }
+
+  // Event listener untuk cleanup setelah print
+  const afterPrint = () => {
+    document.title = oldTitle;
+    const printStyle = document.getElementById(styleId);
+    if (printStyle) {
+      printStyle.remove();
+    }
+    window.removeEventListener('afterprint', afterPrint);
+    console.log('Print style cleaned up');
     setTimeout(() => {
-      window.print();
-    }, 800);
+      window.close();
+    }, 400);
+  };
+  window.addEventListener('afterprint', afterPrint);
+  setTimeout(() => {
+    window.print();
+  }, 1000);
+};
+
+onMounted(async () => {
+  try {
+    await fetchData();
+    await nextTick();
+    handlePrint();
+  } catch (error) {
+    console.error('Error saat mounting:', error);
   }
 });
 </script>
 
 <template>
-  <div
-    class="bg-white mx-auto font-sans print-area"
-    style="color: black; font-size: 7pt; line-height: 1.2"
-  >
-    <!-- Header dengan Logo -->
-    <div class="flex justify-between items-start mb-3 px-4 pt-4">
-      <div>
-        <h1 class="text-xl font-bold text-gray-900 mb-1">Laporan Rekap Distribusi Per Kecamatan</h1>
-        <p class="text-xs text-gray-700">Tahun: {{ tahun === '0' ? 'Semua Tahun' : tahun }}</p>
-        <p class="text-xs text-gray-700">
-          Tanggal Cetak: {{ new Date().toLocaleDateString('id-ID') }}
-        </p>
+  <div v-if="isLoading" class="bg-white min-h-screen flex items-center justify-center">
+    <LoadingSpinner label="Memuat halaman..." />
+  </div>
+  <div v-else class="min-h-screen p-4 print:p-0 print:m-0">
+    <div
+      class="bg-white mx-auto font-sans print-area"
+      style="color: black; font-size: 7pt; line-height: 1.2"
+    >
+      <!-- Header dengan Logo -->
+      <div class="flex justify-between items-start mb-3">
+        <div>
+          <h1 class="text-xl font-bold text-gray-900 mb-1">
+            Laporan Rekap Distribusi Per Kecamatan
+          </h1>
+          <p class="text-xs text-gray-700">Tahun: {{ tahun === '0' ? 'Semua Tahun' : tahun }}</p>
+          <p class="text-xs text-gray-700">
+            Tanggal Cetak: {{ new Date().toLocaleDateString('id-ID') }}
+          </p>
+        </div>
+        <div class="flex-shrink-0">
+          <Logos />
+        </div>
       </div>
-      <div class="flex-shrink-0">
-        <Logos />
+
+      <div v-if="kecamatanList.length === 0" class="text-center py-12">
+        <p class="text-gray-500">Data tidak tersedia</p>
       </div>
-    </div>
 
-    <div v-if="isLoading" class="text-center py-12">
-      <p class="text-gray-500">Memuat data...</p>
-    </div>
-
-    <div v-else-if="kecamatanList.length === 0" class="text-center py-12">
-      <p class="text-gray-500">Data tidak tersedia</p>
-    </div>
-
-    <div v-else class="px-4 pb-4">
-      <div class="border border-gray-300">
-        <table class="w-full text-[7pt] border-collapse table-fixed">
-          <thead class="bg-gray-100 border-b-2 border-gray-400">
-            <tr>
-              <th
-                rowspan="2"
-                class="w-[15%] px-2 py-1 text-left font-semibold text-gray-900 border-r border-gray-300"
-              >
-                KECAMATAN
-              </th>
-              <th
-                colspan="12"
-                class="px-2 py-1 text-center font-semibold text-gray-900 border-r border-gray-300"
-              >
-                BULAN
-              </th>
-              <th rowspan="2" class="w-[10%] px-2 py-1 text-center font-semibold text-gray-900">
-                JUMLAH
-              </th>
-            </tr>
-            <tr>
-              <th
-                v-for="bulan in bulanNames"
-                :key="bulan"
-                class="w-[5.5%] px-1 py-1 text-center font-semibold text-gray-900 border-r border-gray-300"
-              >
-                {{ bulan }}
-              </th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-200">
-            <tr v-for="item in kecamatanList" :key="item.id" class="border-b">
-              <td class="px-2 py-1 text-left font-medium text-gray-700 border-r border-gray-300">
-                {{ item.data.name }}
-              </td>
-              <td
-                v-for="index in 12"
-                :key="`rupiah-${index - 1}`"
-                class="px-1 py-1 text-right border-r border-gray-300 whitespace-nowrap"
-              >
-                {{ formatRupiah(item.data.detail_rupiah[(index - 1) as keyof DetailBulan]) }}
-              </td>
-              <td
-                class="px-2 py-1 text-right font-medium bg-gray-50 text-gray-700 whitespace-nowrap"
-              >
-                {{ formatRupiah(calculateTotal(item.data.detail_rupiah)) }}
-              </td>
-            </tr>
-            <tr class="bg-gray-100 font-bold border-t-2 border-gray-400">
-              <td class="px-2 py-1 text-left border-r border-gray-300">TOTAL KESELURUHAN</td>
-              <td
-                v-for="index in 12"
-                :key="`total-${index - 1}`"
-                class="px-1 py-1 text-right border-r border-gray-300 whitespace-nowrap"
-              >
-                {{ formatRupiah(calculateGrandTotalBulan(index - 1)) }}
-              </td>
-              <td class="px-2 py-1 text-right whitespace-nowrap">
-                {{ formatRupiah(calculateGrandTotal()) }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div v-else class="px-4 pb-4">
+        <div class="border border-gray-300">
+          <table class="w-full text-[7pt] border-collapse table-fixed">
+            <thead class="bg-gray-100 border-b-2 border-gray-400">
+              <tr>
+                <th
+                  rowspan="2"
+                  class="w-[15%] px-2 py-1 text-left font-semibold text-gray-900 border-r border-gray-300"
+                >
+                  KECAMATAN
+                </th>
+                <th
+                  colspan="12"
+                  class="px-2 py-1 text-center font-semibold text-gray-900 border-r border-gray-300"
+                >
+                  BULAN
+                </th>
+                <th rowspan="2" class="w-[10%] px-2 py-1 text-center font-semibold text-gray-900">
+                  JUMLAH
+                </th>
+              </tr>
+              <tr>
+                <th
+                  v-for="bulan in bulanNames"
+                  :key="bulan"
+                  class="w-[5.5%] px-1 py-1 text-center font-semibold text-gray-900 border-r border-gray-300"
+                >
+                  {{ bulan }}
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr v-for="item in kecamatanList" :key="item.id" class="border-b">
+                <td class="px-2 py-1 text-left font-medium text-gray-700 border-r border-gray-300">
+                  {{ item.data.name }}
+                </td>
+                <td
+                  v-for="index in 12"
+                  :key="`rupiah-${index - 1}`"
+                  class="px-1 py-1 text-right border-r border-gray-300 whitespace-nowrap"
+                >
+                  {{ formatRupiah(item.data.detail_rupiah[(index - 1) as keyof DetailBulan]) }}
+                </td>
+                <td
+                  class="px-2 py-1 text-right font-medium bg-gray-50 text-gray-700 whitespace-nowrap"
+                >
+                  {{ formatRupiah(calculateTotal(item.data.detail_rupiah)) }}
+                </td>
+              </tr>
+              <tr class="bg-gray-100 font-bold border-t-2 border-gray-400">
+                <td class="px-2 py-1 text-left border-r border-gray-300">TOTAL KESELURUHAN</td>
+                <td
+                  v-for="index in 12"
+                  :key="`total-${index - 1}`"
+                  class="px-1 py-1 text-right border-r border-gray-300 whitespace-nowrap"
+                >
+                  {{ formatRupiah(calculateGrandTotalBulan(index - 1)) }}
+                </td>
+                <td class="px-2 py-1 text-right whitespace-nowrap">
+                  {{ formatRupiah(calculateGrandTotal()) }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="mt-auto">
+          <FooterCetak />
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
+.print-area {
+  max-width: 297mm;
+  min-height: 210mm;
+  margin: 0 auto;
+  padding: 5mm;
+  background: white;
+}
+
 @media screen {
   body {
-    background-color: #f3f4f6;
+    background: #f3f4f6;
   }
-
   .print-area {
-    width: 297mm;
-    min-height: 210mm;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-    margin: 20px auto;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
+    margin-top: 20px;
   }
 }
 
 @media print {
   @page {
     size: A4 landscape;
-    margin: 8mm;
-  }
-
-  html,
-  body {
-    margin: 0;
-    padding: 0;
-    background: white;
-    overflow: visible;
-  }
-
-  .print-area {
-    width: 100%;
-    max-width: 100%;
-    box-shadow: none;
-    margin: 0;
-    padding: 0;
-    overflow: visible;
-  }
-
-  table {
-    width: 100% !important;
-    table-layout: fixed !important;
-    page-break-inside: auto;
-  }
-
-  tr {
-    page-break-inside: avoid;
-    page-break-after: auto;
-  }
-
-  thead {
-    display: table-header-group;
+    margin: 0 !important;
   }
 
   * {
-    overflow: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
-  .border {
-    border-radius: 0 !important;
+  body,
+  html {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th,
+  td {
+    border: 1px solid black !important;
+    word-wrap: break-word;
+  }
+
+  thead th {
+    background: #f3f4f6 !important;
+    font-weight: 700 !important;
+  }
+
+  tbody tr {
+    page-break-inside: avoid !important;
+  }
+
+  .bg-gray-100 {
+    background: #f3f4f6 !important;
   }
 }
 </style>

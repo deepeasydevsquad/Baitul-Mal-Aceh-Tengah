@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref, onMounted, nextTick, computed } from 'vue';
-import { useRoute } from 'vue-router';
-import VueApexCharts from 'vue3-apexcharts';
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
 import Logos from '@/components/Logo/Logo.vue';
 import { get_beranda } from '@/service/beranda';
+import { computed, nextTick, onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
+import VueApexCharts from 'vue3-apexcharts';
 import FooterCetak from '../FooterCetak/FooterCetak.vue';
 
 const route = useRoute();
@@ -352,179 +353,184 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div
-    class="bg-white max-w-[297mm] mx-auto p-[10mm] font-sans print:p-[10mm] print:m-0 print:shadow-none print-area"
-    style="color: black; font-size: 9pt; line-height: 1.3"
-  >
-    <!-- Header dengan Logo -->
-    <div class="flex justify-between items-start mb-4">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-900 mb-1">Laporan Beranda</h1>
-        <p class="text-sm text-gray-700">Tahun: {{ tahun }}</p>
-      </div>
-      <div class="flex-shrink-0">
-        <Logos />
-      </div>
-    </div>
-
-    <!-- Ringkasan Cards -->
-    <div v-if="apiData" class="grid grid-cols-3 gap-3 mb-4">
-      <div class="p-2 rounded-lg bg-green-50 text-center border border-green-200">
-        <h3 class="text-xs font-semibold text-gray-700 mb-1">Total Pengumpulan</h3>
-        <p class="text-sm font-bold text-gray-900">{{ formatRupiah(totalPengumpulan) }}</p>
-      </div>
-      <div class="p-2 rounded-lg bg-blue-50 text-center border border-blue-200">
-        <h3 class="text-xs font-semibold text-gray-700 mb-1">Total Distribusi</h3>
-        <p class="text-sm font-bold text-gray-900">{{ formatRupiah(totalDistribusi) }}</p>
-      </div>
-      <div class="p-2 rounded-lg bg-yellow-50 text-center border border-yellow-200">
-        <h3 class="text-xs font-semibold text-gray-700 mb-1">Persentase Distribusi</h3>
-        <p class="text-sm font-bold text-gray-900">{{ persentase.toFixed(2) }}%</p>
-      </div>
-    </div>
-
-    <!-- Charts -->
-    <div v-if="apiData" class="grid grid-cols-2 gap-3 mb-4">
-      <!-- Chart Pengumpulan -->
-      <div class="p-2 rounded-lg border border-gray-300 bg-white">
-        <VueApexCharts
-          v-if="seriesPengumpulan.length > 0"
-          type="line"
-          height="280"
-          :options="chartOptionsPengumpulan"
-          :series="seriesPengumpulan"
-        />
-        <div v-else class="flex items-center justify-center h-[280px] text-gray-500">
-          Tidak ada data
+  <div v-if="isLoading" class="bg-white min-h-screen flex items-center justify-center">
+    <LoadingSpinner label="Memuat halaman..." />
+  </div>
+  <div v-else class="min-h-screen p-4 print:p-0 print:m-0">
+    <div
+      class="bg-white max-w-[297mm] mx-auto p-[5mm] font-sans print:p-[5mm] print:m-0 print:shadow-none print-area flex flex-col"
+      style="color: black; font-size: 9pt; line-height: 1.3"
+    >
+      <!-- Header dengan Logo -->
+      <div class="flex justify-between items-start mb-4">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900 mb-1">Laporan Beranda</h1>
+          <p class="text-sm text-gray-700">Tahun: {{ tahun }}</p>
+        </div>
+        <div class="flex-shrink-0">
+          <Logos />
         </div>
       </div>
 
-      <!-- Chart Distribusi -->
-      <div class="p-2 rounded-lg border border-gray-300 bg-white">
-        <VueApexCharts
-          v-if="seriesDistribusi.length > 0"
-          type="bar"
-          height="280"
-          :options="chartOptionsDistribusi"
-          :series="seriesDistribusi"
-        />
-        <div v-else class="flex items-center justify-center h-[280px] text-gray-500">
-          Tidak ada data
+      <!-- Ringkasan Cards -->
+      <div v-if="apiData" class="grid grid-cols-3 gap-3 mb-4">
+        <div class="p-2 rounded-lg bg-green-50 text-center border border-green-200">
+          <h3 class="text-xs font-semibold text-gray-700 mb-1">Total Pengumpulan</h3>
+          <p class="text-sm font-bold text-gray-900">{{ formatRupiah(totalPengumpulan) }}</p>
+        </div>
+        <div class="p-2 rounded-lg bg-blue-50 text-center border border-blue-200">
+          <h3 class="text-xs font-semibold text-gray-700 mb-1">Total Distribusi</h3>
+          <p class="text-sm font-bold text-gray-900">{{ formatRupiah(totalDistribusi) }}</p>
+        </div>
+        <div class="p-2 rounded-lg bg-yellow-50 text-center border border-yellow-200">
+          <h3 class="text-xs font-semibold text-gray-700 mb-1">Persentase Distribusi</h3>
+          <p class="text-sm font-bold text-gray-900">{{ persentase.toFixed(2) }}%</p>
         </div>
       </div>
-    </div>
 
-    <!-- Tabel Data -->
-    <div v-if="apiData" class="overflow-hidden border border-gray-300 rounded-lg">
-      <table class="w-full border-collapse bg-white text-[8pt]">
-        <thead class="bg-gray-100 text-gray-900 border-b-2 border-gray-400">
-          <tr>
-            <th class="px-2 py-2 font-semibold text-left border-r border-gray-300">Kategori</th>
-            <th class="px-2 py-2 font-semibold border-r border-gray-300">
-              Target<br />Pengumpulan
-            </th>
-            <th class="px-2 py-2 font-semibold border-r border-gray-300">
-              Realisasi<br />Pengumpulan
-            </th>
-            <th class="px-2 py-2 font-semibold border-r border-gray-300">Capaian</th>
-            <th class="px-2 py-2 font-semibold border-r border-gray-300">Target<br />Distribusi</th>
-            <th class="px-2 py-2 font-semibold border-r border-gray-300">
-              Realisasi<br />Distribusi
-            </th>
-            <th class="px-2 py-2 font-semibold">Capaian</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-200">
-          <tr class="hover:bg-gray-50">
-            <td class="px-2 py-2 font-medium text-left border-r border-gray-300">Infaq</td>
-            <td class="px-2 py-2 text-right border-r border-gray-300">
-              {{ formatRupiah(apiData.infaq.target_pengumpulan) }}
-            </td>
-            <td class="px-2 py-2 text-right border-r border-gray-300">
-              {{ formatRupiah(apiData.infaq.realisasi_pengumpulan) }}
-            </td>
-            <td class="px-2 py-2 text-right border-r border-gray-300">
-              {{ (apiData.infaq.persentase_pengumpulan ?? 0).toFixed(2) }}%
-            </td>
-            <td class="px-2 py-2 text-right border-r border-gray-300">
-              {{ formatRupiah(apiData.infaq.target_distribusi) }}
-            </td>
-            <td class="px-2 py-2 text-right border-r border-gray-300">
-              {{ formatRupiah(apiData.infaq.realisasi_distribusi) }}
-            </td>
-            <td class="px-2 py-2 text-right">
-              {{ (apiData.infaq.persentase_distribusi ?? 0).toFixed(2) }}%
-            </td>
-          </tr>
-          <tr class="hover:bg-gray-50">
-            <td class="px-2 py-2 font-medium text-left border-r border-gray-300">Zakat</td>
-            <td class="px-2 py-2 text-right border-r border-gray-300">
-              {{ formatRupiah(apiData.zakat.target_pengumpulan) }}
-            </td>
-            <td class="px-2 py-2 text-right border-r border-gray-300">
-              {{ formatRupiah(apiData.zakat.realisasi_pengumpulan) }}
-            </td>
-            <td class="px-2 py-2 text-right border-r border-gray-300">
-              {{ (apiData.zakat.persentase_pengumpulan ?? 0).toFixed(2) }}%
-            </td>
-            <td class="px-2 py-2 text-right border-r border-gray-300">
-              {{ formatRupiah(apiData.zakat.target_distribusi) }}
-            </td>
-            <td class="px-2 py-2 text-right border-r border-gray-300">
-              {{ formatRupiah(apiData.zakat.realisasi_distribusi) }}
-            </td>
-            <td class="px-2 py-2 text-right">
-              {{ (apiData.zakat.persentase_distribusi ?? 0).toFixed(2) }}%
-            </td>
-          </tr>
-          <tr class="hover:bg-gray-50">
-            <td class="px-2 py-2 font-medium text-left border-r border-gray-300">Donasi</td>
-            <td class="px-2 py-2 text-right border-r border-gray-300">
-              {{ formatRupiah(apiData.donasi.target_pengumpulan) }}
-            </td>
-            <td class="px-2 py-2 text-right border-r border-gray-300">
-              {{ formatRupiah(apiData.donasi.realisasi_pengumpulan) }}
-            </td>
-            <td class="px-2 py-2 text-right border-r border-gray-300">
-              {{ (apiData.donasi.persentase_pengumpulan ?? 0).toFixed(2) }}%
-            </td>
-            <td class="px-2 py-2 text-right border-r border-gray-300">
-              {{ formatRupiah(apiData.donasi.target_distribusi) }}
-            </td>
-            <td class="px-2 py-2 text-right border-r border-gray-300">
-              {{ formatRupiah(apiData.donasi.realisasi_distribusi) }}
-            </td>
-            <td class="px-2 py-2 text-right">
-              {{ (apiData.donasi.persentase_distribusi ?? 0).toFixed(2) }}%
-            </td>
-          </tr>
-        </tbody>
-        <tfoot class="bg-gray-200 font-bold text-gray-900 border-t-2 border-gray-400">
-          <tr>
-            <td class="px-2 py-2 text-left border-r border-gray-300">TOTAL</td>
-            <td class="px-2 py-2 text-right border-r border-gray-300">
-              {{ formatRupiah(totalTarget) }}
-            </td>
-            <td class="px-2 py-2 text-right border-r border-gray-300">
-              {{ formatRupiah(totalPengumpulan) }}
-            </td>
-            <td class="px-2 py-2 text-right border-r border-gray-300">
-              {{ persentaseCapaianPengumpulan.toFixed(2) }}%
-            </td>
-            <td class="px-2 py-2 text-right border-r border-gray-300">
-              {{ formatRupiah(totalTargetDistribusi) }}
-            </td>
-            <td class="px-2 py-2 text-right border-r border-gray-300">
-              {{ formatRupiah(totalDistribusi) }}
-            </td>
-            <td class="px-2 py-2 text-right">{{ persentaseCapaianDistribusi.toFixed(2) }}%</td>
-          </tr>
-        </tfoot>
-      </table>
-    </div>
+      <!-- Charts -->
+      <div v-if="apiData" class="grid grid-cols-2 gap-3 mb-4">
+        <!-- Chart Pengumpulan -->
+        <div class="p-2 rounded-lg border border-gray-300 bg-white">
+          <VueApexCharts
+            v-if="seriesPengumpulan.length > 0"
+            type="line"
+            height="280"
+            :options="chartOptionsPengumpulan"
+            :series="seriesPengumpulan"
+          />
+          <div v-else class="flex items-center justify-center h-[280px] text-gray-500">
+            Tidak ada data
+          </div>
+        </div>
 
-    <div class="">
-      <div>
+        <!-- Chart Distribusi -->
+        <div class="p-2 rounded-lg border border-gray-300 bg-white">
+          <VueApexCharts
+            v-if="seriesDistribusi.length > 0"
+            type="bar"
+            height="280"
+            :options="chartOptionsDistribusi"
+            :series="seriesDistribusi"
+          />
+          <div v-else class="flex items-center justify-center h-[280px] text-gray-500">
+            Tidak ada data
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabel Data -->
+      <div v-if="apiData" class="overflow-hidden border border-gray-300 rounded-lg">
+        <table class="w-full border-collapse bg-white text-[8pt]">
+          <thead class="bg-gray-100 text-gray-900 border-b-2 border-gray-400">
+            <tr>
+              <th class="px-2 py-2 font-semibold text-left border-r border-gray-300">Kategori</th>
+              <th class="px-2 py-2 font-semibold border-r border-gray-300">
+                Target<br />Pengumpulan
+              </th>
+              <th class="px-2 py-2 font-semibold border-r border-gray-300">
+                Realisasi<br />Pengumpulan
+              </th>
+              <th class="px-2 py-2 font-semibold border-r border-gray-300">Capaian</th>
+              <th class="px-2 py-2 font-semibold border-r border-gray-300">
+                Target<br />Distribusi
+              </th>
+              <th class="px-2 py-2 font-semibold border-r border-gray-300">
+                Realisasi<br />Distribusi
+              </th>
+              <th class="px-2 py-2 font-semibold">Capaian</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <tr class="hover:bg-gray-50">
+              <td class="px-2 py-2 font-medium text-left border-r border-gray-300">Infaq</td>
+              <td class="px-2 py-2 text-right border-r border-gray-300">
+                {{ formatRupiah(apiData.infaq.target_pengumpulan) }}
+              </td>
+              <td class="px-2 py-2 text-right border-r border-gray-300">
+                {{ formatRupiah(apiData.infaq.realisasi_pengumpulan) }}
+              </td>
+              <td class="px-2 py-2 text-right border-r border-gray-300">
+                {{ (apiData.infaq.persentase_pengumpulan ?? 0).toFixed(2) }}%
+              </td>
+              <td class="px-2 py-2 text-right border-r border-gray-300">
+                {{ formatRupiah(apiData.infaq.target_distribusi) }}
+              </td>
+              <td class="px-2 py-2 text-right border-r border-gray-300">
+                {{ formatRupiah(apiData.infaq.realisasi_distribusi) }}
+              </td>
+              <td class="px-2 py-2 text-right">
+                {{ (apiData.infaq.persentase_distribusi ?? 0).toFixed(2) }}%
+              </td>
+            </tr>
+            <tr class="hover:bg-gray-50">
+              <td class="px-2 py-2 font-medium text-left border-r border-gray-300">Zakat</td>
+              <td class="px-2 py-2 text-right border-r border-gray-300">
+                {{ formatRupiah(apiData.zakat.target_pengumpulan) }}
+              </td>
+              <td class="px-2 py-2 text-right border-r border-gray-300">
+                {{ formatRupiah(apiData.zakat.realisasi_pengumpulan) }}
+              </td>
+              <td class="px-2 py-2 text-right border-r border-gray-300">
+                {{ (apiData.zakat.persentase_pengumpulan ?? 0).toFixed(2) }}%
+              </td>
+              <td class="px-2 py-2 text-right border-r border-gray-300">
+                {{ formatRupiah(apiData.zakat.target_distribusi) }}
+              </td>
+              <td class="px-2 py-2 text-right border-r border-gray-300">
+                {{ formatRupiah(apiData.zakat.realisasi_distribusi) }}
+              </td>
+              <td class="px-2 py-2 text-right">
+                {{ (apiData.zakat.persentase_distribusi ?? 0).toFixed(2) }}%
+              </td>
+            </tr>
+            <tr class="hover:bg-gray-50">
+              <td class="px-2 py-2 font-medium text-left border-r border-gray-300">Donasi</td>
+              <td class="px-2 py-2 text-right border-r border-gray-300">
+                {{ formatRupiah(apiData.donasi.target_pengumpulan) }}
+              </td>
+              <td class="px-2 py-2 text-right border-r border-gray-300">
+                {{ formatRupiah(apiData.donasi.realisasi_pengumpulan) }}
+              </td>
+              <td class="px-2 py-2 text-right border-r border-gray-300">
+                {{ (apiData.donasi.persentase_pengumpulan ?? 0).toFixed(2) }}%
+              </td>
+              <td class="px-2 py-2 text-right border-r border-gray-300">
+                {{ formatRupiah(apiData.donasi.target_distribusi) }}
+              </td>
+              <td class="px-2 py-2 text-right border-r border-gray-300">
+                {{ formatRupiah(apiData.donasi.realisasi_distribusi) }}
+              </td>
+              <td class="px-2 py-2 text-right">
+                {{ (apiData.donasi.persentase_distribusi ?? 0).toFixed(2) }}%
+              </td>
+            </tr>
+          </tbody>
+          <tfoot class="bg-gray-200 font-bold text-gray-900 border-t-2 border-gray-400">
+            <tr>
+              <td class="px-2 py-2 text-left border-r border-gray-300">TOTAL</td>
+              <td class="px-2 py-2 text-right border-r border-gray-300">
+                {{ formatRupiah(totalTarget) }}
+              </td>
+              <td class="px-2 py-2 text-right border-r border-gray-300">
+                {{ formatRupiah(totalPengumpulan) }}
+              </td>
+              <td class="px-2 py-2 text-right border-r border-gray-300">
+                {{ persentaseCapaianPengumpulan.toFixed(2) }}%
+              </td>
+              <td class="px-2 py-2 text-right border-r border-gray-300">
+                {{ formatRupiah(totalTargetDistribusi) }}
+              </td>
+              <td class="px-2 py-2 text-right border-r border-gray-300">
+                {{ formatRupiah(totalDistribusi) }}
+              </td>
+              <td class="px-2 py-2 text-right">{{ persentaseCapaianDistribusi.toFixed(2) }}%</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div class="mt-auto">
         <FooterCetak />
       </div>
     </div>
@@ -532,23 +538,29 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.print-area {
+  max-width: 297mm;
+  min-height: 210mm;
+  margin: 0 auto;
+  padding: 5mm;
+  background: white;
+}
+
 @media screen {
   body {
     background-color: #f3f4f6;
   }
 
   .print-area {
-    width: 297mm;
-    min-height: 210mm;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-    margin: 20px auto;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
+    margin-top: 20px;
   }
 }
 
 @media print {
   @page {
     size: A4 landscape;
-    margin: 15mm 12mm;
+    margin: 5mm;
   }
 
   html,
@@ -556,14 +568,6 @@ onMounted(async () => {
     margin: 0 !important;
     padding: 0 !important;
     background: white;
-  }
-
-  .print-area {
-    width: 100% !important;
-    max-width: 100% !important;
-    box-shadow: none;
-    margin: 0 !important;
-    padding: 8mm 10mm !important;
   }
 
   * {

@@ -24,7 +24,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, nextTick } from 'vue';
+import { computed, nextTick, onMounted } from 'vue';
 
 const tanggalCetak = computed(() => {
   const now = new Date();
@@ -70,9 +70,9 @@ onMounted(async () => {
 @media print {
   .footer-laporan {
     position: fixed;
-    bottom: 8mm;
-    left: 12mm;
-    right: 12mm;
+    bottom: 5mm;
+    left: 5mm;
+    right: 5mm;
     background: white;
     padding-top: 8px;
     border-top: 1px solid #d1d5db;
