@@ -62,127 +62,132 @@ async function fetchData() {
 }
 
 // Function: Handle filter change
-async function handleFilterChange() {
-  await fetchData();
-}
+// async function handleFilterChange() {
+//   await fetchData();
+// }
 
 // Function: Fix oklch colors
-function fixOklchColors(element: HTMLElement) {
-  const all = element.querySelectorAll('*');
-  all.forEach((el) => {
-    const htmlEl = el as HTMLElement;
-    const style = window.getComputedStyle(htmlEl);
+// function fixOklchColors(element: HTMLElement) {
+//   const all = element.querySelectorAll('*');
+//   all.forEach((el) => {
+//     const htmlEl = el as HTMLElement;
+//     const style = window.getComputedStyle(htmlEl);
 
-    if (style.color.includes('oklch')) htmlEl.style.color = '#000000';
-    if (style.backgroundColor.includes('oklch')) htmlEl.style.backgroundColor = '#ffffff';
-    if (style.borderColor.includes('oklch')) htmlEl.style.borderColor = '#d1d5db';
-  });
-}
+//     if (style.color.includes('oklch')) htmlEl.style.color = '#000000';
+//     if (style.backgroundColor.includes('oklch')) htmlEl.style.backgroundColor = '#ffffff';
+//     if (style.borderColor.includes('oklch')) htmlEl.style.borderColor = '#d1d5db';
+//   });
+// }
 
 // Function: Download PDF
-async function handleDownloadPDF() {
-  if (isDownloading.value) return;
-  if (!data.value) {
-    displayNotification('Tidak ada data untuk diunduh', 'error');
-    return;
-  }
+// async function handleDownloadPDF() {
+//   if (isDownloading.value) return;
+//   if (!data.value) {
+//     displayNotification('Tidak ada data untuk diunduh', 'error');
+//     return;
+//   }
 
-  isDownloading.value = true;
+//   isDownloading.value = true;
 
-  try {
-    const contentWrapper = document.getElementById('laporan-content');
-    if (!contentWrapper) {
-      displayNotification('Konten tidak ditemukan', 'error');
-      isDownloading.value = false;
-      return;
-    }
+//   try {
+//     const contentWrapper = document.getElementById('laporan-content');
+//     if (!contentWrapper) {
+//       displayNotification('Konten tidak ditemukan', 'error');
+//       isDownloading.value = false;
+//       return;
+//     }
 
-    // Clone content untuk PDF
-    const clonedContent = contentWrapper.cloneNode(true) as HTMLElement;
+//     // Clone content untuk PDF
+//     const clonedContent = contentWrapper.cloneNode(true) as HTMLElement;
 
-    // Buat temporary container
-    const tempContainer = document.createElement('div');
-    tempContainer.style.position = 'absolute';
-    tempContainer.style.left = '-9999px';
-    tempContainer.style.top = '0';
-    tempContainer.style.width = '1200px';
-    tempContainer.style.background = '#ffffff';
-    tempContainer.style.padding = '20px';
-    tempContainer.appendChild(clonedContent);
+//     // Buat temporary container
+//     const tempContainer = document.createElement('div');
+//     tempContainer.style.position = 'absolute';
+//     tempContainer.style.left = '-9999px';
+//     tempContainer.style.top = '0';
+//     tempContainer.style.width = '1200px';
+//     tempContainer.style.background = '#ffffff';
+//     tempContainer.style.padding = '20px';
+//     tempContainer.appendChild(clonedContent);
 
-    document.body.appendChild(tempContainer);
+//     document.body.appendChild(tempContainer);
 
-    // Show PDF header
-    const pdfHeader = tempContainer.querySelector('.pdf-header') as HTMLElement;
-    if (pdfHeader) {
-      pdfHeader.style.display = 'block';
-    }
+//     // Show PDF header
+//     const pdfHeader = tempContainer.querySelector('.pdf-header') as HTMLElement;
+//     if (pdfHeader) {
+//       pdfHeader.style.display = 'block';
+//     }
 
-    // Fix oklch colors
-    fixOklchColors(tempContainer);
+//     // Fix oklch colors
+//     fixOklchColors(tempContainer);
 
-    // Tunggu layout settle
-    await new Promise((resolve) => setTimeout(resolve, 300));
+//     // Tunggu layout settle
+//     await new Promise((resolve) => setTimeout(resolve, 300));
 
-    // Capture ke canvas
-    const canvas = await html2canvas(tempContainer, {
-      scale: 2,
-      useCORS: true,
-      logging: false,
-      backgroundColor: '#ffffff',
-      windowWidth: tempContainer.scrollWidth,
-      windowHeight: tempContainer.scrollHeight,
-    });
+//     // Capture ke canvas
+//     const canvas = await html2canvas(tempContainer, {
+//       scale: 2,
+//       useCORS: true,
+//       logging: false,
+//       backgroundColor: '#ffffff',
+//       windowWidth: tempContainer.scrollWidth,
+//       windowHeight: tempContainer.scrollHeight,
+//     });
 
-    // Remove temporary container
-    document.body.removeChild(tempContainer);
+//     // Remove temporary container
+//     document.body.removeChild(tempContainer);
 
-    const imgData = canvas.toDataURL('image/png');
+//     const imgData = canvas.toDataURL('image/png');
 
-    // Buat PDF A4
-    const pdf = new jsPDF({
-      orientation: 'portrait',
-      unit: 'mm',
-      format: 'a4',
-      compress: true,
-    });
+//     // Buat PDF A4
+//     const pdf = new jsPDF({
+//       orientation: 'portrait',
+//       unit: 'mm',
+//       format: 'a4',
+//       compress: true,
+//     });
 
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
+//     const pdfWidth = pdf.internal.pageSize.getWidth();
+//     const pdfHeight = pdf.internal.pageSize.getHeight();
 
-    // Convert px to mm
-    const imgWidthMM = (canvas.width * 25.4) / 96;
-    const imgHeightMM = (canvas.height * 25.4) / 96;
+//     // Convert px to mm
+//     const imgWidthMM = (canvas.width * 25.4) / 96;
+//     const imgHeightMM = (canvas.height * 25.4) / 96;
 
-    // Scale untuk fit ke lebar A4
-    const scale = pdfWidth / imgWidthMM;
-    const scaledHeight = imgHeightMM * scale;
+//     // Scale untuk fit ke lebar A4
+//     const scale = pdfWidth / imgWidthMM;
+//     const scaledHeight = imgHeightMM * scale;
 
-    // Split ke multiple pages jika perlu
-    let yPosition = 0;
-    while (yPosition < scaledHeight) {
-      if (yPosition > 0) pdf.addPage();
+//     // Split ke multiple pages jika perlu
+//     let yPosition = 0;
+//     while (yPosition < scaledHeight) {
+//       if (yPosition > 0) pdf.addPage();
 
-      pdf.addImage(imgData, 'PNG', 0, -yPosition, pdfWidth, scaledHeight, '', 'FAST');
+//       pdf.addImage(imgData, 'PNG', 0, -yPosition, pdfWidth, scaledHeight, '', 'FAST');
 
-      yPosition += pdfHeight;
-    }
+//       yPosition += pdfHeight;
+//     }
 
-    // Download
-    pdf.save(`Laporan_Umum_${getMonthName(selectedMonth.value)}_${selectedYear.value}.pdf`);
-    displayNotification('PDF berhasil diunduh', 'success');
-  } catch (error: any) {
-    console.error('❌ Error generating PDF:', error);
-    displayNotification('Gagal mengunduh PDF: ' + error.message, 'error');
-  } finally {
-    isDownloading.value = false;
-  }
-}
+//     // Download
+//     pdf.save(`Laporan_Umum_${getMonthName(selectedMonth.value)}_${selectedYear.value}.pdf`);
+//     displayNotification('PDF berhasil diunduh', 'success');
+//   } catch (error: any) {
+//     console.error('❌ Error generating PDF:', error);
+//     displayNotification('Gagal mengunduh PDF: ' + error.message, 'error');
+//   } finally {
+//     isDownloading.value = false;
+//   }
+// }
 
 // Lifecycle
 onMounted(async () => {
   await fetchData();
 });
+
+const cetak_laporan_umum = () => {
+  const printUrl = `/laporan-umum/`;
+  window.open(printUrl, '_blank');
+};
 
 // Utils
 const formatRupiah = (value: number) => {
@@ -200,10 +205,19 @@ const getMonthName = (month: number) => {
 </script>
 
 <template>
-  <div class="p-6">
+  <div class="p-4">
     <!-- Header -->
     <!-- <h2 class="text-lg font-semibold flex items-center mb-2"></h2> -->
-    <Logo />
+    <!-- <Logo /> -->
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-2 mr-4">
+        <BaseButton @click="cetak_laporan_umum()" class="flex items-center justify-center">
+          <font-awesome-icon icon="fa-solid fa-print" class="mr-2" />
+          <span>Cetak</span>
+        </BaseButton>
+      </div>
+      <Logo />
+    </div>
     <!-- Grid Content -->
     <div v-if="data" class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
       <!-- Kiri -->
