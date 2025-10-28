@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
 import Logos from '@/components/Logo/Logo.vue';
+import FooterCetak from '@/modules/FooterCetak/FooterCetak.vue';
 import { get_laporan_asnaf } from '@/service/laporan_asnaf';
 import { nextTick, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
@@ -103,7 +104,7 @@ onMounted(async () => {
   </div>
   <div v-else class="min-h-screen p-4 print:p-0 print:m-0">
     <div
-      class="print-area font-sans"
+      class="print-area font-sans flex flex-col"
       style="color: black; font-size: 8pt; line-height: 1.3; background: white"
     >
       <!-- Header -->
@@ -192,6 +193,9 @@ onMounted(async () => {
             <p class="font-bold text-[9pt] underline">{{ ttdData.nama_pejabat3 }}</p>
           </div>
         </div>
+      </div>
+      <div class="mt-auto">
+        <FooterCetak />
       </div>
     </div>
   </div>
