@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Logos from '@/components/Logo/Logo.vue';
+import FooterCetak from '@/modules/FooterCetak/FooterCetak.vue';
 import { list_rekap_distribusi_per_kode_asnaf } from '@/service/rekap_distribusi_per_kode_asnaf';
 import { nextTick, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
@@ -47,7 +48,10 @@ function calculateGrandTotal(): number {
   return months.reduce((sum, m) => sum + calculateGrandTotalBulan(m.key), 0);
 }
 
+const isLoading = ref(true);
+
 async function fetchData() {
+  isLoading.value = true;
   try {
     const res = await list_rekap_distribusi_per_kode_asnaf({ year: tahun });
 
@@ -138,35 +142,58 @@ async function fetchData() {
   } catch (error) {
     console.error('Error fetching data:', error);
     rowsNominal.value = [];
+  } finally {
+    isLoading.value = false;
   }
 }
+
+const handlePrint = () => {
+  const oldTitle = document.title;
+  document.title = `Rekap Penyaluran Per Kode Asnaf Tahun ${tahun === '0' ? 'Semua Tahun' : 'Per Tahun ' + tahun}`;
+
+  const styleId = 'print-style';
+  let styleElement: HTMLStyleElement | null = null;
+
+  // Cek apakah style sudah ada
+  if (!document.getElementById(styleId)) {
+    styleElement = document.createElement('style');
+    styleElement.id = styleId;
+    styleElement.textContent = `
+      @page {
+        size: A4 landscape;
+      }
+      body {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+    `;
+    document.head.appendChild(styleElement);
+  }
+
+  // Event listener untuk cleanup setelah print
+  const afterPrint = () => {
+    document.title = oldTitle;
+    const printStyle = document.getElementById(styleId);
+    if (printStyle) {
+      printStyle.remove();
+    }
+    window.removeEventListener('afterprint', afterPrint);
+    console.log('Print style cleaned up');
+    setTimeout(() => {
+      window.close();
+    }, 400);
+  };
+  window.addEventListener('afterprint', afterPrint);
+  setTimeout(() => {
+    window.print();
+  }, 1000);
+};
 
 onMounted(async () => {
   try {
     await fetchData();
     await nextTick();
-
-    const oldTitle = document.title;
-    document.title = `Rekap Penyaluran Per Kode Asnaf Tahun ${tahun}`;
-
-    const styleId = 'print-style';
-    if (!document.getElementById(styleId)) {
-      const style = document.createElement('style');
-      style.id = styleId;
-      style.textContent = `
-        @page { size: A4 landscape; margin: 10mm; }
-        body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-      `;
-      document.head.appendChild(style);
-    }
-
-    setTimeout(() => {
-      window.print();
-      document.title = oldTitle;
-      setTimeout(() => {
-        window.close();
-      }, 400);
-    }, 1000);
+    handlePrint();
   } catch (error) {
     console.error('Error saat mounting:', error);
   }
@@ -174,9 +201,12 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="min-h-screen p-4">
+  <div v-if="isLoading" class="bg-white min-h-screen flex items-center justify-center">
+    <LoadingSpinner label="Memuat halaman..." />
+  </div>
+  <div v-else class="min-h-screen p-4 print:p-0 print:m-0">
     <div
-      class="print-area font-sans"
+      class="print-area font-sans flex flex-col"
       style="color: black; font-size: 8pt; line-height: 1.3; background: white"
     >
       <!-- Header -->
@@ -285,6 +315,9 @@ onMounted(async () => {
           </tr>
         </tbody>
       </table>
+      <div class="mt-auto">
+        <FooterCetak />
+      </div>
     </div>
   </div>
 </template>
@@ -294,7 +327,7 @@ onMounted(async () => {
   max-width: 297mm;
   min-height: 210mm;
   margin: 0 auto;
-  padding: 15mm;
+  padding: 5mm;
   background: white;
 }
 

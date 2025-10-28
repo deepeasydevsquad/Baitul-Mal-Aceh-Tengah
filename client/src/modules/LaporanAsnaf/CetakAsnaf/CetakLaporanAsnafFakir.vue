@@ -206,7 +206,7 @@ onMounted(async () => {
   max-width: 297mm;
   min-height: 210mm;
   margin: 0 auto;
-  padding: 8mm;
+  padding: 5mm;
   background: white;
 }
 
