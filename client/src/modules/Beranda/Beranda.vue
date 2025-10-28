@@ -208,7 +208,7 @@ async function fetchData() {
           type: 'line',
           height: 300,
           foreColor: '#000',
-          toolbar: { show: true },
+          toolbar: { show: false },
         },
         colors: ['#10b981', '#f59e0b'],
         stroke: {
@@ -282,7 +282,7 @@ async function fetchData() {
         type: 'bar',
         height: 300,
         foreColor: '#000',
-        toolbar: { show: true },
+        toolbar: { show: false },
       },
       colors: ['#3b82f6', '#10b981', '#f59e0b'],
       plotOptions: {

@@ -118,7 +118,7 @@ async function fetchData() {
       chart: {
         type: 'bar',
         foreColor: '#000', // ini ngerubah default warna semua teks chart jadi hitam
-        toolbar: { show: true },
+        toolbar: { show: false },
       },
       plotOptions: {
         bar: {
