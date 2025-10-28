@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router';
 import VueApexCharts from 'vue3-apexcharts';
 import Logos from '@/components/Logo/Logo.vue';
 import { get_beranda } from '@/service/beranda';
+import FooterCetak from '../FooterCetak/FooterCetak.vue';
 
 const route = useRoute();
 const tahun = parseInt(route.params.tahun as string);
@@ -203,7 +204,28 @@ async function fetchData() {
             formatter: (val: number) => formatRupiah(val),
           },
         },
-        dataLabels: { enabled: false },
+        dataLabels: {
+          enabled: true,
+          formatter: (val: number) => {
+            if (val >= 1000000) {
+              return (val / 1000000).toFixed(1) + 'jt';
+            }
+            return val;
+          },
+          offsetY: -8,
+          style: {
+            fontSize: '9px',
+            colors: ['#000'],
+          },
+          background: {
+            enabled: true,
+            foreColor: '#fff',
+            padding: 3,
+            borderRadius: 2,
+            borderWidth: 0,
+            opacity: 0.8,
+          },
+        },
         legend: {
           show: true,
           position: 'top',
@@ -331,7 +353,7 @@ onMounted(async () => {
 
 <template>
   <div
-    class="bg-white max-w-[210mm] mx-auto p-[12mm] font-sans print:p-[10mm] print:m-0 print:shadow-none print-area"
+    class="bg-white max-w-[297mm] mx-auto p-[10mm] font-sans print:p-[10mm] print:m-0 print:shadow-none print-area"
     style="color: black; font-size: 9pt; line-height: 1.3"
   >
     <!-- Header dengan Logo -->
@@ -500,6 +522,12 @@ onMounted(async () => {
         </tfoot>
       </table>
     </div>
+
+    <div class="">
+      <div>
+        <FooterCetak />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -510,8 +538,8 @@ onMounted(async () => {
   }
 
   .print-area {
-    width: 210mm;
-    min-height: 297mm;
+    width: 297mm;
+    min-height: 210mm;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
     margin: 20px auto;
   }
@@ -519,25 +547,30 @@ onMounted(async () => {
 
 @media print {
   @page {
-    size: A4;
-    margin: 15mm;
+    size: A4 landscape;
+    margin: 15mm 12mm;
   }
 
   html,
   body {
-    margin: 0;
-    padding: 0;
+    margin: 0 !important;
+    padding: 0 !important;
     background: white;
   }
 
   .print-area {
-    width: 210mm;
+    width: 100% !important;
+    max-width: 100% !important;
     box-shadow: none;
-    margin: 0;
-    padding: 0;
+    margin: 0 !important;
+    padding: 8mm 10mm !important;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 }
-
 :deep(.apexcharts-text),
 :deep(.apexcharts-legend-text),
 :deep(.apexcharts-xaxis-label),

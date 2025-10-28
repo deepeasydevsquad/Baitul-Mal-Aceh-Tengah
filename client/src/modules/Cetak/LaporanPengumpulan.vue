@@ -3,6 +3,7 @@ import { ref, onMounted, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
 import VueApexCharts from 'vue3-apexcharts';
 import Logos from '@/components/Logo/Logo.vue';
+import FooterCetak from '@/modules/FooterCetak/FooterCetak.vue';
 import { get_laporan_pengumpulan } from '@/service/laporan_pengumpulan';
 
 const route = useRoute();
@@ -34,7 +35,7 @@ const donasiChart = ref<any>({});
 
 // Helper format
 const formatMiliar = (val: number) => {
-  if (val >= 1000000) return (val / 1000000).toFixed(0) + ' jt';
+  if (val >= 1000000) return (val / 1000000).toFixed(1) + 'jt';
   return val.toLocaleString('id-ID');
 };
 
@@ -100,7 +101,7 @@ function setupCharts() {
   const infaqData = data.value.dataPerJenis.find((j) => j.jenis === 'Infaq');
   const donasiData = data.value.dataPerJenis.find((j) => j.jenis === 'Donasi');
 
-  // Bar Chart (Stacked)
+  // Bar Chart (Stacked) - dengan data labels
   series.value = [
     {
       name: 'Zakat',
@@ -117,30 +118,69 @@ function setupCharts() {
   ];
 
   chartOptions.value = {
-    chart: { type: 'bar', stacked: true, toolbar: { show: false }, foreColor: '#000' },
-    plotOptions: { bar: { horizontal: false, borderRadius: 4, columnWidth: '60%' } },
+    chart: {
+      type: 'bar',
+      stacked: true,
+      toolbar: { show: false },
+      foreColor: '#000',
+      height: 320,
+    },
+    plotOptions: {
+      bar: {
+        horizontal: false,
+        borderRadius: 4,
+        columnWidth: '60%',
+        dataLabels: { position: 'center' },
+      },
+    },
     xaxis: {
       categories: monthLabels,
       labels: { style: { colors: '#000', fontSize: '10px' } },
     },
     yaxis: {
       labels: {
-        formatter: (val: number) => formatMiliar(val),
+        formatter: (val: number) => {
+          if (val >= 1000000) return 'Rp ' + (val / 1000000).toFixed(1) + 'jt';
+          return formatRupiah(val);
+        },
         style: { colors: '#000', fontSize: '10px' },
       },
     },
     legend: {
       position: 'top',
-      horizontalAlign: 'center',
-      fontSize: '10px',
+      horizontalAlign: 'right',
+      fontSize: '11px',
       labels: { colors: '#000' },
     },
     tooltip: { y: { formatter: (val: number) => formatRupiah(val) } },
-    colors: ['#3b82f6', '#06b6d4', '#ef4444'],
-    dataLabels: { enabled: false },
+    colors: ['#3b82f6', '#10b981', '#f59e0b'],
+    dataLabels: {
+      enabled: true,
+      formatter: (val: number) => {
+        if (val === 0) return '';
+        return formatMiliar(val);
+      },
+      style: {
+        fontSize: '8px',
+        colors: ['#fff'],
+      },
+      offsetY: 0,
+    },
+    grid: {
+      borderColor: '#e5e7eb',
+    },
+    title: {
+      text: 'Pengumpulan per Bulan',
+      align: 'left',
+      style: {
+        fontSize: '13px',
+        fontWeight: 600,
+        color: '#000',
+      },
+    },
   };
 
-  // Line Charts
+  // Line Charts - dengan data labels
   const makeLineChart = (title: string, jenisData: DataPerJenis | undefined) => {
     if (!jenisData) {
       return { series: [], options: {} };
@@ -162,31 +202,65 @@ function setupCharts() {
         { name: 'Realisasi s.d', data: realisasiSD },
       ],
       options: {
-        chart: { type: 'line', toolbar: { show: false }, height: 240 },
+        chart: {
+          type: 'line',
+          toolbar: { show: false },
+          height: 320,
+          foreColor: '#000',
+        },
         stroke: { curve: 'smooth', width: [2, 2, 2, 2] },
         xaxis: {
           categories: monthLabels,
-          labels: { style: { colors: '#000', fontSize: '9px' } },
+          labels: { style: { colors: '#000', fontSize: '10px' } },
         },
         yaxis: {
           labels: {
-            formatter: (val: number) => formatMiliar(val),
-            style: { colors: '#000', fontSize: '9px' },
+            formatter: (val: number) => {
+              if (val >= 1000000) return 'Rp ' + (val / 1000000).toFixed(1) + 'jt';
+              return formatRupiah(val);
+            },
+            style: { colors: '#000', fontSize: '10px' },
           },
         },
         legend: {
           position: 'top',
-          fontSize: '9px',
+          horizontalAlign: 'right',
+          fontSize: '11px',
           labels: { colors: '#000' },
         },
         title: {
           text: title,
           align: 'left',
-          style: { color: '#000', fontSize: '11px', fontWeight: '600' },
+          style: { color: '#000', fontSize: '13px', fontWeight: 600 },
         },
         colors: ['#94a3b8', '#cbd5e1', '#f87171', '#fb923c'],
-        dataLabels: { enabled: false },
+        dataLabels: {
+          enabled: true,
+          formatter: (val: number) => {
+            if (val === 0) return '';
+            return formatMiliar(val);
+          },
+          style: {
+            fontSize: '9px',
+            colors: ['#fff'],
+          },
+          background: {
+            enabled: true,
+            foreColor: '#fff',
+            padding: 3,
+            borderRadius: 2,
+            borderWidth: 0,
+            opacity: 0.8,
+          },
+          offsetY: -8,
+        },
         tooltip: { y: { formatter: (val: number) => formatRupiah(val) } },
+        markers: {
+          size: 4,
+        },
+        grid: {
+          borderColor: '#e5e7eb',
+        },
       },
     };
   };
@@ -215,168 +289,229 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div
-    class="bg-white max-w-[210mm] mx-auto p-[12mm] font-sans print:p-[10mm] print:m-0 print:shadow-none print-area"
-    style="color: black; font-size: 9pt; line-height: 1.3"
-  >
-    <!-- Header dengan Logo -->
-    <div class="flex justify-between items-start mb-4">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-900 mb-1">Laporan Pengumpulan</h1>
-        <p class="text-sm text-gray-700">Tahun: {{ tahun }}</p>
+  <div>
+    <!-- HALAMAN 1 -->
+    <div
+      class="bg-white max-w-[297mm] mx-auto p-[10mm] font-sans print:p-[10mm] print:m-0 print:shadow-none print-area page-break"
+      style="color: black; font-size: 9pt; line-height: 1.3"
+    >
+      <!-- Header dengan Logo -->
+      <div class="flex justify-between items-start mb-4">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900 mb-1">Laporan Pengumpulan</h1>
+          <p class="text-sm text-gray-700">Tahun: {{ tahun }}</p>
+        </div>
+        <div class="flex-shrink-0">
+          <Logos />
+        </div>
       </div>
-      <div class="flex-shrink-0">
-        <Logos />
+
+      <!-- Ringkasan Cards -->
+      <div v-if="data" class="grid grid-cols-4 gap-3 mb-4">
+        <div class="p-2 rounded-lg bg-blue-50 text-center border border-blue-200">
+          <h3 class="text-xs font-semibold text-gray-700 mb-1">Total</h3>
+          <p class="text-sm font-bold text-gray-900">{{ formatRupiah(data.totalRealisasi) }}</p>
+        </div>
+        <div class="p-2 rounded-lg bg-green-50 text-center border border-green-200">
+          <h3 class="text-xs font-semibold text-gray-700 mb-1">Target</h3>
+          <p class="text-sm font-bold text-gray-900">{{ formatRupiah(data.totalTarget) }}</p>
+        </div>
+        <div class="p-2 rounded-lg bg-yellow-50 text-center border border-yellow-200">
+          <h3 class="text-xs font-semibold text-gray-700 mb-1">Realisasi</h3>
+          <p class="text-sm font-bold text-gray-900">{{ formatRupiah(data.totalRealisasi) }}</p>
+        </div>
+        <div class="p-2 rounded-lg bg-purple-50 text-center border border-purple-200">
+          <h3 class="text-xs font-semibold text-gray-700 mb-1">Persentase</h3>
+          <p class="text-sm font-bold text-gray-900">
+            {{ (data.persentaseTotal ?? 0).toFixed(2) }}%
+          </p>
+        </div>
+      </div>
+
+      <!-- Charts Grid - Halaman 1 -->
+      <div v-if="data" class="grid grid-cols-2 gap-3 mb-4">
+        <!-- Zakat Chart -->
+        <div class="p-2 rounded-lg border border-gray-300 bg-white">
+          <VueApexCharts
+            v-if="zakatChart.series && zakatChart.series.length > 0"
+            type="line"
+            height="320"
+            :options="zakatChart.options"
+            :series="zakatChart.series"
+          />
+          <div v-else class="flex items-center justify-center h-[320px] text-gray-500">
+            Tidak ada data
+          </div>
+        </div>
+
+        <!-- Bar Chart Pengumpulan per Bulan -->
+        <div class="p-2 rounded-lg border border-gray-300 bg-white">
+          <VueApexCharts
+            v-if="series.length > 0"
+            type="bar"
+            height="320"
+            :options="chartOptions"
+            :series="series"
+          />
+          <div v-else class="flex items-center justify-center h-[320px] text-gray-500">
+            Tidak ada data
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabel Target dan Capaian - Halaman 1 -->
+      <div v-if="data" class="mb-4">
+        <div class="p-2 rounded-lg border border-gray-300 bg-white">
+          <h3 class="text-xs font-bold text-gray-900 mb-2">Target dan Capaian</h3>
+          <table class="w-full text-[8pt] border-collapse">
+            <thead class="bg-gray-100 border-b-2 border-gray-400">
+              <tr>
+                <th
+                  class="text-left py-1 px-2 font-semibold text-gray-900 border-r border-gray-300"
+                >
+                  Kategori
+                </th>
+                <th
+                  class="text-right py-1 px-2 font-semibold text-gray-900 border-r border-gray-300"
+                >
+                  Target
+                </th>
+                <th
+                  class="text-right py-1 px-2 font-semibold text-gray-900 border-r border-gray-300"
+                >
+                  Realisasi
+                </th>
+                <th class="text-right py-1 px-2 font-semibold text-gray-900">(%)</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr v-for="jenis in data.dataPerJenis" :key="jenis.jenis" class="border-b">
+                <td class="py-1 px-2 border-r border-gray-300">{{ jenis.jenis }}</td>
+                <td class="py-1 px-2 text-right border-r border-gray-300">
+                  {{ formatRupiah(jenis.target) }}
+                </td>
+                <td class="py-1 px-2 text-right border-r border-gray-300">
+                  {{ formatRupiah(jenis.realisasi) }}
+                </td>
+                <td class="py-1 px-2 text-right">{{ (jenis.persentase ?? 0).toFixed(2) }}%</td>
+              </tr>
+              <tr class="bg-gray-100 font-bold border-t-2 border-gray-400">
+                <td class="py-1 px-2 border-r border-gray-300">Total</td>
+                <td class="py-1 px-2 text-right border-r border-gray-300">
+                  {{ formatRupiah(data.totalTarget) }}
+                </td>
+                <td class="py-1 px-2 text-right border-r border-gray-300">
+                  {{ formatRupiah(data.totalRealisasi) }}
+                </td>
+                <td class="py-1 px-2 text-right">{{ (data.persentaseTotal ?? 0).toFixed(2) }}%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Footer Cetak Halaman 1 -->
+      <div class="">
+        <div>
+          <FooterCetak />
+        </div>
       </div>
     </div>
 
-    <!-- Ringkasan Cards -->
-    <div v-if="data" class="grid grid-cols-4 gap-3 mb-4">
-      <div class="p-2 rounded-lg bg-blue-50 text-center border border-blue-200">
-        <h3 class="text-xs font-semibold text-gray-700 mb-1">Total</h3>
-        <p class="text-sm font-bold text-gray-900">{{ formatRupiah(data.totalRealisasi) }}</p>
-      </div>
-      <div class="p-2 rounded-lg bg-green-50 text-center border border-green-200">
-        <h3 class="text-xs font-semibold text-gray-700 mb-1">Target</h3>
-        <p class="text-sm font-bold text-gray-900">{{ formatRupiah(data.totalTarget) }}</p>
-      </div>
-      <div class="p-2 rounded-lg bg-yellow-50 text-center border border-yellow-200">
-        <h3 class="text-xs font-semibold text-gray-700 mb-1">Realisasi</h3>
-        <p class="text-sm font-bold text-gray-900">{{ formatRupiah(data.totalRealisasi) }}</p>
-      </div>
-      <div class="p-2 rounded-lg bg-purple-50 text-center border border-purple-200">
-        <h3 class="text-xs font-semibold text-gray-700 mb-1">Persentase</h3>
-        <p class="text-sm font-bold text-gray-900">{{ (data.persentaseTotal ?? 0).toFixed(2) }}%</p>
-      </div>
-    </div>
-
-    <!-- Charts Grid - Baris 1 -->
-    <div v-if="data" class="grid grid-cols-2 gap-3 mb-3">
-      <!-- Zakat Chart -->
-      <div class="p-2 rounded-lg border border-gray-300 bg-white">
-        <VueApexCharts
-          v-if="zakatChart.series && zakatChart.series.length > 0"
-          :options="zakatChart.options"
-          :series="zakatChart.series"
-          height="240"
-        />
+    <!-- HALAMAN 2 -->
+    <div
+      class="bg-white max-w-[297mm] mx-auto p-[10mm] font-sans print:p-[10mm] print:m-0 print:shadow-none print-area"
+      style="color: black; font-size: 9pt; line-height: 1.3"
+    >
+      <!-- Header dengan Logo - Halaman 2 -->
+      <div class="flex justify-between items-start mb-4">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900 mb-1">Laporan Pengumpulan</h1>
+          <p class="text-sm text-gray-700">Tahun: {{ tahun }}</p>
+        </div>
+        <div class="flex-shrink-0">
+          <Logos />
+        </div>
       </div>
 
-      <!-- Bar Chart Pengumpulan per Bulan -->
-      <div class="p-2 rounded-lg border border-gray-300 bg-white">
-        <h3 class="text-xs font-bold text-gray-900 mb-1">Pengumpulan per Bulan</h3>
-        <VueApexCharts
-          v-if="series.length > 0"
-          type="bar"
-          height="240"
-          :options="chartOptions"
-          :series="series"
-        />
-      </div>
-    </div>
+      <!-- Charts Grid - Halaman 2 -->
+      <div v-if="data" class="grid grid-cols-2 gap-3 mb-4">
+        <!-- Infaq Chart -->
+        <div class="p-2 rounded-lg border border-gray-300 bg-white">
+          <VueApexCharts
+            v-if="infakChart.series && infakChart.series.length > 0"
+            type="line"
+            height="320"
+            :options="infakChart.options"
+            :series="infakChart.series"
+          />
+          <div v-else class="flex items-center justify-center h-[320px] text-gray-500">
+            Tidak ada data
+          </div>
+        </div>
 
-    <!-- Charts Grid - Baris 2 -->
-    <div v-if="data" class="grid grid-cols-2 gap-3 mb-3">
-      <!-- Infaq Chart -->
-      <div class="p-2 rounded-lg border border-gray-300 bg-white">
-        <VueApexCharts
-          v-if="infakChart.series && infakChart.series.length > 0"
-          :options="infakChart.options"
-          :series="infakChart.series"
-          height="240"
-        />
-      </div>
-
-      <!-- Tabel Target dan Capaian -->
-      <div class="p-2 rounded-lg border border-gray-300 bg-white">
-        <h3 class="text-xs font-bold text-gray-900 mb-2">Target dan Capaian</h3>
-        <table class="w-full text-[8pt] border-collapse">
-          <thead class="bg-gray-100 border-b-2 border-gray-400">
-            <tr>
-              <th class="text-left py-1 px-2 font-semibold text-gray-900 border-r border-gray-300">
-                Kategori
-              </th>
-              <th class="text-right py-1 px-2 font-semibold text-gray-900 border-r border-gray-300">
-                Target
-              </th>
-              <th class="text-right py-1 px-2 font-semibold text-gray-900 border-r border-gray-300">
-                Realisasi
-              </th>
-              <th class="text-right py-1 px-2 font-semibold text-gray-900">(%)</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-200">
-            <tr v-for="jenis in data.dataPerJenis" :key="jenis.jenis" class="border-b">
-              <td class="py-1 px-2 border-r border-gray-300">{{ jenis.jenis }}</td>
-              <td class="py-1 px-2 text-right border-r border-gray-300">
-                {{ formatRupiah(jenis.target) }}
-              </td>
-              <td class="py-1 px-2 text-right border-r border-gray-300">
-                {{ formatRupiah(jenis.realisasi) }}
-              </td>
-              <td class="py-1 px-2 text-right">{{ (jenis.persentase ?? 0).toFixed(2) }}%</td>
-            </tr>
-            <tr class="bg-gray-100 font-bold border-t-2 border-gray-400">
-              <td class="py-1 px-2 border-r border-gray-300">Total</td>
-              <td class="py-1 px-2 text-right border-r border-gray-300">
-                {{ formatRupiah(data.totalTarget) }}
-              </td>
-              <td class="py-1 px-2 text-right border-r border-gray-300">
-                {{ formatRupiah(data.totalRealisasi) }}
-              </td>
-              <td class="py-1 px-2 text-right">{{ (data.persentaseTotal ?? 0).toFixed(2) }}%</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Charts Grid - Baris 3 -->
-    <div v-if="data" class="grid grid-cols-2 gap-3">
-      <!-- Donasi Chart -->
-      <div class="p-2 rounded-lg border border-gray-300 bg-white">
-        <VueApexCharts
-          v-if="donasiChart.series && donasiChart.series.length > 0"
-          :options="donasiChart.options"
-          :series="donasiChart.series"
-          height="240"
-        />
+        <!-- Donasi Chart -->
+        <div class="p-2 rounded-lg border border-gray-300 bg-white">
+          <VueApexCharts
+            v-if="donasiChart.series && donasiChart.series.length > 0"
+            type="line"
+            height="320"
+            :options="donasiChart.options"
+            :series="donasiChart.series"
+          />
+          <div v-else class="flex items-center justify-center h-[320px] text-gray-500">
+            Tidak ada data
+          </div>
+        </div>
       </div>
 
-      <!-- Tabel Komposisi Sumber Dana -->
-      <div class="p-2 rounded-lg border border-gray-300 bg-white">
-        <h3 class="text-xs font-bold text-gray-900 mb-2">Komposisi Sumber Dana</h3>
-        <table class="w-full text-[8pt] border-collapse">
-          <thead class="bg-gray-100 border-b-2 border-gray-400">
-            <tr>
-              <th class="text-left py-1 px-2 font-semibold text-gray-900 border-r border-gray-300">
-                Kategori
-              </th>
-              <th class="text-right py-1 px-2 font-semibold text-gray-900 border-r border-gray-300">
-                Rek Penampung
-              </th>
-              <th class="text-right py-1 px-2 font-semibold text-gray-900">Rek Kasda</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-200">
-            <tr v-for="jenis in data.dataPerJenis" :key="jenis.jenis" class="border-b">
-              <td class="py-1 px-2 border-r border-gray-300">{{ jenis.jenis }}</td>
-              <td class="py-1 px-2 text-right border-r border-gray-300">
-                {{ formatRupiah(jenis.realisasi * 0.6) }}
-              </td>
-              <td class="py-1 px-2 text-right">{{ formatRupiah(jenis.realisasi * 0.4) }}</td>
-            </tr>
-            <tr class="bg-gray-100 font-bold border-t-2 border-gray-400">
-              <td class="py-1 px-2 border-r border-gray-300">Total keseluruhan</td>
-              <td class="py-1 px-2 text-right border-r border-gray-300">
-                {{ formatRupiah(data.totalRealisasi * 0.6) }}
-              </td>
-              <td class="py-1 px-2 text-right">
-                {{ formatRupiah(data.totalRealisasi * 0.4) }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <!-- Tabel Komposisi Sumber Dana - Halaman 2 -->
+      <div v-if="data" class="mb-4">
+        <div class="p-2 rounded-lg border border-gray-300 bg-white">
+          <h3 class="text-xs font-bold text-gray-900 mb-2">Komposisi Sumber Dana</h3>
+          <table class="w-full text-[8pt] border-collapse">
+            <thead class="bg-gray-100 border-b-2 border-gray-400">
+              <tr>
+                <th
+                  class="text-left py-1 px-2 font-semibold text-gray-900 border-r border-gray-300"
+                >
+                  Kategori
+                </th>
+                <th
+                  class="text-right py-1 px-2 font-semibold text-gray-900 border-r border-gray-300"
+                >
+                  Rek Penampung
+                </th>
+                <th class="text-right py-1 px-2 font-semibold text-gray-900">Rek Kasda</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr v-for="jenis in data.dataPerJenis" :key="jenis.jenis" class="border-b">
+                <td class="py-1 px-2 border-r border-gray-300">{{ jenis.jenis }}</td>
+                <td class="py-1 px-2 text-right border-r border-gray-300">
+                  {{ formatRupiah(jenis.realisasi * 0.6) }}
+                </td>
+                <td class="py-1 px-2 text-right">{{ formatRupiah(jenis.realisasi * 0.4) }}</td>
+              </tr>
+              <tr class="bg-gray-100 font-bold border-t-2 border-gray-400">
+                <td class="py-1 px-2 border-r border-gray-300">Total keseluruhan</td>
+                <td class="py-1 px-2 text-right border-r border-gray-300">
+                  {{ formatRupiah(data.totalRealisasi * 0.6) }}
+                </td>
+                <td class="py-1 px-2 text-right">
+                  {{ formatRupiah(data.totalRealisasi * 0.4) }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Footer Cetak Halaman 2 -->
+      <div class="">
+        <div>
+          <FooterCetak />
+        </div>
       </div>
     </div>
   </div>
@@ -389,31 +524,46 @@ onMounted(async () => {
   }
 
   .print-area {
-    width: 210mm;
-    min-height: 297mm;
+    width: 297mm;
+    min-height: 210mm;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
     margin: 20px auto;
+  }
+
+  .page-break {
+    margin-bottom: 20px;
   }
 }
 
 @media print {
   @page {
     size: A4 landscape;
-    margin: 12mm;
+    margin: 15mm 12mm;
   }
 
   html,
   body {
-    margin: 0;
-    padding: 0;
+    margin: 0 !important;
+    padding: 0 !important;
     background: white;
   }
 
   .print-area {
-    width: 277mm;
+    width: 100% !important;
+    max-width: 100% !important;
     box-shadow: none;
-    margin: 0;
-    padding: 0;
+    margin: 0 !important;
+    padding: 8mm 10mm !important;
+  }
+
+  .page-break {
+    page-break-after: always;
+    margin-bottom: 0 !important;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 }
 
@@ -424,5 +574,14 @@ onMounted(async () => {
 :deep(.apexcharts-title-text) {
   fill: #000 !important;
   color: #000 !important;
+}
+
+:deep(.apexcharts-datalabel) {
+  fill: #000 !important;
+}
+
+:deep(.apexcharts-datalabel-value) {
+  fill: #fff !important;
+  font-weight: 600;
 }
 </style>

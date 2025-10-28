@@ -377,6 +377,7 @@ onMounted(fetchData);
         <div class="flex items-center gap-4">
           <div class="flex items-center gap-2">
             <BaseButton @click="cetak_laporan(tahun)" class="flex items-center justify-center">
+              <font-awesome-icon icon="fa-solid fa-print" class="mr-2" />
               <span>Cetak</span>
             </BaseButton>
           </div>

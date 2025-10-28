@@ -2,6 +2,7 @@
 import { ref, onMounted, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
 import Logos from '@/components/Logo/Logo.vue';
+import FooterCetak from '@/modules/FooterCetak/FooterCetak.vue';
 import { get_laporan_perencanaan } from '@/service/laporan_perencanaan';
 
 const route = useRoute();
@@ -63,7 +64,7 @@ onMounted(async () => {
 
     const style = document.createElement('style');
     style.textContent = `
-      @page { size: A4 landscape; margin: 10mm; }
+      @page { size: A4 landscape; margin: 15mm 12mm; }
       body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     `;
     document.head.appendChild(style);
@@ -76,21 +77,23 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="print-area font-sans"
-    style="color: black; font-size: 8pt; line-height: 1.3; background: white"
+  <div
+    class="print-area font-sans"
+    style="color: black; font-size: 9pt; line-height: 1.3; background: white"
   >
     <!-- Header -->
-    <div class="flex justify-between items-start mb-3">
+    <div class="flex justify-between items-start mb-4">
       <div>
-        <h1 class="text-lg font-bold mb-1">Laporan Perencanaan</h1>
-        <p class="text-sm">Tahun: {{ tahun }}</p>
+        <h1 class="text-2xl font-bold text-gray-900 mb-1">Laporan Perencanaan</h1>
+        <p class="text-sm text-gray-700">Tahun: {{ tahun }}</p>
       </div>
-      <div class="flex-shrink-0 scale-90 origin-top-right">
+      <div class="flex-shrink-0">
         <Logos />
       </div>
     </div>
+
     <!-- Tabel -->
-    <table class="w-full border-collapse text-[7pt]" style="table-layout: fixed">
+    <table class="w-full border-collapse text-[8pt] mb-4" style="table-layout: fixed">
       <thead class="border border-black text-center">
         <tr>
           <th rowspan="2" class="border border-black w-[14%] px-2 py-1">Asnaf</th>
@@ -115,7 +118,7 @@ onMounted(async () => {
         <template v-if="datas.length > 0">
           <template v-for="asnaf in datas" :key="asnaf.nama">
             <!-- Baris Asnaf -->
-            <tr class="font-semibold text-black text-[7pt] bg-gray-50">
+            <tr class="font-semibold text-black text-[8pt] bg-gray-50">
               <td colspan="6" class="border border-black px-2 py-1 text-left">
                 {{ asnaf.nama }}
               </td>
@@ -130,7 +133,7 @@ onMounted(async () => {
             <tr
               v-for="(p, i) in asnaf.program"
               :key="i"
-              class="text-[6.5pt] text-black"
+              class="text-[7pt] text-black"
               style="page-break-inside: avoid"
             >
               <td class="border border-black px-2 py-1 text-left">{{ p.uraian }}</td>
@@ -170,53 +173,73 @@ onMounted(async () => {
         </tr>
       </tbody>
     </table>
+
+    <!-- Footer -->
+    <FooterCetak />
   </div>
 </template>
 
 <style scoped>
-  .print-area {
+.print-area {
   max-width: 297mm;
   margin: 0 auto;
-  padding: 15mm;
+  padding: 10mm;
   background: white;
 }
+
 @media screen {
   body {
     background: #f3f4f6;
   }
   .print-area {
-    box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
-    margin-top: 20px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    margin: 20px auto;
+    min-height: 210mm;
   }
 }
+
 @media print {
   @page {
     size: A4 landscape;
-    margin: 10mm;
+    margin: 15mm 12mm;
   }
+
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
+
   body,
   html {
     margin: 0 !important;
     padding: 0 !important;
     background: white !important;
   }
+
+  .print-area {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-shadow: none;
+    margin: 0 !important;
+    padding: 8mm 10mm !important;
+  }
+
   table {
     width: 100%;
     border-collapse: collapse;
   }
+
   th,
   td {
     border: 1px solid black !important;
     word-wrap: break-word;
   }
+
   thead th {
     background: #f3f4f6 !important;
     font-weight: 700 !important;
   }
+
   tbody tr {
     page-break-inside: avoid !important;
   }
