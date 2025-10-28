@@ -201,6 +201,7 @@ onMounted(async () => {
   <div class="mx-auto p-4">
     <div class="flex items-center justify-between">
       <BaseButton @click="cetak_laporan(tahun)" class="flex items-center justify-center">
+        <font-awesome-icon icon="fa-solid fa-print" class="mr-2" />
         <span>Cetak</span>
       </BaseButton>
 

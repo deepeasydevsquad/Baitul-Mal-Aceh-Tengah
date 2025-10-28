@@ -139,6 +139,7 @@ const cetak_laporan = () => {
             type="button"
             :disabled="isDownloading"
           >
+            <font-awesome-icon icon="fa-solid fa-print" class="mr-2" />
             Cetak
           </BaseButton>
         </div>

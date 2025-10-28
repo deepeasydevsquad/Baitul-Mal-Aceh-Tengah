@@ -1666,6 +1666,7 @@ controllers.fn_asnaf = async (req, res) => {
     }
 
     const model_r_instance = new Model_r(req);
+    var tanda_tangan = await model_r_instance.tanda_tangan();
     const feedBack = await model_r_instance.fn_asnaf(tahun, asnaf);
 
     if (feedBack.length === 0) {
@@ -1679,7 +1680,7 @@ controllers.fn_asnaf = async (req, res) => {
     res.status(200).json({
       error: false,
       error_msg: "Data laporan penyaluran ditemukan",
-      data: feedBack,
+      data: { list: feedBack, tanda_tangan: tanda_tangan.data },
     });
   } catch (error) {
     console.error("ERROR in fn_asnaf controller:", error);
