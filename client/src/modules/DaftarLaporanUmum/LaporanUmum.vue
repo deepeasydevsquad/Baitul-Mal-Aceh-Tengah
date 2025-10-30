@@ -206,14 +206,19 @@ const getMonthName = (month: number) => {
 
 <template>
   <div class="p-4">
-    <!-- Header -->
-    <!-- <h2 class="text-lg font-semibold flex items-center mb-2"></h2> -->
-    <!-- <Logo /> -->
     <div class="flex items-center justify-between mb-4">
       <div class="flex items-center gap-2 mr-4">
         <BaseButton @click="cetak_laporan_umum()" class="flex items-center justify-center">
           <font-awesome-icon icon="fa-solid fa-print" class="mr-2" />
           <span>Cetak</span>
+        </BaseButton>
+        <BaseButton
+          variant="warning"
+          @click="cetak_laporan_umum()"
+          class="flex items-center justify-center"
+        >
+          <font-awesome-icon icon="fa-solid fa-print" class="mr-2" />
+          <span>Rekap Pengumpulan Harian Oleh Petugas</span>
         </BaseButton>
       </div>
       <Logo />

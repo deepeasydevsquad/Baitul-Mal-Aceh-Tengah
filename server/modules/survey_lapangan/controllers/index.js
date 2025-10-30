@@ -14,12 +14,19 @@ controllers.survey_lapangan = async (req, res) => {
     const model_r = new Model_r(req);
     const feedBack = await model_r.survey_lapangan();
 
+    console.log("=====>");
+    console.log(feedBack);
+    console.log("=====>");
+
     res.status(200).json({
       error: false,
       data: feedBack.data,
       total: feedBack.total,
     });
   } catch (error) {
+    console.log("xxx");
+    console.log(error);
+    console.log("xxx");
     handleServerError(res, error);
   }
 };
