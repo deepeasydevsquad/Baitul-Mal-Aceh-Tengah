@@ -31,6 +31,7 @@ router.post(
     body("search").optional().isString().withMessage("Search Harus String"),
     body("status").optional(),
     body("konfirmasi_pembayaran").optional(),
+    body("tipe_pembayaran").optional(),
   ],
   controllers.list
 );
@@ -61,13 +62,42 @@ router.post(
         "zakat_pertanian",
       ])
       .withMessage("Tipe Zakat tidak valid"),
-    body("status_pemasukan")
+    body("tipe_pembayaran")
       .notEmpty()
-      .withMessage("Status Pemasukan Tidak Boleh Kosong")
-      .isIn(["belum_dikirim", "sudah_dikirim"])
-      .withMessage("Status Pemasukan Harus String"),
+      .withMessage("Tipe Pembayaran Tidak Boleh Kosong")
+      .isIn(["transfer", "cash"])
+      .withMessage("Tipe Pembayaran tidak valid"),
   ],
   controllers.add
+);
+
+router.post(
+  "/riwayat_zakat/approve_online",
+  authenticateTokenAdministrator,
+  [
+    body("id")
+      .notEmpty()
+      .withMessage("ID Tidak Boleh Kosong")
+      .isInt()
+      .withMessage("ID Harus Angka")
+      .custom(validation.check_id_riwayat_zakat),
+  ],
+  controllers.approve_online
+);
+
+router.post(
+  "/riwayat_zakat/reject_online",
+  authenticateTokenAdministrator,
+  [
+    body("id")
+      .notEmpty()
+      .withMessage("ID Tidak Boleh Kosong")
+      .isInt()
+      .withMessage("ID Harus Angka")
+      .custom(validation.check_id_riwayat_zakat),
+    body("alasan").notEmpty().withMessage("Alasan Tidak Boleh Kosong"),
+  ],
+  controllers.reject_online
 );
 
 router.post(

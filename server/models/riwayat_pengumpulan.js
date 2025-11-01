@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Riwayat_pengumpulan extends Model {
     /**
@@ -16,17 +14,34 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
   }
-  Riwayat_pengumpulan.init({
-    member_id: DataTypes.INTEGER,
-    invoice: DataTypes.STRING,
-    tipe: DataTypes.ENUM(["zakat_harta", "zakat_simpanan", "zakat_profesi", "zakat_perdagangan", "zakat_pertanian", "infaq"]),
-    nominal: DataTypes.INTEGER,
-    kode: DataTypes.INTEGER,
-    status: DataTypes.ENUM(['process','success','failed']),
-    konfirmasi_pembayaran: DataTypes.ENUM(['sudah_dikirim','belum_dikirim'])
-  }, {
-    sequelize,
-    modelName: 'Riwayat_pengumpulan',
-  });
+  Riwayat_pengumpulan.init(
+    {
+      member_id: DataTypes.INTEGER,
+      invoice: DataTypes.STRING,
+      tipe: DataTypes.ENUM([
+        "zakat_harta",
+        "zakat_simpanan",
+        "zakat_profesi",
+        "zakat_perdagangan",
+        "zakat_pertanian",
+        "infaq",
+      ]),
+      nominal: DataTypes.INTEGER,
+      kode: DataTypes.INTEGER,
+      status: DataTypes.ENUM(["process", "success", "failed"]),
+      alasan_penolakan: DataTypes.STRING,
+      tipe_pembayaran: DataTypes.ENUM(["online", "transfer", "cash"]),
+      nominal_transfer: DataTypes.INTEGER,
+      bukti_transfer: DataTypes.STRING,
+      nominal_setoran: DataTypes.INTEGER,
+      bukti_setoran: DataTypes.STRING,
+      posisi_uang: DataTypes.ENUM(["kantor_baitulmal", "bank"]),
+      konfirmasi_pembayaran: DataTypes.ENUM(["sudah_dikirim", "belum_dikirim"]),
+    },
+    {
+      sequelize,
+      modelName: "Riwayat_pengumpulan",
+    }
+  );
   return Riwayat_pengumpulan;
 };

@@ -1,95 +1,95 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted, onBeforeUnmount } from 'vue'
-import Notification from '@/components/Modal/Notification.vue'
-import BaseButton from '@/components/Button/BaseButton.vue'
-import InputText from '@/components/Form/InputText.vue'
-import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
-import TextArea from '@/components/Form/TextArea.vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue';
+import Notification from '@/components/Modal/Notification.vue';
+import BaseButton from '@/components/Button/BaseButton.vue';
+import InputText from '@/components/Form/InputText.vue';
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
+import TextArea from '@/components/Form/TextArea.vue';
 
 // Composable
-import { useNotification } from '@/composables/useNotification'
+import { useNotification } from '@/composables/useNotification';
 
 // Service
-import { add_daftar_program } from '@/service/daftar_program'
+import { add_daftar_program } from '@/service/daftar_program';
 
 // Notification
 const { showNotification, notificationType, notificationMessage, displayNotification } =
-  useNotification()
+  useNotification();
 
 // Props
 interface Props {
-  isModalOpen: boolean
+  isModalOpen: boolean;
 }
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 
 // Emit
 const emit = defineEmits<{
-  (e: 'close'): void
-  (e: 'status', payload: { error_msg?: string; error?: boolean }): void
-}>()
+  (e: 'close'): void;
+  (e: 'status', payload: { error_msg?: string; error?: boolean }): void;
+}>();
 
 // State
-const isSubmitting = ref(false)
-const form = ref<{ name: string; desc: string }>({ name: '', desc: '' })
-const errors = ref<Record<string, string>>({})
+const isSubmitting = ref(false);
+const form = ref<{ name: string; desc: string }>({ name: '', desc: '' });
+const errors = ref<Record<string, string>>({});
 
 // Reset form
 const resetForm = () => {
-  form.value = { name: '', desc: '' }
-  errors.value = {}
-}
+  form.value = { name: '', desc: '' };
+  errors.value = {};
+};
 
 // Validasi
 const validateForm = () => {
-  let isValid = true
-  errors.value = {}
+  let isValid = true;
+  errors.value = {};
 
   if (!form.value.name) {
-    errors.value.name = 'Nama program tidak boleh kosong.'
-    isValid = false
+    errors.value.name = 'Nama program tidak boleh kosong.';
+    isValid = false;
   }
 
   if (!form.value.desc) {
-    errors.value.desc = 'Deskripsi tidak boleh kosong.'
-    isValid = false
-  } 
+    errors.value.desc = 'Deskripsi tidak boleh kosong.';
+    isValid = false;
+  }
 
-  return isValid
-}
+  return isValid;
+};
 
 // Submit
 const handleSubmit = async () => {
-  if (!validateForm()) return
+  if (!validateForm()) return;
 
-  isSubmitting.value = true
+  isSubmitting.value = true;
   try {
-    console.log('form.value', form.value)
-    const response = await add_daftar_program(form.value)
-    emit('status', { error_msg: response.error_msg, error: response.error })
-    closeModal()
+    console.log('form.value', form.value);
+    const response = await add_daftar_program(form.value);
+    emit('status', { error_msg: response.error_msg, error: response.error });
+    closeModal();
   } catch (error: any) {
     const msg =
-      error.response?.data?.error_msg || error.response?.data?.message || 'Terjadi kesalahan'
-    displayNotification(msg, 'error')
+      error.response?.data?.error_msg || error.response?.data?.message || 'Terjadi kesalahan';
+    displayNotification(msg, 'error');
   } finally {
-    isSubmitting.value = false
-    closeModal()
+    isSubmitting.value = false;
+    closeModal();
   }
-}
+};
 
 // Close modal
 const closeModal = () => {
-  resetForm()
-  emit('close')
-}
+  resetForm();
+  emit('close');
+};
 
 // Escape key
 const handleEscape = (e: KeyboardEvent) => {
-  if (e.key === 'Escape' && props.isModalOpen) closeModal()
-}
-onMounted(() => document.addEventListener('keydown', handleEscape))
-onBeforeUnmount(() => document.removeEventListener('keydown', handleEscape))
+  if (e.key === 'Escape' && props.isModalOpen) closeModal();
+};
+onMounted(() => document.addEventListener('keydown', handleEscape));
+onBeforeUnmount(() => document.removeEventListener('keydown', handleEscape));
 </script>
 
 <template>

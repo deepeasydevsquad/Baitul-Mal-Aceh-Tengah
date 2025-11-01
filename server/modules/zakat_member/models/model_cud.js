@@ -33,6 +33,8 @@ class Model_cud {
         nominal: nominal,
         kode: kode,
         status: "process",
+        tipe_pembayaran: "online",
+        posisi_uang: "bank",
         konfirmasi_pembayaran: "belum_dikirim",
       });
 

@@ -1,15 +1,18 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, getCurrentInstance } from 'vue';
 import Notification from '@/components/Modal/Notification.vue';
 import Confirmation from '@/components/Modal/Confirmation.vue';
 import BaseButton from '@/components/Button/BaseButton.vue';
+import LightButton from '@/components/Button/LightButton.vue';
+import ButtonGreen from '@/components/Button/ButtonGreen.vue';
 import DangerButton from '@/components/Button/DangerButton.vue';
 import DeleteIcon from '@/components/Icons/DeleteIcon.vue';
 import Pagination from '@/components/Pagination/Pagination.vue';
 import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
 import FormAdd from '@/modules/RiwayatZakat/widgets/FormAdd.vue';
+import FormReject from '@/modules/RiwayatZakat/widgets/FormReject.vue';
 import BaseSelect from '@/components/Form/BaseSelect.vue';
 
 // Composable
@@ -19,7 +22,17 @@ import { useNotification } from '@/composables/useNotification';
 import { useDynamicLabel } from '@/composables/useDynamicLabel';
 
 // Service API
-import { list, delete_riwayat_zakat } from '@/service/riwayat_zakat';
+import { list, delete_riwayat_zakat, setujui_pembayaran_zakat } from '@/service/riwayat_zakat';
+
+// Store
+import { MessageTabZakat } from '@/stores/message';
+
+// Global Properties
+const { appContext } = getCurrentInstance()!;
+
+const $formatToRupiah = appContext.config.globalProperties.$formatToRupiah;
+
+const message = MessageTabZakat();
 
 // State: Loading
 const isLoading = ref(false);
@@ -53,6 +66,13 @@ interface RiwayatZakat {
   nominal: number;
   kode: string;
   status: string;
+  alasan_penolakan: string;
+  tipe_pembayaran: string;
+  nominal_transfer: number;
+  bukti_transfer: string;
+  nominal_setoran: number;
+  bukti_setoran: string;
+  posisi_uang: string;
   konfirmasi_pembayaran: string;
   datetimes: string;
 }
@@ -68,8 +88,10 @@ function openModalAdd() {
 
 // Function: Fetch Data
 const search = ref('');
-const selectStatus = ref('');
+const selectStatus = ref('process');
 const selectStatusKonfirmasi = ref('belum_dikirim');
+const selectTipePembayaran = ref('');
+const id = ref(0);
 
 async function fetchData() {
   isTableLoading.value = true;
@@ -79,10 +101,40 @@ async function fetchData() {
       perpage: perPage.value,
       pageNumber: currentPage.value,
       status: selectStatus.value,
+      tipe_pembayaran: selectTipePembayaran.value,
       konfirmasi_pembayaran: selectStatusKonfirmasi.value,
     });
 
-    dataRiwayatZakat.value = response.data;
+    dataRiwayatZakat.value = response.data.list;
+
+    // gunakan variabel berbeda untuk HTML
+    let htmlMessage = `
+
+    `;
+    if (response.data.pembayaran_online_dikirim > 0) {
+      htmlMessage += `<span class="text-green-500">
+        Terdapat ${response.data.pembayaran_online_dikirim} transaksi pembayaran online yang telah dikirim.
+      </span>`;
+    }
+
+    if (response.data.total_saldo_dikantor > 0) {
+      if (htmlMessage != '') {
+        htmlMessage += `<br />`;
+      }
+      htmlMessage += `
+       <span class="text-red-500">
+          Saldo kas di kantor saat ini berjumlah ${$formatToRupiah(response.data.total_saldo_dikantor)}.
+        </span>
+      `;
+    }
+
+    // panggil setString pada store, bukan pada string
+    message.setString(`
+      <div class="text-sm text-gray-600 text-right">
+        ${htmlMessage}
+      </div>
+    `);
+
     totalRow.value = response.total;
     console.log(dataRiwayatZakat.value);
   } catch (error) {
@@ -115,6 +167,51 @@ async function deleteData(id: number) {
     },
   );
 }
+
+async function approveOnline(id: number, status_kirim: string) {
+  async function setujui(id: number) {
+    try {
+      isLoading.value = true;
+      await setujui_pembayaran_zakat(id);
+      displayNotification('Pembayaran zakat berhasil disetujui', 'success');
+      await fetchData();
+    } catch (error: any) {
+      displayNotification(error.response.data.error_msg, 'error');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+  // Implementation for approving online payment
+  if (status_kirim === 'belum_dikirim') {
+    displayConfirmation(
+      'Setujui Permohonan Pembayaran Zakat Online',
+      'Biaya untuk permohonan pembayaran zakat ini belum dikirim. Apakah Anda yakin ingin menyetujui permohonan ini?',
+      async () => {
+        await setujui(id);
+      },
+    );
+  } else {
+    await setujui(id);
+  }
+}
+
+const isModalRejectOpen = ref(false);
+async function rejectOnline(idl: number) {
+  isModalRejectOpen.value = true;
+  id.value = idl;
+}
+
+async function uploadBuktiTransfer(id: number) {
+  // Implementation for uploading transfer proof
+}
+
+async function cetakSuratSerahTerimaZakat(id: number) {
+  // Implementation for printing receipt letter
+}
+
+async function uploadBuktiSetoranZakat(id: number) {
+  // Implementation for uploading deposit proof
+}
 </script>
 
 <template>
@@ -132,7 +229,6 @@ async function deleteData(id: number) {
           <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" />
           {{ dynamicLabel('Tambah Riwayat Zakat') }}
         </BaseButton>
-
         <!-- Search -->
         <div class="flex items-center w-full sm:w-auto gap-2">
           <label for="search" class="mr-2 text-sm font-medium text-gray-600">Filter</label>
@@ -157,6 +253,17 @@ async function deleteData(id: number) {
               { value: 'sudah_dikirim', label: 'Sudah Dikirim' },
             ]"
             placeholder="Semua Status Konfirmasi"
+            @change="fetchData"
+          />
+
+          <BaseSelect
+            v-model="selectTipePembayaran"
+            :options="[
+              { value: 'online', label: 'Online' },
+              { value: 'transfer', label: 'Transfer' },
+              { value: 'cash', label: 'Cash' },
+            ]"
+            placeholder="Semua Tipe Pembayaran"
             @change="fetchData"
           />
 
@@ -239,15 +346,45 @@ async function deleteData(id: number) {
                   <table class="w-full border border-gray-300 rounded-lg">
                     <tbody>
                       <tr class="border border-gray-300">
-                        <td class="bg-gray-100 px-4 py-2 font-medium">Invoice</td>
+                        <td class="w-[40%] bg-gray-100 px-4 py-2 font-medium">Invoice</td>
                         <td class="px-4 py-2 font-medium w-full text-right">
                           #{{ riwayat_zakat.invoice }}
                         </td>
                       </tr>
                       <tr class="border border-gray-300">
-                        <td class="bg-gray-100 px-4 py-2 font-medium">Nominal</td>
+                        <td class="bg-gray-100 px-4 py-2 font-medium">Nominal Zakat</td>
                         <td class="px-4 py-2 font-medium w-full text-right">
                           {{ $formatToRupiah(riwayat_zakat.nominal) }}
+                        </td>
+                      </tr>
+                      <tr
+                        class="border border-gray-300"
+                        v-if="riwayat_zakat.tipe_pembayaran == 'online'"
+                      >
+                        <td class="bg-gray-100 px-4 py-2 font-medium">Kode</td>
+                        <td class="px-4 py-2 font-medium w-full text-right text-red-500">
+                          {{ $formatToRupiah(riwayat_zakat.kode) }}
+                        </td>
+                      </tr>
+                      <tr
+                        class="border border-gray-300"
+                        v-if="riwayat_zakat.tipe_pembayaran == 'online'"
+                      >
+                        <td class="bg-gray-100 px-4 py-2 font-medium">Total Dikirim</td>
+                        <td class="px-4 py-2 font-medium w-full text-right text-red-500">
+                          {{ $formatToRupiah(riwayat_zakat.nominal + riwayat_zakat.kode) }}
+                        </td>
+                      </tr>
+                      <tr class="border border-gray-300">
+                        <td class="bg-gray-100 px-4 py-2 font-medium">Tipe Pembayaran</td>
+                        <td class="px-4 py-2 font-medium w-full text-right">
+                          {{ riwayat_zakat.tipe_pembayaran }}
+                        </td>
+                      </tr>
+                      <tr class="border border-gray-300" v-if="riwayat_zakat.status == 'failed'">
+                        <td class="bg-gray-100 px-4 py-2 font-medium text-red">Alasan Penolakan</td>
+                        <td class="px-4 py-2 font-medium w-full text-right text-red">
+                          {{ riwayat_zakat.alasan_penolakan }}
                         </td>
                       </tr>
                     </tbody>
@@ -290,6 +427,53 @@ async function deleteData(id: number) {
                 </td>
                 <td class="px-6 py-4">
                   <div class="flex justify-center gap-2">
+                    <ButtonGreen
+                      v-if="
+                        riwayat_zakat.tipe_pembayaran == 'online' &&
+                        riwayat_zakat.status == 'process'
+                      "
+                      title="Setujui Permohonan"
+                      @click="approveOnline(riwayat_zakat.id, riwayat_zakat.konfirmasi_pembayaran)"
+                    >
+                      <font-awesome-icon icon="fa-solid fa-check" />
+                    </ButtonGreen>
+                    <DangerButton
+                      v-if="
+                        riwayat_zakat.tipe_pembayaran == 'online' &&
+                        riwayat_zakat.status == 'process'
+                      "
+                      title="Reject Permohonan"
+                      @click="rejectOnline(riwayat_zakat.id)"
+                    >
+                      <font-awesome-icon icon="fa-solid fa-ban" />
+                    </DangerButton>
+                    <LightButton
+                      v-if="riwayat_zakat.tipe_pembayaran == 'transfer'"
+                      title="Upload Bukti Transfer"
+                      @click="uploadBuktiTransfer(riwayat_zakat.id)"
+                    >
+                      <font-awesome-icon icon="fa-solid fa-upload" />
+                    </LightButton>
+                    <LightButton
+                      v-if="
+                        riwayat_zakat.tipe_pembayaran == 'cash' &&
+                        riwayat_zakat.posisi_uang == 'kantor_baitulmal'
+                      "
+                      title="Cetak Surat Serah Terima Zakat"
+                      @click="cetakSuratSerahTerimaZakat(riwayat_zakat.id)"
+                    >
+                      <font-awesome-icon icon="fa-solid fa-print" />
+                    </LightButton>
+                    <LightButton
+                      v-if="
+                        riwayat_zakat.tipe_pembayaran == 'cash' &&
+                        riwayat_zakat.posisi_uang == 'kantor_baitulmal'
+                      "
+                      @click="uploadBuktiSetoranZakat(riwayat_zakat.id)"
+                      title="Upload Bukti Setoran"
+                    >
+                      <font-awesome-icon icon="fa-solid fa-upload" />
+                    </LightButton>
                     <DangerButton @click="deleteData(riwayat_zakat.id)"
                       ><DeleteIcon
                     /></DangerButton>
@@ -330,6 +514,20 @@ async function deleteData(id: number) {
     <FormAdd
       :is-modal-open="isModalAddOpen"
       @close="((isModalAddOpen = false), fetchData())"
+      @status="
+        (payload: any) =>
+          displayNotification(
+            payload.error_msg || 'Tambah/Update RiwayatZakat gagal',
+            payload.error ? 'error' : 'success',
+          )
+      "
+    />
+
+    <!-- Modal FormReject -->
+    <FormReject
+      :is-modal-open="isModalRejectOpen"
+      :id="id"
+      @close="((isModalRejectOpen = false), fetchData())"
       @status="
         (payload: any) =>
           displayNotification(
