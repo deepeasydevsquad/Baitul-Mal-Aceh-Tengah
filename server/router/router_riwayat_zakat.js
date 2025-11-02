@@ -2,6 +2,7 @@ const express = require("express");
 const { body } = require("express-validator");
 const controllers = require("../modules/riwayat_zakat/controllers/index");
 const validation = require("../validation/riwayat_zakat");
+const validationHelper = require("../helper/handleErrorFile");
 const {
   authenticateTokenAdministrator,
 } = require("../middleware/authenticateToken");
@@ -112,6 +113,48 @@ router.post(
       .custom(validation.check_id_riwayat_zakat),
   ],
   controllers.delete
+);
+
+router.post(
+  "/riwayat_zakat/upload_bukti_transfer",
+  authenticateTokenAdministrator,
+  validation.upload("transfer").single("bukti"),
+  [
+    body("id")
+      .notEmpty()
+      .withMessage("ID Tidak Boleh Kosong")
+      .isInt()
+      .withMessage("ID Harus Angka")
+      .custom(validation.check_id_riwayat_zakat),
+    body("nominal_transfer")
+      .notEmpty()
+      .withMessage("Jumlah Nominal Transfer Tidak Boleh Kosong")
+      .isInt()
+      .withMessage("Jumlah Nominal Transfer Harus Angka"),
+  ],
+  validationHelper.handleFileErrors,
+  controllers.upload_bukti_transfer
+);
+
+router.post(
+  "/riwayat_zakat/upload_bukti_setoran",
+  authenticateTokenAdministrator,
+  validation.upload("cash").single("bukti"),
+  [
+    body("id")
+      .notEmpty()
+      .withMessage("ID Tidak Boleh Kosong")
+      .isInt()
+      .withMessage("ID Harus Angka")
+      .custom(validation.check_id_riwayat_zakat),
+    body("nominal_setoran")
+      .notEmpty()
+      .withMessage("Jumlah Nominal Setoran Tidak Boleh Kosong")
+      .isInt()
+      .withMessage("Jumlah Nominal Setoran Harus Angka"),
+  ],
+  validationHelper.handleFileErrors,
+  controllers.upload_bukti_setoran
 );
 
 module.exports = router;

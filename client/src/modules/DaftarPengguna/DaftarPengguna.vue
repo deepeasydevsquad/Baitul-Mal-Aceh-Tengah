@@ -45,6 +45,8 @@ const { showConfirmDialog, confirmTitle, confirmMessage, displayConfirmation, co
 interface daftar_pengguna {
   id: number;
   kode: string;
+  name: string;
+  jabatan: string;
   username: string;
   grup: string;
   createdAt: string;
@@ -150,8 +152,8 @@ async function deleteData(id: number) {
         <table v-else class="table-fixed w-full border-collapse bg-white text-sm">
           <thead class="bg-gray-50 text-gray-700 text-center">
             <tr>
-              <th class="w-[20%] px-6 py-3 font-medium">Kode</th>
-              <th class="w-[20%] px-6 py-3 font-medium">Nama User</th>
+              <th class="w-[20%] px-6 py-3 font-medium">Kode / Username</th>
+              <th class="w-[20%] px-6 py-3 font-medium">Nama / Jabatan</th>
               <th class="w-[20%] px-6 py-3 font-medium">Grup</th>
               <th class="w-[20%] px-6 py-3 font-medium">DateTimes</th>
               <th class="w-[20%] px-6 py-3 font-medium">Aksi</th>
@@ -166,10 +168,14 @@ async function deleteData(id: number) {
                 class="hover:bg-gray-50 transition-colors text-center"
               >
                 <td class="px-4 py-2 text-gray-600">
-                  {{ pengguna.kode }}
+                  <b>#{{ pengguna.kode }}</b>
+                  <br />
+                  ( {{ pengguna.username }} )
                 </td>
                 <td class="px-6 py-4 text-gray-600 break-words">
                   {{ pengguna.name }}
+                  <br />
+                  ( Jabatan : {{ pengguna.jabatan }} )
                 </td>
                 <td class="px-6 py-4 text-gray-600 break-words">
                   {{ pengguna.grup }}

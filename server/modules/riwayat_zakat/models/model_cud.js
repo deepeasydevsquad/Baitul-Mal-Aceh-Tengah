@@ -1,3 +1,4 @@
+const jwt = require("jsonwebtoken");
 const { sequelize, Riwayat_pengumpulan, Member } = require("../../../models");
 const Model_r = require("../models/model_r");
 const { writeLog } = require("../../../helper/writeLogHelper");
@@ -18,6 +19,10 @@ class Model_cud {
     const myDate = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
     const body = this.req.body;
 
+    const authHeader = this.req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
+    const decoded = jwt.decode(token);
+
     try {
       const insert = await Riwayat_pengumpulan.create(
         {
@@ -30,6 +35,8 @@ class Model_cud {
           konfirmasi_pembayaran: "belum_dikirim",
           posisi_uang:
             body.tipe_pembayaran == "cash" ? "kantor_baitulmal" : "bank",
+          nama_petugas: decoded.name,
+          jabatan_petugas: decoded.jabatan,
           createdAt: myDate,
           updatedAt: myDate,
         },
@@ -48,6 +55,10 @@ class Model_cud {
     await this.initialize();
     const body = this.req.body;
 
+    const authHeader = this.req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
+    const decoded = jwt.decode(token);
+
     try {
       const model_r = new Model_r(this.req);
       const info_riwayat_zakat = await model_r.info_riwayat_zakat(body.id);
@@ -55,6 +66,8 @@ class Model_cud {
       await Riwayat_pengumpulan.update(
         {
           konfirmasi_pembayaran: "sudah_dikirim",
+          nama_petugas: decoded.name,
+          jabatan_petugas: decoded.jabatan,
           status: "success",
           updatedAt: new Date(),
         },
@@ -74,6 +87,10 @@ class Model_cud {
     await this.initialize();
     const body = this.req.body;
 
+    const authHeader = this.req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
+    const decoded = jwt.decode(token);
+
     try {
       const model_r = new Model_r(this.req);
       const info_riwayat_zakat = await model_r.info_riwayat_zakat(body.id);
@@ -82,6 +99,8 @@ class Model_cud {
         {
           status: "failed",
           alasan_penolakan: body.alasan,
+          nama_petugas: decoded.name,
+          jabatan_petugas: decoded.jabatan,
           updatedAt: new Date(),
         },
         {
@@ -112,6 +131,66 @@ class Model_cud {
 
       this.message = `Menghapus Riwayat pengumpulan dengan Nama member Riwayat_pengumpulan: ${info_riwayat_zakat.member_name} dan ID Riwayat pengumpulan: ${info_riwayat_zakat.id}`;
     } catch (error) {
+      this.state = false;
+    }
+  }
+
+  async upload_bukti_transfer() {
+    await this.initialize();
+    const body = this.req.body;
+
+    try {
+      const model_r = new Model_r(this.req);
+      const info_riwayat_zakat = await model_r.info_riwayat_zakat(body.id);
+
+      await Riwayat_pengumpulan.update(
+        {
+          bukti_transfer: body.buktiPath,
+          nominal_transfer: body.nominal_transfer,
+          status: "success",
+          konfirmasi_pembayaran: "sudah_dikirim",
+          updatedAt: new Date(),
+        },
+        {
+          where: { id: body.id },
+          transaction: this.t,
+        }
+      );
+
+      this.message = `Mengunggah Bukti Transfer untuk Riwayat pengumpulan dengan Nama member Riwayat_pengumpulan: ${info_riwayat_zakat.member_name} dan ID Riwayat pengumpulan: ${info_riwayat_zakat.id}`;
+    } catch (error) {
+      this.state = false;
+    }
+  }
+
+  async upload_bukti_setoran() {
+    await this.initialize();
+    const body = this.req.body;
+
+    try {
+      const model_r = new Model_r(this.req);
+      const info_riwayat_zakat = await model_r.info_riwayat_zakat(body.id);
+
+      await Riwayat_pengumpulan.update(
+        {
+          bukti_setoran: body.buktiPath,
+          nominal_setoran: body.nominal_setoran,
+          status: "success",
+          posisi_uang: "bank",
+          konfirmasi_pembayaran: "sudah_dikirim",
+          updatedAt: new Date(),
+        },
+        {
+          where: { id: body.id },
+          transaction: this.t,
+        }
+      );
+
+      this.message = `Mengunggah Bukti Transfer untuk Riwayat pengumpulan dengan Nama member Riwayat_pengumpulan: ${info_riwayat_zakat.member_name} dan ID Riwayat pengumpulan: ${info_riwayat_zakat.id}`;
+    } catch (error) {
+      console.log("=======error2");
+      console.log(error);
+      console.log("=======error2");
       this.state = false;
     }
   }

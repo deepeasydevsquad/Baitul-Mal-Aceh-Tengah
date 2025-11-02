@@ -60,7 +60,7 @@ class Model_r {
     const sql = {
       limit,
       offset: (page - 1) * limit,
-      order: [["id", "ASC"]],
+      order: [["id", "DESC"]],
       attributes: [
         "id",
         "invoice",
@@ -76,6 +76,8 @@ class Model_r {
         "nominal_setoran",
         "bukti_setoran",
         "posisi_uang",
+        "nama_petugas",
+        "jabatan_petugas",
         "createdAt",
         "updatedAt",
       ],
@@ -110,6 +112,8 @@ class Model_r {
           nominal_setoran: row.nominal_setoran,
           bukti_setoran: row.bukti_setoran,
           posisi_uang: row.posisi_uang,
+          nama_petugas: row.nama_petugas,
+          jabatan_petugas: row.jabatan_petugas,
           datetimes: moment(row.updatedAt).format("YYYY-MM-DD HH:mm:ss"),
           member_id: row.Member?.id,
           member_name: row.Member?.fullname,

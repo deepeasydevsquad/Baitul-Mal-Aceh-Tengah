@@ -29,6 +29,7 @@ class Model_cud {
       await User.create(
         {
           name: body.name,
+          jabatan: body.jabatan,
           grup_id: body.grup_id,
           kode: await this.generate_kode(),
           username: body.username,
@@ -58,6 +59,7 @@ class Model_cud {
       // siapkan data update dasar
       const updateData = {
         name: body.name,
+        jabatan: body.jabatan,
         grup_id: body.grup_id,
         username: body.username,
         updatedAt: date,

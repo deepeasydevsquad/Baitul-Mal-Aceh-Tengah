@@ -1,58 +1,60 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
-import Notification from '@/components/Modal/Notification.vue'
-import BaseButton from '@/components/Button/BaseButton.vue'
-import InputText from '@/components/Form/InputText.vue'
-import SelectField from '@/components/Form/SelectField.vue'
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
+import Notification from '@/components/Modal/Notification.vue';
+import BaseButton from '@/components/Button/BaseButton.vue';
+import InputText from '@/components/Form/InputText.vue';
+import SelectField from '@/components/Form/SelectField.vue';
 
 // Composable
-import { useNotification } from '@/composables/useNotification'
+import { useNotification } from '@/composables/useNotification';
 
 // Service
 import {
   edit_daftar_pengguna,
   get_info_edit_daftar_pengguna,
   list_grup,
-} from '@/service/daftar_pengguna'
+} from '@/service/daftar_pengguna';
 
 // Notification
 const { showNotification, notificationType, notificationMessage, displayNotification } =
-  useNotification()
+  useNotification();
 
 // Props
 interface Props {
-  isModalOpen: boolean
-  selectedPengguna: any
+  isModalOpen: boolean;
+  selectedPengguna: any;
 }
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 
 // Emit
 const emit = defineEmits<{
-  (e: 'close'): void
-  (e: 'status', payload: { error_msg?: string; error?: boolean }): void
-}>()
+  (e: 'close'): void;
+  (e: 'status', payload: { error_msg?: string; error?: boolean }): void;
+}>();
 
 // State
-const isSubmitting = ref(false)
-const isLoading = ref(false)
+const isSubmitting = ref(false);
+const isLoading = ref(false);
 const form = ref<{
-  id?: number
-  name: string
-  username: string
-  grup_id: string
-  password: string
-  password_confirmation: string
+  id?: number;
+  name: string;
+  jabatan: string;
+  username: string;
+  grup_id: string;
+  password: string;
+  password_confirmation: string;
 }>({
   id: undefined,
   name: '',
+  jabatan: '',
   username: '',
   grup_id: '',
   password: '',
   password_confirmation: '',
-})
-const errors = ref<Record<string, string>>({})
-const grupData = ref<any[]>([])
+});
+const errors = ref<Record<string, string>>({});
+const grupData = ref<any[]>([]);
 
 // Reset form
 const resetForm = () => {
@@ -60,130 +62,138 @@ const resetForm = () => {
     id: undefined,
     username: '',
     name: '',
+    jabatan: '',
     grup_id: '',
     password: '',
     password_confirmation: '',
-  }
-  errors.value = {}
-}
+  };
+  errors.value = {};
+};
 
 // Fetch grup list
 const fetch_grup = async () => {
   try {
     // Fetch grup data from the server
-    const response = await list_grup()
-    grupData.value = response.data
-    console.log('grupData.value', grupData.value)
+    const response = await list_grup();
+    grupData.value = response.data;
+    console.log('grupData.value', grupData.value);
   } catch (error) {
-    console.error('Failed to fetch grup data:', error)
+    console.error('Failed to fetch grup data:', error);
   }
-}
+};
 // Validasi
 const validateForm = () => {
-  let isValid = true
-  errors.value = {}
+  let isValid = true;
+  errors.value = {};
 
   if (!form.value.name) {
-    errors.value.name = 'Nama pengguna tidak boleh kosong.'
-    isValid = false
+    errors.value.name = 'Nama pengguna tidak boleh kosong.';
+    isValid = false;
   }
+
+  if (!form.value.jabatan) {
+    errors.value.jabatan = 'Jabatan pengguna tidak boleh kosong.';
+    isValid = false;
+  }
+
   if (!form.value.username) {
-    errors.value.username = 'Username tidak boleh kosong.'
-    isValid = false
+    errors.value.username = 'Username tidak boleh kosong.';
+    isValid = false;
   }
   if (!form.value.grup_id) {
-    errors.value.grup_id = 'Grup tidak boleh kosong.'
-    isValid = false
+    errors.value.grup_id = 'Grup tidak boleh kosong.';
+    isValid = false;
   }
   if (form.value.password && form.value.password !== form.value.password_confirmation) {
-    errors.value.password_confirmation = 'Konfirmasi password tidak sama.'
-    isValid = false
+    errors.value.password_confirmation = 'Konfirmasi password tidak sama.';
+    isValid = false;
   }
-  return isValid
-}
+  return isValid;
+};
 
 // Ambil data pengguna untuk edit
 const fetchData = async () => {
-  if (!props.selectedPengguna?.id) return
-  isLoading.value = true
+  if (!props.selectedPengguna?.id) return;
+  isLoading.value = true;
   try {
-    const response = await get_info_edit_daftar_pengguna(props.selectedPengguna.id)
-    form.value.id = response.data.id
-    form.value.name = response.data.name
-    form.value.grup_id = response.data.grup_id
-    form.value.username = response.data.username
-    form.value.password = ''
-    form.value.password_confirmation = ''
+    const response = await get_info_edit_daftar_pengguna(props.selectedPengguna.id);
+    form.value.id = response.data.id;
+    form.value.name = response.data.name;
+    form.value.jabatan = response.data.jabatan;
+    form.value.grup_id = response.data.grup_id;
+    form.value.username = response.data.username;
+    form.value.password = '';
+    form.value.password_confirmation = '';
   } catch (error) {
-    displayNotification('Gagal mengambil data pengguna', 'error')
+    displayNotification('Gagal mengambil data pengguna', 'error');
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
-}
+};
 
 // Submit
 const handleSubmit = async () => {
-  if (!validateForm()) return
+  if (!validateForm()) return;
   if (!props.selectedPengguna?.id) {
-    displayNotification('ID pengguna tidak valid', 'error')
-    return
+    displayNotification('ID pengguna tidak valid', 'error');
+    return;
   }
 
-  isSubmitting.value = true
+  isSubmitting.value = true;
   try {
     const payload = {
       id: Number(props.selectedPengguna.id),
       name: String(form.value.name).trim(),
+      jabatan: String(form.value.jabatan).trim(),
       username: String(form.value.username).trim(),
       grup_id: String(form.value.grup_id).trim(),
       password: form.value.password || undefined,
-    }
+    };
 
-    const response = await edit_daftar_pengguna(payload)
-    const msg = response.message || response.error_msg || 'Berhasil'
-    const isError = response.error || false
+    const response = await edit_daftar_pengguna(payload);
+    const msg = response.message || response.error_msg || 'Berhasil';
+    const isError = response.error || false;
 
-    emit('status', { error_msg: msg, error: isError })
-    closeModal()
+    emit('status', { error_msg: msg, error: isError });
+    closeModal();
   } catch (error: any) {
     const msg =
-      error.response?.data?.error_msg || error.response?.data?.message || 'Terjadi kesalahan'
-    displayNotification(msg, 'error')
+      error.response?.data?.error_msg || error.response?.data?.message || 'Terjadi kesalahan';
+    displayNotification(msg, 'error');
   } finally {
-    isSubmitting.value = false
-    closeModal()
+    isSubmitting.value = false;
+    closeModal();
   }
-}
+};
 
 // Tutup modal
 const closeModal = () => {
-  if (isSubmitting.value) return
-  resetForm()
-  emit('close')
-}
-
+  if (isSubmitting.value) return;
+  resetForm();
+  emit('close');
+};
 
 // Escape
 const handleEscape = (e: KeyboardEvent) => {
-  if (e.key === 'Escape' && props.isModalOpen) closeModal()
-}
+  if (e.key === 'Escape' && props.isModalOpen) closeModal();
+};
 onMounted(() => {
-  document.addEventListener('keydown', handleEscape)
-  fetch_grup()
-})
-onBeforeUnmount(() => document.removeEventListener('keydown', handleEscape))
+  document.addEventListener('keydown', handleEscape);
+  fetch_grup();
+});
+onBeforeUnmount(() => document.removeEventListener('keydown', handleEscape));
 
 // Watch perubahan modal
 watch(
   () => props.isModalOpen,
   (val) => {
     if (val && props.selectedPengguna?.id) {
-      fetchData()
+      fetchData();
     } else if (!val) {
-      resetForm()
+      resetForm();
     }
   },
-)
+);
 </script>
 
 <template>
@@ -215,7 +225,7 @@ watch(
           </button>
         </div>
 
-        <!-- Input -->
+        <!-- Name -->
         <InputText
           id="name"
           v-model="form.name"
@@ -225,6 +235,17 @@ watch(
           :error="errors.name"
         />
 
+        <!-- Jabatan -->
+        <InputText
+          id="jabatan"
+          v-model="form.jabatan"
+          label="Jabatan Pengguna"
+          type="text"
+          placeholder="Masukkan jabatan pengguna"
+          :error="errors.jabatan"
+        />
+
+        <!-- Username -->
         <InputText
           v-model="form.username"
           label="Username"
@@ -234,17 +255,6 @@ watch(
         />
 
         <!-- Grup -->
-        <!-- <div class="flex flex-col">
-          <label class="mb-1 text-gray-700">Grup</label>
-          <select v-model="form.grup_id" class="border rounded px-3 py-2">
-            <option disabled value="">Pilih grup</option>
-            <option v-for="grup in grupData" :key="grup.id" :value="grup.id">
-              {{ grup.name }}
-            </option>
-          </select>
-          <p v-if="errors.grup_id" class="text-red-500 text-sm mt-1">{{ errors.grup_id }}</p>
-        </div> -->
-
         <SelectField
           v-model="form.grup_id"
           label="Grup"
@@ -286,13 +296,7 @@ watch(
             type="submit"
             variant="primary"
             :disabled="
-              !(
-                form.grup_id &&
-                form.name &&
-                form.username &&
-                form.password &&
-                form.password_confirmation
-              ) || isSubmitting
+              !(form.grup_id && form.name && form.jabatan && form.username) || isSubmitting
             "
             @click="handleSubmit"
           >

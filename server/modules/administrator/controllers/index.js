@@ -17,6 +17,7 @@ controllers.login_administrator_process = async (req, res) => {
       id: data.id,
       username: data.username,
       name: data.name,
+      jabatan: data.jabatan,
     };
     const access_token = jwt.sign(
       userPayload,
@@ -88,12 +89,10 @@ controllers.refreshToken = async (req, res) => {
     process.env.ADMINISTRATOR_REFRESH_SECRET_KEY,
     (err, user) => {
       if (err) {
-        return res
-          .status(403)
-          .json({
-            error: true,
-            error_msg: "Token kadaluarsa atau tidak valid",
-          });
+        return res.status(403).json({
+          error: true,
+          error_msg: "Token kadaluarsa atau tidak valid",
+        });
       }
       const { exp, iat, ...cleanUser } = user;
       const accessToken = jwt.sign(
@@ -131,7 +130,6 @@ controllers.edit_profile = async (req, res) => {
     handleServerError(res, error);
   }
 };
-
 
 controllers.get_info_edit_profile = async (req, res) => {
   if (!(await handleValidationErrors(req, res))) return;

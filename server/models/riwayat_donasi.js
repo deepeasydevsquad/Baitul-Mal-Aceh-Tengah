@@ -31,6 +31,8 @@ module.exports = (sequelize, DataTypes) => {
       nominal_setoran: DataTypes.INTEGER,
       bukti_setoran: DataTypes.STRING,
       posisi_uang: DataTypes.ENUM(["kantor_baitulmal", "bank"]),
+      nama_petugas: DataTypes.STRING,
+      jabatan_petugas: DataTypes.STRING,
       konfirmasi_pembayaran: DataTypes.ENUM(["sudah_dikirim", "belum_dikirim"]),
     },
     {

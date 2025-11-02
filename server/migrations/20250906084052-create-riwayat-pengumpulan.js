@@ -72,6 +72,14 @@ module.exports = {
         values: ["kantor_baitulmal", "bank"],
         defaultValue: "bank",
       },
+      nama_petugas: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+      jabatan_petugas: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
       konfirmasi_pembayaran: {
         type: Sequelize.ENUM,
         values: ["sudah_dikirim", "belum_dikirim"],

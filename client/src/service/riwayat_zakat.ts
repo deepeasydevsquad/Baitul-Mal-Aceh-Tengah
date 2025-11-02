@@ -52,6 +52,34 @@ export const tolak_pembayaran_zakat = async (data: { id: number; alasan: string 
   }
 };
 
+export const upload_bukti_transfer = async (param: any) => {
+  try {
+    const response = await api.post('/riwayat_zakat/upload_bukti_transfer', param, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Gagal mengupload bukti transfer:', error);
+    throw error;
+  }
+};
+
+export const upload_bukti_setoran = async (param: any) => {
+  try {
+    const response = await api.post('/riwayat_zakat/upload_bukti_setoran', param, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Gagal mengupload bukti transfer:', error);
+    throw error;
+  }
+};
+
 export const delete_riwayat_zakat = async (id: number) => {
   try {
     const response = await api.post('/riwayat_zakat/delete', { id: id });

@@ -17,8 +17,8 @@ class Model_cud {
 
   async edit_profile() {
     await this.initialize();
-    const authHeader = this.req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
+    const authHeader = this.req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
     const decoded = jwt.decode(token);
 
     const myDate = moment().format("YYYY-MM-DD HH:mm:ss");
@@ -37,6 +37,7 @@ class Model_cud {
       await User.update(
         {
           name: body.name,
+          jabatan: body.jabatan,
           username: body.username,
           password: hashedPassword || info_user.password,
           updatedAt: myDate,

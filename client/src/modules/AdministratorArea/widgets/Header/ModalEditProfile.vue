@@ -1,58 +1,59 @@
 <script setup lang="ts">
-import { ref, defineEmits, watch } from 'vue'
-import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
-import InputText from '@/components/Form/InputText.vue'
+import { ref, defineEmits, watch } from 'vue';
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
+import InputText from '@/components/Form/InputText.vue';
 
-import { SettingStore } from '@/stores/settings'
-import { edit_profile, get_info_edit_profile } from '@/service/auth'
+import { SettingStore } from '@/stores/settings';
+import { edit_profile, get_info_edit_profile } from '@/service/auth';
 
 // State: Loading
-const isLoading = ref(false)
+const isLoading = ref(false);
 
 const props = defineProps<{
-  formStatus: boolean
-}>()
+  formStatus: boolean;
+}>();
 
 const emit = defineEmits<{
-  (e: 'cancel'): void
-  (e: 'submitted'): void
-  (e: 'notify', payload: { type: string; message: string }): void
-}>()
+  (e: 'cancel'): void;
+  (e: 'submitted'): void;
+  (e: 'notify', payload: { type: string; message: string }): void;
+}>();
 
-const SettingGlob = SettingStore()
+const SettingGlob = SettingStore();
 
 // Function: Reset form
 const resetForm = () => {
   form.value = {
     name: '',
+    jabatan: '',
     username: '',
     password: '',
     password_confirmation: '',
-  }
+  };
 
-  errors.value = {}
-}
+  errors.value = {};
+};
 
 // Function: Hide confirmation
 const HideModal = () => {
   if (!isLoading.value) {
-    resetForm()
-    emit('cancel')
+    resetForm();
+    emit('cancel');
   }
-}
+};
 
 // Function: Fetch data
 async function fetchData() {
-  isLoading.value = true
+  isLoading.value = true;
 
   try {
-    const response = await get_info_edit_profile()
-    form.value = response.data
-    console.log(response)
+    const response = await get_info_edit_profile();
+    form.value = response.data;
+    console.log(response);
   } catch (error) {
-    console.error(error)
+    console.error(error);
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
 }
 
@@ -62,78 +63,84 @@ const errors = ref<Record<string, string>>({
   username: '',
   password: '',
   password_confirmation: '',
-})
+});
 
 const validateForm = () => {
-  let isValid = true
+  let isValid = true;
 
   if (!form.value.name) {
-    errors.value.name = 'Nama tidak boleh kosong'
-    isValid = false
+    errors.value.name = 'Nama tidak boleh kosong';
+    isValid = false;
+  }
+
+  if (!form.value.jabatan) {
+    errors.value.jabatan = 'Jabatan tidak boleh kosong';
+    isValid = false;
   }
 
   if (!form.value.username) {
-    errors.value.username = 'Username tidak boleh kosong'
-    isValid = false
+    errors.value.username = 'Username tidak boleh kosong';
+    isValid = false;
   }
 
   if (form.value.password_) {
-    errors.value.password_confirmation = 'Konfirmasi password tidak boleh kosong'
-    isValid = false
+    errors.value.password_confirmation = 'Konfirmasi password tidak boleh kosong';
+    isValid = false;
   }
 
   if (form.value.password && form.value.password_confirmation) {
-    // if (form.value.password.length < 8) {
-    //   errors.value.password = 'Password minimal 8 karakter'
-    // }
     if (form.value.password !== form.value.password_confirmation) {
-      errors.value.password_confirmation = 'Password tidak sama'
-      isValid = false
+      errors.value.password_confirmation = 'Password tidak sama';
+      isValid = false;
     }
   }
 
-  console.log(errors.value)
-  return isValid
-}
+  console.log(errors.value);
+  return isValid;
+};
 
 // Function: Handle submit
 const form = ref<Record<string, string>>({
   name: '',
+  jabatan: '',
   username: '',
   password: '',
   password_confirmation: '',
-})
+});
 
 const handleSubmit = async () => {
-  console.log('Siknetut')
-  console.log(form.value)
-  if (!validateForm()) return
+  console.log('Siknetut');
+  console.log(form.value);
+  if (!validateForm()) return;
 
-  isLoading.value = true
+  isLoading.value = true;
   try {
-    console.log(form.value)
-    await edit_profile(form.value)
+    console.log(form.value);
+    await edit_profile(form.value);
 
-    SettingGlob.addItem("name", form.value.name);
-    emit('notify', { type: 'success', message: 'Berhasil mengubah profile' })
+    SettingGlob.addItem('name', form.value.name);
+    emit('notify', { type: 'success', message: 'Berhasil mengubah profile' });
   } catch (error: any) {
-    emit('notify', { type: 'error', message: error.response?.data?.message || 'Gagal mengubah profile' })
-    console.error(error)
+    emit('notify', {
+      type: 'error',
+      message: error.response?.data?.message || 'Gagal mengubah profile',
+    });
+    console.error(error);
   } finally {
-    emit('submitted')
-    isLoading.value = false
+    emit('submitted');
+    isLoading.value = false;
     // HideModal()
   }
-}
+};
 
 watch(
   () => props.formStatus,
   (val) => {
     if (val) {
-      fetchData()
+      fetchData();
     }
   },
-)
+);
 </script>
 
 <template>
@@ -169,6 +176,15 @@ watch(
                   label="Name"
                   placeholder="Masukkan nama"
                   :error="errors.name"
+                />
+              </div>
+              <div class="mb-4">
+                <InputText
+                  id="jabatan"
+                  v-model="form.jabatan"
+                  label="Jabatan"
+                  placeholder="Masukkan jabatan"
+                  :error="errors.jabatan"
                 />
               </div>
               <div class="mb-4">
