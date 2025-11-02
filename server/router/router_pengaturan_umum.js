@@ -21,6 +21,7 @@ router.post(
     { name: "icon", maxCount: 1 },
     { name: "logo", maxCount: 1 },
     { name: "hero_logo", maxCount: 1 },
+    { name: "logo_tanpa_teks", maxCount: 1 },
   ]),
   validation.check_dimensions(false),
   [
@@ -39,6 +40,11 @@ router.post(
       .withMessage("Quote tidak boleh kosong")
       .isString()
       .withMessage("Quote harus string"),
+    body("harga_emas_per_gram")
+      .notEmpty()
+      .withMessage("Harga emas per gram tidak boleh kosong")
+      .isInt()
+      .withMessage("Harga emas per gram harus angka"),
     body("nama_jabatan_1")
       .notEmpty()
       .withMessage("Nama jabatan 1 tidak boleh kosong")

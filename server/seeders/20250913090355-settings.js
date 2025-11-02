@@ -37,6 +37,12 @@ module.exports = {
           updatedAt: new Date(),
         },
         {
+          name: "logo_tanpa_teks",
+          value: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
           name: "hero_logo",
           value: "hero_logo.png",
           createdAt: new Date(),
@@ -58,6 +64,12 @@ module.exports = {
         {
           name: "quote",
           value: "Sucikan Harta dengan Zakat",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          name: "harga_emas_per_gram",
+          value: 2561879, // 1 gram emas = 2.561.879 rupiah per tanggal 02 November 2025
           createdAt: new Date(),
           updatedAt: new Date(),
         },
