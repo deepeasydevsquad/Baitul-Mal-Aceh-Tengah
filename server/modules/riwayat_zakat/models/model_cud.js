@@ -1,4 +1,6 @@
 const jwt = require("jsonwebtoken");
+const fs = require("fs").promises;
+const path = require("path");
 const { sequelize, Riwayat_pengumpulan, Member } = require("../../../models");
 const Model_r = require("../models/model_r");
 const { writeLog } = require("../../../helper/writeLogHelper");
@@ -7,6 +9,7 @@ const moment = require("moment");
 class Model_cud {
   constructor(req) {
     this.req = req;
+    this.filesToDelete = [];
   }
 
   async initialize() {
@@ -129,7 +132,19 @@ class Model_cud {
         transaction: this.t,
       });
 
-      this.message = `Menghapus Riwayat pengumpulan dengan Nama member Riwayat_pengumpulan: ${info_riwayat_zakat.member_name} dan ID Riwayat pengumpulan: ${info_riwayat_zakat.id}`;
+      if (info_riwayat_zakat.bukti_transfer) {
+        this.filesToDelete.push(
+          path.resolve(process.cwd(), info_riwayat_zakat.bukti_transfer)
+        );
+      }
+
+      if (info_riwayat_zakat.bukti_setoran) {
+        this.filesToDelete.push(
+          path.resolve(process.cwd(), info_riwayat_zakat.bukti_setoran)
+        );
+      }
+
+      this.message = `Menghapus Riwayat pengumpulan dengan Nama member Riwayat_pengumpulan: ${info_riwayat_zakat.member_name}, nominal zakat sebesar: ${info_riwayat_zakat.nominal} dan ID Riwayat pengumpulan: ${info_riwayat_zakat.id}`;
     } catch (error) {
       this.state = false;
     }
@@ -201,6 +216,15 @@ class Model_cud {
         msg: this.message,
       });
       await this.t.commit();
+      // hapus file setelah commit (tidak bisa di-rollback jika terjadi kegagalan)
+      for (const filePath of this.filesToDelete || []) {
+        try {
+          await fs.unlink(filePath);
+        } catch (err) {
+          if (err.code !== "ENOENT")
+            console.error("Failed to delete file:", filePath, err);
+        }
+      }
       return true;
     } else {
       await this.t.rollback();
