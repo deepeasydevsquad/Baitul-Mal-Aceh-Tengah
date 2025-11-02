@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Riwayat_donasi extends Model {
     /**
@@ -19,17 +17,28 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
   }
-  Riwayat_donasi.init({
-    program_donasi_id: DataTypes.INTEGER,
-    member_id: DataTypes.INTEGER,
-    invoice: DataTypes.STRING,
-    nominal: DataTypes.INTEGER,
-    kode: DataTypes.INTEGER,
-    status: DataTypes.ENUM(['process','success','failed']),
-    konfirmasi_pembayaran: DataTypes.ENUM(['sudah_dikirim','belum_dikirim'])
-  }, {
-    sequelize,
-    modelName: 'Riwayat_donasi',
-  });
+  Riwayat_donasi.init(
+    {
+      program_donasi_id: DataTypes.INTEGER,
+      member_id: DataTypes.INTEGER,
+      invoice: DataTypes.STRING,
+      nominal: DataTypes.INTEGER,
+      kode: DataTypes.INTEGER,
+      status: DataTypes.ENUM(["process", "success", "failed"]),
+      tipe_pembayaran: DataTypes.ENUM(["online", "transfer", "cash"]),
+      nominal_transfer: DataTypes.INTEGER,
+      bukti_transfer: DataTypes.STRING,
+      nominal_setoran: DataTypes.INTEGER,
+      bukti_setoran: DataTypes.STRING,
+      posisi_uang: DataTypes.ENUM(["kantor_baitulmal", "bank"]),
+      nama_petugas: DataTypes.STRING,
+      jabatan_petugas: DataTypes.STRING,
+      konfirmasi_pembayaran: DataTypes.ENUM(["sudah_dikirim", "belum_dikirim"]),
+    },
+    {
+      sequelize,
+      modelName: "Riwayat_donasi",
+    }
+  );
   return Riwayat_donasi;
 };

@@ -35,6 +35,11 @@ class Model_r {
       where.status = body.status;
     }
 
+    // filter tipe pembayaran
+    if (body.tipe_pembayaran && body.tipe_pembayaran !== "") {
+      where.tipe_pembayaran = body.tipe_pembayaran;
+    }
+
     // filter konfirmasi
     if (body.konfirmasi_pembayaran && body.konfirmasi_pembayaran !== "") {
       where.konfirmasi_pembayaran = body.konfirmasi_pembayaran;
@@ -55,15 +60,24 @@ class Model_r {
     const sql = {
       limit,
       offset: (page - 1) * limit,
-      order: [["id", "ASC"]],
+      order: [["id", "DESC"]],
       attributes: [
         "id",
         "invoice",
         "status",
+        "alasan_penolakan",
         "nominal",
         "kode",
         "konfirmasi_pembayaran",
         "tipe",
+        "tipe_pembayaran",
+        "nominal_transfer",
+        "bukti_transfer",
+        "nominal_setoran",
+        "bukti_setoran",
+        "posisi_uang",
+        "nama_petugas",
+        "jabatan_petugas",
         "createdAt",
         "updatedAt",
       ],
@@ -81,16 +95,25 @@ class Model_r {
       const q = await Riwayat_pengumpulan.findAndCountAll(sql);
       const total = q.count;
 
-      const data = q.rows.map((item) => {
+      const list = q.rows.map((item) => {
         const row = item.toJSON();
         return {
           id: row.id,
           invoice: row.invoice,
           status: row.status,
+          alasan_penolakan: row.alasan_penolakan,
           nominal: row.nominal,
           kode: row.kode,
           konfirmasi_pembayaran: row.konfirmasi_pembayaran,
           tipe: row.tipe,
+          tipe_pembayaran: row.tipe_pembayaran,
+          nominal_transfer: row.nominal_transfer,
+          bukti_transfer: row.bukti_transfer,
+          nominal_setoran: row.nominal_setoran,
+          bukti_setoran: row.bukti_setoran,
+          posisi_uang: row.posisi_uang,
+          nama_petugas: row.nama_petugas,
+          jabatan_petugas: row.jabatan_petugas,
           datetimes: moment(row.updatedAt).format("YYYY-MM-DD HH:mm:ss"),
           member_id: row.Member?.id,
           member_name: row.Member?.fullname,
@@ -98,14 +121,42 @@ class Model_r {
         };
       });
 
+      let total_saldo_dikantor = 0;
+      let pembayaran_online_dikirim = 0;
+      await Riwayat_pengumpulan.findAll({}).then(async (value) => {
+        await Promise.all(
+          await value.map(async (e) => {
+            if (e.posisi_uang === "kantor_baitulmal") {
+              total_saldo_dikantor =
+                total_saldo_dikantor + (parseInt(e.nominal) + parseInt(e.kode));
+            }
+            if (
+              e.status === "process" &&
+              e.tipe_pembayaran === "online" &&
+              e.konfirmasi_pembayaran === "sudah_dikirim"
+            ) {
+              pembayaran_online_dikirim = pembayaran_online_dikirim + 1;
+            }
+          })
+        );
+      });
+
       return {
-        data,
+        data: {
+          list: list,
+          total_saldo_dikantor: total_saldo_dikantor,
+          pembayaran_online_dikirim: pembayaran_online_dikirim,
+        },
         total,
       };
     } catch (error) {
       console.error("ERROR in daftar riwayat zakat:", error);
       return {
-        data: [],
+        data: {
+          list: [],
+          total_saldo_dikantor: 0,
+          pembayaran_online_dikirim: 0,
+        },
         total: 0,
       };
     }
@@ -128,6 +179,9 @@ class Model_r {
         kode: result.kode,
         status: result.status,
         konfirmasi_pembayaran: result.konfirmasi_pembayaran,
+        tipe_pembayaran: result.tipe_pembayaran,
+        bukti_transfer: result.bukti_transfer,
+        bukti_setoran: result.bukti_setoran,
         member_id: result.member_id,
         member_name: result.Member?.fullname,
         member_nik: result.Member?.nomor_ktp,

@@ -8,6 +8,12 @@ import {
   useTabTerpilih,
 } from '../../../../stores/sidebar';
 
+import { MessageTabZakat, MessageTabDonasi, MessageTabInfaq } from '@/stores/message';
+
+const messageZakat = MessageTabZakat();
+const messageDonasi = MessageTabDonasi();
+const messageInfaq = MessageTabInfaq();
+
 // components
 import BakalPenerimaBantuan from '@/modules/BakalPenerimaBantuan/BakalPenerimaBantuan.vue';
 import Bank from '@/modules/Bank/Bank.vue';
@@ -239,10 +245,28 @@ watch(
       role="tabpanel"
       :aria-labelledby="`${tab.sharedObject[item.id].path}-tab`"
     >
-      <p
-        class="px-5 mb-5 text-sm text-gray-900 dark:text-white"
-        v-html="tab.sharedObject[item.id].desc"
-      ></p>
+      <div class="grid grid-cols-2 gap-6 items-start">
+        <p
+          class="px-5 text-sm text-gray-900 dark:text-white leading-relaxed"
+          v-html="tab.sharedObject[item.id].desc"
+        ></p>
+
+        <p
+          class="px-5 text-sm text-gray-900 dark:text-white font-medium leading-relaxed text-right"
+          v-if="tab.sharedObject[item.id].path == 'riwayat_zakat'"
+          v-html="messageZakat.getString"
+        ></p>
+        <p
+          class="px-5 text-sm text-gray-900 dark:text-white font-medium leading-relaxed text-right"
+          v-if="tab.sharedObject[item.id].path == 'riwayat_donasi'"
+          v-html="messageDonasi.getString"
+        ></p>
+        <p
+          class="px-5 text-sm text-gray-900 dark:text-white font-medium leading-relaxed text-right"
+          v-if="tab.sharedObject[item.id].path == 'riwayat_infaq'"
+          v-html="messageInfaq.getString"
+        ></p>
+      </div>
       <component :is="tabComponents[tab.sharedObject[item.id].path]" class="tab"></component>
     </div>
   </div>

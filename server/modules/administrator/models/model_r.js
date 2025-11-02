@@ -39,7 +39,12 @@ class Model_r {
           id: decoded.id,
         },
       });
-      return { id: q.id, username: q.username, name: q.name };
+      return {
+        id: q.id,
+        username: q.username,
+        name: q.name,
+        jabatan: q.jabatan,
+      };
     } catch (error) {
       return {};
     }
@@ -50,7 +55,12 @@ class Model_r {
       var q = await User.findOne({
         where: { username: this.req.body.username },
       });
-      return { id: q.id, username: q.username, name: q.name };
+      return {
+        id: q.id,
+        username: q.username,
+        name: q.name,
+        jabatan: q.jabatan,
+      };
     } catch (error) {
       return {};
     }

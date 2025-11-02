@@ -113,6 +113,14 @@ class Model_r {
         order: [["fullname", "ASC"]],
       });
 
+      console.log("--------------------------");
+      console.log("dataMember:", dataMember);
+      console.log("dataSurvey:", dataSurvey.Surveyor);
+      console.log("dataSurvey:", dataSurvey.Surveyor.name);
+      // console.log(dataSurvey.Kegiatan.Asnaf);
+      // console.log(dataSurvey.Kegiatan.Asnaf.name);
+      console.log("--------------------------");
+
       // Format response
       return {
         data: {
@@ -121,7 +129,7 @@ class Model_r {
           surveyor_name: dataSurvey.Surveyor.name,
           kegiatan_name: dataSurvey.Kegiatan.nama_kegiatan,
           program_name: dataSurvey.Kegiatan.Program.name,
-          asnaf_name: dataSurvey.Kegiatan.Asnaf.name,
+          asnaf_name: dataSurvey.Kegiatan.Asnaf?.name,
           sk: dataSurvey.sk,
           member: dataMember.rows.map((member) => ({
             id: member.id,
@@ -131,7 +139,10 @@ class Model_r {
         total: dataMember.count,
       };
     } catch (error) {
-      console.error("Error survey_lapangan:", error.message);
+      console.log("--------------------------");
+      console.log(error);
+      console.log("--------------------------");
+      // console.error("Error survey_lapangan:", error.message);
       return {};
     }
   }
@@ -357,7 +368,10 @@ class Model_r {
       });
       return member;
     } catch (error) {
-      console.error("Error fetching info for member:", error);
+      //console.error("Error fetching info for member:", error);
+      console.log("000000000000000000000000000");
+      console.log(error);
+      console.log("000000000000000000000000000");
       return null;
     }
   }

@@ -39,6 +39,7 @@ class Model_r {
           "id",
           "grup_id",
           "name",
+          "jabatan",
           "kode",
           "username",
           "createdAt",
@@ -61,6 +62,7 @@ class Model_r {
           grup_id: row.grup_id,
           grup: row.Grup ? row.Grup.name : null, // ambil nama grup
           name: row.name,
+          jabatan: row.jabatan,
           kode: row.kode,
           username: row.username,
           createdAt: moment(row.createdAt).format("YYYY-MM-DD HH:mm:ss"),
@@ -108,6 +110,7 @@ class Model_r {
         attributes: [
           "id",
           "name",
+          "jabatan",
           "grup_id",
           "kode",
           "username",
@@ -125,6 +128,7 @@ class Model_r {
       return {
         id: row.id,
         name: row.name,
+        jabatan: row.jabatan,
         grup_id: row.grup_id,
         kode: row.kode,
         username: row.username,

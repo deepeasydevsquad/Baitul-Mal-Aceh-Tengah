@@ -151,6 +151,7 @@ import {
   faToggleOn,
   faTriangleExclamation,
   faUndoAlt,
+  faUpload,
   faUser,
   faUserCheck,
   faUserClock,
@@ -301,6 +302,7 @@ library.add(
   faCircleInfo,
   faEye,
   faInbox,
+  faUpload,
 );
 
 // Buat App Vue

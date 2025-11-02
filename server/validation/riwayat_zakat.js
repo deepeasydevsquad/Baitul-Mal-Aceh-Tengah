@@ -1,4 +1,8 @@
 const { Op, Riwayat_pengumpulan, Member } = require("../models");
+const multer = require("multer");
+const sharp = require("sharp");
+const path = require("path");
+const fs = require("fs");
 
 const validation = {};
 
@@ -33,5 +37,76 @@ validation.check_id_riwayat_zakat = async (value) => {
   }
   return true;
 };
+
+validation.upload = (tipe = "cash") => {
+  const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      const folder = tipe === "transfer" ? "bukti_transfer" : "bukti_setoran";
+      const uploadPath = path.join(__dirname, "../uploads/img/zakat", folder);
+      if (!fs.existsSync(uploadPath)) {
+        fs.mkdirSync(uploadPath, { recursive: true });
+      }
+      cb(null, uploadPath);
+    },
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname).toLowerCase();
+      const timestamp = Date.now();
+      const filename = `${timestamp}${ext}`;
+      req.body.buktiPath = filename;
+      cb(null, filename);
+    },
+  });
+
+  const fileFilter = (req, file, cb) => {
+    const allowedTypes = ["image/png", "image/jpeg", "image/jpg"];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Format file harus PNG, JPG, atau JPEG"), false);
+    }
+  };
+
+  return multer({
+    storage,
+    fileFilter,
+    limits: { fileSize: 2 * 1024 * 1024 }, // 2 MB
+  });
+};
+
+// const storage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     const uploadPath = path.join(
+//       __dirname,
+//       "../uploads/img/zakat/" +
+//         (body.tipe_pembayaran == "tranfer" ? "bukti_tranfer" : "bukti_setoran")
+//     );
+//     if (!fs.existsSync(uploadPath)) {
+//       fs.mkdirSync(uploadPath, { recursive: true });
+//     }
+//     cb(null, uploadPath);
+//   },
+//   filename: (req, file, cb) => {
+//     const ext = path.extname(file.originalname).toLowerCase();
+//     const timestamp = Date.now();
+//     const filename = `${timestamp}${ext}`;
+//     req.body.buktiPath = filename;
+//     cb(null, filename);
+//   },
+// });
+
+// const fileFilter = (req, file, cb) => {
+//   const allowedTypes = ["image/png", "image/jpeg", "image/jpg"];
+//   if (allowedTypes.includes(file.mimetype)) {
+//     cb(null, true);
+//   } else {
+//     cb(new Error("Format file harus PNG, JPG atau JPEG"), false);
+//   }
+// };
+
+// validation.upload = multer({
+//   storage,
+//   fileFilter,
+//   limits: { fileSize: 2 * 1024 * 1024 }, // 2 MB
+// });
 
 module.exports = validation;

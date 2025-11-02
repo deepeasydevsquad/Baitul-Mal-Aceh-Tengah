@@ -4,6 +4,7 @@ import { logo } from '@/service/logo'; // fungsi buat ambil logo dari backend
 
 import { API_URL } from '@/config/config';
 const BASE_URL = API_URL;
+
 const logoUrl = ref<string | null>(null);
 
 const getLogo = async () => {

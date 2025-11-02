@@ -31,6 +31,9 @@ router.post(
   authenticateTokenAdministrator,
   [
     body("name").notEmpty().withMessage("Nama Pengguna Tidak Boleh Kosong"),
+    body("jabatan")
+      .notEmpty()
+      .withMessage("Jabatan Pengguna Tidak Boleh Kosong"),
     body("grup_id").notEmpty().withMessage("Grup Pengguna Tidak Boleh Kosong"),
     body("password").notEmpty().withMessage("Password Tidak Boleh Kosong"),
     body("password_confirmation")

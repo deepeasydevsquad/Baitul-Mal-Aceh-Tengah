@@ -63,6 +63,48 @@ controllers.add = async (req, res) => {
   }
 };
 
+controllers.approve_online = async (req, res) => {
+  if (!(await handleValidationErrors(req, res))) return;
+  try {
+    const model_cud = new Model_cud(req);
+    await model_cud.approve_online();
+    if (await model_cud.response()) {
+      res.status(200).json({
+        error: false,
+        error_msg: "Pembayaran zakat online berhasil disetujui.",
+      });
+    } else {
+      res.status(400).json({
+        error: true,
+        error_msg: "Gagal menyetujui pembayaran zakat online.",
+      });
+    }
+  } catch (error) {
+    handleServerError(res, error);
+  }
+};
+
+controllers.reject_online = async (req, res) => {
+  if (!(await handleValidationErrors(req, res))) return;
+  try {
+    const model_cud = new Model_cud(req);
+    await model_cud.reject_online();
+    if (await model_cud.response()) {
+      res.status(200).json({
+        error: false,
+        error_msg: "Pembayaran zakat online berhasil ditolak.",
+      });
+    } else {
+      res.status(400).json({
+        error: true,
+        error_msg: "Gagal menolak pembayaran zakat online.",
+      });
+    }
+  } catch (error) {
+    handleServerError(res, error);
+  }
+};
+
 // DELETE
 controllers.delete = async (req, res) => {
   if (!(await handleValidationErrors(req, res))) return;
@@ -83,6 +125,58 @@ controllers.delete = async (req, res) => {
       });
     }
   } catch (error) {
+    handleServerError(res, error);
+  }
+};
+
+controllers.upload_bukti_transfer = async (req, res) => {
+  if (!(await handleValidationErrors(req, res))) return;
+
+  try {
+    const model_cud = new Model_cud(req);
+    await model_cud.upload_bukti_transfer();
+
+    if (await model_cud.response()) {
+      res.status(200).json({
+        error: false,
+        error_msg: "Bukti transfer berhasil diupload.",
+      });
+    } else {
+      res.status(400).json({
+        error: true,
+        error_msg: "Bukti transfer gagal diupload.",
+      });
+    }
+  } catch (error) {
+    console.log("=======error");
+    console.log(error);
+    console.log("=======error");
+    handleServerError(res, error);
+  }
+};
+
+controllers.upload_bukti_setoran = async (req, res) => {
+  if (!(await handleValidationErrors(req, res))) return;
+
+  try {
+    const model_cud = new Model_cud(req);
+    await model_cud.upload_bukti_setoran();
+
+    if (await model_cud.response()) {
+      res.status(200).json({
+        error: false,
+        error_msg: "Bukti setoran berhasil diupload.",
+      });
+    } else {
+      res.status(400).json({
+        error: true,
+        error_msg: "Bukti setoran gagal diupload.",
+      });
+    }
+  } catch (error) {
+    console.log("=======error");
+    console.log(error);
+    console.log("=======error");
     handleServerError(res, error);
   }
 };

@@ -41,7 +41,7 @@ const resetForm = () => {
     member_id: null,
     nominal: 0,
     tipe_zakat: '',
-    status_pemasukan: '',
+    tipe_pembayaran: '',
   };
 
   // Reset errors
@@ -90,8 +90,8 @@ const validateForm = () => {
     isValid = false;
   }
 
-  if (!form.value.status_pemasukan) {
-    errors.value.status_pemasukan = 'Status Pemasukan wajib diisi.';
+  if (!form.value.tipe_pembayaran) {
+    errors.value.status_pemasukan = 'Tipe Pembayaran wajib diisi.';
     isValid = false;
   }
 
@@ -105,12 +105,12 @@ const form = ref<{
   member_id: number | null;
   nominal: number;
   tipe_zakat: string;
-  status_pemasukan: string;
+  tipe_pembayaran: string;
 }>({
   member_id: null,
   nominal: 0,
   tipe_zakat: '',
-  status_pemasukan: '',
+  tipe_pembayaran: '',
 });
 
 const handleSubmit = async () => {
@@ -121,7 +121,7 @@ const handleSubmit = async () => {
     member_id: form.value.member_id,
     nominal: form.value.nominal,
     tipe_zakat: form.value.tipe_zakat,
-    status_pemasukan: form.value.status_pemasukan,
+    tipe_pembayaran: form.value.tipe_pembayaran,
   };
 
   console.log(formData);
@@ -235,19 +235,18 @@ watch(
 
         <div>
           <SelectField
-            v-model="form.status_pemasukan"
-            id="status_pemasukan"
-            label="Status Pemasukan"
-            :error="errors.status_pemasukan"
+            v-model="form.tipe_pembayaran"
+            id="tipe_pembayaran"
+            label="Tipe Pembayaran"
+            :error="errors.tipe_pembayaran"
             :options="[
-              { id: '', name: '-- Pilih Status --' },
-              { id: 'belum_dikirim', name: 'Belum Dikirim' },
-              { id: 'sudah_dikirim', name: 'Sudah Dikirim' },
+              { id: '', name: '-- Pilih Tipe Pembayaran --' },
+              { id: 'transfer', name: 'Transfer' },
+              { id: 'cash', name: 'Cash' },
             ]"
             :required="true"
           />
         </div>
-
         <!-- Actions -->
         <div class="flex justify-end gap-3">
           <BaseButton
@@ -262,7 +261,7 @@ watch(
             type="submit"
             variant="primary"
             :disabled="
-              !(form.member_id && form.nominal && form.tipe_zakat && form.status_pemasukan) ||
+              !(form.member_id && form.nominal && form.tipe_zakat && form.tipe_pembayaran) ||
               isSubmitting
             "
             @click="handleSubmit"

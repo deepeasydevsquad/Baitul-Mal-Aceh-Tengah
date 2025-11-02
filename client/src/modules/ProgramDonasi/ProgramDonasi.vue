@@ -27,6 +27,8 @@ import ButtonGreen from '@/components/Button/ButtonGreen.vue';
 import FormDonasi from './widgets/FormDonasi.vue';
 import LockIcon from '@/components/Icons/LockIcon.vue';
 
+import { API_URL } from '@/config/config';
+
 // State: Loading
 const isLoading = ref(false);
 const isTableLoading = ref(false);
@@ -49,7 +51,7 @@ const { showConfirmDialog, confirmTitle, confirmMessage, displayConfirmation, co
 // Composable: dynamic label
 const { dynamicLabel } = useDynamicLabel();
 // State Data Bank
-const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
+const BASE_URL = API_URL;
 
 interface Data {
   id: number;

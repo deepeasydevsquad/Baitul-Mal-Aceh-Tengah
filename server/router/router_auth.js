@@ -6,7 +6,7 @@ const validationMember = require("../validation/member");
 const validationAdministrator = require("../validation/administrator");
 const {
   authenticateTokenAdministrator,
-  authenticateTokenMember
+  authenticateTokenMember,
 } = require("../middleware/authenticateToken");
 
 // ROUTER
@@ -47,6 +47,7 @@ router.post(
   authenticateTokenAdministrator,
   [
     body("name").notEmpty().withMessage("Name Tidak Boleh Kosong").trim(),
+    body("jabatan").notEmpty().withMessage("Jabatan Tidak Boleh Kosong").trim(),
     body("username")
       .notEmpty()
       .withMessage("Username Tidak Boleh Kosong")
@@ -73,9 +74,7 @@ router.post(
       .withMessage("Username Tidak Boleh Kosong")
       .trim()
       .custom(validationMember.check_username),
-    body("password")
-      .optional()
-      .custom(validationMember.check_password),
+    body("password").optional().custom(validationMember.check_password),
   ],
   controllersMember.edit_profile_member
 );
@@ -105,4 +104,3 @@ router.post(
 );
 
 module.exports = router;
-

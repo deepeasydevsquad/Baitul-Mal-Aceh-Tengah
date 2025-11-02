@@ -1,16 +1,26 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, getCurrentInstance } from 'vue';
 import Notification from '@/components/Modal/Notification.vue';
 import Confirmation from '@/components/Modal/Confirmation.vue';
 import BaseButton from '@/components/Button/BaseButton.vue';
+import LightButton from '@/components/Button/LightButton.vue';
+import ButtonGreen from '@/components/Button/ButtonGreen.vue';
+import YellowButton from '@/components/Button/YellowButton.vue';
 import DangerButton from '@/components/Button/DangerButton.vue';
 import DeleteIcon from '@/components/Icons/DeleteIcon.vue';
 import Pagination from '@/components/Pagination/Pagination.vue';
 import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
 import FormAdd from '@/modules/RiwayatZakat/widgets/FormAdd.vue';
+import FormReject from '@/modules/RiwayatZakat/widgets/FormReject.vue';
+import FormUploadBuktiTransfer from '@/modules/RiwayatZakat/widgets/FormUploadBuktiTransfer.vue';
+import FormUploadBuktiSetoranZakat from '@/modules/RiwayatZakat/widgets/FormUploadBuktiSetoranZakat.vue';
+import FormDisplayBukti from '@/modules/RiwayatZakat/widgets/FormDisplayBukti.vue';
 import BaseSelect from '@/components/Form/BaseSelect.vue';
+
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 // Composable
 import { usePagination } from '@/composables/usePaginations';
@@ -19,7 +29,22 @@ import { useNotification } from '@/composables/useNotification';
 import { useDynamicLabel } from '@/composables/useDynamicLabel';
 
 // Service API
-import { list, delete_riwayat_zakat } from '@/service/riwayat_zakat';
+import { list, delete_riwayat_zakat, setujui_pembayaran_zakat } from '@/service/riwayat_zakat';
+
+// Store
+import { MessageTabZakat } from '@/stores/message';
+import Form from '@/components/Modal/Form.vue';
+import FormUploadBeritaAcara from '../BakalPenerimaBantuan/widgets/FormUploadBeritaAcara.vue';
+
+import { API_URL } from '@/config/config';
+const BASE_URL = API_URL;
+
+// Global Properties
+const { appContext } = getCurrentInstance()!;
+
+const $formatToRupiah = appContext.config.globalProperties.$formatToRupiah;
+
+const message = MessageTabZakat();
 
 // State: Loading
 const isLoading = ref(false);
@@ -53,6 +78,15 @@ interface RiwayatZakat {
   nominal: number;
   kode: string;
   status: string;
+  alasan_penolakan: string;
+  tipe_pembayaran: string;
+  nominal_transfer: number;
+  bukti_transfer: string;
+  nominal_setoran: number;
+  bukti_setoran: string;
+  posisi_uang: string;
+  nama_petugas: string;
+  jabatan_petugas: string;
   konfirmasi_pembayaran: string;
   datetimes: string;
 }
@@ -68,8 +102,11 @@ function openModalAdd() {
 
 // Function: Fetch Data
 const search = ref('');
-const selectStatus = ref('');
+const selectStatus = ref('process');
 const selectStatusKonfirmasi = ref('belum_dikirim');
+const selectTipePembayaran = ref('');
+const id = ref(0);
+const nominal = ref(0);
 
 async function fetchData() {
   isTableLoading.value = true;
@@ -79,10 +116,40 @@ async function fetchData() {
       perpage: perPage.value,
       pageNumber: currentPage.value,
       status: selectStatus.value,
+      tipe_pembayaran: selectTipePembayaran.value,
       konfirmasi_pembayaran: selectStatusKonfirmasi.value,
     });
 
-    dataRiwayatZakat.value = response.data;
+    dataRiwayatZakat.value = response.data.list;
+
+    // gunakan variabel berbeda untuk HTML
+    let htmlMessage = `
+
+    `;
+    if (response.data.pembayaran_online_dikirim > 0) {
+      htmlMessage += `<span class="text-green-500">
+        Terdapat ${response.data.pembayaran_online_dikirim} transaksi pembayaran online yang telah dikirim.
+      </span>`;
+    }
+
+    if (response.data.total_saldo_dikantor > 0) {
+      if (htmlMessage != '') {
+        htmlMessage += `<br />`;
+      }
+      htmlMessage += `
+       <span class="text-red-500">
+          Saldo kas di kantor saat ini berjumlah ${$formatToRupiah(response.data.total_saldo_dikantor)}.
+        </span>
+      `;
+    }
+
+    // panggil setString pada store, bukan pada string
+    message.setString(`
+      <div class="text-sm text-gray-600 text-right">
+        ${htmlMessage}
+      </div>
+    `);
+
     totalRow.value = response.total;
     console.log(dataRiwayatZakat.value);
   } catch (error) {
@@ -115,6 +182,205 @@ async function deleteData(id: number) {
     },
   );
 }
+
+async function approveOnline(id: number, status_kirim: string) {
+  async function setujui(id: number) {
+    try {
+      isLoading.value = true;
+      await setujui_pembayaran_zakat(id);
+      displayNotification('Pembayaran zakat berhasil disetujui', 'success');
+      await fetchData();
+    } catch (error: any) {
+      displayNotification(error.response.data.error_msg, 'error');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+  // Implementation for approving online payment
+  if (status_kirim === 'belum_dikirim') {
+    displayConfirmation(
+      'Setujui Permohonan Pembayaran Zakat Online',
+      'Biaya untuk permohonan pembayaran zakat ini belum dikirim. Apakah Anda yakin ingin menyetujui permohonan ini?',
+      async () => {
+        await setujui(id);
+      },
+    );
+  } else {
+    await setujui(id);
+  }
+}
+
+const isModalRejectOpen = ref(false);
+async function rejectOnline(idl: number) {
+  isModalRejectOpen.value = true;
+  id.value = idl;
+}
+
+const isModalUploadBuktiTransferOpen = ref(false);
+async function uploadBuktiTransfer(idl: number, nominalZakat: number) {
+  isModalUploadBuktiTransferOpen.value = true;
+  id.value = idl;
+  nominal.value = nominalZakat;
+}
+
+async function loadImageAsBase64(url) {
+  const res = await fetch(url);
+  const blob = await res.blob();
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function cetakSuratSerahTerimaZakat(id: number) {
+  // Implementation for printing receipt letter
+
+  const logo = BASE_URL + '/uploads/img/logos/site_logo.png';
+  const logoBase64 = await loadImageAsBase64(logo);
+
+  const footer = '../../../public/images/ziwah.png';
+  const footerBase64 = await loadImageAsBase64(footer);
+
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+
+  let y = 15;
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const marginRight = 15;
+  const scale = 0.9;
+  const logoWidth = 53 * scale;
+  const logoHeight = 15 * scale;
+  const x = pageWidth - marginRight - 45;
+
+  const scaleFooter = 0.28;
+  const footerWidth = 106 * scaleFooter; // 42 mm
+  const footerHeight = 34 * scaleFooter; // 13.6 mm
+
+  // Judul
+  doc.setFont('times', 'bold');
+  doc.setFontSize(12);
+  doc.text('BERITA ACARA', 105, y, { align: 'center' });
+  doc.setFontSize(12);
+  y = y + 6;
+  doc.text('SERAH TERIMA ZAKAT', 105, y, { align: 'center' });
+  y = y + 6;
+  doc.text('KABUPATEN ACEH TENGAH', 105, y, { align: 'center' });
+
+  doc.addImage(logoBase64, 'PNG', x, 12, logoWidth, logoHeight);
+
+  y = y + 5;
+  doc.setDrawColor(200, 200, 200);
+  doc.line(15, y, 195, y);
+
+  // Isi surat
+  doc.setFont('times', 'normal');
+  doc.setFontSize(12);
+  y = y + 5;
+  const lineHeight = 6; // tinggi baris normal (mm)
+  const spacing = 1.2;
+  y += lineHeight * spacing;
+  doc.text(
+    `Pada hari ini Senin, 23 Januari 2025 bertempat di Kabupaten Aceh Tengah, Kami bertanda tangan di bawah ini :`,
+    20,
+    y,
+    { maxWidth: 170, align: 'justify' },
+  );
+  y = y + 15;
+  // Data pihak pertama
+  doc.text('1.', 25, y);
+  doc.text('Nama', 30, y);
+  doc.text(': SUDIRMAN', 50, y);
+  y += lineHeight * spacing;
+  doc.text('Alamat', 30, y);
+  doc.text(': TZ Komputer, Lantai 3, Komputer City.', 50, y);
+  y += lineHeight * spacing;
+  doc.text('Sebagai', 30, y);
+  doc.text(': Muzakki', 50, y);
+  doc.setFont('times', 'bold');
+  doc.text('(PIHAK PERTAMA)', 69, y);
+  y += lineHeight * spacing;
+  doc.setFont('times', 'normal');
+  y = y + 4;
+  // Data pihak kedua
+  doc.text('2.', 25, y);
+  doc.text('Nama', 30, y);
+  doc.text(': REZKAYANTHA USMAN, S. PD', 50, y);
+  // doc.text(' Nama     : REZKAYANTHA USMAN, S. PD', 25, y);
+  y += lineHeight * spacing;
+  doc.text('Alamat', 30, y);
+  doc.text(': Bilacaddi, Kec. Pattallassang, Kab. Takalar.', 50, y);
+  y += lineHeight * spacing;
+  doc.text('Sebagai', 30, y);
+  doc.text(': Petugas Baitulmal Kabupaten Aceh Tengah', 50, y);
+  doc.setFont('times', 'bold');
+  doc.text('(PIHAK KEDUA)', 127, y);
+  doc.setFont('times', 'normal');
+  y += lineHeight * spacing;
+  y = y + 5;
+  // Isi tengah
+  const isi2 = `Dengan ini menyatakan bahwa PIHAK PERTAMA telah menyerahkan Zakat Harta kepada PIHAK KEDUA berupa uang tunai sebesar Rp 200.000,-. Demikian Berita Acara Serah Terima ini dibuat untuk dipergunakan sebagaimana mestinya.`;
+  doc.text(isi2, 20, y, { maxWidth: 170, align: 'justify' });
+
+  y = y + 30;
+
+  // Tanda tangan
+  doc.text('PIHAK PERTAMA', 40, y, { align: 'center' });
+  doc.text('PIHAK KEDUA', 150, y, { align: 'center' });
+  y += lineHeight * spacing;
+  doc.text('Muzakki', 40, y, { align: 'center' });
+  doc.text('Petugas Baitulmal Kabupaten Aceh Tengah', 150, y, { align: 'center' });
+  y = y + 30;
+  doc.text('S U D I R M A N', 40, y, { align: 'center' });
+  doc.text('REZKAYANTHA USMAN, S. PD', 150, y, { align: 'center' });
+
+  // FOOTER
+  // garis pemisah
+  doc.setDrawColor(200, 200, 200);
+  doc.line(10, pageHeight - 20, 195, pageHeight - 20);
+
+  // teks footer
+  doc.setFontSize(9);
+  doc.setTextColor(120, 120, 120);
+  doc.text('Dicetak pada: 01 November 2025 pukul 23.51', 105, pageHeight - 10, {
+    align: 'center',
+  });
+
+  doc.addImage(footerBase64, 'PNG', 15, pageHeight - 15, footerWidth, footerHeight);
+
+  // 3️⃣ Simpan file
+  doc.save('Surat Serah Terima Zakat.pdf');
+}
+
+const isModalUploadBuktiSetoranZakatOpen = ref(false);
+async function uploadBuktiSetoranZakat(idl: number, nominalZakat: number) {
+  isModalUploadBuktiSetoranZakatOpen.value = true;
+  id.value = idl;
+  nominal.value = nominalZakat;
+}
+
+interface Displaybuktiparam {
+  tipe_pembayaran: string;
+  nominal_zakat: number;
+  bukti: string;
+  nominal_bukti: number;
+}
+
+const isModalDisplayBuktiOpen = ref(false);
+const tipe_pembayaran = ref('');
+const nominal_zakat = ref(0);
+const bukti = ref('');
+const nominal_bukti = ref(0);
+async function displayBukti(param: Displaybuktiparam) {
+  console.log('----');
+  console.log(param);
+  console.log('----');
+  isModalDisplayBuktiOpen.value = true;
+  tipe_pembayaran.value = param.tipe_pembayaran;
+  nominal_zakat.value = param.nominal_zakat;
+  bukti.value = param.bukti;
+  nominal_bukti.value = param.nominal_bukti;
+}
 </script>
 
 <template>
@@ -132,7 +398,6 @@ async function deleteData(id: number) {
           <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" />
           {{ dynamicLabel('Tambah Riwayat Zakat') }}
         </BaseButton>
-
         <!-- Search -->
         <div class="flex items-center w-full sm:w-auto gap-2">
           <label for="search" class="mr-2 text-sm font-medium text-gray-600">Filter</label>
@@ -157,6 +422,17 @@ async function deleteData(id: number) {
               { value: 'sudah_dikirim', label: 'Sudah Dikirim' },
             ]"
             placeholder="Semua Status Konfirmasi"
+            @change="fetchData"
+          />
+
+          <BaseSelect
+            v-model="selectTipePembayaran"
+            :options="[
+              { value: 'online', label: 'Online' },
+              { value: 'transfer', label: 'Transfer' },
+              { value: 'cash', label: 'Cash' },
+            ]"
+            placeholder="Semua Tipe Pembayaran"
             @change="fetchData"
           />
 
@@ -239,15 +515,57 @@ async function deleteData(id: number) {
                   <table class="w-full border border-gray-300 rounded-lg">
                     <tbody>
                       <tr class="border border-gray-300">
-                        <td class="bg-gray-100 px-4 py-2 font-medium">Invoice</td>
+                        <td class="w-[40%] bg-gray-100 px-4 py-2 font-medium">Invoice</td>
                         <td class="px-4 py-2 font-medium w-full text-right">
                           #{{ riwayat_zakat.invoice }}
                         </td>
                       </tr>
                       <tr class="border border-gray-300">
-                        <td class="bg-gray-100 px-4 py-2 font-medium">Nominal</td>
+                        <td class="bg-gray-100 px-4 py-2 font-medium">Nominal Zakat</td>
                         <td class="px-4 py-2 font-medium w-full text-right">
                           {{ $formatToRupiah(riwayat_zakat.nominal) }}
+                        </td>
+                      </tr>
+                      <tr
+                        class="border border-gray-300"
+                        v-if="riwayat_zakat.tipe_pembayaran == 'online'"
+                      >
+                        <td class="bg-gray-100 px-4 py-2 font-medium">Kode</td>
+                        <td class="px-4 py-2 font-medium w-full text-right text-red-500">
+                          {{ $formatToRupiah(riwayat_zakat.kode) }}
+                        </td>
+                      </tr>
+                      <tr
+                        class="border border-gray-300"
+                        v-if="riwayat_zakat.tipe_pembayaran == 'online'"
+                      >
+                        <td class="bg-gray-100 px-4 py-2 font-medium">Total Dikirim</td>
+                        <td class="px-4 py-2 font-medium w-full text-right text-red-500">
+                          {{ $formatToRupiah(riwayat_zakat.nominal + riwayat_zakat.kode) }}
+                        </td>
+                      </tr>
+                      <tr class="border border-gray-300">
+                        <td class="bg-gray-100 px-4 py-2 font-medium">Tipe Pembayaran</td>
+                        <td class="px-4 py-2 font-medium w-full text-right">
+                          {{ riwayat_zakat.tipe_pembayaran }}
+                        </td>
+                      </tr>
+                      <tr class="border border-gray-300" v-if="riwayat_zakat.status == 'failed'">
+                        <td class="bg-gray-100 px-4 py-2 font-medium text-red">Alasan Penolakan</td>
+                        <td class="px-4 py-2 font-medium w-full text-right text-red">
+                          {{ riwayat_zakat.alasan_penolakan }}
+                        </td>
+                      </tr>
+                      <tr class="border border-gray-300" v-if="riwayat_zakat.status != 'process'">
+                        <td class="bg-gray-100 px-4 py-2 font-medium">Nama Petugas</td>
+                        <td class="px-4 py-2 font-medium w-full text-right">
+                          {{ riwayat_zakat.nama_petugas ?? '-' }}
+                        </td>
+                      </tr>
+                      <tr class="border border-gray-300" v-if="riwayat_zakat.status != 'process'">
+                        <td class="bg-gray-100 px-4 py-2 font-medium">Jabatan Petugas</td>
+                        <td class="px-4 py-2 font-medium w-full text-right">
+                          {{ riwayat_zakat.jabatan_petugas ?? '-' }}
                         </td>
                       </tr>
                     </tbody>
@@ -290,6 +608,85 @@ async function deleteData(id: number) {
                 </td>
                 <td class="px-6 py-4">
                   <div class="flex justify-center gap-2">
+                    <ButtonGreen
+                      v-if="
+                        riwayat_zakat.tipe_pembayaran == 'online' &&
+                        riwayat_zakat.status == 'process'
+                      "
+                      title="Setujui Permohonan"
+                      @click="approveOnline(riwayat_zakat.id, riwayat_zakat.konfirmasi_pembayaran)"
+                    >
+                      <font-awesome-icon icon="fa-solid fa-check" />
+                    </ButtonGreen>
+                    <DangerButton
+                      v-if="
+                        riwayat_zakat.tipe_pembayaran == 'online' &&
+                        riwayat_zakat.status == 'process'
+                      "
+                      title="Reject Permohonan"
+                      @click="rejectOnline(riwayat_zakat.id)"
+                    >
+                      <font-awesome-icon icon="fa-solid fa-ban" />
+                    </DangerButton>
+                    <LightButton
+                      v-if="
+                        riwayat_zakat.tipe_pembayaran == 'transfer' &&
+                        riwayat_zakat.status == 'process'
+                      "
+                      title="Upload Bukti Transfer"
+                      @click="uploadBuktiTransfer(riwayat_zakat.id, riwayat_zakat.nominal)"
+                    >
+                      <font-awesome-icon icon="fa-solid fa-upload" />
+                    </LightButton>
+                    <LightButton
+                      v-if="
+                        riwayat_zakat.tipe_pembayaran == 'cash' ||
+                        (riwayat_zakat.tipe_pembayaran == 'transfer' &&
+                          riwayat_zakat.status == 'success')
+                      "
+                      title="Cetak Surat Serah Terima Zakat"
+                      @click="cetakSuratSerahTerimaZakat(riwayat_zakat.id)"
+                    >
+                      <font-awesome-icon icon="fa-solid fa-print" />
+                    </LightButton>
+                    <LightButton
+                      v-if="
+                        riwayat_zakat.tipe_pembayaran == 'cash' &&
+                        riwayat_zakat.posisi_uang == 'kantor_baitulmal'
+                      "
+                      @click="uploadBuktiSetoranZakat(riwayat_zakat.id, riwayat_zakat.nominal)"
+                      title="Upload Bukti Setoran"
+                    >
+                      <font-awesome-icon icon="fa-solid fa-upload" />
+                    </LightButton>
+
+                    <YellowButton
+                      v-if="
+                        riwayat_zakat.status == 'success' &&
+                        (riwayat_zakat.tipe_pembayaran == 'transfer' ||
+                          riwayat_zakat.tipe_pembayaran == 'cash')
+                      "
+                      :title="
+                        `Tampilkan Bukti ` +
+                        (riwayat_zakat.tipe_pembayaran == 'transfer' ? 'Transfer' : 'Setoran')
+                      "
+                      @click="
+                        displayBukti({
+                          tipe_pembayaran: riwayat_zakat.tipe_pembayaran,
+                          nominal_zakat: riwayat_zakat.nominal,
+                          bukti:
+                            riwayat_zakat.tipe_pembayaran == 'transfer'
+                              ? riwayat_zakat.bukti_transfer
+                              : riwayat_zakat.bukti_setoran,
+                          nominal_bukti:
+                            riwayat_zakat.tipe_pembayaran == 'transfer'
+                              ? riwayat_zakat.nominal_transfer
+                              : riwayat_zakat.nominal_setoran,
+                        })
+                      "
+                    >
+                      <font-awesome-icon icon="fa-solid fa-print" />
+                    </YellowButton>
                     <DangerButton @click="deleteData(riwayat_zakat.id)"
                       ><DeleteIcon
                     /></DangerButton>
@@ -337,6 +734,59 @@ async function deleteData(id: number) {
             payload.error ? 'error' : 'success',
           )
       "
+    />
+
+    <!-- Modal FormReject -->
+    <FormReject
+      :is-modal-open="isModalRejectOpen"
+      :id="id"
+      @close="((isModalRejectOpen = false), fetchData())"
+      @status="
+        (payload: any) =>
+          displayNotification(
+            payload.error_msg || 'Tambah/Update RiwayatZakat gagal',
+            payload.error ? 'error' : 'success',
+          )
+      "
+    />
+
+    <!-- Modal Form Upload Bukti Transfer -->
+    <FormUploadBuktiTransfer
+      :is-modal-open="isModalUploadBuktiTransferOpen"
+      :id="id"
+      :nominal_zakat="nominal"
+      @close="((isModalUploadBuktiTransferOpen = false), fetchData())"
+      @status="
+        (payload: any) =>
+          displayNotification(
+            payload.error_msg || 'Upload Bukti Transfer Gagal',
+            payload.error ? 'error' : 'success',
+          )
+      "
+    />
+
+    <FormUploadBuktiSetoranZakat
+      :is-modal-open="isModalUploadBuktiSetoranZakatOpen"
+      :id="id"
+      :nominal_zakat="nominal"
+      @close="((isModalUploadBuktiSetoranZakatOpen = false), fetchData())"
+      @status="
+        (payload: any) =>
+          displayNotification(
+            payload.error_msg || 'Upload Bukti Transfer Gagal',
+            payload.error ? 'error' : 'success',
+          )
+      "
+    />
+
+    <!-- Modal Form Display Bukti Transfer / Bukti Setoran -->
+    <FormDisplayBukti
+      :is-modal-open="isModalDisplayBuktiOpen"
+      :tipe_pembayaran="tipe_pembayaran"
+      :nominal_zakat="nominal_zakat"
+      :bukti="bukti"
+      :nominal_bukti="nominal_bukti"
+      @close="((isModalDisplayBuktiOpen = false), fetchData())"
     />
 
     <!-- Confirmation -->
