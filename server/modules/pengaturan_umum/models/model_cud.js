@@ -32,6 +32,7 @@ class Model_cud {
         nama_kabupaten_kota: body.nama_kabupaten_kota,
         alamat: body.alamat,
         quote: body.quote,
+        harga_emas_per_gram: body.harga_emas_per_gram,
         nama_jabatan1: body.nama_jabatan_1,
         nama_pejabat1: body.nama_pejabat_1,
         nama_jabatan2: body.nama_jabatan_2,
@@ -50,6 +51,10 @@ class Model_cud {
 
       if (body.heroLogoPath) {
         updateData.hero_logo = body.heroLogoPath;
+      }
+
+      if (body.logoTanpaTeksPath) {
+        updateData.logo_tanpa_teks = body.logoTanpaTeksPath;
       }
 
       for (const [key, value] of Object.entries(updateData)) {
