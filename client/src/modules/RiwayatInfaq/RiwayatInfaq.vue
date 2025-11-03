@@ -15,7 +15,7 @@ import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
 import FormAdd from '@/modules/RiwayatInfaq/widgets/FormAdd.vue';
 import FormReject from '@/modules/RiwayatInfaq/widgets/FormReject.vue';
 import FormUploadBuktiTransfer from '@/modules/RiwayatInfaq/widgets/FormUploadBuktiTransfer.vue';
-import FormuploadBuktiSetoranInfaq from '@/modules/RiwayatInfaq/widgets/FormuploadBuktiSetoranInfaq.vue';
+import FormuploadBuktiSetoranInfaq from '@/modules/RiwayatInfaq/widgets/FormUploadBuktiSetoranInfaq.vue';
 import FormDisplayBukti from '@/modules/RiwayatInfaq/widgets/FormDisplayBukti.vue';
 import BaseSelect from '@/components/Form/BaseSelect.vue';
 
