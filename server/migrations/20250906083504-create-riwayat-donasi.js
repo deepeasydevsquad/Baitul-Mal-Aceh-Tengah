@@ -70,6 +70,12 @@ module.exports = {
         values: ["sudah_dikirim", "belum_dikirim"],
         defaultValue: "belum_dikirim",
       },
+      nama_petugas: {
+        type: Sequelize.STRING,
+      },
+      jabatan_petugas: {
+        type: Sequelize.STRING,
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

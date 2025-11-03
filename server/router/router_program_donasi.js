@@ -2,7 +2,9 @@ const express = require("express");
 const { body } = require("express-validator");
 const controllers = require("../modules/program_donasi/controllers/index");
 const validation = require("../validation/program_donasi");
-const { authenticateTokenAdministrator } = require("../middleware/authenticateToken");
+const {
+  authenticateTokenAdministrator,
+} = require("../middleware/authenticateToken");
 
 const router = express.Router();
 
@@ -127,7 +129,11 @@ router.post(
       .withMessage("program donasi Tidak Boleh Kosong"),
     body("member_id").notEmpty().withMessage("Member Tidak Boleh Kosong"),
     body("nominal").notEmpty().withMessage("Nominal Tidak Boleh Kosong"),
-    body("status").notEmpty().withMessage("Status Tidak Boleh Kosong"),
+    body("tipe_pembayaran")
+      .notEmpty()
+      .withMessage("Tipe Pembayaran Tidak Boleh Kosong")
+      .isIn(["transfer", "cash"])
+      .withMessage("Tipe Pembayaran tidak valid"),
   ],
   controllers.add_donasi
 );

@@ -180,7 +180,7 @@ watch(
       <div v-else class="relative max-w-xl w-full bg-white shadow-2xl rounded-2xl p-6 space-y-6">
         <!-- Header -->
         <div class="flex items-center justify-between">
-          <h2 id="modal-title" class="text-xl font-bold text-gray-800">Tambah Riwayat Infaq</h2>
+          <h2 id="modal-title" class="text-xl font-bold text-gray-800">Tambah Riwayat Zakat</h2>
           <button
             class="text-gray-400 text-lg hover:text-gray-600"
             @click="closeModal"
@@ -194,10 +194,10 @@ watch(
           <SelectField
             v-model="form.member_id"
             id="member_id"
-            label="Daftar Munfiq"
+            label="Daftar Muzakki"
             placeholder="Pilih Member"
             :error="errors.member_id"
-            :options="[{ id: null, name: '-- Pilih Daftar Munfiq --' }, ...optionsMember]"
+            :options="[{ id: null, name: '-- Pilih Daftar Muzakki --' }, ...optionsMember]"
             :required="true"
           />
         </div>

@@ -34,9 +34,6 @@ import {
 
 // Store
 import { MessageTabInfaq } from '@/stores/message';
-// import Form from '@/components/Modal/Form.vue';
-// import FormUploadBeritaAcara from '../BakalPenerimaBantuan/widgets/FormUploadBeritaAcara.vue';
-
 import { API_URL } from '@/config/config';
 const BASE_URL = API_URL;
 
@@ -457,7 +454,7 @@ async function displayBukti(param: Displaybuktiparam) {
               <th
                 class="w-[30%] text-center px-6 py-4 font-medium font-bold text-gray-900 text-center"
               >
-                Info Member
+                Info Munfiq
               </th>
               <th
                 class="w-[30%] text-center px-6 py-4 font-medium font-bold text-gray-900 text-center"

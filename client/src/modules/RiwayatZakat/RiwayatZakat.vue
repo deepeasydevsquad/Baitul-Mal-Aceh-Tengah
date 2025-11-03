@@ -457,7 +457,7 @@ async function displayBukti(param: Displaybuktiparam) {
               <th
                 class="w-[30%] text-center px-6 py-4 font-medium font-bold text-gray-900 text-center"
               >
-                Info Member
+                Info Muzakki
               </th>
               <th
                 class="w-[30%] text-center px-6 py-4 font-medium font-bold text-gray-900 text-center"
@@ -493,7 +493,7 @@ async function displayBukti(param: Displaybuktiparam) {
                 :key="riwayat_zakat.id"
                 class="hover:bg-gray-50 transition-colors"
               >
-                <td class="px-6 py-4 text-start align-middle w-[30%] align-top">
+                <td class="px-6 py-4 text-start align-top">
                   <table class="w-full border border-gray-300 rounded-lg">
                     <tbody>
                       <tr class="border-b border-gray-300">

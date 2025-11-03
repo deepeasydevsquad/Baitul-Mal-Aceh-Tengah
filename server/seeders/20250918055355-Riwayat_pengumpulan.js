@@ -171,7 +171,7 @@ module.exports = {
           tipe: "infaq",
           nominal: 2000000,
           kode: 310,
-          status: "success",
+          status: "process",
           tipe_pembayaran: "online",
           posisi_uang: "bank",
           konfirmasi_pembayaran: "sudah_dikirim",

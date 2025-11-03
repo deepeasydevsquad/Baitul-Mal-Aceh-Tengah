@@ -143,6 +143,7 @@ exports.tutup = async (req, res) => {
   }
 };
 
+// add donasi
 exports.add_donasi = async (req, res) => {
   if (!(await handleValidationErrors(req, res))) return;
 

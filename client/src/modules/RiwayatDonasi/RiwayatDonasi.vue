@@ -12,6 +12,9 @@ import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
 import ButtonGreen from '@/components/Button/ButtonGreen.vue';
 import LightButton from '@/components/Button/LightButton.vue';
 import YellowButton from '@/components/Button/YellowButton.vue';
+import BaseSelect from '@/components/Form/BaseSelect.vue';
+
+// BaseSelect
 
 // Composable
 import { usePagination } from '@/composables/usePaginations';
@@ -38,14 +41,6 @@ const { showConfirmDialog, confirmTitle, confirmMessage, displayConfirmation, co
   useConfirmation();
 
 // Interfaces
-interface Member {
-  id: number;
-  username: string;
-  nomor_ktp: string;
-  whatsapp_number: string;
-  alamat: string;
-}
-
 interface ProgramDonasi {
   id: number;
   name: string;
@@ -56,12 +51,24 @@ interface ProgramDonasi {
 
 interface RiwayatDonasi {
   id: number;
+  member_id: number;
+  member_name: string;
+  member_nik: string;
+  invoice: string;
   nominal: number;
+  kode: string;
   status: string;
-  status_konfirmasi: string;
-  createdAt: string;
-  updatedAt: string;
-  Member?: Member;
+  alasan_penolakan: string;
+  tipe_pembayaran: string;
+  nominal_transfer: number;
+  bukti_transfer: string;
+  nominal_setoran: number;
+  bukti_setoran: string;
+  posisi_uang: string;
+  nama_petugas: string;
+  jabatan_petugas: string;
+  konfirmasi_pembayaran: string;
+  datetimes: string;
   Program_donasi?: ProgramDonasi;
 }
 
@@ -70,7 +77,8 @@ const RiwayatDonasi = ref<RiwayatDonasi[]>([]);
 // Search & Filters
 const search = ref('');
 const status = ref('');
-const status_konfirmasi = ref('');
+const selectStatusKonfirmasi = ref('belum_dikirim');
+const selectTipePembayaran = ref('');
 
 async function fetchData() {
   isTableLoading.value = true;
@@ -80,9 +88,10 @@ async function fetchData() {
       perpage: perPage.value,
       pageNumber: currentPage.value,
       status: status.value,
-      konfirmasi_pembayaran: status_konfirmasi.value,
+      konfirmasi_pembayaran: selectStatusKonfirmasi.value,
+      tipe_pembayaran: selectTipePembayaran.value,
     });
-    RiwayatDonasi.value = response.data;
+    RiwayatDonasi.value = response.data.list;
     totalRow.value = response.total;
   } catch (error) {
     displayNotification('Gagal mengambil data riwayat donasi', 'error');
@@ -160,7 +169,17 @@ async function updatestatus(id: number, newStatus: string) {
             <option value="PROCESS">Process</option>
             <option value="FAILED">Failed</option>
           </select>
-          <select
+          <!-- Status Konfirmasi -->
+          <BaseSelect
+            v-model="selectStatusKonfirmasi"
+            :options="[
+              { value: 'belum_dikirim', label: 'Belum Dikirim' },
+              { value: 'sudah_dikirim', label: 'Sudah Dikirim' },
+            ]"
+            placeholder="Semua Status Konfirmasi"
+            @change="fetchData"
+          />
+          <!-- <select
             v-model="status_konfirmasi"
             @change="fetchData"
             class="block w-full sm:w-48 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:ring-2 focus:ring-green-900 focus:border-green-900 transition"
@@ -168,7 +187,18 @@ async function updatestatus(id: number, newStatus: string) {
             <option value="">Semua Konfirmasi</option>
             <option value="sudah_dikirim">Sudah dikirim</option>
             <option value="belum_dikirim">Belum dikirim</option>
-          </select>
+          </select> -->
+          <BaseSelect
+            v-model="selectTipePembayaran"
+            :options="[
+              { value: 'online', label: 'Online' },
+              { value: 'transfer', label: 'Transfer' },
+              { value: 'cash', label: 'Cash' },
+            ]"
+            placeholder="Semua Tipe Pembayaran"
+            @change="fetchData"
+          />
+
           <input
             id="search"
             type="text"
@@ -186,15 +216,38 @@ async function updatestatus(id: number, newStatus: string) {
         <table v-else class="w-full border-collapse bg-white text-sm">
           <thead class="bg-gray-50 text-gray-700 text-center border-b border-gray-300">
             <tr>
-              <th class="w-[20%] px-6 py-3 font-medium">Info Donasi</th>
-              <th class="w-[30%] px-6 py-3 font-medium">Info Pemasukan</th>
-              <th class="w-[10%] px-6 py-3 font-medium">Status</th>
-              <th class="w-[20%] px-6 py-3 font-medium">Status Konfirmasi</th>
-              <th class="w-[10%] px-6 py-3 font-medium">Datetimes</th>
-              <th class="w-[10%] px-6 py-3 font-medium">Aksi</th>
+              <th
+                class="w-[30%] text-center px-6 py-4 font-medium font-bold text-gray-900 text-center"
+              >
+                Info Donatur
+              </th>
+              <th
+                class="w-[30%] text-center px-6 py-4 font-medium font-bold text-gray-900 text-center"
+              >
+                Info Pemasukan
+              </th>
+              <th
+                class="w-[10%] text-center px-6 py-4 font-medium font-bold text-gray-900 text-center"
+              >
+                Status
+              </th>
+              <th
+                class="w-[10%] text-center px-6 py-4 font-medium font-bold text-gray-900 text-center"
+              >
+                Status Konfirmasi
+              </th>
+              <th
+                class="w-[10%] text-center px-6 py-4 font-medium font-bold text-gray-900 text-center"
+              >
+                Datetimes
+              </th>
+              <th
+                class="w-[10%] text-center px-6 py-4 font-medium font-bold text-gray-900 text-center"
+              >
+                Aksi
+              </th>
             </tr>
           </thead>
-
           <tbody class="divide-y divide-gray-100">
             <template v-if="RiwayatDonasi.length">
               <tr
@@ -203,25 +256,17 @@ async function updatestatus(id: number, newStatus: string) {
                 class="hover:bg-gray-50 transition-colors"
               >
                 <!-- Info Member -->
-                <td class="px-6 py-4 text-left font-medium text-gray-800 align-top">
+                <td class="px-6 py-4 text-start align-top">
                   <table class="w-full border border-gray-300 rounded-lg">
                     <tbody>
                       <tr class="border-b border-gray-300">
-                        <th class="w-[5%] px-4 py-2 text-left font-medium bg-gray-100">Nama</th>
-                        <td class="px-4 py-2 text-right">{{ data.Member?.username }}</td>
+                        <th class="w-[40%] px-4 py-2 text-left font-medium bg-gray-100">Nama</th>
+                        <td class="px-4 py-2 text-right">{{ data.member_name }}</td>
                       </tr>
                       <tr class="border-b border-gray-300">
                         <th class="px-4 py-2 text-left font-medium bg-gray-100">NIK</th>
                         <td class="px-4 py-2 text-right">
-                          {{
-                            data.Member?.nomor_ktp
-                              ? data.Member.nomor_ktp.replace(
-                                  /^(\d{4})(\d+)(\d{4})$/,
-                                  (_, start, middle, end) =>
-                                    start + '*'.repeat(middle.length) + end,
-                                )
-                              : ''
-                          }}
+                          {{ data.member_nik }}
                         </td>
                       </tr>
                     </tbody>
@@ -229,7 +274,7 @@ async function updatestatus(id: number, newStatus: string) {
                 </td>
 
                 <!-- Info Program & Nominal -->
-                <td class="px-6 py-4 text-left font-medium text-gray-800 align-top">
+                <td class="px-6 py-4 text-start font-medium text-gray-800 w-[30%] align-top">
                   <table class="w-full border border-gray-300 rounded-lg">
                     <tbody>
                       <tr class="border-b border-gray-300">
@@ -248,10 +293,52 @@ async function updatestatus(id: number, newStatus: string) {
                           {{ data.Program_donasi?.status.replace(/_/g, ' ').toUpperCase() }}
                         </td>
                       </tr>
+                      <tr class="border border-gray-300">
+                        <td class="bg-gray-100 px-4 py-2 font-medium">Invoice</td>
+                        <td class="px-4 py-2 font-medium text-right">
+                          {{ data.invoice }}
+                        </td>
+                      </tr>
                       <tr class="border-b border-gray-300">
-                        <th class="px-4 py-2 text-left font-medium bg-gray-100">Nominal</th>
+                        <th class="px-4 py-2 text-left font-medium bg-gray-100">Nominal Donasi</th>
                         <td class="px-4 py-2 text-right">
                           Rp {{ Number(data.nominal).toLocaleString('id-ID') }}
+                        </td>
+                      </tr>
+                      <tr class="border border-gray-300" v-if="data.tipe_pembayaran == 'online'">
+                        <td class="bg-gray-100 px-4 py-2 font-medium">Kode</td>
+                        <td class="px-4 py-2 font-medium w-full text-right text-red-500">
+                          {{ $formatToRupiah(data.kode) }}
+                        </td>
+                      </tr>
+                      <tr class="border border-gray-300" v-if="data.tipe_pembayaran == 'online'">
+                        <td class="bg-gray-100 px-4 py-2 font-medium">Total Dikirim</td>
+                        <td class="px-4 py-2 font-medium w-full text-right text-red-500">
+                          {{ $formatToRupiah(data.nominal + data.kode) }}
+                        </td>
+                      </tr>
+                      <tr class="border border-gray-300">
+                        <td class="bg-gray-100 px-4 py-2 font-medium">Tipe Pembayaran</td>
+                        <td class="px-4 py-2 font-medium w-full text-right">
+                          {{ data.tipe_pembayaran }}
+                        </td>
+                      </tr>
+                      <tr class="border border-gray-300" v-if="data.status == 'failed'">
+                        <td class="bg-gray-100 px-4 py-2 font-medium text-red">Alasan Penolakan</td>
+                        <td class="px-4 py-2 font-medium w-full text-right text-red">
+                          {{ data.alasan_penolakan }}
+                        </td>
+                      </tr>
+                      <tr class="border border-gray-300" v-if="data.status != 'process'">
+                        <td class="bg-gray-100 px-4 py-2 font-medium">Nama Petugas</td>
+                        <td class="px-4 py-2 font-medium w-full text-right">
+                          {{ data.nama_petugas ?? '-' }}
+                        </td>
+                      </tr>
+                      <tr class="border border-gray-300" v-if="data.status != 'process'">
+                        <td class="bg-gray-100 px-4 py-2 font-medium">Jabatan Petugas</td>
+                        <td class="px-4 py-2 font-medium w-full text-right">
+                          {{ data.jabatan_petugas ?? '-' }}
                         </td>
                       </tr>
                     </tbody>
@@ -260,7 +347,7 @@ async function updatestatus(id: number, newStatus: string) {
 
                 <!-- Status -->
                 <td
-                  class="px-6 py-4 text-center font-medium"
+                  class="px-6 py-4 text-center font-bold text-gray-800"
                   :class="{
                     'text-green-600 font-semibold':
                       data.status === 'SUCCESS' || data.status === 'success',
@@ -275,28 +362,28 @@ async function updatestatus(id: number, newStatus: string) {
 
                 <!-- Status Konfirmasi -->
                 <td
-                  class="px-6 py-4 text-center font-medium"
+                  class="px-6 py-4 text-center font-bold text-gray-800"
                   :class="{
-                    'text-green-600 font-semibold':
-                      data.status_konfirmasi === 'SUDAH_DIKIRIM' ||
-                      data.status_konfirmasi === 'sudah_dikirim',
-                    'text-red-600 font-semibold':
-                      data.status_konfirmasi === 'BELUM_DIKIRIM' ||
-                      data.status_konfirmasi === 'belum_dikirim',
+                    'text-green-600':
+                      data.konfirmasi_pembayaran === 'SUDAH_DIKIRIM' ||
+                      data.konfirmasi_pembayaran === 'sudah_dikirim',
+                    'text-red-600':
+                      data.konfirmasi_pembayaran === 'BELUM_DIKIRIM' ||
+                      data.konfirmasi_pembayaran === 'belum_dikirim',
                   }"
                 >
-                  {{ data.status_konfirmasi.replace(/_/g, ' ').toUpperCase() }}
+                  {{ data.konfirmasi_pembayaran.replace(/_/g, ' ').toUpperCase() }}
                 </td>
 
                 <!-- Datetimes -->
                 <td class="px-6 py-4 text-center font-medium text-gray-800">
-                  {{ new Date(data.createdAt).toLocaleString('id-ID') }}
+                  {{ data.datetimes }}
                 </td>
 
                 <!-- Aksi -->
                 <td class="px-6 py-4">
-                  <div class="flex flex-col gap-2 items-center">
-                    <LightButton
+                  <div class="flex justify-center gap-2">
+                    <!-- <LightButton
                       title="Approve Donasi"
                       @click="updatestatus(data.id, 'success')"
                       v-if="data.status_konfirmasi === 'sudah_dikirim' && data.status !== 'success'"
@@ -309,7 +396,74 @@ async function updatestatus(id: number, newStatus: string) {
                       v-if="data.status_konfirmasi === 'sudah_dikirim' && data.status === 'success'"
                     >
                       <font-awesome-icon icon="fa-solid fa-times" />
+                    </LightButton> -->
+                    <ButtonGreen
+                      v-if="data.tipe_pembayaran == 'online' && data.status == 'process'"
+                      title="Setujui Permohonan"
+                      @click="approveOnline(data.id, data.konfirmasi_pembayaran)"
+                    >
+                      <font-awesome-icon icon="fa-solid fa-check" />
+                    </ButtonGreen>
+                    <DangerButton
+                      v-if="data.tipe_pembayaran == 'online' && data.status == 'process'"
+                      title="Reject Permohonan"
+                      @click="rejectOnline(data.id)"
+                    >
+                      <font-awesome-icon icon="fa-solid fa-ban" />
+                    </DangerButton>
+                    <LightButton
+                      v-if="data.tipe_pembayaran == 'transfer' && data.status == 'process'"
+                      title="Upload Bukti Transfer"
+                      @click="uploadBuktiTransfer(data.id, data.nominal)"
+                    >
+                      <font-awesome-icon icon="fa-solid fa-upload" />
                     </LightButton>
+                    <LightButton
+                      v-if="
+                        data.tipe_pembayaran == 'cash' ||
+                        (data.tipe_pembayaran == 'transfer' && data.status == 'success')
+                      "
+                      title="Cetak Surat Serah Terima Infaq"
+                      @click="cetakSuratSerahTerimaInfaq(data.id)"
+                    >
+                      <font-awesome-icon icon="fa-solid fa-print" />
+                    </LightButton>
+                    <LightButton
+                      v-if="
+                        data.tipe_pembayaran == 'cash' && data.posisi_uang == 'kantor_baitulmal'
+                      "
+                      @click="uploadBuktiSetoranInfaq(data.id, data.nominal)"
+                      title="Upload Bukti Setoran"
+                    >
+                      <font-awesome-icon icon="fa-solid fa-upload" />
+                    </LightButton>
+
+                    <YellowButton
+                      v-if="
+                        data.status == 'success' &&
+                        (data.tipe_pembayaran == 'transfer' || data.tipe_pembayaran == 'cash')
+                      "
+                      :title="
+                        `Tampilkan Bukti ` +
+                        (data.tipe_pembayaran == 'transfer' ? 'Transfer' : 'Setoran')
+                      "
+                      @click="
+                        displayBukti({
+                          tipe_pembayaran: data.tipe_pembayaran,
+                          nominal_infaq: data.nominal,
+                          bukti:
+                            data.tipe_pembayaran == 'transfer'
+                              ? data.bukti_transfer
+                              : data.bukti_setoran,
+                          nominal_bukti:
+                            data.tipe_pembayaran == 'transfer'
+                              ? data.nominal_transfer
+                              : data.nominal_setoran,
+                        })
+                      "
+                    >
+                      <font-awesome-icon icon="fa-solid fa-print" />
+                    </YellowButton>
                     <DangerButton @click="deleteData(data.id)">
                       <DeleteIcon />
                     </DangerButton>
