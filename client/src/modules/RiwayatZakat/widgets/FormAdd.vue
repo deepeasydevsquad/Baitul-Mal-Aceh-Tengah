@@ -91,7 +91,7 @@ const validateForm = () => {
   }
 
   if (!form.value.tipe_pembayaran) {
-    errors.value.status_pemasukan = 'Tipe Pembayaran wajib diisi.';
+    errors.value.tipe_pembayaran = 'Tipe Pembayaran wajib diisi.';
     isValid = false;
   }
 

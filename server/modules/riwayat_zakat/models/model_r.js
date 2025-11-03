@@ -123,7 +123,11 @@ class Model_r {
 
       let total_saldo_dikantor = 0;
       let pembayaran_online_dikirim = 0;
-      await Riwayat_pengumpulan.findAll({}).then(async (value) => {
+      await Riwayat_pengumpulan.findAll({
+        where: {
+          tipe: { [Op.ne]: "infaq" },
+        },
+      }).then(async (value) => {
         await Promise.all(
           await value.map(async (e) => {
             if (e.posisi_uang === "kantor_baitulmal") {

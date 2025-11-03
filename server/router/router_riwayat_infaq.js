@@ -2,6 +2,7 @@ const express = require("express");
 const { body } = require("express-validator");
 const controllers = require("../modules/riwayat_infaq/controllers/index");
 const validation = require("../validation/riwayat_infaq");
+const validationHelper = require("../helper/handleErrorFile");
 const {
   authenticateTokenAdministrator,
 } = require("../middleware/authenticateToken");
@@ -31,6 +32,7 @@ router.post(
     body("search").optional().isString().withMessage("Search Harus String"),
     body("status").optional(),
     body("konfirmasi_pembayaran").optional(),
+    body("tipe_pembayaran").optional(),
   ],
   controllers.list
 );
@@ -50,13 +52,42 @@ router.post(
       .withMessage("Nominal Tidak Boleh Kosong")
       .isInt()
       .withMessage("Nominal Harus Angka"),
-    body("status_pemasukan")
+    body("tipe_pembayaran")
       .notEmpty()
-      .withMessage("Status Pemasukan Tidak Boleh Kosong")
-      .isIn(["belum_dikirim", "sudah_dikirim"])
-      .withMessage("Status Pemasukan Harus String"),
+      .withMessage("Tipe Pembayaran Tidak Boleh Kosong")
+      .isIn(["transfer", "cash"])
+      .withMessage("Tipe Pembayaran tidak valid"),
   ],
   controllers.add
+);
+
+router.post(
+  "/riwayat_infaq/approve_online",
+  authenticateTokenAdministrator,
+  [
+    body("id")
+      .notEmpty()
+      .withMessage("ID Tidak Boleh Kosong")
+      .isInt()
+      .withMessage("ID Harus Angka")
+      .custom(validation.check_id_riwayat_infaq),
+  ],
+  controllers.approve_online
+);
+
+router.post(
+  "/riwayat_infaq/reject_online",
+  authenticateTokenAdministrator,
+  [
+    body("id")
+      .notEmpty()
+      .withMessage("ID Tidak Boleh Kosong")
+      .isInt()
+      .withMessage("ID Harus Angka")
+      .custom(validation.check_id_riwayat_infaq),
+    body("alasan").notEmpty().withMessage("Alasan Tidak Boleh Kosong"),
+  ],
+  controllers.reject_online
 );
 
 router.post(
@@ -71,6 +102,48 @@ router.post(
       .custom(validation.check_id_riwayat_infaq),
   ],
   controllers.delete
+);
+
+router.post(
+  "/riwayat_infaq/upload_bukti_transfer",
+  authenticateTokenAdministrator,
+  validation.upload("transfer").single("bukti"),
+  [
+    body("id")
+      .notEmpty()
+      .withMessage("ID Tidak Boleh Kosong")
+      .isInt()
+      .withMessage("ID Harus Angka")
+      .custom(validation.check_id_riwayat_infaq),
+    body("nominal_transfer")
+      .notEmpty()
+      .withMessage("Jumlah Nominal Transfer Tidak Boleh Kosong")
+      .isInt()
+      .withMessage("Jumlah Nominal Transfer Harus Angka"),
+  ],
+  validationHelper.handleFileErrors,
+  controllers.upload_bukti_transfer
+);
+
+router.post(
+  "/riwayat_infaq/upload_bukti_setoran",
+  authenticateTokenAdministrator,
+  validation.upload("cash").single("bukti"),
+  [
+    body("id")
+      .notEmpty()
+      .withMessage("ID Tidak Boleh Kosong")
+      .isInt()
+      .withMessage("ID Harus Angka")
+      .custom(validation.check_id_riwayat_infaq),
+    body("nominal_setoran")
+      .notEmpty()
+      .withMessage("Jumlah Nominal Setoran Tidak Boleh Kosong")
+      .isInt()
+      .withMessage("Jumlah Nominal Setoran Harus Angka"),
+  ],
+  validationHelper.handleFileErrors,
+  controllers.upload_bukti_setoran
 );
 
 module.exports = router;
