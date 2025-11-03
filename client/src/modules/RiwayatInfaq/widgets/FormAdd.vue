@@ -1,154 +1,154 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
-import Notification from '@/components/Modal/Notification.vue'
-import BaseButton from '@/components/Button/BaseButton.vue'
-import InputCurrency from '@/components/Form/InputCurrency.vue'
-import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
+import Notification from '@/components/Modal/Notification.vue';
+import BaseButton from '@/components/Button/BaseButton.vue';
+import InputCurrency from '@/components/Form/InputCurrency.vue';
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
 
 // Composable
-import { useNotification } from '@/composables/useNotification'
+import { useNotification } from '@/composables/useNotification';
 
 // Service
-import { get_member, add_riwayat_infaq } from '@/service/riwayat_infaq'
-import SelectField from '@/components/Form/SelectField.vue'
+import { get_member, add_riwayat_infaq } from '@/service/riwayat_infaq';
+import SelectField from '@/components/Form/SelectField.vue';
 
 // Composable: notification
 const { showNotification, notificationType, notificationMessage, displayNotification } =
-  useNotification()
+  useNotification();
 
 interface Props {
-  isModalOpen: boolean
+  isModalOpen: boolean;
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 
 const emit = defineEmits<{
-  (e: 'close'): void
-  (e: 'status', payload: { error_msg?: string; error?: boolean }): void
-}>()
+  (e: 'close'): void;
+  (e: 'status', payload: { error_msg?: string; error?: boolean }): void;
+}>();
 
 // Function: Close modal
 const closeModal = () => {
-  if (isSubmitting.value) return
-  resetForm()
-  emit('close')
-}
+  if (isSubmitting.value) return;
+  resetForm();
+  emit('close');
+};
 
 // Function: Reset form
 const resetForm = () => {
   form.value = {
     member_id: null,
     nominal: 0,
-    status_pemasukan: '',
-  }
+    tipe_pembayaran: '',
+  };
 
   // Reset errors
-  errors.value = {}
-}
+  errors.value = {};
+};
 
 // Function: Fetch data
-const isLoading = ref(false)
-const optionsMember = ref([])
+const isLoading = ref(false);
+const optionsMember = ref([]);
 
 async function fetchData() {
-  isLoading.value = true
+  isLoading.value = true;
   try {
-    const responseMember = await get_member()
+    const responseMember = await get_member();
 
-    optionsMember.value = responseMember.data
+    optionsMember.value = responseMember.data;
   } catch (error) {
-    displayNotification('Terjadi kesalahan saat memuat data.', 'error')
+    displayNotification('Terjadi kesalahan saat memuat data.', 'error');
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
 }
 
 // Function:
 const errors = ref<Record<string, string>>({
   name: '',
-})
+});
 
 const validateForm = () => {
-  let isValid = true
+  let isValid = true;
   // Reset errors
-  errors.value = {}
+  errors.value = {};
 
   if (!form.value.member_id) {
-    errors.value.member_id = 'Member wajib diisi.'
-    isValid = false
+    errors.value.member_id = 'Member wajib diisi.';
+    isValid = false;
   }
 
   if (!form.value.nominal) {
-    errors.value.nominal = 'Nominal wajib diisi.'
-    isValid = false
+    errors.value.nominal = 'Nominal wajib diisi.';
+    isValid = false;
   }
 
-  if (!form.value.status_pemasukan) {
-    errors.value.status_pemasukan = 'Status Pemasukan wajib diisi.'
-    isValid = false
+  if (!form.value.tipe_pembayaran) {
+    errors.value.tipe_pembayaran = 'Tipe Pembayaran wajib diisi.';
+    isValid = false;
   }
 
-  console.log(errors.value)
-  return isValid
-}
+  console.log(errors.value);
+  return isValid;
+};
 
 // Function: Handle submit
-const isSubmitting = ref(false)
+const isSubmitting = ref(false);
 const form = ref<{
-  member_id: number | null
-  nominal: number
-  status_pemasukan: string
+  member_id: number | null;
+  nominal: number;
+  tipe_pembayaran: string;
 }>({
   member_id: null,
   nominal: 0,
-  status_pemasukan: '',
-})
+  tipe_pembayaran: '',
+});
 
 const handleSubmit = async () => {
-  isSubmitting.value = true
-  if (!validateForm()) return
+  isSubmitting.value = true;
+  if (!validateForm()) return;
 
   const formData = {
     member_id: form.value.member_id,
     nominal: form.value.nominal,
-    status_pemasukan: form.value.status_pemasukan,
-  }
+    tipe_pembayaran: form.value.tipe_pembayaran,
+  };
 
-  console.log(formData)
+  console.log(formData);
 
   try {
-    const response = await add_riwayat_infaq(formData)
-    emit('status', { error_msg: response.error_msg || response, error: response.error })
+    const response = await add_riwayat_infaq(formData);
+    emit('status', { error_msg: response.error_msg || response, error: response.error });
   } catch (error: any) {
-    console.error(error)
-    displayNotification(error.response.data.error_msg || error.response.data.message, 'error')
+    console.error(error);
+    displayNotification(error.response.data.error_msg || error.response.data.message, 'error');
   } finally {
-    isSubmitting.value = false
-    closeModal()
+    isSubmitting.value = false;
+    closeModal();
   }
-}
+};
 
 // Function: Handle escape
 const handleEscape = (e: KeyboardEvent) => {
-  if (e.key === 'Escape' && props.isModalOpen) closeModal()
-}
+  if (e.key === 'Escape' && props.isModalOpen) closeModal();
+};
 onMounted(async () => {
-  document.addEventListener('keydown', handleEscape)
-})
+  document.addEventListener('keydown', handleEscape);
+});
 
 onBeforeUnmount(async () => {
-  document.removeEventListener('keydown', handleEscape)
-})
+  document.removeEventListener('keydown', handleEscape);
+});
 
 watch(
   () => props.isModalOpen,
   (val) => {
     if (val) {
-      fetchData()
+      fetchData();
     }
   },
-)
+);
 </script>
 
 <template>
@@ -206,7 +206,7 @@ watch(
           />
         </div>
 
-        <div>
+        <!-- <div>
           <SelectField
             v-model="form.status_pemasukan"
             id="status_pemasukan"
@@ -217,6 +217,20 @@ watch(
               { id: '', name: '-- Pilih Status --' },
               { id: 'belum_dikirim', name: 'Belum Dikirim' },
               { id: 'sudah_dikirim', name: 'Sudah Dikirim' },
+            ]"
+            :required="true"
+          />
+        </div> -->
+        <div>
+          <SelectField
+            v-model="form.tipe_pembayaran"
+            id="tipe_pembayaran"
+            label="Tipe Pembayaran"
+            :error="errors.tipe_pembayaran"
+            :options="[
+              { id: '', name: '-- Pilih Tipe Pembayaran --' },
+              { id: 'transfer', name: 'Transfer' },
+              { id: 'cash', name: 'Cash' },
             ]"
             :required="true"
           />
@@ -235,13 +249,7 @@ watch(
           <BaseButton
             type="submit"
             variant="primary"
-            :disabled="
-              !(
-                form.member_id &&
-                form.nominal &&
-                form.status_pemasukan
-              ) || isSubmitting
-            "
+            :disabled="!(form.member_id && form.nominal && form.tipe_pembayaran) || isSubmitting"
             @click="handleSubmit"
           >
             <span v-if="isSubmitting">Menyimpan...</span>

@@ -64,6 +64,12 @@ class Model_r {
     if (body.status) {
       typeFilter.status = body.status;
     }
+
+    // filter tipe pembayaran
+    if (body.tipe_pembayaran && body.tipe_pembayaran !== "") {
+      typeFilter.tipe_pembayaran = body.tipe_pembayaran;
+    }
+
     if (body.konfirmasi_pembayaran) {
       typeFilter.konfirmasi_pembayaran = body.konfirmasi_pembayaran;
     }
@@ -72,12 +78,21 @@ class Model_r {
       const result = await Riwayat_pengumpulan.findAndCountAll({
         limit,
         offset: (page - 1) * limit,
-        order: [["id", "ASC"]],
+        order: [["id", "DESC"]],
         attributes: [
           "id",
           "member_id",
           "invoice",
           "tipe",
+          "alasan_penolakan",
+          "tipe_pembayaran",
+          "nominal_transfer",
+          "bukti_transfer",
+          "nominal_setoran",
+          "bukti_setoran",
+          "posisi_uang",
+          "nama_petugas",
+          "jabatan_petugas",
           "nominal",
           "kode",
           "status",
@@ -95,20 +110,57 @@ class Model_r {
         ],
       });
 
+      let total_saldo_dikantor = 0;
+      let pembayaran_online_dikirim = 0;
+      await Riwayat_pengumpulan.findAll({
+        where: {
+          tipe: "infaq",
+        },
+      }).then(async (value) => {
+        await Promise.all(
+          await value.map(async (e) => {
+            if (e.posisi_uang === "kantor_baitulmal") {
+              total_saldo_dikantor =
+                total_saldo_dikantor + (parseInt(e.nominal) + parseInt(e.kode));
+            }
+            if (
+              e.status === "process" &&
+              e.tipe_pembayaran === "online" &&
+              e.konfirmasi_pembayaran === "sudah_dikirim"
+            ) {
+              pembayaran_online_dikirim = pembayaran_online_dikirim + 1;
+            }
+          })
+        );
+      });
+
       return {
-        data: result.rows.map((e) => ({
-          id: e.id,
-          invoice: e.invoice,
-          tipe: e.tipe,
-          nominal: e.nominal,
-          kode: e.kode,
-          status: e.status,
-          konfirmasi_pembayaran: e.konfirmasi_pembayaran,
-          member_id: e.member_id,
-          member_name: e.Member?.fullname,
-          member_nik: e.Member?.nomor_ktp,
-          datetimes: moment(e.updatedAt).format("YYYY-MM-DD HH:mm:ss"),
-        })),
+        data: {
+          list: result.rows.map((e) => ({
+            id: e.id,
+            invoice: e.invoice,
+            tipe: e.tipe,
+            nominal: e.nominal,
+            kode: e.kode,
+            status: e.status,
+            alasan_penolakan: e.alasan_penolakan,
+            konfirmasi_pembayaran: e.konfirmasi_pembayaran,
+            tipe_pembayaran: e.tipe_pembayaran,
+            nominal_transfer: e.nominal_transfer,
+            bukti_transfer: e.bukti_transfer,
+            nominal_setoran: e.nominal_setoran,
+            bukti_setoran: e.bukti_setoran,
+            posisi_uang: e.posisi_uang,
+            nama_petugas: e.nama_petugas,
+            jabatan_petugas: e.jabatan_petugas,
+            member_id: e.member_id,
+            member_name: e.Member?.fullname,
+            member_nik: e.Member?.nomor_ktp,
+            datetimes: moment(e.updatedAt).format("YYYY-MM-DD HH:mm:ss"),
+          })),
+          total_saldo_dikantor: total_saldo_dikantor,
+          pembayaran_online_dikirim: pembayaran_online_dikirim,
+        },
         total: result.count,
       };
     } catch (error) {
@@ -135,6 +187,9 @@ class Model_r {
         kode: result.kode,
         status: result.status,
         konfirmasi_pembayaran: result.konfirmasi_pembayaran,
+        tipe_pembayaran: result.tipe_pembayaran,
+        bukti_transfer: result.bukti_transfer,
+        bukti_setoran: result.bukti_setoran,
         member_id: result.member_id,
         member_name: result.Member?.fullname,
         member_nik: result.Member?.nomor_ktp,

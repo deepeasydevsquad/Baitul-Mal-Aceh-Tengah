@@ -19,7 +19,7 @@ import FormUploadBuktiSetoranZakat from '@/modules/RiwayatZakat/widgets/FormUplo
 import FormDisplayBukti from '@/modules/RiwayatZakat/widgets/FormDisplayBukti.vue';
 import BaseSelect from '@/components/Form/BaseSelect.vue';
 
-import html2canvas from 'html2canvas';
+// import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
 // Composable
@@ -33,8 +33,8 @@ import { list, delete_riwayat_zakat, setujui_pembayaran_zakat } from '@/service/
 
 // Store
 import { MessageTabZakat } from '@/stores/message';
-import Form from '@/components/Modal/Form.vue';
-import FormUploadBeritaAcara from '../BakalPenerimaBantuan/widgets/FormUploadBeritaAcara.vue';
+// import Form from '@/components/Modal/Form.vue';
+// import FormUploadBeritaAcara from '../BakalPenerimaBantuan/widgets/FormUploadBeritaAcara.vue';
 
 import { API_URL } from '@/config/config';
 const BASE_URL = API_URL;
@@ -644,7 +644,7 @@ async function displayBukti(param: Displaybuktiparam) {
                         (riwayat_zakat.tipe_pembayaran == 'transfer' &&
                           riwayat_zakat.status == 'success')
                       "
-                      title="Cetak Surat Serah Terima Zakat"
+                      title="Cetak Bukti Setoran"
                       @click="cetakSuratSerahTerimaZakat(riwayat_zakat.id)"
                     >
                       <font-awesome-icon icon="fa-solid fa-print" />
@@ -765,6 +765,7 @@ async function displayBukti(param: Displaybuktiparam) {
       "
     />
 
+    <!-- Modal Upload Bukti Setoran Zakat -->
     <FormUploadBuktiSetoranZakat
       :is-modal-open="isModalUploadBuktiSetoranZakatOpen"
       :id="id"
