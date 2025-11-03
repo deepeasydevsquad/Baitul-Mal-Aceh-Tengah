@@ -10,6 +10,7 @@ const validation = {};
 const uploadPaths = {
   icon: path.join(__dirname, "../uploads/img/icons"),
   logo: path.join(__dirname, "../uploads/img/logos"),
+  logo_tanpa_teks: path.join(__dirname, "../uploads/img/logos"),
   hero_logo: path.join(__dirname, "../uploads/img/hero"),
 };
 
@@ -22,6 +23,7 @@ Object.values(uploadPaths).forEach((uploadPath) => {
 const fixedFilenames = {
   icon: "site_icon.ico",
   logo: "site_logo.png",
+  logo_tanpa_teks: "logo_tanpa_teks.png",
   hero_logo: "hero_logo.png",
 };
 
@@ -51,7 +53,10 @@ const fileFilter = (req, file, cb) => {
       cb(new Error("Format file icon harus .ico"), false);
     }
     // Khusus untuk logo, hanya izinkan .png
-  } else if (file.fieldname === "logo") {
+  } else if (
+    file.fieldname === "logo" ||
+    file.fieldname === "logo_tanpa_teks"
+  ) {
     if (file.mimetype === "image/png") {
       cb(null, true);
     } else {
@@ -71,7 +76,7 @@ const fileFilter = (req, file, cb) => {
 validation.upload = multer({
   storage: tempStorage,
   fileFilter,
-  limits: { fileSize: 1 * 1024 * 1024 },
+  limits: { fileSize: 1 * 1024 * 2048 }, // 2 MB
 });
 
 // Middleware validasi dimensi gambar
@@ -107,6 +112,13 @@ validation.check_dimensions = (isRequired = true) => {
           maxWidth: 779,
           maxHeight: 161,
           name: "Logo",
+        },
+        logo_tanpa_teks: {
+          minWidth: 100,
+          minHeight: 100,
+          maxWidth: 200,
+          maxHeight: 200,
+          name: "Logo Tanpa Teks",
         },
         hero_logo: {
           minWidth: 100,
@@ -183,6 +195,9 @@ validation.check_dimensions = (isRequired = true) => {
               break;
             case "hero_logo":
               req.body.heroLogoPath = finalFilename;
+              break;
+            case "logo_tanpa_teks":
+              req.body.logoTanpaTeksPath = finalFilename;
               break;
           }
         }

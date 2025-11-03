@@ -13,10 +13,12 @@ class Model_r {
     const mappingKey = [
       "icon",
       "logo",
+      "logo_tanpa_teks",
       "hero_logo",
       "nama_kabupaten_kota",
       "alamat",
       "quote",
+      "harga_emas_per_gram",
       "nama_jabatan1",
       "nama_jabatan2",
       "nama_jabatan3",
@@ -35,9 +37,9 @@ class Model_r {
       const result = await Setting.findAll({
         where,
         attributes: ["id", "name", "value"],
+        raw: true,
+        nest: true,
       });
-
-      console.log("Result:", result);
 
       const settings = {};
       result.forEach((item) => {
