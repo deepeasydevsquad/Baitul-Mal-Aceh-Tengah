@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted, getCurrentInstance } from 'vue';
+import { ref, onMounted, getCurrentInstance, watch } from 'vue';
 import Notification from '@/components/Modal/Notification.vue';
 import Confirmation from '@/components/Modal/Confirmation.vue';
 import BaseButton from '@/components/Button/BaseButton.vue';
@@ -34,7 +34,7 @@ import {
 } from '@/service/riwayat_donasi';
 
 // Store
-import { MessageTabDonasi } from '@/stores/message';
+import { MessageTabDonasi, RefreshRiwayatDonasi } from '@/stores/message';
 import { API_URL } from '@/config/config';
 const BASE_URL = API_URL;
 
@@ -44,6 +44,10 @@ const { appContext } = getCurrentInstance()!;
 const $formatToRupiah = appContext.config.globalProperties.$formatToRupiah;
 
 const message = MessageTabDonasi();
+const refresh = RefreshRiwayatDonasi();
+
+// ubah nilai
+// refresh.setBool(false);
 
 // State
 const isLoading = ref(false);
@@ -104,6 +108,7 @@ const id = ref(0);
 const nominal = ref(0);
 
 async function fetchData() {
+  refresh.setBool(false);
   isTableLoading.value = true;
   try {
     const response = await get_riwayat_donasi({
@@ -151,6 +156,16 @@ async function fetchData() {
 }
 
 onMounted(fetchData);
+
+watch(
+  () => refresh.getBool,
+  async () => {
+    if (refresh.getBool == true) {
+      await fetchData();
+    }
+  },
+  { deep: true },
+);
 
 async function deleteData(id: number) {
   displayConfirmation(
