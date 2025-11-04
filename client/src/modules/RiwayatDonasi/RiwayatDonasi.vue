@@ -14,7 +14,7 @@ import LightButton from '@/components/Button/LightButton.vue';
 import YellowButton from '@/components/Button/YellowButton.vue';
 import FormReject from '@/modules/RiwayatDonasi/widgets/FormReject.vue';
 import FormUploadBuktiTransfer from '@/modules/RiwayatDonasi/widgets/FormUploadBuktiTransfer.vue';
-import FormuploadBuktiSetoranInfaq from '@/modules/RiwayatDonasi/widgets/FormUploadBuktiSetoranDonasi.vue';
+import FormUploadBuktiSetoranDonasi from '@/modules/RiwayatDonasi/widgets/FormUploadBuktiSetoranDonasi.vue';
 import FormDisplayBukti from '@/modules/RiwayatDonasi/widgets/FormDisplayBukti.vue';
 
 import BaseSelect from '@/components/Form/BaseSelect.vue';
@@ -727,10 +727,10 @@ async function displayBukti(param: Displaybuktiparam) {
     />
 
     <!-- Modal Upload Bukti Setoran Donasi -->
-    <FormuploadBuktiSetoranInfaq
+    <FormUploadBuktiSetoranDonasi
       :is-modal-open="isModalUploadBuktiSetoranDonasiOpen"
       :id="id"
-      :nominal_zakat="nominal"
+      :nominal_donasi="nominal"
       @close="((isModalUploadBuktiSetoranDonasiOpen = false), fetchData())"
       @status="
         (payload: any) =>
