@@ -158,7 +158,7 @@ async function deleteData(id: number) {
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
-            <template v-if="datas">
+            <template v-if="datas.length > 0">
               <tr v-for="data in datas" :key="data.id" class="hover:bg-gray-50 transition-colors">
                 <td class="px-6 py-4 text-left font-medium text-gray-800">
                   <table class="w-full mx-auto border border-gray-300 rounded-lg">
@@ -195,16 +195,18 @@ async function deleteData(id: number) {
                 </td>
               </tr>
             </template>
-            <tr v-else>
-              <td :colspan="totalColumns" class="px-6 py-8 text-center text-gray-500">
-                <font-awesome-icon
-                  icon="fa-solid fa-database"
-                  class="text-4xl mb-2 text-gray-400"
-                />
-                <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ada data</h3>
-                <p class="text-sm">Belum ada data field.</p>
-              </td>
-            </tr>
+            <template v-else>
+              <tr>
+                <td :colspan="totalColumns" class="px-6 py-8 text-center text-gray-500">
+                  <font-awesome-icon
+                    icon="fa-solid fa-database"
+                    class="text-4xl mb-2 text-gray-400"
+                  />
+                  <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ada data</h3>
+                  <p class="text-sm">Belum ada data field.</p>
+                </td>
+              </tr>
+            </template>
           </tbody>
 
           <!-- Pagination -->

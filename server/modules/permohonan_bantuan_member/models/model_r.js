@@ -349,6 +349,40 @@ class Model_r {
       return { banks: [], members: [] };
     }
   }
+
+  async daftar_syarat() {
+    try {
+      const syarat = await Syarat_kegiatan.findAll({
+        where: {
+          kegiatan_id: this.req.body.kegiatan_id,
+        },
+        include: [
+          {
+            model: Syarat,
+            attributes: ["id", "name"],
+          },
+        ],
+      });
+
+      const data = syarat.map((item) => ({
+        id: item.Syarat.id,
+        name: item.Syarat.name,
+        path: item.Syarat.path,
+      }));
+
+      return {
+        success: true,
+        data: data,
+        message: "Data berhasil diambil",
+      };
+    } catch (error) {
+      return {
+        success: false,
+        data: null,
+        message: error.message,
+      };
+    }
+  }
 }
 
 module.exports = Model_r;

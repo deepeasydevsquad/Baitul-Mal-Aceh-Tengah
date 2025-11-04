@@ -1,4 +1,4 @@
-const { Riwayat_pengumpulan, Member } = require("../models");
+const { Op, Riwayat_pengumpulan, Member } = require("../models");
 const multer = require("multer");
 const sharp = require("sharp");
 const path = require("path");
@@ -29,6 +29,24 @@ validation.check_id_riwayat_infaq = async (value) => {
     throw new Error("Riwayat infaq tidak terdaftar di pangkalan data");
   }
   return true;
+};
+
+// Validasi id Riwayat apakah sudah ada di database dan dalam tipe pembayaran cash atau transfer
+validation.check_id_riwayat_infaq_cash_or_transfer = async (value) => {
+  const check = await Riwayat_pengumpulan.findOne({
+    where: {
+      id: value,
+      tipe: "infaq",
+      tipe_pembayaran: {
+        [Op.in]: ["transfer", "cash"],
+      },
+    },
+  });
+  console.log(check);
+
+  if (!check) {
+    throw new Error("Riwayat infaq tidak terdaftar di pangkalan data");
+  }
 };
 
 validation.upload = (tipe = "cash") => {

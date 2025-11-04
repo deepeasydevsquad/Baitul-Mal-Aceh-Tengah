@@ -7,7 +7,12 @@ import InputText from '@/components/Form/InputText.vue';
 import SelectField from '@/components/Form/SelectField.vue';
 import { useNotification } from '@/composables/useNotification';
 
-import { get_info_member, daftar_bank, add_permohonan } from '@/service/permohonan_member';
+import {
+  get_info_member,
+  daftar_bank,
+  add_permohonan,
+  daftar_syarat,
+} from '@/service/permohonan_member';
 
 const { showNotification, notificationType, notificationMessage, displayNotification } =
   useNotification();
@@ -17,6 +22,11 @@ interface Props {
   id_kegiatan: number;
 }
 
+interface SyaratItem {
+  id: number;
+  name: string;
+}
+
 const props = defineProps<Props>();
 
 const emit = defineEmits<{
@@ -24,10 +34,12 @@ const emit = defineEmits<{
   (e: 'status', payload: { error_msg?: string; error?: boolean }): void;
 }>();
 
-// ========== DEKLARASI VARIABEL REAKTIF (harus di atas) ==========
+// ========== DEKLARASI VARIABEL REAKTIF ==========
 const formUploadDynamic = ref<Record<string, File | null>>({});
 const dataBank = ref<Array<{ id: number; name: string | null }>>([]);
+const dataSyarat = ref<SyaratItem[]>([]);
 const isSubmitting = ref(false);
+const isLoadingSyarat = ref(false);
 
 // Form data
 const form = ref({
@@ -49,7 +61,7 @@ const errors = ref<Record<string, string>>({});
 const fetchData = async () => {
   try {
     const response = await get_info_member();
-    console.log('Response get_info_member:', response); // Debug
+    console.log('Response get_info_member:', response);
 
     form.value.nama_pemohon = response.nama_pemohon || '';
     form.value.member_id = response.member_id || response.id || '';
@@ -70,13 +82,54 @@ const listBank = async () => {
   }
 };
 
+// Generate field name dari nama syarat
+const generateFieldName = (name: string): string => {
+  return name.toLowerCase().replace(/\s+/g, '_').replace(/[()]/g, '').replace(/_+/g, '_').trim();
+};
+
+// Fetch data syarat dinamis
+const fetchDataSyarat = async () => {
+  if (!props.id_kegiatan) return;
+
+  isLoadingSyarat.value = true;
+  try {
+    const response = await daftar_syarat({ kegiatan_id: props.id_kegiatan });
+    console.log('Response daftar_syarat:', response);
+
+    // Ambil data dari response
+    const rawData = response.data || [];
+
+    // Remove duplikat berdasarkan id dan name
+    const uniqueData = rawData.reduce((acc: SyaratItem[], current: SyaratItem) => {
+      const exists = acc.find((item) => item.id === current.id && item.name === current.name);
+      if (!exists) {
+        acc.push(current);
+      }
+      return acc;
+    }, []);
+
+    dataSyarat.value = uniqueData;
+
+    // Reset form upload saat syarat berubah
+    formUploadDynamic.value = {};
+    errors.value = {};
+
+    console.log('Syarat yang sudah diproses:', dataSyarat.value);
+  } catch (error) {
+    console.error('Error fetching syarat data:', error);
+    displayNotification('Gagal memuat daftar syarat', 'error');
+  } finally {
+    isLoadingSyarat.value = false;
+  }
+};
+
 // Validate form
 const validateForm = () => {
   let isValid = true;
   errors.value = {};
 
-  console.log('Validating form:', form.value); // Debug
-  console.log('File uploads:', formUploadDynamic.value); // Debug
+  console.log('Validating form:', form.value);
+  console.log('File uploads:', formUploadDynamic.value);
 
   // Validasi text fields
   if (!form.value.nama_pemohon || !form.value.nama_pemohon.trim()) {
@@ -94,36 +147,14 @@ const validateForm = () => {
     isValid = false;
   }
 
-  // Validasi file uploads
-  if (!formUploadDynamic.value.dokumen_foto_ktp) {
-    errors.value.foto_ktp = 'Fotokopi KTP wajib diisi.';
-    isValid = false;
-  }
-
-  if (!formUploadDynamic.value.dokumen_foto_kk) {
-    errors.value.foto_kk = 'Fotokopi KK wajib diisi.';
-    isValid = false;
-  }
-
-  if (!formUploadDynamic.value.dokumen_surat_tidak_mampu) {
-    errors.value.surat_tidak_mampu = 'Surat keterangan tidak mampu wajib diisi.';
-    isValid = false;
-  }
-
-  if (!formUploadDynamic.value.dokumen_surat_keterangan) {
-    errors.value.surat_keterangan = 'Surat keterangan wajib diisi.';
-    isValid = false;
-  }
-
-  if (!formUploadDynamic.value.dokumen_surat_rujukan) {
-    errors.value.surat_rujukan = 'Surat rujukan wajib diisi.';
-    isValid = false;
-  }
-
-  if (!formUploadDynamic.value.dokumen_foto_buku_rekening) {
-    errors.value.foto_buku_rekening = 'Fotokopi buku rekening wajib diisi.';
-    isValid = false;
-  }
+  // Validasi file uploads berdasarkan syarat dinamis (semua wajib diisi)
+  dataSyarat.value.forEach((syarat) => {
+    const fieldName = generateFieldName(syarat.name);
+    if (!formUploadDynamic.value[`dokumen_${fieldName}`]) {
+      errors.value[fieldName] = `${syarat.name} wajib diisi.`;
+      isValid = false;
+    }
+  });
 
   // Validasi bank info
   if (!form.value.bank_id) {
@@ -141,7 +172,7 @@ const validateForm = () => {
     isValid = false;
   }
 
-  console.log('Validation result:', isValid, errors.value); // Debug
+  console.log('Validation result:', isValid, errors.value);
   return isValid;
 };
 
@@ -160,13 +191,14 @@ const handleFileUpload = (field: string) => (file: File | null) => {
 
   formUploadDynamic.value[`dokumen_${field}`] = file;
   errors.value[field] = '';
-  console.log(`File uploaded for ${field}:`, file.name); // Debug
+  console.log(`File uploaded for ${field}:`, file.name);
 };
 
 // Submit handler
 const handleSubmit = async () => {
   if (!validateForm()) {
-    console.log('Validation failed'); // Debug
+    console.log('Validation failed');
+    displayNotification('Mohon lengkapi semua field yang wajib diisi', 'error');
     return;
   }
 
@@ -175,11 +207,11 @@ const handleSubmit = async () => {
   const formData = new FormData();
 
   // Append form fields
-  formData.append('kegiatan_id', props.id_kegiatan);
+  formData.append('kegiatan_id', props.id_kegiatan.toString());
 
   // Append member_id jika ada
   if (form.value.member_id) {
-    formData.append('member_id', form.value.member_id);
+    formData.append('member_id', form.value.member_id.toString());
   }
 
   // Append other form fields
@@ -196,10 +228,15 @@ const handleSubmit = async () => {
     }
   });
 
-  console.log('Isi formData:');
+  console.log('=== FormData yang akan dikirim ===');
   formData.forEach((value, key) => {
-    console.log(`${key}:`, value);
+    if (value instanceof File) {
+      console.log(`${key}: [File] ${value.name} (${Math.round(value.size / 1024)} KB)`);
+    } else {
+      console.log(`${key}:`, value);
+    }
   });
+  console.log('=== End FormData ===');
 
   try {
     const response = await add_permohonan(formData);
@@ -263,6 +300,7 @@ watch(
   (newVal) => {
     if (newVal) {
       console.log('🔥 props.id_kegiatan udah ready:', newVal);
+      fetchDataSyarat();
     }
   },
   { immediate: true },
@@ -293,16 +331,16 @@ onBeforeUnmount(() => {
       <div
         class="relative max-w-4xl w-full bg-white shadow-2xl rounded-2xl max-h-[90vh] overflow-y-auto"
       >
-        <div class="sticky top-0 bg-white z-10 p-6 pb-4 border-b">
+        <div class="p-6 space-y-6">
           <!-- Header -->
-          <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center justify-between pb-4 border-b">
             <div>
               <h2 id="modal-title" class="text-xl font-bold text-gray-800">
                 UPLOAD SYARAT PRASYARAT PERMOHONAN BANTUAN
               </h2>
             </div>
             <button
-              class="text-gray-400 text-lg hover:text-gray-600"
+              class="text-gray-400 text-lg hover:text-gray-600 transition-colors"
               @click="closeModal"
               aria-label="Tutup modal"
             >
@@ -310,136 +348,125 @@ onBeforeUnmount(() => {
             </button>
           </div>
 
+          <!-- Loading State -->
+          <div v-if="isLoadingSyarat" class="flex justify-center items-center py-12">
+            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+            <span class="ml-3 text-gray-600">Memuat daftar syarat...</span>
+          </div>
+
           <!-- Form -->
-          <div class="space-y-4">
-            <!-- Row 1: Nama, KTP, WhatsApp -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <InputText
-                id="nama_pemohon"
-                v-model="form.nama_pemohon"
-                readonly
-                label="Nama Pemohon Bantuan"
-                type="text"
-                placeholder="Nama Pemohon"
-                :error="errors.nama_pemohon"
-              />
-              <InputText
-                id="nomor_ktp"
-                readonly
-                v-model="form.nomor_ktp"
-                label="Nomor KTP Pemohon Bantuan"
-                type="text"
-                placeholder="1177123787123716"
-                :error="errors.nomor_ktp"
-              />
-              <InputText
-                readonly
-                id="nomor_whatsapp"
-                v-model="form.nomor_whatsapp"
-                label="Nomor Whatsapp Pemohon Bantuan"
-                type="text"
-                placeholder="08526280141"
-                :error="errors.nomor_whatsapp"
-              />
+          <div v-else class="space-y-6">
+            <!-- Section: Data Pemohon -->
+            <div>
+              <h3 class="text-base font-semibold text-gray-700 mb-4 flex items-center">
+                <span class="w-1 h-5 bg-blue-600 mr-2"></span>
+                Data Pemohon
+              </h3>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <InputText
+                  id="nama_pemohon"
+                  v-model="form.nama_pemohon"
+                  readonly
+                  label="Nama Pemohon Bantuan"
+                  type="text"
+                  placeholder="Nama Pemohon"
+                  :error="errors.nama_pemohon"
+                />
+                <InputText
+                  id="nomor_ktp"
+                  readonly
+                  v-model="form.nomor_ktp"
+                  label="Nomor KTP Pemohon Bantuan"
+                  type="text"
+                  placeholder="1177123787123716"
+                  :error="errors.nomor_ktp"
+                />
+                <InputText
+                  readonly
+                  id="nomor_whatsapp"
+                  v-model="form.nomor_whatsapp"
+                  label="Nomor Whatsapp Pemohon Bantuan"
+                  type="text"
+                  placeholder="08526280141"
+                  :error="errors.nomor_whatsapp"
+                />
+              </div>
             </div>
 
-            <!-- Row 2: Foto KTP & KK -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <InputFile
-                id="foto_ktp"
-                label="Fotokopi Kartu Tanda Penduduk ( KTP)"
-                buttonText="Choose File"
-                accept=".pdf"
-                :error="errors.foto_ktp"
-                :maxSize="1000"
-                @file-selected="(file) => handleFileUpload('foto_ktp')(file)"
-              />
-              <InputFile
-                id="foto_kk"
-                label="Fotokopi Kartu Keluarga (KK)"
-                buttonText="Choose File"
-                accept=".pdf"
-                :error="errors.foto_kk"
-                :maxSize="1000"
-                @file-selected="(file) => handleFileUpload('foto_kk')(file)"
-              />
+            <!-- Section: Dynamic Syarat Fields -->
+            <div v-if="dataSyarat.length > 0">
+              <h3 class="text-base font-semibold text-gray-700 mb-4 flex items-center">
+                <span class="w-1 h-5 bg-blue-600 mr-2"></span>
+                Dokumen Persyaratan
+                <span class="ml-2 text-xs font-normal text-gray-500"
+                  >({{ dataSyarat.length }} dokumen wajib)</span
+                >
+              </h3>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <InputFile
+                  v-for="(syarat, index) in dataSyarat"
+                  :key="`${syarat.id}-${index}`"
+                  :id="`syarat_${generateFieldName(syarat.name)}`"
+                  :label="`${syarat.name} *`"
+                  buttonText="Pilih File"
+                  accept=".pdf"
+                  :error="errors[generateFieldName(syarat.name)]"
+                  :maxSize="1000"
+                  @file-selected="(file) => handleFileUpload(generateFieldName(syarat.name))(file)"
+                />
+              </div>
             </div>
 
-            <!-- Row 3: Surat Keterangan -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <InputFile
-                id="surat_tidak_mampu"
-                label="Surat Keterangan Tidak Mampu yang Ditandatangi oleh Reje Kampung dan Imam Kampung"
-                buttonText="Choose File"
-                accept=".pdf"
-                :error="errors.surat_tidak_mampu"
-                :maxSize="1000"
-                @file-selected="(file) => handleFileUpload('surat_tidak_mampu')(file)"
+            <div
+              v-else-if="!isLoadingSyarat"
+              class="text-center py-12 text-gray-500 bg-gray-50 rounded-lg"
+            >
+              <font-awesome-icon
+                icon="fa-solid fa-folder-open"
+                class="text-4xl mb-3 text-gray-400"
               />
-              <InputFile
-                id="surat_keterangan"
-                label="Surat Keterangan dari Puskesmas / Rumah Sakit / Bidan Desa Setempat yang Menyatakan Ibu Hamil, Anak Stunting atau Anak Berpotensi Stunting."
-                buttonText="Choose File"
-                accept=".pdf"
-                :error="errors.surat_keterangan"
-                :maxSize="1000"
-                @file-selected="(file) => handleFileUpload('surat_keterangan')(file)"
-              />
+              <p>Tidak ada syarat yang tersedia untuk kegiatan ini.</p>
             </div>
 
-            <!-- Row 4: Surat Rujukan & Buku Rekening -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <InputFile
-                id="surat_rujukan"
-                label="Surat Rujukan dari Rumah Sakit / Puskesmas Setempat Terbaru (untuk bantuan berobat)"
-                buttonText="Choose File"
-                accept=".pdf"
-                :error="errors.surat_rujukan"
-                :maxSize="1000"
-                @file-selected="(file) => handleFileUpload('surat_rujukan')(file)"
-              />
-              <InputFile
-                id="foto_buku_rekening"
-                label="Fotokopi Buku Rekening Bank Aceh Syariah"
-                buttonText="Choose File"
-                accept=".pdf"
-                :error="errors.foto_buku_rekening"
-                :maxSize="1000"
-                @file-selected="(file) => handleFileUpload('foto_buku_rekening')(file)"
-              />
-            </div>
+            <!-- Section: Informasi Rekening -->
+            <div>
+              <h3 class="text-base font-semibold text-gray-700 mb-4 flex items-center">
+                <span class="w-1 h-5 bg-blue-600 mr-2"></span>
+                Informasi Rekening
+              </h3>
 
-            <!-- Row 5: Bank Info -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <SelectField
-                id="bank_id"
-                v-model="form.bank_id"
-                :options="[{ id: null, name: 'Pilih Bank' }, ...dataBank]"
-                label="Pilih Bank"
-                placeholder="Pilih Bank"
-                :required="true"
-                :error="errors.bank_id"
-              />
-              <InputText
-                id="nomor_rekening"
-                v-model="form.nomor_rekening"
-                label="Nomor Rekening"
-                type="text"
-                placeholder="Nomor Rekening"
-                :error="errors.nomor_rekening"
-              />
-              <InputText
-                id="atas_nama"
-                v-model="form.atas_nama"
-                label="Atas Nama"
-                type="text"
-                placeholder="Atas Nama"
-                :error="errors.atas_nama"
-              />
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <SelectField
+                  id="bank_id"
+                  v-model="form.bank_id"
+                  :options="[{ id: null, name: 'Pilih Bank' }, ...dataBank]"
+                  label="Pilih Bank *"
+                  placeholder="Pilih Bank"
+                  :required="true"
+                  :error="errors.bank_id"
+                />
+                <InputText
+                  id="nomor_rekening"
+                  v-model="form.nomor_rekening"
+                  label="Nomor Rekening *"
+                  type="text"
+                  placeholder="Nomor Rekening"
+                  :error="errors.nomor_rekening"
+                />
+                <InputText
+                  id="atas_nama"
+                  v-model="form.atas_nama"
+                  label="Atas Nama *"
+                  type="text"
+                  placeholder="Atas Nama"
+                  :error="errors.atas_nama"
+                />
+              </div>
             </div>
 
             <!-- Submit Button -->
-            <div class="flex justify-end gap-3 mt-4">
+            <div class="flex justify-end gap-3 pt-4 border-t">
               <BaseButton
                 @click="closeModal"
                 type="button"
@@ -451,10 +478,32 @@ onBeforeUnmount(() => {
               <BaseButton
                 type="submit"
                 variant="primary"
-                :disabled="isSubmitting"
+                :disabled="isSubmitting || isLoadingSyarat"
                 @click="handleSubmit"
               >
-                <span v-if="isSubmitting">Menyimpan...</span>
+                <span v-if="isSubmitting" class="flex items-center">
+                  <svg
+                    class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    ></circle>
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Menyimpan...
+                </span>
                 <span v-else>Simpan</span>
               </BaseButton>
             </div>

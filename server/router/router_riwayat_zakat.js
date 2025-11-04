@@ -166,7 +166,7 @@ router.post(
       .withMessage("ID Tidak Boleh Kosong")
       .isInt()
       .withMessage("ID Harus Angka")
-      .custom(validation.check_id_riwayat_zakat),
+      .custom(validation.check_id_riwayat_zakat_cash_or_transfer),
   ],
   controllers.info_bukti_setoran
 );
