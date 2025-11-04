@@ -22,6 +22,7 @@ import LoginAdminView from '@/views/LoginAdminView.vue';
 import MemberAreaView from '@/views/MemberAreaView.vue';
 import SurveyLapanganView from '@/views/SurveyLapanganView.vue';
 import { createRouter, createWebHistory } from 'vue-router';
+import Kalkulator from '@/modules/Kalkulator/Kalkulator.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -252,6 +253,16 @@ const router = createRouter({
       meta: {
         title:
           'Cetak Rekap Distribusi Per Kode Asnaf || Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah',
+        description:
+          'Member Area Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah memberikan akses mudah untuk melihat data zakat, status permohonan, serta laporan transaksi secara aman dan transparan',
+      },
+    },
+    {
+      path: '/kalkulator',
+      name: 'kalkulator',
+      component: Kalkulator,
+      meta: {
+        title: 'Kalkulator Zakat || Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah',
         description:
           'Member Area Aplikasi Mustahik dan Muzaki Kabupaten Aceh Tengah memberikan akses mudah untuk melihat data zakat, status permohonan, serta laporan transaksi secara aman dan transparan',
       },
