@@ -179,15 +179,6 @@ async function updatestatus(id: number, newStatus: string) {
             placeholder="Semua Status Konfirmasi"
             @change="fetchData"
           />
-          <!-- <select
-            v-model="status_konfirmasi"
-            @change="fetchData"
-            class="block w-full sm:w-48 rounded-lg border-gray-300 shadow-sm px-3 py-2 text-gray-700 focus:ring-2 focus:ring-green-900 focus:border-green-900 transition"
-          >
-            <option value="">Semua Konfirmasi</option>
-            <option value="sudah_dikirim">Sudah dikirim</option>
-            <option value="belum_dikirim">Belum dikirim</option>
-          </select> -->
           <BaseSelect
             v-model="selectTipePembayaran"
             :options="[
