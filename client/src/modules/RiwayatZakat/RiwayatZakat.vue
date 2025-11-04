@@ -270,7 +270,27 @@ async function cetakSuratSerahTerimaZakat(id: number) {
     console.log(id);
     const response = await info_bukti_setoran(id);
     const buktiData: BuktiSetoranData = response.data;
-    console.log(buktiData);
+
+    const invalidFields: string[] = [];
+
+    for (const key in buktiData) {
+      if (buktiData[key] == null || buktiData[key] === undefined) {
+        invalidFields.push(key);
+      }
+    }
+
+    if (invalidFields.length > 0) {
+      const message = [
+        'Data berikut belum lengkap:',
+        invalidFields
+          .map((f) => `- ${f.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}`)
+          .join('\n'),
+      ].join('\n');
+      console.log(message);
+
+      displayNotification(message, 'error');
+      return;
+    }
 
     // Load images
     const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
@@ -332,10 +352,11 @@ async function cetakSuratSerahTerimaZakat(id: number) {
     // doc.setFillColor(255, 0, 0);
     // doc.rect(boxX + 22, y + 1.5, 46, 7, 'F');
     // doc.setTextColor(255, 255, 255);
-    // doc.setFont('times', 'normal');
-    // doc.setFontSize(8);
-    // doc.text(buktiData.kode, boxX + 45, y + 6, { align: 'center' });
-    // doc.setTextColor(0, 0, 0); // Reset warna text
+    doc.setFont('times', 'normal');
+    doc.setFontSize(11);
+    // doc.text(buktiData.kode, boxX + 45, y + 6, { align: 'center' }); // Ini direvisi sebelumnya
+    doc.text('/ ...... / ...... /', boxX + 45, y + 6, { align: 'center' });
+    doc.setTextColor(0, 0, 0); // Reset warna text
 
     // ==================== JUDUL BAGIAN UTAMA ====================
     y += 18;
@@ -488,7 +509,12 @@ async function cetakSuratSerahTerimaZakat(id: number) {
     );
   } catch (error: any) {
     console.error('Error cetak bukti setoran:', error);
-    // displayNotification(error.response.data.message || 'Gagal mencetak bukti setoran', 'error');
+    displayNotification(
+      error.response.data.message ||
+        error.response.data.error_msg ||
+        'Gagal mencetak bukti setoran',
+      'error',
+    );
   } finally {
     isLoading.value = false;
   }
@@ -511,9 +537,6 @@ async function cetakSuratSerahTerimaZakat(id: number) {
 // }
 
 // async function cetakSuratSerahTerimaZakat(data?: BuktiStoranData) {
-//   try {
-//     const response = await info_bukti_setoran(data.id);
-//   } catch (error) {}
 //   // Data dummy jika tidak ada data
 //   const buktiData: BuktiStoranData = data || {
 //     nomorBukti: '02/11/25',

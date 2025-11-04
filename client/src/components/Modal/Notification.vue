@@ -122,7 +122,10 @@ const titleClass = computed(() => {
                 {{ titleText }}
               </h3>
 
-              <p v-if="notificationMessage" class="mt-1 text-sm sm:text-base text-gray-600">
+              <p
+                v-if="notificationMessage"
+                class="mt-1 text-sm sm:text-base text-gray-600 whitespace-pre-line"
+              >
                 {{ notificationMessage }}
               </p>
 

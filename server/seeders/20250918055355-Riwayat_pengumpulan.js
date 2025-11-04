@@ -257,6 +257,8 @@ module.exports = {
           kode: 0,
           status: "process",
           tipe_pembayaran: "cash",
+          nama_petugas: "Yuri Oisha Kurniawan",
+          jabatan_petugas: "Admin Baitulmal",
           posisi_uang: "kantor_baitulmal",
           konfirmasi_pembayaran: "belum_dikirim",
           nama_petugas: "Administrator",
