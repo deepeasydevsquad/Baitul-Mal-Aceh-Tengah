@@ -25,6 +25,7 @@ module.exports = (sequelize, DataTypes) => {
       nominal: DataTypes.INTEGER,
       kode: DataTypes.INTEGER,
       status: DataTypes.ENUM(["process", "success", "failed"]),
+      alasan_penolakan: DataTypes.STRING,
       tipe_pembayaran: DataTypes.ENUM(["online", "transfer", "cash"]),
       nominal_transfer: DataTypes.INTEGER,
       bukti_transfer: DataTypes.STRING,

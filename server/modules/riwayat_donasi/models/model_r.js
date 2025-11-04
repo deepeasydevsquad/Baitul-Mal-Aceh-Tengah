@@ -27,6 +27,12 @@ class Model_r {
     if (body.status && body.status !== "") {
       where.status = body.status;
     }
+
+    // filter tipe pembayaran
+    if (body.tipe_pembayaran && body.tipe_pembayaran !== "") {
+      where.tipe_pembayaran = body.tipe_pembayaran;
+    }
+
     if (body.konfirmasi_pembayaran && body.konfirmasi_pembayaran !== "") {
       where.konfirmasi_pembayaran = body.konfirmasi_pembayaran;
     }
@@ -174,6 +180,38 @@ class Model_r {
       this.state = false;
       this.message = err.message || "Gagal mengambil detail riwayat donasi";
       return null;
+    }
+  }
+
+  async info_riwayat_donasi(id) {
+    try {
+      const result = await Riwayat_donasi.findByPk(id, {
+        include: [
+          {
+            model: Member,
+            attributes: ["fullname", "nomor_ktp", "kode"],
+          },
+        ],
+      });
+      return {
+        id: result.id,
+        invoice: result.invoice,
+        tipe: result.tipe,
+        nominal: result.nominal,
+        kode: result.kode,
+        status: result.status,
+        konfirmasi_pembayaran: result.konfirmasi_pembayaran,
+        tipe_pembayaran: result.tipe_pembayaran,
+        bukti_transfer: result.bukti_transfer,
+        bukti_setoran: result.bukti_setoran,
+        member_id: result.member_id,
+        member_name: result.Member?.fullname,
+        member_nik: result.Member?.nomor_ktp,
+        datetime: moment(result.updatedAt).format("YYYY-MM-DD HH:mm:ss"),
+      };
+    } catch (error) {
+      console.error("Error fetching bank data:", error);
+      return {};
     }
   }
 

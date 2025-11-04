@@ -12,6 +12,10 @@ import { add_donasi, daftar_member } from '@/service/program_donasi';
 import SelectField from '@/components/Form/SelectField.vue';
 import { formatRupiah } from '@/libs/formatRupiah';
 
+import { RefreshRiwayatDonasi } from '@/stores/message';
+const refresh = RefreshRiwayatDonasi();
+refresh.setBool(false);
+
 // Notification
 const { showNotification, notificationType, notificationMessage, displayNotification } =
   useNotification();
@@ -118,6 +122,9 @@ const handleSubmit = async () => {
 
     const msg = response.message || response.error_msg || 'Berhasil';
     const isError = response.error || false;
+
+    // supaya reload
+    refresh.setBool(true);
 
     emit('status', { error_msg: msg, error: isError });
     closeModal();

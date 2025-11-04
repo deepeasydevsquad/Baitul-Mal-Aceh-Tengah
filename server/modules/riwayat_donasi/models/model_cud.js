@@ -1,5 +1,12 @@
-const { sequelize, Program_donasi, Riwayat_donasi, Member } = require("../../../models");
+const {
+  sequelize,
+  Program_donasi,
+  Riwayat_donasi,
+  Member,
+} = require("../../../models");
+const Model_r = require("../models/model_r");
 const { writeLog } = require("../../../helper/writeLogHelper");
+const jwt = require("jsonwebtoken");
 const path = require("path");
 const fs = require("fs");
 const moment = require("moment");
@@ -18,11 +25,37 @@ class Model_cud {
         include: [
           {
             model: Program_donasi,
-            attributes: ["id", "name", "slug", "banner", "tahun", "deskripsi", "target_donasi_terkumpul", "status", "waktu_donasi", "createdAt", "updatedAt"],
+            attributes: [
+              "id",
+              "name",
+              "slug",
+              "banner",
+              "tahun",
+              "deskripsi",
+              "target_donasi_terkumpul",
+              "status",
+              "waktu_donasi",
+              "createdAt",
+              "updatedAt",
+            ],
           },
           {
             model: Member,
-            attributes: ["id","kode","tipe", "fullname", "nomor_ktp", "nomor_kk", "whatsapp_number","birth_date","alamat","username","password","createdAt","updatedAt"],
+            attributes: [
+              "id",
+              "kode",
+              "tipe",
+              "fullname",
+              "nomor_ktp",
+              "nomor_kk",
+              "whatsapp_number",
+              "birth_date",
+              "alamat",
+              "username",
+              "password",
+              "createdAt",
+              "updatedAt",
+            ],
           },
         ],
         order: [["createdAt", "DESC"]],
@@ -47,7 +80,9 @@ class Model_cud {
     try {
       if (!id) throw new Error("ID wajib diisi");
 
-      const riwayat = await Riwayat_donasi.findByPk(id, { transaction: this.t });
+      const riwayat = await Riwayat_donasi.findByPk(id, {
+        transaction: this.t,
+      });
       if (!riwayat) throw new Error("Data tidak ditemukan");
 
       await riwayat.destroy({ transaction: this.t });
@@ -61,39 +96,169 @@ class Model_cud {
     }
   }
 
-async updatestatus() {
-  const { id, status } = this.req.body;
-  this.t = await sequelize.transaction();
+  // async updatestatus() {
+  //   const { id, status } = this.req.body;
+  //   this.t = await sequelize.transaction();
 
-  try {
-    if (!id || !status) {
-      throw new Error("ID dan status wajib diisi");
+  //   try {
+  //     if (!id || !status) {
+  //       throw new Error("ID dan status wajib diisi");
+  //     }
+
+  //     const riwayat = await Riwayat_donasi.findByPk(id, { transaction: this.t });
+  //     if (!riwayat) {
+  //       throw new Error("Data riwayat donasi tidak ditemukan");
+  //     }
+
+  //     await Riwayat_donasi.update(
+  //       { status: status.toLowerCase() },
+  //       {
+  //         where: { id },
+  //         transaction: this.t,
+  //       }
+  //     );
+
+  //     await this.t.commit();
+
+  //     this.state = true;
+  //     this.message = `Status donasi berhasil diubah menjadi ${status}`;
+  //   } catch (error) {
+  //     await this.t.rollback();
+  //     console.error("❌ Gagal update status:", error);
+  //     this.state = false;
+  //     this.message = error.message || "Gagal mengubah status donasi";
+  //   }
+  // }
+
+  async approve_online() {
+    // await this.initialize();
+    const body = this.req.body;
+
+    const authHeader = this.req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
+    const decoded = jwt.decode(token);
+
+    try {
+      const model_r = new Model_r(this.req);
+      const info_riwayat_donasi = await model_r.info_riwayat_donasi(body.id);
+
+      await Riwayat_donasi.update(
+        {
+          konfirmasi_pembayaran: "sudah_dikirim",
+          nama_petugas: decoded.name,
+          jabatan_petugas: decoded.jabatan,
+          status: "success",
+          updatedAt: new Date(),
+        },
+        {
+          where: { id: body.id },
+          transaction: this.t,
+        }
+      );
+
+      this.message = `Menyetujui Pembayaran donasi Secara Online dengan Nama member Riwayat_donasi: ${info_riwayat_donasi.member_name} dan ID Riwayat donasi: ${info_riwayat_donasi.id}`;
+    } catch (error) {
+      console.log("GGGG");
+      console.log(error);
+      console.log("GGGG");
+      this.state = false;
     }
-
-    const riwayat = await Riwayat_donasi.findByPk(id, { transaction: this.t });
-    if (!riwayat) {
-      throw new Error("Data riwayat donasi tidak ditemukan");
-    }
-
-    await Riwayat_donasi.update(
-      { status: status.toLowerCase() },
-      {
-        where: { id },
-        transaction: this.t,
-      }
-    );
-
-    await this.t.commit();
-
-    this.state = true;
-    this.message = `Status donasi berhasil diubah menjadi ${status}`;
-  } catch (error) {
-    await this.t.rollback();
-    console.error("❌ Gagal update status:", error);
-    this.state = false;
-    this.message = error.message || "Gagal mengubah status donasi";
   }
-}
+
+  async reject_online() {
+    const body = this.req.body;
+
+    const authHeader = this.req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
+    const decoded = jwt.decode(token);
+
+    try {
+      const model_r = new Model_r(this.req);
+      const info_riwayat_donasi = await model_r.info_riwayat_donasi(body.id);
+
+      await Riwayat_donasi.update(
+        {
+          status: "failed",
+          alasan_penolakan: body.alasan,
+          nama_petugas: decoded.name,
+          jabatan_petugas: decoded.jabatan,
+          updatedAt: new Date(),
+        },
+        {
+          where: { id: body.id },
+          transaction: this.t,
+        }
+      );
+
+      this.message = `Menolak Pembayaran Donasi Secara Online  dengan Nama member Riwayat Donasi: ${info_riwayat_donasi.member_name} dan ID Riwayat donasi: ${info_riwayat_donasi.id}`;
+    } catch (error) {
+      console.log("GGGG");
+      console.log(error);
+      console.log("GGGG");
+      this.state = false;
+    }
+  }
+
+  async upload_bukti_transfer() {
+    const body = this.req.body;
+
+    try {
+      const model_r = new Model_r(this.req);
+      const info_riwayat_donasi = await model_r.info_riwayat_donasi(body.id);
+
+      await Riwayat_donasi.update(
+        {
+          bukti_transfer: body.buktiPath,
+          nominal_transfer: body.nominal_transfer,
+          status: "success",
+          konfirmasi_pembayaran: "sudah_dikirim",
+          updatedAt: new Date(),
+        },
+        {
+          where: { id: body.id },
+          transaction: this.t,
+        }
+      );
+
+      this.message = `Mengunggah Bukti Transfer untuk Riwayat donasi dengan Nama member Riwayat donasi: ${info_riwayat_donasi.member_name} dan ID Riwayat donasi: ${info_riwayat_donasi.id}`;
+    } catch (error) {
+      console.log("DDDDDD");
+      console.log(error);
+      console.log("DDDDDD");
+      this.state = false;
+    }
+  }
+
+  async upload_bukti_setoran() {
+    const body = this.req.body;
+
+    try {
+      const model_r = new Model_r(this.req);
+      const info_riwayat_donasi = await model_r.info_riwayat_donasi(body.id);
+
+      await Riwayat_donasi.update(
+        {
+          bukti_setoran: body.buktiPath,
+          nominal_setoran: body.nominal_setoran,
+          status: "success",
+          posisi_uang: "bank",
+          konfirmasi_pembayaran: "sudah_dikirim",
+          updatedAt: new Date(),
+        },
+        {
+          where: { id: body.id },
+          transaction: this.t,
+        }
+      );
+
+      this.message = `Mengunggah Bukti Transfer untuk Riwayat donasi dengan Nama member Riwayat donasi: ${info_riwayat_donasi.member_name} dan ID Riwayat donasi: ${info_riwayat_donasi.id}`;
+    } catch (error) {
+      console.log("=======error2");
+      console.log(error);
+      console.log("=======error2");
+      this.state = false;
+    }
+  }
 
   // Response konsisten
   async response(data = null) {
@@ -108,7 +273,6 @@ async updatestatus() {
       return { success: false, message: this.message };
     }
   }
-
 }
 
 module.exports = Model_cud;

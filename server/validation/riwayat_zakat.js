@@ -38,6 +38,31 @@ validation.check_id_riwayat_zakat = async (value) => {
   return true;
 };
 
+// Validasi id Riwayat apakah sudah ada di database dan dalam tipe pembayaran cash atau transfer
+validation.check_id_riwayat_zakat_cash_or_transfer = async (value) => {
+  const check = await Riwayat_pengumpulan.findOne({
+    where: {
+      id: value,
+      tipe: {
+        [Op.in]: [
+          "zakat_harta",
+          "zakat_simpanan",
+          "zakat_profesi",
+          "zakat_perdagangan",
+          "zakat_pertanian",
+        ],
+      },
+      tipe_pembayaran: {
+        [Op.in]: ["transfer", "cash"],
+      },
+    },
+  });
+
+  if (!check) {
+    throw new Error("Riwayat zakat tidak terdaftar di pangkalan data");
+  }
+};
+
 validation.upload = (tipe = "cash") => {
   const storage = multer.diskStorage({
     destination: (req, file, cb) => {
