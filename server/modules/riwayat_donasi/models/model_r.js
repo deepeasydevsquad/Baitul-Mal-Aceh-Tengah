@@ -1,11 +1,12 @@
 const {
+  Op,
   Program_donasi,
   Riwayat_donasi,
   Member,
-  sequelize,
+  Setting,
 } = require("../../../models");
-const { Op } = require("sequelize");
 const moment = require("moment");
+const { get_info_lokasi } = require("../../../helper/locationHelper");
 
 class Model_r {
   constructor(req) {
@@ -180,6 +181,67 @@ class Model_r {
       this.state = false;
       this.message = err.message || "Gagal mengambil detail riwayat donasi";
       return null;
+    }
+  }
+
+  async info_bukti_setoran() {
+    const body = this.req.body;
+
+    try {
+      const [buktiData, settings] = await Promise.all([
+        Riwayat_donasi.findByPk(body.id, {
+          attributes: ["kode", "nominal", "nama_petugas", "jabatan_petugas"],
+          include: [
+            {
+              model: Member,
+              attributes: ["fullname", "desa_id", "alamat", "whatsapp_number"],
+              required: true,
+            },
+          ],
+          raw: true,
+          nest: true,
+        }),
+        Setting.findAll({
+          where: {
+            name: {
+              [Op.in]: ["nama_kabupaten_kota", "alamat"],
+            },
+          },
+          attributes: ["name", "value"],
+          raw: true,
+        }),
+      ]);
+
+      const settingMap = Object.fromEntries(
+        settings.map((s) => [s.name, s.value])
+      );
+
+      return {
+        waktu: {
+          tanggal: moment().format("DD"),
+          bulan_str: moment().format("MMMM"),
+          bulan_num: moment().format("M"),
+          tahun_lng: moment().format("YYYY"),
+          tahun_shrt: moment().format("YY"),
+        },
+        member_fullname: buktiData.Member.fullname,
+        alamat: buktiData.Member.alamat,
+        whatsapp_number: buktiData.Member.whatsapp_number,
+        bukti_setoran: buktiData.bukti_setoran,
+        kode: String(buktiData.kode),
+        tipe: "donasi",
+        nominal: buktiData.nominal,
+        nama_petugas: buktiData.nama_petugas,
+        jabatan_petugas: buktiData.jabatan_petugas,
+        lokasi: await get_info_lokasi(buktiData.Member.desa_id),
+        lokasi_kantor: {
+          nama_kabupaten_kota: settingMap.nama_kabupaten_kota,
+          alamat: settingMap.alamat,
+        },
+      };
+    } catch (error) {
+      console.error("Error fetching riwayat zakat data:", error);
+      return {};
     }
   }
 

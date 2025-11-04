@@ -1,53 +1,53 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted, getCurrentInstance, watch } from 'vue';
-import Notification from '@/components/Modal/Notification.vue';
-import Confirmation from '@/components/Modal/Confirmation.vue';
 import BaseButton from '@/components/Button/BaseButton.vue';
-import DangerButton from '@/components/Button/DangerButton.vue';
-import DeleteIcon from '@/components/Icons/DeleteIcon.vue';
-import Pagination from '@/components/Pagination/Pagination.vue';
-import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
-import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
 import ButtonGreen from '@/components/Button/ButtonGreen.vue';
+import DangerButton from '@/components/Button/DangerButton.vue';
 import LightButton from '@/components/Button/LightButton.vue';
 import YellowButton from '@/components/Button/YellowButton.vue';
-import FormReject from '@/modules/RiwayatDonasi/widgets/FormReject.vue';
-import FormUploadBuktiTransfer from '@/modules/RiwayatDonasi/widgets/FormUploadBuktiTransfer.vue';
-import FormUploadBuktiSetoranDonasi from '@/modules/RiwayatDonasi/widgets/FormUploadBuktiSetoranDonasi.vue';
+import DeleteIcon from '@/components/Icons/DeleteIcon.vue';
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
+import Confirmation from '@/components/Modal/Confirmation.vue';
+import Notification from '@/components/Modal/Notification.vue';
+import Pagination from '@/components/Pagination/Pagination.vue';
+import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
 import FormDisplayBukti from '@/modules/RiwayatDonasi/widgets/FormDisplayBukti.vue';
+import FormReject from '@/modules/RiwayatDonasi/widgets/FormReject.vue';
+import FormUploadBuktiSetoranDonasi from '@/modules/RiwayatDonasi/widgets/FormUploadBuktiSetoranDonasi.vue';
+import FormUploadBuktiTransfer from '@/modules/RiwayatDonasi/widgets/FormUploadBuktiTransfer.vue';
+import { getCurrentInstance, onMounted, ref, watch } from 'vue';
 
 import BaseSelect from '@/components/Form/BaseSelect.vue';
 
-// BaseSelect
+// import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 // Composable
-import { usePagination } from '@/composables/usePaginations';
 import { useConfirmation } from '@/composables/useConfirmation';
 import { useNotification } from '@/composables/useNotification';
+import { usePagination } from '@/composables/usePaginations';
 
 // Service API
 import {
-  get_riwayat_donasi,
   delete_riwayat_donasi,
+  get_riwayat_donasi,
+  info_bukti_setoran,
   setujui_pembayaran_donasi,
 } from '@/service/riwayat_donasi';
 
 // Store
-import { MessageTabDonasi, RefreshRiwayatDonasi } from '@/stores/message';
 import { API_URL } from '@/config/config';
+import { MessageTabDonasi, RefreshRiwayatDonasi } from '@/stores/message';
 const BASE_URL = API_URL;
 
 // Global Properties
 const { appContext } = getCurrentInstance()!;
 
 const $formatToRupiah = appContext.config.globalProperties.$formatToRupiah;
+const $terbilangUang = appContext.config.globalProperties.$terbilangUang;
 
 const message = MessageTabDonasi();
 const refresh = RefreshRiwayatDonasi();
-
-// ubah nilai
-// refresh.setBool(false);
 
 // State
 const isLoading = ref(false);
@@ -236,122 +236,407 @@ async function loadImageAsBase64(url) {
   });
 }
 
-async function cetakSuratSerahTerimaInfaq(id: number) {
-  const logo = BASE_URL + '/uploads/img/logos/site_logo.png';
-  const logoBase64 = await loadImageAsBase64(logo);
-
-  const footer = '../../../public/images/ziwah.png';
-  const footerBase64 = await loadImageAsBase64(footer);
-
-  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-
-  let y = 15;
-  const pageHeight = doc.internal.pageSize.getHeight();
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const marginRight = 15;
-  const scale = 0.9;
-  const logoWidth = 53 * scale;
-  const logoHeight = 15 * scale;
-  const x = pageWidth - marginRight - 45;
-
-  const scaleFooter = 0.28;
-  const footerWidth = 106 * scaleFooter; // 42 mm
-  const footerHeight = 34 * scaleFooter; // 13.6 mm
-
-  // Judul
-  doc.setFont('times', 'bold');
-  doc.setFontSize(12);
-  doc.text('BERITA ACARA', 105, y, { align: 'center' });
-  doc.setFontSize(12);
-  y = y + 6;
-  doc.text('SERAH TERIMA ZAKAT', 105, y, { align: 'center' });
-  y = y + 6;
-  doc.text('KABUPATEN ACEH TENGAH', 105, y, { align: 'center' });
-
-  doc.addImage(logoBase64, 'PNG', x, 12, logoWidth, logoHeight);
-
-  y = y + 5;
-  doc.setDrawColor(200, 200, 200);
-  doc.line(15, y, 195, y);
-
-  // Isi surat
-  doc.setFont('times', 'normal');
-  doc.setFontSize(12);
-  y = y + 5;
-  const lineHeight = 6; // tinggi baris normal (mm)
-  const spacing = 1.2;
-  y += lineHeight * spacing;
-  doc.text(
-    `Pada hari ini Senin, 23 Januari 2025 bertempat di Kabupaten Aceh Tengah, Kami bertanda tangan di bawah ini :`,
-    20,
-    y,
-    { maxWidth: 170, align: 'justify' },
-  );
-  y = y + 15;
-  // Data pihak pertama
-  doc.text('1.', 25, y);
-  doc.text('Nama', 30, y);
-  doc.text(': SUDIRMAN', 50, y);
-  y += lineHeight * spacing;
-  doc.text('Alamat', 30, y);
-  doc.text(': TZ Komputer, Lantai 3, Komputer City.', 50, y);
-  y += lineHeight * spacing;
-  doc.text('Sebagai', 30, y);
-  doc.text(': Muzakki', 50, y);
-  doc.setFont('times', 'bold');
-  doc.text('(PIHAK PERTAMA)', 69, y);
-  y += lineHeight * spacing;
-  doc.setFont('times', 'normal');
-  y = y + 4;
-  // Data pihak kedua
-  doc.text('2.', 25, y);
-  doc.text('Nama', 30, y);
-  doc.text(': REZKAYANTHA USMAN, S. PD', 50, y);
-  // doc.text(' Nama     : REZKAYANTHA USMAN, S. PD', 25, y);
-  y += lineHeight * spacing;
-  doc.text('Alamat', 30, y);
-  doc.text(': Bilacaddi, Kec. Pattallassang, Kab. Takalar.', 50, y);
-  y += lineHeight * spacing;
-  doc.text('Sebagai', 30, y);
-  doc.text(': Petugas Baitulmal Kabupaten Aceh Tengah', 50, y);
-  doc.setFont('times', 'bold');
-  doc.text('(PIHAK KEDUA)', 127, y);
-  doc.setFont('times', 'normal');
-  y += lineHeight * spacing;
-  y = y + 5;
-  // Isi tengah
-  const isi2 = `Dengan ini menyatakan bahwa PIHAK PERTAMA telah menyerahkan Zakat Harta kepada PIHAK KEDUA berupa uang tunai sebesar Rp 200.000,-. Demikian Berita Acara Serah Terima ini dibuat untuk dipergunakan sebagaimana mestinya.`;
-  doc.text(isi2, 20, y, { maxWidth: 170, align: 'justify' });
-
-  y = y + 30;
-
-  // Tanda tangan
-  doc.text('PIHAK PERTAMA', 40, y, { align: 'center' });
-  doc.text('PIHAK KEDUA', 150, y, { align: 'center' });
-  y += lineHeight * spacing;
-  doc.text('Muzakki', 40, y, { align: 'center' });
-  doc.text('Petugas Baitulmal Kabupaten Aceh Tengah', 150, y, { align: 'center' });
-  y = y + 30;
-  doc.text('S U D I R M A N', 40, y, { align: 'center' });
-  doc.text('REZKAYANTHA USMAN, S. PD', 150, y, { align: 'center' });
-
-  // FOOTER
-  // garis pemisah
-  doc.setDrawColor(200, 200, 200);
-  doc.line(10, pageHeight - 20, 195, pageHeight - 20);
-
-  // teks footer
-  doc.setFontSize(9);
-  doc.setTextColor(120, 120, 120);
-  doc.text('Dicetak pada: 01 November 2025 pukul 23.51', 105, pageHeight - 10, {
-    align: 'center',
-  });
-
-  doc.addImage(footerBase64, 'PNG', 15, pageHeight - 15, footerWidth, footerHeight);
-
-  // 3️⃣ Simpan file
-  doc.save('Surat Serah Terima Infaq.pdf');
+interface BuktiSetoranData {
+  waktu: {
+    tanggal: string;
+    bulan_str: string;
+    bulan_num: string;
+    tahun_lng: string;
+    tahun_shrt: string;
+  };
+  member_fullname: string;
+  alamat: string;
+  whatsapp_number: string;
+  kode: string;
+  tipe: string;
+  nominal: number;
+  nama_petugas: string;
+  jabatan_petugas: string;
+  lokasi: {
+    id: number;
+    desa_name: string;
+    kecamatan_id: number;
+    kecamatan_name: string;
+  };
+  lokasi_kantor: {
+    nama_kabupaten_kota: string;
+    alamat: string;
+  };
 }
+
+async function cetakSuratSerahTerima(id: number) {
+  isLoading.value = true;
+  try {
+    const response = await info_bukti_setoran(id);
+    const buktiData: BuktiSetoranData = response.data;
+
+    const invalidFields: string[] = [];
+
+    for (const key in buktiData) {
+      if (buktiData[key] == null || buktiData[key] === undefined) {
+        invalidFields.push(key);
+      }
+    }
+
+    if (invalidFields.length > 0) {
+      const message = [
+        'Data berikut belum lengkap:',
+        invalidFields
+          .map((f) => `- ${f.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}`)
+          .join('\n'),
+      ].join('\n');
+      console.log(message);
+
+      displayNotification(message, 'error');
+      return;
+    }
+
+    // Load images
+    const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
+    const logo = BASE_URL + '/uploads/img/logos/site_logo.png';
+    const logoBase64 = await loadImageAsBase64(logo);
+    const footer = '../../../public/images/ziwah.png';
+    const footerBase64 = await loadImageAsBase64(footer);
+
+    // Inisialisasi PDF
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    let y = 15;
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const lineHeight = 6;
+    const spacing = 1.2;
+
+    // ==================== HEADER ====================
+    // Logo di kanan
+    const marginRight = 150;
+    const scale = 1.15;
+    const logoWidth = 53 * scale;
+    const logoHeight = 15 * scale;
+    const x = pageWidth - marginRight - 45;
+    doc.addImage(logoBase64, 'PNG', x, 12, logoWidth, logoHeight);
+
+    // Info Sekretariat (Kanan)
+    doc.setFont('times', 'bold');
+    doc.setFontSize(10);
+    doc.text('SEKRETARIAT', pageWidth - 85, y, { align: 'left' });
+    y += 5;
+
+    doc.setFont('times', 'normal');
+    doc.setFontSize(9);
+    doc.text('BAITUL MAL KABUPATEN ACEH TENGAH', pageWidth - 85, y, { align: 'left' });
+    y += 4;
+
+    const alamat = buktiData.lokasi_kantor.alamat || '';
+    const alamatKantorWrapped = doc.splitTextToSize(alamat, 70);
+    doc.text(alamatKantorWrapped, pageWidth - 85, y, { align: 'left' });
+    y += alamatKantorWrapped.length * 2;
+
+    // Box Nomor Bukti (Kanan)
+    y += 8;
+    const boxX = pageWidth - 85;
+    const boxWidth = 70;
+    const boxHeight = 10;
+    doc.setDrawColor(255, 0, 0); // Border merah
+    doc.setLineWidth(0.5);
+    doc.rect(boxX, y, boxWidth, boxHeight);
+
+    doc.setFont('times', 'bold');
+    doc.setFontSize(11);
+    doc.text(
+      `${buktiData.waktu.tanggal} / ${buktiData.waktu.bulan_num} / ${buktiData.waktu.tahun_shrt}`,
+      boxX + 3,
+      y + 6,
+    );
+
+    // Background merah untuk periodekan
+    doc.setFont('times', 'normal');
+    doc.setFontSize(11);
+    // doc.text(buktiData.kode, boxX + 45, y + 6, { align: 'center' }); // Ini direvisi sebelumnya
+    doc.text('/ ...... / ...... /', boxX + 45, y + 6, { align: 'center' });
+    doc.setTextColor(0, 0, 0); // Reset warna text
+
+    // ==================== JUDUL BAGIAN UTAMA ====================
+    y += 18;
+    doc.setFillColor(220, 220, 220);
+    doc.rect(15, y, pageWidth - 30, 8, 'F');
+    doc.setDrawColor(0, 0, 0);
+    doc.rect(15, y, pageWidth - 30, 8);
+    doc.setFont('times', 'bold');
+    doc.setFontSize(12);
+    doc.text('TELAH TERIMA DARI', pageWidth / 2, y + 5.5, { align: 'center' });
+
+    // ==================== DATA PENERIMA ====================
+    y += 15;
+    doc.setFont('times', 'normal');
+    doc.setFontSize(11);
+
+    const leftCol = 15;
+    const dataCol = 80;
+
+    const maxWidth = 120; // batas lebar teks
+    const lineGap = lineHeight * spacing;
+
+    // Atas Nama
+    doc.setFont('times', 'bold');
+    doc.text('Atas Nama', leftCol, y);
+    doc.setFont('times', 'normal');
+    doc.text(': ' + buktiData.member_fullname, dataCol, y);
+    y += lineGap;
+
+    // Alamat (bisa panjang → perlu wrap)
+    doc.setFont('times', 'bold');
+    doc.text('Alamat', leftCol, y);
+    doc.setFont('times', 'normal');
+
+    const alamatWrapped = doc.splitTextToSize(`: ${buktiData.alamat || '-'}`, maxWidth);
+    doc.text(alamatWrapped, dataCol, y);
+    y += alamatWrapped.length * lineGap;
+
+    // No. Tlp/HP
+    doc.setFont('times', 'bold');
+    doc.text('No. Tlp/ HP', leftCol, y);
+    doc.setFont('times', 'normal');
+    doc.text(': ' + (buktiData.whatsapp_number || '-'), dataCol, y);
+    y += lineGap;
+
+    // Jenis Pembayaran
+    doc.setFont('times', 'bold');
+    doc.text('Jenis Pembayaran', leftCol, y);
+    doc.setFont('times', 'normal');
+    const capitalizedText = buktiData.tipe
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+    doc.text(`: ${capitalizedText}`, dataCol, y);
+    y += lineGap;
+
+    // Telah Diterima Uang Sejumlah
+    doc.setFont('times', 'bold');
+    doc.text('Telah Diterima Uang Sejumlah', leftCol, y);
+    doc.setFont('times', 'normal');
+    doc.text(': ' + $formatToRupiah(buktiData.nominal), dataCol, y);
+    y += lineGap;
+
+    // Terbilang (bisa sangat panjang → perlu wrap)
+    doc.setFont('times', 'bolditalic');
+    doc.text('Terbilang', leftCol, y);
+    doc.setFont('times', 'normal');
+    doc.text(':', dataCol, y);
+    doc.setFont('times', 'italic');
+
+    const terbilangText =
+      `  ` + $terbilangUang(buktiData.nominal, { case: 'title', currency: 'Rupiah' });
+    const terbilangWrapped = doc.splitTextToSize(terbilangText, maxWidth);
+    doc.text(terbilangWrapped, dataCol, y);
+    y += terbilangWrapped.length * lineGap;
+
+    y += lineHeight * spacing;
+
+    // ==================== TANDA TANGAN ====================
+    y += 30;
+    doc.setFont('times', 'normal');
+    doc.setFontSize(11);
+
+    // Kolom Kiri - Diterima Oleh
+    const leftSignX = 50;
+    doc.text(
+      `${buktiData.lokasi_kantor.nama_kabupaten_kota}, ${buktiData.waktu.tanggal} / ${buktiData.waktu.bulan_num} / ${buktiData.waktu.tahun_shrt}`,
+      leftSignX,
+      y,
+      { align: 'center' },
+    );
+    y += lineHeight * spacing;
+    doc.setFont('times', 'bold');
+    doc.text('Diterima Oleh', leftSignX, y, { align: 'center' });
+    y += lineHeight * spacing;
+    doc.setFont('times', 'normal');
+    doc.text(buktiData.jabatan_petugas == null ? '-' : buktiData.jabatan_petugas, leftSignX, y, {
+      align: 'center',
+    });
+
+    // Kolom Kanan - Penyetor
+    const rightSignX = 160;
+    doc.setFont('times', 'bold');
+    doc.text('Penyetor', rightSignX, y - lineHeight * spacing, { align: 'center' });
+
+    y += 25;
+    doc.setFont('times', 'bold');
+    doc.text(
+      buktiData.nama_petugas == null ? '-' : buktiData.nama_petugas.toUpperCase(),
+      leftSignX,
+      y,
+      { align: 'center' },
+    );
+    doc.line(leftSignX - 25, y + 3, leftSignX + 25, y + 3); // Garis bawah nama
+
+    doc.text(buktiData.member_fullname.toUpperCase(), rightSignX, y, { align: 'center' });
+    doc.line(rightSignX - 25, y + 3, rightSignX + 25, y + 3); // Garis bawah nama
+
+    // ==================== QUOTE ====================
+    y += 30;
+    doc.setFont('times', 'bolditalic');
+    doc.setFontSize(12);
+    const quote =
+      '" YA ALLAH BERIKANLAH PAHALA ATAS DONASI YANG DITUNAIKAN DAN BERKAHILAH HARTA YANG LAINNYA. AMIN "';
+    doc.text(quote, pageWidth / 2, y, { align: 'center', maxWidth: 160 });
+
+    // ==================== FOOTER ====================
+    const scaleFooter = 0.28;
+    const footerWidth = 106 * scaleFooter;
+    const footerHeight = 34 * scaleFooter;
+
+    // Garis pemisah
+    doc.setDrawColor(200, 200, 200);
+    doc.line(10, pageHeight - 20, pageWidth - 10, pageHeight - 20);
+
+    // Teks footer
+    doc.setFont('times', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(120, 120, 120);
+    doc.text(
+      `Dicetak Pada: ${buktiData.waktu.tanggal} ${buktiData.waktu.bulan_str} ${buktiData.waktu.tahun_lng} `,
+      pageWidth / 2,
+      pageHeight - 10,
+      {
+        align: 'center',
+      },
+    );
+
+    // Logo footer
+    doc.addImage(footerBase64, 'PNG', 15, pageHeight - 15, footerWidth, footerHeight);
+
+    // ==================== SAVE PDF ====================
+    doc.save(
+      `Bukti Setoran Donasi ${buktiData.waktu.tanggal}-${buktiData.waktu.bulan_num}-${buktiData.waktu.tahun_lng}.pdf`,
+    );
+  } catch (error: any) {
+    console.error('Error cetak bukti setoran:', error);
+    displayNotification(
+      error.response.data.message ||
+        error.response.data.error_msg ||
+        'Gagal mencetak bukti setoran',
+      'error',
+    );
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+// async function cetakSuratSerahTerima(id: number) {
+//   const logo = BASE_URL + '/uploads/img/logos/site_logo.png';
+//   const logoBase64 = await loadImageAsBase64(logo);
+
+//   const footer = '../../../public/images/ziwah.png';
+//   const footerBase64 = await loadImageAsBase64(footer);
+
+//   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+
+//   let y = 15;
+//   const pageHeight = doc.internal.pageSize.getHeight();
+//   const pageWidth = doc.internal.pageSize.getWidth();
+//   const marginRight = 15;
+//   const scale = 0.9;
+//   const logoWidth = 53 * scale;
+//   const logoHeight = 15 * scale;
+//   const x = pageWidth - marginRight - 45;
+
+//   const scaleFooter = 0.28;
+//   const footerWidth = 106 * scaleFooter; // 42 mm
+//   const footerHeight = 34 * scaleFooter; // 13.6 mm
+
+//   // Judul
+//   doc.setFont('times', 'bold');
+//   doc.setFontSize(12);
+//   doc.text('BERITA ACARA', 105, y, { align: 'center' });
+//   doc.setFontSize(12);
+//   y = y + 6;
+//   doc.text('SERAH TERIMA ZAKAT', 105, y, { align: 'center' });
+//   y = y + 6;
+//   doc.text('KABUPATEN ACEH TENGAH', 105, y, { align: 'center' });
+
+//   doc.addImage(logoBase64, 'PNG', x, 12, logoWidth, logoHeight);
+
+//   y = y + 5;
+//   doc.setDrawColor(200, 200, 200);
+//   doc.line(15, y, 195, y);
+
+//   // Isi surat
+//   doc.setFont('times', 'normal');
+//   doc.setFontSize(12);
+//   y = y + 5;
+//   const lineHeight = 6; // tinggi baris normal (mm)
+//   const spacing = 1.2;
+//   y += lineHeight * spacing;
+//   doc.text(
+//     `Pada hari ini Senin, 23 Januari 2025 bertempat di Kabupaten Aceh Tengah, Kami bertanda tangan di bawah ini :`,
+//     20,
+//     y,
+//     { maxWidth: 170, align: 'justify' },
+//   );
+//   y = y + 15;
+//   // Data pihak pertama
+//   doc.text('1.', 25, y);
+//   doc.text('Nama', 30, y);
+//   doc.text(': SUDIRMAN', 50, y);
+//   y += lineHeight * spacing;
+//   doc.text('Alamat', 30, y);
+//   doc.text(': TZ Komputer, Lantai 3, Komputer City.', 50, y);
+//   y += lineHeight * spacing;
+//   doc.text('Sebagai', 30, y);
+//   doc.text(': Muzakki', 50, y);
+//   doc.setFont('times', 'bold');
+//   doc.text('(PIHAK PERTAMA)', 69, y);
+//   y += lineHeight * spacing;
+//   doc.setFont('times', 'normal');
+//   y = y + 4;
+//   // Data pihak kedua
+//   doc.text('2.', 25, y);
+//   doc.text('Nama', 30, y);
+//   doc.text(': REZKAYANTHA USMAN, S. PD', 50, y);
+//   // doc.text(' Nama     : REZKAYANTHA USMAN, S. PD', 25, y);
+//   y += lineHeight * spacing;
+//   doc.text('Alamat', 30, y);
+//   doc.text(': Bilacaddi, Kec. Pattallassang, Kab. Takalar.', 50, y);
+//   y += lineHeight * spacing;
+//   doc.text('Sebagai', 30, y);
+//   doc.text(': Petugas Baitulmal Kabupaten Aceh Tengah', 50, y);
+//   doc.setFont('times', 'bold');
+//   doc.text('(PIHAK KEDUA)', 127, y);
+//   doc.setFont('times', 'normal');
+//   y += lineHeight * spacing;
+//   y = y + 5;
+//   // Isi tengah
+//   const isi2 = `Dengan ini menyatakan bahwa PIHAK PERTAMA telah menyerahkan Zakat Harta kepada PIHAK KEDUA berupa uang tunai sebesar Rp 200.000,-. Demikian Berita Acara Serah Terima ini dibuat untuk dipergunakan sebagaimana mestinya.`;
+//   doc.text(isi2, 20, y, { maxWidth: 170, align: 'justify' });
+
+//   y = y + 30;
+
+//   // Tanda tangan
+//   doc.text('PIHAK PERTAMA', 40, y, { align: 'center' });
+//   doc.text('PIHAK KEDUA', 150, y, { align: 'center' });
+//   y += lineHeight * spacing;
+//   doc.text('Muzakki', 40, y, { align: 'center' });
+//   doc.text('Petugas Baitulmal Kabupaten Aceh Tengah', 150, y, { align: 'center' });
+//   y = y + 30;
+//   doc.text('S U D I R M A N', 40, y, { align: 'center' });
+//   doc.text('REZKAYANTHA USMAN, S. PD', 150, y, { align: 'center' });
+
+//   // FOOTER
+//   // garis pemisah
+//   doc.setDrawColor(200, 200, 200);
+//   doc.line(10, pageHeight - 20, 195, pageHeight - 20);
+
+//   // teks footer
+//   doc.setFontSize(9);
+//   doc.setTextColor(120, 120, 120);
+//   doc.text('Dicetak pada: 01 November 2025 pukul 23.51', 105, pageHeight - 10, {
+//     align: 'center',
+//   });
+
+//   doc.addImage(footerBase64, 'PNG', 15, pageHeight - 15, footerWidth, footerHeight);
+
+//   // 3️⃣ Simpan file
+//   doc.save('Surat Serah Terima Infaq.pdf');
+// }
 
 const isModalUploadBuktiSetoranDonasiOpen = ref(false);
 async function uploadBuktiSetoranDonasi(idl: number, nominalDonasi: number) {
@@ -635,7 +920,7 @@ async function displayBukti(param: Displaybuktiparam) {
                         (data.tipe_pembayaran == 'transfer' && data.status == 'success')
                       "
                       title="Cetak Surat Serah Terima Infaq"
-                      @click="cetakSuratSerahTerimaInfaq(data.id)"
+                      @click="cetakSuratSerahTerima(data.id)"
                     >
                       <font-awesome-icon icon="fa-solid fa-print" />
                     </LightButton>
