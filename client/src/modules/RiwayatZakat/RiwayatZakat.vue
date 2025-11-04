@@ -312,30 +312,30 @@ async function cetakSuratSerahTerimaZakat(id: number) {
     doc.text('Kabupaten Aceh Tengah Provinsi Aceh', pageWidth - 85, y, { align: 'left' });
 
     // Box Nomor Bukti (Kanan)
-    y += 8;
-    const boxX = pageWidth - 85;
-    const boxWidth = 70;
-    const boxHeight = 10;
-    doc.setDrawColor(255, 0, 0); // Border merah
-    doc.setLineWidth(0.5);
-    doc.rect(boxX, y, boxWidth, boxHeight);
+    // y += 8;
+    // const boxX = pageWidth - 85;
+    // const boxWidth = 70;
+    // const boxHeight = 10;
+    // doc.setDrawColor(255, 0, 0); // Border merah
+    // doc.setLineWidth(0.5);
+    // doc.rect(boxX, y, boxWidth, boxHeight);
 
-    doc.setFont('times', 'bold');
-    doc.setFontSize(11);
-    doc.text(
-      `${buktiData.waktu.tanggal} / ${buktiData.waktu.bulan_num} / ${buktiData.waktu.tahun_shrt}`,
-      boxX + 3,
-      y + 6,
-    );
+    // doc.setFont('times', 'bold');
+    // doc.setFontSize(11);
+    // doc.text(
+    //   `${buktiData.waktu.tanggal} / ${buktiData.waktu.bulan_num} / ${buktiData.waktu.tahun_shrt}`,
+    //   boxX + 3,
+    //   y + 6,
+    // );
 
     // Background merah untuk periodekan
-    doc.setFillColor(255, 0, 0);
-    doc.rect(boxX + 22, y + 1.5, 46, 7, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFont('times', 'normal');
-    doc.setFontSize(8);
-    doc.text(buktiData.kode, boxX + 45, y + 6, { align: 'center' });
-    doc.setTextColor(0, 0, 0); // Reset warna text
+    // doc.setFillColor(255, 0, 0);
+    // doc.rect(boxX + 22, y + 1.5, 46, 7, 'F');
+    // doc.setTextColor(255, 255, 255);
+    // doc.setFont('times', 'normal');
+    // doc.setFontSize(8);
+    // doc.text(buktiData.kode, boxX + 45, y + 6, { align: 'center' });
+    // doc.setTextColor(0, 0, 0); // Reset warna text
 
     // ==================== JUDUL BAGIAN UTAMA ====================
     y += 18;
@@ -401,10 +401,6 @@ async function cetakSuratSerahTerimaZakat(id: number) {
     );
 
     y += lineHeight * spacing;
-    doc.setFont('times', 'bold');
-    doc.text('Keterangan', leftCol, y);
-    doc.setFont('times', 'normal');
-    doc.text(': ' + buktiData.keterangan, dataCol, y);
 
     // ==================== TANDA TANGAN ====================
     y += 30;
@@ -424,7 +420,13 @@ async function cetakSuratSerahTerimaZakat(id: number) {
     doc.text('Diterima Oleh', leftSignX, y, { align: 'center' });
     y += lineHeight * spacing;
     doc.setFont('times', 'normal');
-    doc.text(buktiData.jabatan_petugas, leftSignX, y, { align: 'center' });
+
+    console.log('xxx');
+    console.log(buktiData.jabatan_petugas);
+    console.log('xxx');
+    doc.text(buktiData.jabatan_petugas == null ? '-' : buktiData.jabatan_petugas, leftSignX, y, {
+      align: 'center',
+    });
 
     // Kolom Kanan - Penyetor
     const rightSignX = 160;
@@ -433,11 +435,19 @@ async function cetakSuratSerahTerimaZakat(id: number) {
 
     y += 25;
     doc.setFont('times', 'bold');
-    doc.text(buktiData.nama_petugas.toUpperCase(), leftSignX, y, { align: 'center' });
-    doc.line(leftSignX - 25, y + 1, leftSignX + 25, y + 1); // Garis bawah nama
+    // console.log('SSSSSSSS');
+    // console.log(buktiData.nama_petugas == null ? '-' : buktiData.nama_petugas);
+    // console.log('SSSSSSSS');
+    doc.text(
+      buktiData.nama_petugas == null ? '-' : buktiData.nama_petugas.toUpperCase(),
+      leftSignX,
+      y,
+      { align: 'center' },
+    );
+    doc.line(leftSignX - 25, y + 3, leftSignX + 25, y + 3); // Garis bawah nama
 
     doc.text(buktiData.member_fullname.toUpperCase(), rightSignX, y, { align: 'center' });
-    doc.line(rightSignX - 25, y + 1, rightSignX + 25, y + 1); // Garis bawah nama
+    doc.line(rightSignX - 25, y + 3, rightSignX + 25, y + 3); // Garis bawah nama
 
     // ==================== QUOTE ====================
     y += 15;
