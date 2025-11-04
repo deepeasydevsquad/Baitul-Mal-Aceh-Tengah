@@ -44,6 +44,13 @@ router.post(
   controllers.get_lokasi
 );
 
+router.post(
+  "/permohonan_member/syarat_permohonan",
+  body("kegiatan_id").notEmpty().withMessage("kegiatan_id Tidak Boleh Kosong"),
+  authenticateTokenAdministrator,
+  controllers.list_syarat
+);
+
 router.get(
   "/permohonan_member/info_member",
   authenticateTokenAdministrator,
