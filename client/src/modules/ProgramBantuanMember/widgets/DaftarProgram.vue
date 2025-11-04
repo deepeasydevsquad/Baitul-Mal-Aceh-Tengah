@@ -159,7 +159,7 @@ const formatRupiah = (value: number) =>
       {{ programName }}
     </h2>
 
-    <div class="pb-4 flex gap-3 items-end">
+    <div class="pb-4 flex gap-3 items-end max-w-xl mr-auto mb-8">
       <InputDateRange
         id="date_range"
         v-model="filter_date_range"
