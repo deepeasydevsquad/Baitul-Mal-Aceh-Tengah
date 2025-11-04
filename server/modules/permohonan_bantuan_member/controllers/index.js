@@ -132,4 +132,21 @@ controllers.add = async (req, res) => {
   }
 };
 
+controllers.list_syarat = async (req, res) => {
+  if (!(await handleValidationErrors(req, res))) return;
+
+  try {
+    const model_r = new Model_r(req);
+    const feedBack = await model_r.daftar_syarat();
+
+    res.status(200).json({
+      error: false,
+      data: feedBack.data,
+      total: feedBack.total,
+    });
+  } catch (error) {
+    handleServerError(res, error);
+  }
+};
+
 module.exports = controllers;
