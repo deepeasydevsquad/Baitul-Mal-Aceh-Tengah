@@ -331,9 +331,9 @@ async function cetakSuratSerahTerimaZakat(id: number) {
     y += 4;
 
     const alamat = buktiData.lokasi_kantor.alamat || '';
-    const alamatWrapped = doc.splitTextToSize(alamat, 70);
-    doc.text(alamatWrapped, pageWidth - 85, y, { align: 'left' });
-    y += alamatWrapped.length * 2;
+    const alamatKantorWrapped = doc.splitTextToSize(alamat, 70);
+    doc.text(alamatKantorWrapped, pageWidth - 85, y, { align: 'left' });
+    y += alamatKantorWrapped.length * 2;
 
     // Box Nomor Bukti (Kanan)
     y += 8;
@@ -377,25 +377,33 @@ async function cetakSuratSerahTerimaZakat(id: number) {
     const leftCol = 15;
     const dataCol = 80;
 
+    const maxWidth = 120; // batas lebar teks
+    const lineGap = lineHeight * spacing;
+
     // Atas Nama
     doc.setFont('times', 'bold');
     doc.text('Atas Nama', leftCol, y);
     doc.setFont('times', 'normal');
     doc.text(': ' + buktiData.member_fullname, dataCol, y);
+    y += lineGap;
 
-    y += lineHeight * spacing;
+    // Alamat (bisa panjang → perlu wrap)
     doc.setFont('times', 'bold');
     doc.text('Alamat', leftCol, y);
     doc.setFont('times', 'normal');
-    doc.text(': ' + buktiData.alamat, dataCol, y);
 
-    y += lineHeight * spacing;
+    const alamatWrapped = doc.splitTextToSize(`: ${buktiData.alamat || '-'}`, maxWidth);
+    doc.text(alamatWrapped, dataCol, y);
+    y += alamatWrapped.length * lineGap;
+
+    // No. Tlp/HP
     doc.setFont('times', 'bold');
     doc.text('No. Tlp/ HP', leftCol, y);
     doc.setFont('times', 'normal');
-    doc.text(': ' + buktiData.whatsapp_number, dataCol, y);
+    doc.text(': ' + (buktiData.whatsapp_number || '-'), dataCol, y);
+    y += lineGap;
 
-    y += lineHeight * spacing;
+    // Jenis Pembayaran
     doc.setFont('times', 'bold');
     doc.text('Jenis Pembayaran', leftCol, y);
     doc.setFont('times', 'normal');
@@ -403,24 +411,27 @@ async function cetakSuratSerahTerimaZakat(id: number) {
       .replace(/_/g, ' ')
       .replace(/\b\w/g, (c) => c.toUpperCase());
     doc.text(`: ${capitalizedText}`, dataCol, y);
+    y += lineGap;
 
-    y += lineHeight * spacing;
+    // Telah Diterima Uang Sejumlah
     doc.setFont('times', 'bold');
     doc.text('Telah Diterima Uang Sejumlah', leftCol, y);
     doc.setFont('times', 'normal');
     doc.text(': ' + $formatToRupiah(buktiData.nominal), dataCol, y);
+    y += lineGap;
 
-    y += lineHeight * spacing;
+    // Terbilang (bisa sangat panjang → perlu wrap)
     doc.setFont('times', 'bolditalic');
     doc.text('Terbilang', leftCol, y);
     doc.setFont('times', 'normal');
     doc.text(':', dataCol, y);
     doc.setFont('times', 'italic');
-    doc.text(
-      `  ` + $terbilangUang(buktiData.nominal, { case: 'title', currency: 'Rupiah' }),
-      dataCol,
-      y,
-    );
+
+    const terbilangText =
+      `  ` + $terbilangUang(buktiData.nominal, { case: 'title', currency: 'Rupiah' });
+    const terbilangWrapped = doc.splitTextToSize(terbilangText, maxWidth);
+    doc.text(terbilangWrapped, dataCol, y);
+    y += terbilangWrapped.length * lineGap;
 
     y += lineHeight * spacing;
 

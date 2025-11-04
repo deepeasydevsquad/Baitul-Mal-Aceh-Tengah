@@ -80,6 +80,16 @@ export const upload_bukti_setoran = async (param: any) => {
   }
 };
 
+export const info_bukti_setoran = async (id: number) => {
+  try {
+    const response = await api.post('/riwayat_donasi/info_bukti_setoran', { id: id });
+    return response.data;
+  } catch (error) {
+    console.error('Gagal menambahkan riwayat infaq:', error);
+    throw error;
+  }
+};
+
 // export const update_status = async (id: number, status: string) => {
 //   try {
 //     const response = await api.post(`/riwayat_donasi/update_status`, { id, status });

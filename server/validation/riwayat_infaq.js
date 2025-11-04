@@ -42,7 +42,6 @@ validation.check_id_riwayat_infaq_cash_or_transfer = async (value) => {
       },
     },
   });
-  console.log(check);
 
   if (!check) {
     throw new Error("Riwayat infaq tidak terdaftar di pangkalan data");
