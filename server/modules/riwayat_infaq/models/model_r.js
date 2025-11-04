@@ -1,5 +1,6 @@
-const { Op, Riwayat_pengumpulan, Member } = require("../../../models");
+const { Op, Riwayat_pengumpulan, Member, Setting } = require("../../../models");
 const moment = require("moment");
+const { get_info_lokasi } = require("../../../helper/locationHelper");
 
 class Model_r {
   constructor(req) {
@@ -167,6 +168,73 @@ class Model_r {
     } catch (error) {
       console.error("Error fetching riwayat data infaq:", error);
       return { data: [], total: 0 };
+    }
+  }
+
+  async info_bukti_setoran() {
+    const body = this.req.body;
+
+    try {
+      const [buktiData, settings] = await Promise.all([
+        Riwayat_pengumpulan.findByPk(body.id, {
+          attributes: [
+            "kode",
+            "nominal",
+            "tipe",
+            "nama_petugas",
+            "jabatan_petugas",
+          ],
+          include: [
+            {
+              model: Member,
+              attributes: ["fullname", "desa_id", "alamat", "whatsapp_number"],
+              required: true,
+            },
+          ],
+          raw: true,
+          nest: true,
+        }),
+        Setting.findAll({
+          where: {
+            name: {
+              [Op.in]: ["nama_kabupaten_kota", "alamat"],
+            },
+          },
+          attributes: ["name", "value"],
+          raw: true,
+        }),
+      ]);
+
+      const settingMap = Object.fromEntries(
+        settings.map((s) => [s.name, s.value])
+      );
+
+      return {
+        waktu: {
+          tanggal: moment().format("DD"),
+          bulan_str: moment().format("MMMM"),
+          bulan_num: moment().format("M"),
+          tahun_lng: moment().format("YYYY"),
+          tahun_shrt: moment().format("YY"),
+        },
+        member_fullname: buktiData.Member.fullname,
+        alamat: buktiData.Member.alamat,
+        whatsapp_number: buktiData.Member.whatsapp_number,
+        bukti_setoran: buktiData.bukti_setoran,
+        kode: String(buktiData.kode),
+        tipe: buktiData.tipe,
+        nominal: buktiData.nominal,
+        nama_petugas: buktiData.nama_petugas,
+        jabatan_petugas: buktiData.jabatan_petugas,
+        lokasi: await get_info_lokasi(buktiData.Member.desa_id),
+        lokasi_kantor: {
+          nama_kabupaten_kota: settingMap.nama_kabupaten_kota,
+          alamat: settingMap.alamat,
+        },
+      };
+    } catch (error) {
+      console.error("Error fetching riwayat zakat data:", error);
+      return {};
     }
   }
 
