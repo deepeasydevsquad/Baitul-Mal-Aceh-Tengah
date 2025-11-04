@@ -237,8 +237,6 @@ async function loadImageAsBase64(url) {
 }
 
 async function cetakSuratSerahTerimaInfaq(id: number) {
-  // Implementation for printing receipt letter
-
   const logo = BASE_URL + '/uploads/img/logos/site_logo.png';
   const logoBase64 = await loadImageAsBase64(logo);
 
@@ -375,9 +373,6 @@ const nominal_donasi = ref(0);
 const bukti = ref('');
 const nominal_bukti = ref(0);
 async function displayBukti(param: Displaybuktiparam) {
-  console.log('----');
-  console.log(param);
-  console.log('----');
   isModalDisplayBuktiOpen.value = true;
   tipe_pembayaran.value = param.tipe_pembayaran;
   nominal_donasi.value = param.nominal_donasi;
@@ -574,40 +569,42 @@ async function displayBukti(param: Displaybuktiparam) {
                 </td>
 
                 <!-- Status -->
-                <td
-                  class="px-6 py-4 text-center font-bold text-gray-800"
-                  :class="{
-                    'text-green-600 font-semibold':
-                      data.status === 'SUCCESS' || data.status === 'success',
-                    'text-yellow-600 font-semibold':
-                      data.status === 'PROCESS' || data.status === 'process',
-                    'text-red-600 font-semibold':
-                      data.status === 'FAILED' || data.status === 'failed',
-                  }"
-                >
-                  {{ data.status.replace(/_/g, ' ').toUpperCase() }}
+                <td class="px-6 py-4 text-center font-bold text-gray-800">
+                  <span
+                    :class="{
+                      'text-green-500': data.status === 'success',
+                      'text-yellow-500': data.status === 'process',
+                      'text-red-500': data.status === 'failed',
+                    }"
+                  >
+                    {{
+                      {
+                        success: 'SUKSES',
+                        process: 'PROSES',
+                        failed: 'GAGAL',
+                      }[data.status]
+                    }}
+                  </span>
                 </td>
-
-                <!-- Status Konfirmasi -->
-                <td
-                  class="px-6 py-4 text-center font-bold text-gray-800"
-                  :class="{
-                    'text-green-600':
-                      data.konfirmasi_pembayaran === 'SUDAH_DIKIRIM' ||
-                      data.konfirmasi_pembayaran === 'sudah_dikirim',
-                    'text-red-600':
-                      data.konfirmasi_pembayaran === 'BELUM_DIKIRIM' ||
-                      data.konfirmasi_pembayaran === 'belum_dikirim',
-                  }"
-                >
-                  {{ data.konfirmasi_pembayaran.replace(/_/g, ' ').toUpperCase() }}
+                <td class="px-6 py-4 text-center font-bold text-gray-800">
+                  <span
+                    :class="
+                      data.konfirmasi_pembayaran === 'sudah_dikirim'
+                        ? 'text-green-500'
+                        : 'text-red-500'
+                    "
+                  >
+                    {{
+                      data.konfirmasi_pembayaran === 'sudah_dikirim'
+                        ? 'SUDAH DIKIRIM'
+                        : 'BELUM DIKIRIM'
+                    }}
+                  </span>
                 </td>
-
                 <!-- Datetimes -->
                 <td class="px-6 py-4 text-center font-medium text-gray-800">
                   {{ data.datetimes }}
                 </td>
-
                 <!-- Aksi -->
                 <td class="px-6 py-4">
                   <div class="flex justify-center gap-2">

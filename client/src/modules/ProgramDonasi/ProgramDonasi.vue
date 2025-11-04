@@ -23,10 +23,8 @@ import { useDynamicLabel } from '@/composables/useDynamicLabel';
 // Service API
 import { list, delete_program, tutup } from '@/service/program_donasi';
 import IconMoney from '@/components/Icons/IconMoney.vue';
-import ButtonGreen from '@/components/Button/ButtonGreen.vue';
 import FormDonasi from './widgets/FormDonasi.vue';
 import LockIcon from '@/components/Icons/LockIcon.vue';
-
 import { API_URL } from '@/config/config';
 
 // State: Loading
@@ -219,8 +217,8 @@ function formatToRupiah(angka: number | string) {
               <th class="w-[20%] px-6 py-3 font-medium">Banner</th>
               <th class="w-[40%] px-6 py-3 font-medium">Informasi Donasi</th>
               <th class="w-[15%] px-6 py-3 font-medium">Status</th>
-              <th class="w-[15%] px-6 py-3 font-medium">Datetime</th>
-              <th class="w-[10%] px-6 py-3 font-medium">Aksi</th>
+              <th class="w-[20%] px-6 py-3 font-medium">Datetime</th>
+              <th class="w-[5%] px-6 py-3 font-medium">Aksi</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
@@ -304,7 +302,6 @@ function formatToRupiah(angka: number | string) {
                         <DeleteIcon />
                       </DangerButton>
                     </template>
-
                     <!-- Kalau sudah ditutup -->
                     <template v-else>
                       <DangerButton @click="deleteData(data.id)">
