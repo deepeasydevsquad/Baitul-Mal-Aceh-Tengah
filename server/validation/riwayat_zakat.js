@@ -38,6 +38,9 @@ validation.check_id_riwayat_zakat = async (value) => {
   return true;
 };
 
+// Validasi id Riwayat apakah sudah ada di database dan dalam status process
+// validation.check_id_riwayat_zakat
+
 validation.upload = (tipe = "cash") => {
   const storage = multer.diskStorage({
     destination: (req, file, cb) => {
