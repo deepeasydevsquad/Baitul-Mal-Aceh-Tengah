@@ -1,5 +1,4 @@
-const { Riwayat_pengumpulan, Member } = require("../../../models");
-const { Op } = require("sequelize");
+const { Op, Riwayat_pengumpulan, Member, Setting } = require("../../../models");
 const moment = require("moment");
 const { get_info_lokasi } = require("../../../helper/locationHelper");
 
@@ -171,24 +170,39 @@ class Model_r {
     const body = this.req.body;
 
     try {
-      const response = await Riwayat_pengumpulan.findByPk(body.id, {
-        attributes: [
-          "kode",
-          "nominal",
-          "tipe",
-          "nama_petugas",
-          "jabatan_petugas",
-        ],
-        include: [
-          {
-            model: Member,
-            attributes: ["fullname", "desa_id", "alamat", "whatsapp_number"],
-            required: true,
+      const [buktiData, settings] = await Promise.all([
+        Riwayat_pengumpulan.findByPk(body.id, {
+          attributes: [
+            "kode",
+            "nominal",
+            "tipe",
+            "nama_petugas",
+            "jabatan_petugas",
+          ],
+          include: [
+            {
+              model: Member,
+              attributes: ["fullname", "desa_id", "alamat", "whatsapp_number"],
+              required: true,
+            },
+          ],
+          raw: true,
+          nest: true,
+        }),
+        Setting.findAll({
+          where: {
+            name: {
+              [Op.in]: ["nama_kabupaten_kota", "alamat"],
+            },
           },
-        ],
-        raw: true,
-        nest: true,
-      });
+          attributes: ["name", "value"],
+          raw: true,
+        }),
+      ]);
+
+      const settingMap = Object.fromEntries(
+        settings.map((s) => [s.name, s.value])
+      );
 
       return {
         waktu: {
@@ -198,17 +212,20 @@ class Model_r {
           tahun_lng: moment().format("YYYY"),
           tahun_shrt: moment().format("YY"),
         },
-        member_fullname: response.Member.fullname,
-        alamat: response.Member.alamat,
-        whatsapp_number: response.Member.whatsapp_number,
-        bukti_setoran: response.bukti_setoran,
-        kode: String(response.kode),
-        tipe: response.tipe,
-        nominal: response.nominal,
-        keterangan: response.keterangan ?? "-",
-        nama_petugas: response.nama_petugas,
-        jabatan_petugas: response.jabatan_petugas,
-        lokasi: await get_info_lokasi(response.Member.desa_id),
+        member_fullname: buktiData.Member.fullname,
+        alamat: buktiData.Member.alamat,
+        whatsapp_number: buktiData.Member.whatsapp_number,
+        bukti_setoran: buktiData.bukti_setoran,
+        kode: String(buktiData.kode),
+        tipe: buktiData.tipe,
+        nominal: buktiData.nominal,
+        nama_petugas: buktiData.nama_petugas,
+        jabatan_petugas: buktiData.jabatan_petugas,
+        lokasi: await get_info_lokasi(buktiData.Member.desa_id),
+        lokasi_kantor: {
+          nama_kabupaten_kota: settingMap.nama_kabupaten_kota,
+          alamat: settingMap.alamat,
+        },
       };
     } catch (error) {
       console.error("Error fetching riwayat zakat data:", error);

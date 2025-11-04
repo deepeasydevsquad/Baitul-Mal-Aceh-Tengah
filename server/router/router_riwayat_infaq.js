@@ -146,4 +146,18 @@ router.post(
   controllers.upload_bukti_setoran
 );
 
+router.post(
+  "/riwayat_infaq/info_bukti_setoran",
+  authenticateTokenAdministrator,
+  [
+    body("id")
+      .notEmpty()
+      .withMessage("ID Tidak Boleh Kosong")
+      .isInt()
+      .withMessage("ID Harus Angka")
+      .custom(validation.check_id_riwayat_infaq_cash_or_transfer),
+  ],
+  controllers.info_bukti_setoran
+);
+
 module.exports = router;
