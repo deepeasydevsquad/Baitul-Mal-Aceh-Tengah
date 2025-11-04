@@ -30,12 +30,62 @@ export const delete_riwayat_donasi = async (id: number) => {
   }
 };
 
-export const update_status = async (id: number, status: string) => {
+export const setujui_pembayaran_donasi = async (id: number) => {
   try {
-    const response = await api.post(`/riwayat_donasi/update_status`, { id, status });
+    const response = await api.post('/riwayat_donasi/approve_online', {
+      id: id,
+    });
     return response.data;
   } catch (error) {
-    console.error('Gagal mengubah status riwayat donasi:', error);
+    console.error('Gagal menyetujui pembayaran donasi:', error);
     throw error;
   }
 };
+
+export const tolak_pembayaran_donasi = async (data: { id: number; alasan: string }) => {
+  try {
+    const response = await api.post('/riwayat_donasi/reject_online', data);
+    return response.data;
+  } catch (error) {
+    console.error('Gagal menolak pembayaran donasi:', error);
+    throw error;
+  }
+};
+
+export const upload_bukti_transfer = async (param: any) => {
+  try {
+    const response = await api.post('/riwayat_donasi/upload_bukti_transfer', param, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Gagal mengupload bukti transfer:', error);
+    throw error;
+  }
+};
+
+export const upload_bukti_setoran = async (param: any) => {
+  try {
+    const response = await api.post('/riwayat_donasi/upload_bukti_setoran', param, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Gagal mengupload bukti transfer:', error);
+    throw error;
+  }
+};
+
+// export const update_status = async (id: number, status: string) => {
+//   try {
+//     const response = await api.post(`/riwayat_donasi/update_status`, { id, status });
+//     return response.data;
+//   } catch (error) {
+//     console.error('Gagal mengubah status riwayat donasi:', error);
+//     throw error;
+//   }
+// };

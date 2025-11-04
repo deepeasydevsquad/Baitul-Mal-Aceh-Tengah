@@ -124,7 +124,7 @@ async function fetchData() {
     let htmlMessage = ``;
     if (response.data.pembayaran_online_dikirim > 0) {
       htmlMessage += `<span class="text-green-500">
-        Terdapat ${response.data.pembayaran_online_dikirim} transaksi pembayaran online yang telah dikirim.
+        Terdapat ${response.data.pembayaran_online_dikirim} transaksi pembayaran <b>INFAQ SECARA ONLINE</b> yang telah dikirim.
       </span>`;
     }
 
@@ -134,7 +134,7 @@ async function fetchData() {
       }
       htmlMessage += `
        <span class="text-red-500">
-          Saldo kas di kantor saat ini berjumlah ${$formatToRupiah(response.data.total_saldo_dikantor)}.
+          Saldo kas <b>INFAQ</b> di kantor saat ini berjumlah ${$formatToRupiah(response.data.total_saldo_dikantor)}.
         </span>
       `;
     }
@@ -213,10 +213,10 @@ async function rejectOnline(idl: number) {
 }
 
 const isModalUploadBuktiTransferOpen = ref(false);
-async function uploadBuktiTransfer(idl: number, nominalZakat: number) {
+async function uploadBuktiTransfer(idl: number, nominalInfaq: number) {
   isModalUploadBuktiTransferOpen.value = true;
   id.value = idl;
-  nominal.value = nominalZakat;
+  nominal.value = nominalInfaq;
 }
 
 async function loadImageAsBase64(url) {
@@ -727,7 +727,7 @@ async function displayBukti(param: Displaybuktiparam) {
       @status="
         (payload: any) =>
           displayNotification(
-            payload.error_msg || 'Tambah/Update RiwayatInfaq gagal',
+            payload.error_msg || 'Tambah/Update Pembayarans Infaq gagal',
             payload.error ? 'error' : 'success',
           )
       "
@@ -741,7 +741,7 @@ async function displayBukti(param: Displaybuktiparam) {
       @status="
         (payload: any) =>
           displayNotification(
-            payload.error_msg || 'Tambah/Update RiwayatZakat gagal',
+            payload.error_msg || 'Proses Reject Pembayaran Infaq gagal',
             payload.error ? 'error' : 'success',
           )
       "
@@ -751,7 +751,7 @@ async function displayBukti(param: Displaybuktiparam) {
     <FormUploadBuktiTransfer
       :is-modal-open="isModalUploadBuktiTransferOpen"
       :id="id"
-      :nominal_zakat="nominal"
+      :nominal_infaq="nominal"
       @close="((isModalUploadBuktiTransferOpen = false), fetchData())"
       @status="
         (payload: any) =>
@@ -762,11 +762,11 @@ async function displayBukti(param: Displaybuktiparam) {
       "
     />
 
-    <!-- Modal Upload Bukti Setoran Zakat -->
+    <!-- Modal Upload Bukti Setoran Infaq -->
     <FormuploadBuktiSetoranInfaq
       :is-modal-open="isModalUploadBuktiSetoranInfaqOpen"
       :id="id"
-      :nominal_zakat="nominal"
+      :nominal_infaq="nominal"
       @close="((isModalUploadBuktiSetoranInfaqOpen = false), fetchData())"
       @status="
         (payload: any) =>

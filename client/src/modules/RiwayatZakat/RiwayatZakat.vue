@@ -128,7 +128,7 @@ async function fetchData() {
     `;
     if (response.data.pembayaran_online_dikirim > 0) {
       htmlMessage += `<span class="text-green-500">
-        Terdapat ${response.data.pembayaran_online_dikirim} transaksi pembayaran online yang telah dikirim.
+        Terdapat ${response.data.pembayaran_online_dikirim} transaksi pembayaran <b>ZAKAT SECARA ONLINE</b> yang telah dikirim.
       </span>`;
     }
 
@@ -138,7 +138,7 @@ async function fetchData() {
       }
       htmlMessage += `
        <span class="text-red-500">
-          Saldo kas di kantor saat ini berjumlah ${$formatToRupiah(response.data.total_saldo_dikantor)}.
+          Saldo kas <b>ZAKAT</b> di kantor saat ini berjumlah ${$formatToRupiah(response.data.total_saldo_dikantor)}.
         </span>
       `;
     }

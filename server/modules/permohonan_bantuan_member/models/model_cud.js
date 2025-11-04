@@ -39,10 +39,10 @@ class Model_cud {
     const sisaBulan = await this.sisaBulanTahunIni();
     const arr_filepath = body.arr_path || [];
 
-    console.log("----- DEBUG ADD PERMOHONAN -----");
-    console.log(sisaBulan);
-    console.log(body);
-    console.log("----- END DEBUG ADD PERMOHONAN -----");
+    // console.log("----- DEBUG ADD PERMOHONAN -----");
+    // console.log(sisaBulan);
+    // console.log(body);
+    // console.log("----- END DEBUG ADD PERMOHONAN -----");
 
     try {
       const model_r = new Model_r(this.req);
