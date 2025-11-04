@@ -21,12 +21,8 @@ import { usePagination } from '@/composables/usePaginations';
 import { useConfirmation } from '@/composables/useConfirmation';
 import { useNotification } from '@/composables/useNotification';
 
-// Service API
-import {
-  get_daftar_program,
-  edit_daftar_program,
-  delete_daftar_program,
-} from '@/service/daftar_program';
+// Service API // edit_daftar_program,
+import { get_daftar_program, delete_daftar_program } from '@/service/daftar_program';
 
 // Loading
 const isLoading = ref(false);

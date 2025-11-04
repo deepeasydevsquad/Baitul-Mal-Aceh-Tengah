@@ -39,6 +39,9 @@ module.exports = {
         values: ["process", "success", "failed"],
         defaultValue: "process",
       },
+      alasan_penolakan: {
+        type: Sequelize.STRING,
+      },
       tipe_pembayaran: {
         type: Sequelize.ENUM,
         values: ["online", "transfer", "cash"],
@@ -69,6 +72,12 @@ module.exports = {
         type: Sequelize.ENUM,
         values: ["sudah_dikirim", "belum_dikirim"],
         defaultValue: "belum_dikirim",
+      },
+      nama_petugas: {
+        type: Sequelize.STRING,
+      },
+      jabatan_petugas: {
+        type: Sequelize.STRING,
       },
       createdAt: {
         allowNull: false,

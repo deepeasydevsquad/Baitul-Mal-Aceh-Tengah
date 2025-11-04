@@ -1,4 +1,4 @@
-const { Riwayat_pengumpulan, Member } = require("../models");
+const { Riwayat_donasi, Member } = require("../models");
 const multer = require("multer");
 const sharp = require("sharp");
 const path = require("path");
@@ -15,18 +15,17 @@ validation.check_id_member = async (value) => {
   return true;
 };
 
-// Validasi id riwayat infaq apakah sudah ada di database
-validation.check_id_riwayat_infaq = async (value) => {
-  console.log("ID riwayat infaq", value);
-  const check = await Riwayat_pengumpulan.findOne({
+// Validasi id riwayat donasi apakah sudah ada di database
+validation.check_id_riwayat_donasi = async (value) => {
+  console.log("ID riwayat donasi", value);
+  const check = await Riwayat_donasi.findOne({
     where: {
       id: value,
-      tipe: "infaq",
     },
   });
 
   if (!check) {
-    throw new Error("Riwayat infaq tidak terdaftar di pangkalan data");
+    throw new Error("Riwayat donasi tidak terdaftar di pangkalan data");
   }
   return true;
 };
@@ -35,7 +34,7 @@ validation.upload = (tipe = "cash") => {
   const storage = multer.diskStorage({
     destination: (req, file, cb) => {
       const folder = tipe === "transfer" ? "bukti_transfer" : "bukti_setoran";
-      const uploadPath = path.join(__dirname, "../uploads/img/infaq", folder);
+      const uploadPath = path.join(__dirname, "../uploads/img/donasi", folder);
       if (!fs.existsSync(uploadPath)) {
         fs.mkdirSync(uploadPath, { recursive: true });
       }

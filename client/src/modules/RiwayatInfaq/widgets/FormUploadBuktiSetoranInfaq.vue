@@ -18,7 +18,7 @@ const { displayNotification } = useNotification();
 interface Props {
   isModalOpen: boolean;
   id: number;
-  nominal_zakat: number;
+  nominal_infaq: number;
 }
 
 const props = defineProps<Props>();
@@ -175,10 +175,10 @@ watchEffect(async () => {
         </div>
         <div>
           <div>
-            <label class="block text-sm font-medium text-gray-700">Nominal Zakat</label>
+            <label class="block text-sm font-medium text-gray-700">Nominal Infaq</label>
             <input
               type="text"
-              :value="$formatToRupiah(props.nominal_zakat)"
+              :value="$formatToRupiah(props.nominal_infaq)"
               class="w-full bg-gray-100 border-gray-300 rounded-md p-2 mt-1"
               readonly
             />

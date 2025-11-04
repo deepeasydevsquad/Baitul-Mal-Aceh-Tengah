@@ -89,3 +89,13 @@ export const delete_riwayat_zakat = async (id: number) => {
     throw error;
   }
 };
+
+export const info_bukti_setoran = async (id: number) => {
+  try {
+    const response = await api.post('/riwayat_zakat/info_bukti_setoran', { id: id });
+    return response.data;
+  } catch (error) {
+    console.error('Gagal menambahkan riwayat zakat:', error);
+    throw error;
+  }
+};

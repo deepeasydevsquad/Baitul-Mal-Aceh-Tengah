@@ -1,11 +1,12 @@
+const jwt = require("jsonwebtoken");
+const fs = require("fs").promises;
+const path = require("path");
 const {
   sequelize,
   Program_donasi,
   Riwayat_donasi,
 } = require("../../../models");
 const { writeLog } = require("../../../helper/writeLogHelper");
-const path = require("path");
-const fs = require("fs");
 const moment = require("moment");
 
 class Model_cud {
@@ -152,6 +153,10 @@ class Model_cud {
     const myDate = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
     const body = this.req.body;
 
+    const authHeader = this.req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
+    const decoded = jwt.decode(token);
+
     try {
       const insert = await Riwayat_donasi.create(
         {
@@ -159,11 +164,13 @@ class Model_cud {
           member_id: body.member_id,
           invoice: await this.invoice(),
           nominal: body.nominal,
-          kode: await this.kode(),
-          status: body.status,
-          konfirmasi_pembayaran:
-            body.status === "success" ? "sudah_dikirim" : "belum_dikirim",
-
+          kode: "000",
+          tipe_pembayaran: body.tipe_pembayaran,
+          konfirmasi_pembayaran: "belum_dikirim",
+          posisi_uang:
+            body.tipe_pembayaran == "cash" ? "kantor_baitulmal" : "bank",
+          nama_petugas: decoded.name,
+          jabatan_petugas: decoded.jabatan,
           createdAt: myDate,
           updatedAt: myDate,
         },
@@ -172,7 +179,7 @@ class Model_cud {
         }
       );
 
-      this.message = `Menambahkan Riwayat Donasi Baru dengan Nominal Donasi: ${body.nominal} `;
+      this.message = `Menambahkan Riwayat Donasi Baru dengan Nominal Donasi: ${body.nominal} dan ID Riwayat Donasi: ${insert.id}`;
     } catch (error) {
       this.state = false;
       console.log(error);

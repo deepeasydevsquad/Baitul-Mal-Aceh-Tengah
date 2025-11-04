@@ -10,7 +10,7 @@ import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
 import { useNotification } from '@/composables/useNotification';
 
 // Service
-import { upload_bukti_transfer } from '@/service/riwayat_infaq';
+import { upload_bukti_transfer } from '@/service/riwayat_donasi';
 
 // Composable: notification
 const { displayNotification } = useNotification();
@@ -18,7 +18,7 @@ const { displayNotification } = useNotification();
 interface Props {
   isModalOpen: boolean;
   id: number;
-  nominal_infaq: number;
+  nominal_donasi: number;
 }
 
 const props = defineProps<Props>();
@@ -154,7 +154,7 @@ watchEffect(async () => {
       <div v-else class="relative max-w-xl w-full bg-white shadow-2xl rounded-2xl p-6 space-y-6">
         <!-- Header -->
         <div class="flex items-center justify-between">
-          <h2 id="modal-title" class="text-xl font-bold text-gray-800">Upload Bukti Transfer</h2>
+          <h2 id="modal-title" class="text-xl font-bold text-gray-800">Upload Bukti Transfer SS</h2>
           <button
             class="text-gray-400 text-lg hover:text-gray-600"
             @click="closeModal"
@@ -177,10 +177,10 @@ watchEffect(async () => {
         </div>
         <div>
           <div>
-            <label class="block text-sm font-medium text-gray-700">Nominal Infaq</label>
+            <label class="block text-sm font-medium text-gray-700">Nominal Donasi</label>
             <input
               type="text"
-              :value="$formatToRupiah(props.nominal_infaq)"
+              :value="$formatToRupiah(props.nominal_donasi)"
               class="w-full bg-gray-100 border-gray-300 rounded-md p-2 mt-1"
               readonly
             />

@@ -48,6 +48,23 @@ export const MessageTabInfaq = defineStore('messageTabInfaq', {
   },
 });
 
+export const RefreshRiwayatDonasi = defineStore('RefreshRiwayatDonasi', {
+  state: () => ({
+    sharedBool: false as boolean,
+  }),
+  actions: {
+    setBool(value: boolean) {
+      this.sharedBool = value;
+    },
+    clearBool() {
+      this.sharedBool = false;
+    },
+  },
+  getters: {
+    getBool: (state) => state.sharedBool,
+  },
+});
+
 // export const Name = defineStore('nameGlobal', {
 //   state: () => ({ sharedString: '' }),
 //   actions: {

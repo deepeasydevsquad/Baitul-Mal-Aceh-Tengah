@@ -1,33 +1,37 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue'
-import Notification from '@/components/Modal/Notification.vue'
-import BaseButton from '@/components/Button/BaseButton.vue'
-import InputText from '@/components/Form/InputText.vue'
+import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue';
+import Notification from '@/components/Modal/Notification.vue';
+import BaseButton from '@/components/Button/BaseButton.vue';
+import InputText from '@/components/Form/InputText.vue';
 // Composable
-import { useNotification } from '@/composables/useNotification'
+import { useNotification } from '@/composables/useNotification';
 
 // Service
-import { add_donasi, daftar_member } from '@/service/program_donasi'
-import SelectField from '@/components/Form/SelectField.vue'
-import { formatRupiah } from '@/libs/formatRupiah'
+import { add_donasi, daftar_member } from '@/service/program_donasi';
+import SelectField from '@/components/Form/SelectField.vue';
+import { formatRupiah } from '@/libs/formatRupiah';
+
+import { RefreshRiwayatDonasi } from '@/stores/message';
+const refresh = RefreshRiwayatDonasi();
+refresh.setBool(false);
 
 // Notification
 const { showNotification, notificationType, notificationMessage, displayNotification } =
-  useNotification()
+  useNotification();
 
 // Props
 interface Props {
-  isModalOpen: boolean
-  id_donasi: number
+  isModalOpen: boolean;
+  id_donasi: number;
 }
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 
 // Emit
 const emit = defineEmits<{
-  (e: 'close'): void
-  (e: 'status', payload: { error_msg?: string; error?: boolean }): void
-}>()
+  (e: 'close'): void;
+  (e: 'status', payload: { error_msg?: string; error?: boolean }): void;
+}>();
 
 // Form state
 
@@ -35,127 +39,132 @@ const form = ref({
   donasi_id: '',
   member_id: '',
   nominal: '',
-  status: '',
-})
+  tipe_pembayaran: '',
+});
 
-const errors = ref<Record<string, string>>({})
-const isSubmitting = ref(false)
-const isLoading = ref(false)
+const errors = ref<Record<string, string>>({});
+const isSubmitting = ref(false);
+const isLoading = ref(false);
 
 // Reset form
 const resetForm = () => {
-  form.value = { donasi_id: '', member_id: '', nominal: '', status: '' }
-  errors.value = {}
-}
+  form.value = { donasi_id: '', member_id: '', nominal: '', tipe_pembayaran: '' };
+  errors.value = {};
+};
 
 // Validasi
 const validateForm = () => {
-  let isValid = true
-  errors.value = {}
+  let isValid = true;
+  errors.value = {};
 
   if (!form.value.member_id) {
-    errors.value.member_id = 'Donatur tidak boleh kosong.'
-    isValid = false
-  }
-  if (!form.value.nominal) {
-    errors.value.nominal = 'Nominal tidak boleh kosong.'
-    isValid = false
+    errors.value.member_id = 'Donatur tidak boleh kosong.';
+    isValid = false;
   }
 
-  if (!form.value.status) {
-    errors.value.status = 'Status tidak boleh kosong.'
-    isValid = false
+  if (!form.value.nominal) {
+    errors.value.nominal = 'Nominal tidak boleh kosong.';
+    isValid = false;
   }
-  return isValid
-}
+
+  if (!form.value.tipe_pembayaran) {
+    errors.value.tipe_pembayaran = 'Tipe Pembayaran wajib diisi.';
+    isValid = false;
+  }
+
+  return isValid;
+};
 
 interface Member {
-  id: number
-  name: string
+  id: number;
+  name: string;
 }
 
-const member = ref<Member[]>([])
+const member = ref<Member[]>([]);
 
 // Ambil data syarat untuk edit
 const fetchData = async () => {
-  isLoading.value = true
+  isLoading.value = true;
   try {
-    const response = await daftar_member()
-    member.value = response
+    const response = await daftar_member();
+    member.value = response;
   } catch (error) {
-    displayNotification('Gagal mengambil data member', 'error')
+    displayNotification('Gagal mengambil data member', 'error');
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
-}
+};
 
-onMounted(fetchData)
+onMounted(fetchData);
 
 const handleSubmit = async () => {
-  if (!validateForm()) return
+  if (!validateForm()) return;
 
   // Pastikan data sudah di-fetch
   if (!props.id_donasi) {
-    displayNotification('ID donasi tidak valid', 'error')
-    return
+    displayNotification('ID donasi tidak valid', 'error');
+    return;
   }
 
-  isSubmitting.value = true
+  isSubmitting.value = true;
 
   try {
     const payload = {
       program_donasi_id: Number(props.id_donasi),
       member_id: String(form.value.member_id),
       nominal: String(form.value.nominal),
-      status: String(form.value.status),
-    }
+      tipe_pembayaran: String(form.value.tipe_pembayaran),
+    };
 
-    console.log('Payload dikirim ke backend:', payload)
+    console.log('Payload dikirim ke backend:', payload);
 
-    const response = await add_donasi(payload)
+    const response = await add_donasi(payload);
 
-    const msg = response.message || response.error_msg || 'Berhasil'
-    const isError = response.error || false
+    const msg = response.message || response.error_msg || 'Berhasil';
+    const isError = response.error || false;
 
-    emit('status', { error_msg: msg, error: isError })
-    closeModal()
+    // supaya reload
+    refresh.setBool(true);
+
+    emit('status', { error_msg: msg, error: isError });
+    closeModal();
   } catch (error: any) {
     const msg =
-      error.response?.data?.error_msg || error.response?.data?.message || 'Terjadi kesalahan'
-    displayNotification(msg, 'error')
+      error.response?.data?.error_msg || error.response?.data?.message || 'Terjadi kesalahan';
+    displayNotification(msg, 'error');
   } finally {
-    isSubmitting.value = false
-    closeModal()
+    isSubmitting.value = false;
+    closeModal();
   }
-}
+};
 
 // Tutup modal
 const closeModal = () => {
-  if (isSubmitting.value) return
-  resetForm()
-  emit('close')
-}
+  if (isSubmitting.value) return;
+  resetForm();
+  emit('close');
+};
 
 // Escape
 const handleEscape = (e: KeyboardEvent) => {
-  if (e.key === 'Escape' && props.isModalOpen) closeModal()
-}
+  if (e.key === 'Escape' && props.isModalOpen) closeModal();
+};
 
 onMounted(() => {
-  document.addEventListener('keydown', handleEscape)
-})
+  document.addEventListener('keydown', handleEscape);
+});
 
 onBeforeUnmount(() => {
-  document.removeEventListener('keydown', handleEscape)
-})
+  document.removeEventListener('keydown', handleEscape);
+});
 
 const nominalDisplay = computed({
   get: () => (form.value.nominal ? formatRupiah(form.value.nominal) : ''),
   set: (val: string) => {
     // ambil angka murni doang, buang selain digit
-    form.value.nominal = val.replace(/[^0-9]/g, '')
+    form.value.nominal = val.replace(/[^0-9]/g, '');
   },
-})
+});
 </script>
 
 <template>
@@ -206,19 +215,21 @@ const nominalDisplay = computed({
           :error="errors.nominal"
         />
 
-        <!-- status -->
-        <SelectField
-          id="status"
-          v-model="form.status"
-          :options="[
-            { id: '', name: '-- Pilih Status --' },
-            { id: 'success', name: 'success' },
-            { id: 'process', name: 'pending' },
-            { id: 'sailed', name: 'failed' },
-          ]"
-          label="Status"
-          :error="errors.status"
-        />
+        <!-- Tipe Pembayaran -->
+        <div>
+          <SelectField
+            v-model="form.tipe_pembayaran"
+            id="tipe_pembayaran"
+            label="Tipe Pembayaran"
+            :error="errors.tipe_pembayaran"
+            :options="[
+              { id: '', name: '-- Pilih Tipe Pembayaran --' },
+              { id: 'transfer', name: 'Transfer' },
+              { id: 'cash', name: 'Cash' },
+            ]"
+            :required="true"
+          />
+        </div>
 
         <div class="flex justify-end gap-3 mt-4">
           <BaseButton
@@ -232,7 +243,7 @@ const nominalDisplay = computed({
           <BaseButton
             type="submit"
             variant="primary"
-            :disabled="!(form.member_id && form.nominal && form.status) || isSubmitting"
+            :disabled="!(form.member_id && form.nominal && form.tipe_pembayaran) || isSubmitting"
             @click="handleSubmit"
           >
             <span v-if="isSubmitting">Menyimpan...</span>

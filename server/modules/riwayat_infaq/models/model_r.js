@@ -138,6 +138,9 @@ class Model_r {
         data: {
           list: result.rows.map((e) => ({
             id: e.id,
+            member_id: e.member_id,
+            member_name: e.Member?.fullname,
+            member_nik: e.Member?.nomor_ktp,
             invoice: e.invoice,
             tipe: e.tipe,
             nominal: e.nominal,
@@ -153,9 +156,7 @@ class Model_r {
             posisi_uang: e.posisi_uang,
             nama_petugas: e.nama_petugas,
             jabatan_petugas: e.jabatan_petugas,
-            member_id: e.member_id,
-            member_name: e.Member?.fullname,
-            member_nik: e.Member?.nomor_ktp,
+
             datetimes: moment(e.updatedAt).format("YYYY-MM-DD HH:mm:ss"),
           })),
           total_saldo_dikantor: total_saldo_dikantor,

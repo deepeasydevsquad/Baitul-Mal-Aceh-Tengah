@@ -252,17 +252,17 @@ watch(
         ></p>
 
         <p
-          class="px-5 text-sm text-gray-900 dark:text-white font-medium leading-relaxed text-right"
+          class="px-5 text-sm text-gray-900 dark:text-white font-medium leading-relaxed text-right min-h-[40px]"
           v-if="tab.sharedObject[item.id].path == 'riwayat_zakat'"
           v-html="messageZakat.getString"
         ></p>
         <p
-          class="px-5 text-sm text-gray-900 dark:text-white font-medium leading-relaxed text-right"
+          class="px-5 text-sm text-gray-900 dark:text-white font-medium leading-relaxed text-right min-h-[40px]"
           v-if="tab.sharedObject[item.id].path == 'riwayat_donasi'"
           v-html="messageDonasi.getString"
         ></p>
         <p
-          class="px-5 text-sm text-gray-900 dark:text-white font-medium leading-relaxed text-right"
+          class="px-5 text-sm text-gray-900 dark:text-white font-medium leading-relaxed text-right min-h-[40px]"
           v-if="tab.sharedObject[item.id].path == 'riwayat_infaq'"
           v-html="messageInfaq.getString"
         ></p>

@@ -2,15 +2,14 @@
 // Library
 import { ref, watchEffect } from 'vue';
 import BaseButton from '@/components/Button/BaseButton.vue';
-import InputFile from '@/components/Form/InputFile.vue';
-import InputCurrency from '@/components/Form/InputCurrency.vue';
+import TextArea from '@/components/Form/TextArea.vue';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
 
 // Composable
 import { useNotification } from '@/composables/useNotification';
 
 // Service
-import { upload_bukti_transfer } from '@/service/riwayat_infaq';
+import { tolak_pembayaran_donasi } from '@/service/riwayat_donasi';
 
 // Composable: notification
 const { displayNotification } = useNotification();
@@ -18,7 +17,6 @@ const { displayNotification } = useNotification();
 interface Props {
   isModalOpen: boolean;
   id: number;
-  nominal_infaq: number;
 }
 
 const props = defineProps<Props>();
@@ -38,20 +36,17 @@ const errors = ref<Record<string, string>>({
 const isSubmitting = ref(false);
 const form = ref<{
   id: number;
-  bukti: File | null;
-  nominal_transfer: number;
+  alasan: string;
 }>({
   id: 0,
-  bukti: null,
-  nominal_transfer: 0,
+  alasan: '',
 });
 
 // Function: Reset form
 const resetForm = () => {
   form.value = {
     id: 0,
-    bukti: null,
-    nominal_transfer: 0,
+    alasan: '',
   };
 
   // Reset errors
@@ -71,17 +66,12 @@ const validateForm = () => {
   errors.value = {};
 
   if (!form.value.id) {
-    errors.value.bukti = 'ID wajib diisi.';
+    errors.value.alasan = 'ID wajib diisi.';
     isValid = false;
   }
 
-  if (!form.value.bukti) {
-    errors.value.bukti = 'Bukti transfer wajib diisi.';
-    isValid = false;
-  }
-
-  if (form.value.nominal_transfer <= 0) {
-    errors.value.nominal_transfer = 'Nominal transfer wajib diisi.';
+  if (!form.value.alasan) {
+    errors.value.alasan = 'Alasan penolakan wajib diisi.';
     isValid = false;
   }
 
@@ -93,14 +83,13 @@ const handleSubmit = async () => {
   isSubmitting.value = true;
   if (!validateForm()) return;
 
-  const formData = new FormData();
-  formData.append('id', String(form.value.id));
-  formData.append('nominal_transfer', String(form.value.nominal_transfer));
-  formData.append('bukti', form.value.bukti);
+  const formData = {
+    id: form.value.id,
+    alasan: form.value.alasan,
+  };
 
   try {
-    const response = await upload_bukti_transfer(formData);
-    console.log(response);
+    const response = await tolak_pembayaran_donasi(formData);
     emit('status', { error_msg: response.error_msg || response, error: response.error });
   } catch (error: any) {
     console.error(error);
@@ -109,24 +98,6 @@ const handleSubmit = async () => {
     isSubmitting.value = false;
     closeModal();
   }
-};
-
-const previewUrl = ref<string | null>(null);
-const handleFile = (file: File | null) => {
-  if (!file) {
-    form.value.bukti = null;
-    return;
-  }
-
-  // Validasi ukuran file
-  const fileSizeMB = Math.round(file.size / (1024 * 1024));
-  if (fileSizeMB > 2) {
-    errors.value.bukti = 'Ukuran file maksimal 2 MB';
-    return;
-  }
-
-  previewUrl.value = URL.createObjectURL(file);
-  form.value.bukti = file;
 };
 
 watchEffect(async () => {
@@ -154,7 +125,7 @@ watchEffect(async () => {
       <div v-else class="relative max-w-xl w-full bg-white shadow-2xl rounded-2xl p-6 space-y-6">
         <!-- Header -->
         <div class="flex items-center justify-between">
-          <h2 id="modal-title" class="text-xl font-bold text-gray-800">Upload Bukti Transfer</h2>
+          <h2 id="modal-title" class="text-xl font-bold text-gray-800">Alasan Penolakan</h2>
           <button
             class="text-gray-400 text-lg hover:text-gray-600"
             @click="closeModal"
@@ -164,36 +135,13 @@ watchEffect(async () => {
           </button>
         </div>
         <div>
-          <InputFile
-            id="bukti-transfer"
-            label="Bukti Transfer"
-            buttonText="Pilih File"
-            accept=".jpg,.jpeg,.png"
-            :error="errors.bukti"
-            :maxSize="2000"
-            :show-preview="true"
-            @file-selected="handleFile"
-          />
-        </div>
-        <div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Nominal Infaq</label>
-            <input
-              type="text"
-              :value="$formatToRupiah(props.nominal_infaq)"
-              class="w-full bg-gray-100 border-gray-300 rounded-md p-2 mt-1"
-              readonly
-            />
-          </div>
-        </div>
-        <div>
-          <InputCurrency
-            id="nominal_transfer"
-            v-model="form.nominal_transfer"
-            label="Nominal Transfer"
-            placeholder="Masukkan nominal transfer"
-            required
-            :error="errors.nominal_transfer"
+          <TextArea
+            v-model="form.alasan"
+            id="alasan"
+            label="Alasan penolakan"
+            :error="errors.alasan"
+            :placeholder="'Tulis alasan penolakan di sini...'"
+            :required="true"
           />
         </div>
         <!-- Actions -->
@@ -209,11 +157,11 @@ watchEffect(async () => {
           <BaseButton
             type="submit"
             variant="primary"
-            :disabled="!(form.id && form.nominal_transfer && form.bukti) || isSubmitting"
+            :disabled="!(form.id && form.alasan) || isSubmitting"
             @click="handleSubmit"
           >
-            <span v-if="isSubmitting">Mengupload...</span>
-            <span v-else>Upload Bukti</span>
+            <span v-if="isSubmitting">Menyimpan...</span>
+            <span v-else>Simpan</span>
           </BaseButton>
         </div>
       </div>
