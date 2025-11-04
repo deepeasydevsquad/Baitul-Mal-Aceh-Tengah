@@ -10,6 +10,7 @@ import 'flowbite';
 
 // Vue Core
 import rupiahPlugin from '@/plugins/rupiahPlugin';
+import terbilangPlugin from '@/plugins/terbilangPlugin';
 import { createHead } from '@vueuse/head';
 import alertify from 'alertifyjs';
 import 'alertifyjs/build/css/alertify.min.css';
@@ -320,6 +321,7 @@ app.use(PrimeVue, {
   },
 });
 app.use(rupiahPlugin);
+app.use(terbilangPlugin);
 
 router.beforeEach((to, from, next) => {
   const defaultTitle = 'Nama Aplikasi Anda';
