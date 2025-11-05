@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, getCurrentInstance } from 'vue';
 import Notification from '@/components/Modal/Notification.vue';
 import BaseButton from '@/components/Button/BaseButton.vue';
 import jsPDF from 'jspdf';
@@ -7,7 +7,12 @@ import html2canvas from 'html2canvas';
 import Logo from '@/components/Logo/Logo.vue';
 import { useNotification } from '@/composables/useNotification';
 
-import { list } from '@/service/laporan_umum';
+import { get_laporan_harian, list } from '@/service/laporan_umum';
+// Global Properties
+const { appContext } = getCurrentInstance()!;
+
+const $formatToRupiah = appContext.config.globalProperties.$formatToRupiah;
+const $terbilangUang = appContext.config.globalProperties.$terbilangUang;
 
 const isLoading = ref(false);
 const isDownloading = ref(false);
@@ -179,9 +184,331 @@ async function fetchData() {
 //   }
 // }
 
+async function loadImageAsBase64(url) {
+  const res = await fetch(url);
+  const blob = await res.blob();
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.readAsDataURL(blob);
+  });
+}
+
+const debug_harian = async () => {
+  try {
+    const response = await get_laporan_harian();
+    console.log('Laporan harian:', response);
+  } catch (error) {
+    console.error('Error fetching laporan harian:', error);
+  }
+};
+
 // Lifecycle
+async function cetakLaporanHarian() {
+  isLoading.value = true;
+  try {
+    const response = await get_laporan_harian();
+    const laporanData = response;
+
+    // Load images
+    const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
+    const logo = BASE_URL + '/uploads/img/logos/site_logo.png';
+    const logoBase64 = await loadImageAsBase64(logo);
+    const footer = '../../../public/images/ziwah.png';
+    const footerBase64 = await loadImageAsBase64(footer);
+
+    // Inisialisasi PDF
+    const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+    let y = 15;
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const leftMargin = 15;
+    const rightMargin = pageWidth - 15;
+
+    // Format tanggal
+    const tanggalCetak = new Date(laporanData.date);
+    const options: Intl.DateTimeFormatOptions = {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+    };
+    const tanggalStr = tanggalCetak.toLocaleDateString('id-ID', options);
+    const [year, month, day] = laporanData.date.split('-');
+
+    // ==================== HEADER (SAMA SEPERTI CETAK SERAH TERIMA) ====================
+    // Logo di kiri atas
+    const marginRight = 150;
+    const scale = 1.15;
+    const logoWidth = 53 * scale;
+    const logoHeight = 15 * scale;
+    const x = pageWidth - marginRight - 45;
+    doc.addImage(logoBase64, 'PNG', x, 12, logoWidth, logoHeight);
+
+    // Info Sekretariat (Kanan)
+    doc.setFont('times', 'bold');
+    doc.setFontSize(10);
+    doc.text('SEKRETARIAT', pageWidth - 85, y, { align: 'left' });
+    y += 5;
+
+    doc.setFont('times', 'normal');
+    doc.setFontSize(9);
+    const namaKabupaten = `BAITUL MAL ${laporanData.lokasi_kantor.nama_kabupaten_kota.toUpperCase()}`;
+    doc.text(namaKabupaten, pageWidth - 85, y, { align: 'left' });
+    y += 4;
+
+    // Alamat dari API
+    const alamatKantorWrapped = doc.splitTextToSize(laporanData.lokasi_kantor.alamat, 70);
+    doc.text(alamatKantorWrapped, pageWidth - 85, y, { align: 'left' });
+    y += alamatKantorWrapped.length * 4;
+
+    // Box Nomor/Tanggal (Kanan)
+    y += 8;
+    const boxX = pageWidth - 85;
+    const boxWidth = 70;
+    const boxHeight = 10;
+    doc.setDrawColor(255, 0, 0); // Border merah
+    doc.setLineWidth(0.5);
+    doc.rect(boxX, y, boxWidth, boxHeight);
+
+    doc.setFont('times', 'bold');
+    doc.setFontSize(11);
+    doc.text(`${day} / ${month} / ${year.slice(-2)}`, boxX + 3, y + 6);
+
+    doc.setFont('times', 'normal');
+    doc.setFontSize(11);
+    doc.text('/ ...... / ...... /', boxX + 45, y + 6, { align: 'center' });
+    doc.setTextColor(0, 0, 0); // Reset warna text
+
+    // ==================== JUDUL ====================
+    y += 18;
+    doc.setFillColor(220, 220, 220);
+    doc.rect(leftMargin, y, rightMargin - leftMargin, 8, 'F');
+    doc.setDrawColor(0, 0, 0);
+    doc.rect(leftMargin, y, rightMargin - leftMargin, 8);
+    doc.setFont('times', 'bold');
+    doc.setFontSize(12);
+    doc.text('ZAKAT / INFAQ / DONASI', pageWidth / 2, y + 5.5, { align: 'center' });
+
+    y += 12;
+
+    // ==================== JENIS PEMBAYARAN: ZAKAT ====================
+    doc.setFont('times', 'bold');
+    doc.setFontSize(10);
+    doc.text('• Jenis Pembayaran : Zakat', leftMargin + 5, y);
+    y += 7;
+
+    // Tabel Zakat
+    const colWidths = [15, 75, 55, 35]; // No, Nama Muzakki, Tipe Zakat, Jumlah
+    const tableWidth = colWidths.reduce((a, b) => a + b, 0);
+
+    // Header tabel
+    doc.setFillColor(220, 220, 220);
+    doc.rect(leftMargin, y, tableWidth, 8, 'FD');
+
+    doc.setFont('times', 'bold');
+    doc.setFontSize(9);
+    let xPos = leftMargin;
+
+    doc.text('No', xPos + 2, y + 5.5);
+    xPos += colWidths[0];
+
+    doc.text('Nama Muzakki', xPos + 2, y + 5.5);
+    xPos += colWidths[1];
+
+    doc.text('Tipe Zakat', xPos + 2, y + 5.5);
+    xPos += colWidths[2];
+
+    doc.text('Jumlah', xPos + 2, y + 5.5);
+
+    y += 8;
+
+    // Data rows Zakat
+    doc.setFont('times', 'normal');
+    if (laporanData.zakat.list && laporanData.zakat.list.length > 0) {
+      laporanData.zakat.list.forEach((item: any, index: number) => {
+        doc.rect(leftMargin, y, tableWidth, 7, 'D');
+
+        xPos = leftMargin;
+        doc.text(String(index + 1), xPos + 2, y + 5);
+        xPos += colWidths[0];
+
+        doc.text(item.Member.fullname, xPos + 2, y + 5);
+        xPos += colWidths[1];
+
+        // Format tipe zakat
+        const tipeZakat = item.tipe
+          .replace(/_/g, ' ')
+          .replace(/\b\w/g, (c: string) => c.toUpperCase());
+        doc.text(tipeZakat, xPos + 2, y + 5);
+        xPos += colWidths[2];
+
+        doc.text(formatRupiah(item.nominal), xPos + 2, y + 5);
+
+        y += 7;
+      });
+    } else {
+      // Tampilkan baris kosong jika tidak ada data
+      doc.rect(leftMargin, y, tableWidth, 7, 'D');
+      y += 7;
+    }
+
+    // Row Jumlah Total Zakat
+    doc.setFont('times', 'bold');
+    doc.rect(leftMargin, y, tableWidth, 7, 'D');
+    xPos = leftMargin + colWidths[0];
+    doc.text('Jumlah Total', xPos + 2, y + 5);
+    xPos = leftMargin + colWidths[0] + colWidths[1] + colWidths[2];
+    doc.text(formatRupiah(laporanData.zakat.total), xPos + 2, y + 5);
+
+    y += 12;
+
+    // ==================== JENIS PEMBAYARAN: INFAQ ====================
+    doc.setFont('times', 'bold');
+    doc.setFontSize(10);
+    doc.text('• Jenis Pembayaran : Infaq', leftMargin + 5, y);
+    y += 7;
+
+    // Tabel Infaq (3 kolom - tanpa tipe)
+    const colWidthsInfaq = [15, 130, 35];
+    const tableWidthInfaq = colWidthsInfaq.reduce((a, b) => a + b, 0);
+
+    // Header
+    doc.setFillColor(220, 220, 220);
+    doc.rect(leftMargin, y, tableWidthInfaq, 8, 'FD');
+    xPos = leftMargin;
+    doc.text('No', xPos + 2, y + 5.5);
+    xPos += colWidthsInfaq[0];
+    doc.text('Nama Muzakki', xPos + 2, y + 5.5);
+    xPos += colWidthsInfaq[1];
+    doc.text('Jumlah', xPos + 2, y + 5.5);
+
+    y += 8;
+
+    // Data Infaq
+    doc.setFont('times', 'normal');
+    if (laporanData.infaq.list && laporanData.infaq.list.length > 0) {
+      laporanData.infaq.list.forEach((item: any, index: number) => {
+        doc.rect(leftMargin, y, tableWidthInfaq, 7, 'D');
+        xPos = leftMargin;
+        doc.text(String(index + 1), xPos + 2, y + 5);
+        xPos += colWidthsInfaq[0];
+        doc.text(item.Member.fullname, xPos + 2, y + 5);
+        xPos += colWidthsInfaq[1];
+        doc.text(formatRupiah(item.nominal), xPos + 2, y + 5);
+        y += 7;
+      });
+    } else {
+      doc.rect(leftMargin, y, tableWidthInfaq, 7, 'D');
+      y += 7;
+    }
+
+    // Total Infaq
+    doc.setFont('times', 'bold');
+    doc.rect(leftMargin, y, tableWidthInfaq, 7, 'D');
+    xPos = leftMargin + colWidthsInfaq[0];
+    doc.text('Jumlah Total', xPos + 2, y + 5);
+    xPos = leftMargin + colWidthsInfaq[0] + colWidthsInfaq[1];
+    doc.text(formatRupiah(laporanData.infaq.total), xPos + 2, y + 5);
+
+    y += 12;
+
+    // ==================== JENIS PEMBAYARAN: DONASI ====================
+    doc.setFont('times', 'bold');
+    doc.text('• Jenis Pembayaran : Donasi', leftMargin + 5, y);
+    y += 7;
+
+    // Tabel Donasi
+    const colWidthsDonasi = [15, 130, 35];
+    const tableWidthDonasi = colWidthsDonasi.reduce((a, b) => a + b, 0);
+
+    doc.setFillColor(220, 220, 220);
+    doc.rect(leftMargin, y, tableWidthDonasi, 8, 'FD');
+    xPos = leftMargin;
+    doc.text('No', xPos + 2, y + 5.5);
+    xPos += colWidthsDonasi[0];
+    doc.text('Nama Muzakki', xPos + 2, y + 5.5);
+    xPos += colWidthsDonasi[1];
+    doc.text('Jumlah', xPos + 2, y + 5.5);
+
+    y += 8;
+
+    // Data Donasi
+    doc.setFont('times', 'normal');
+    if (laporanData.donasi.list && laporanData.donasi.list.length > 0) {
+      laporanData.donasi.list.forEach((item: any, index: number) => {
+        doc.rect(leftMargin, y, tableWidthDonasi, 7, 'D');
+        xPos = leftMargin;
+        doc.text(String(index + 1), xPos + 2, y + 5);
+        xPos += colWidthsDonasi[0];
+        doc.text(item.Member.fullname, xPos + 2, y + 5);
+        xPos += colWidthsDonasi[1];
+        doc.text(formatRupiah(item.nominal), xPos + 2, y + 5);
+        y += 7;
+      });
+    } else {
+      doc.rect(leftMargin, y, tableWidthDonasi, 7, 'D');
+      y += 7;
+    }
+
+    // Total Donasi
+    doc.setFont('times', 'bold');
+    doc.rect(leftMargin, y, tableWidthDonasi, 7, 'D');
+    xPos = leftMargin + colWidthsDonasi[0];
+    doc.text('Jumlah Total', xPos + 2, y + 5);
+    xPos = leftMargin + colWidthsDonasi[0] + colWidthsDonasi[1];
+    doc.text(formatRupiah(laporanData.donasi.total), xPos + 2, y + 5);
+
+    y += 12;
+
+    // ==================== GRAND TOTAL ====================
+    doc.setFont('times', 'bold');
+    doc.setFontSize(11);
+    doc.text(`• Grand Total : ${formatRupiah(laporanData.grandTotal)}`, leftMargin + 5, y);
+    y += 5;
+
+    doc.setFont('times', 'italic');
+    doc.setFontSize(10);
+    const terbilang = $terbilangUang(laporanData.grandTotal, {
+      case: 'title',
+      currency: 'Rupiah',
+    });
+    doc.text(`  Terbilang    : ${terbilang}`, leftMargin + 5, y);
+
+    // ==================== FOOTER ====================
+    const scaleFooter = 0.28;
+    const footerWidth = 106 * scaleFooter;
+    const footerHeight = 34 * scaleFooter;
+
+    // Garis pemisah
+    doc.setDrawColor(200, 200, 200);
+    doc.line(10, pageHeight - 20, pageWidth - 10, pageHeight - 20);
+
+    // Teks footer
+    doc.setFont('times', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(120, 120, 120);
+    doc.text(`Dicetak Pada: ${tanggalStr} `, pageWidth / 2, pageHeight - 10, {
+      align: 'center',
+    });
+
+    // Logo footer
+    doc.addImage(footerBase64, 'PNG', 15, pageHeight - 15, footerWidth, footerHeight);
+
+    // ==================== SAVE PDF ====================
+    const fileName = `Laporan_Harian_${day}-${month}-${year}.pdf`;
+    doc.save(fileName);
+
+    displayNotification('Laporan harian berhasil dicetak', 'success');
+  } catch (error: any) {
+    console.error('Error cetak laporan harian:', error);
+    displayNotification(error.response?.data?.message || 'Gagal mencetak laporan harian', 'error');
+  } finally {
+    isLoading.value = false;
+  }
+}
 onMounted(async () => {
   await fetchData();
+  debug_harian();
 });
 
 const cetak_laporan_umum = () => {
@@ -214,7 +541,7 @@ const getMonthName = (month: number) => {
         </BaseButton>
         <BaseButton
           variant="warning"
-          @click="cetak_laporan_umum()"
+          @click="cetakLaporanHarian()"
           class="flex items-center justify-center"
         >
           <font-awesome-icon icon="fa-solid fa-print" class="mr-2" />
