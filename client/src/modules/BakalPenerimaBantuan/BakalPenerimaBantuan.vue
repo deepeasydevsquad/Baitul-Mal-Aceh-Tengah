@@ -10,7 +10,10 @@ import Confirmation from '@/components/Modal/Confirmation.vue';
 import Notification from '@/components/Modal/Notification.vue';
 import Pagination from '@/components/Pagination/Pagination.vue';
 import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
+
+import { RefreshBakal } from '@/stores/refresh';
+const refreshBakal = RefreshBakal();
 
 // Form
 import FormRealisasiPermohonan from '@/modules/BakalPenerimaBantuan/widgets/FormRealisasiPermohonan.vue';
@@ -238,6 +241,16 @@ function formatTanggal(tanggal: string | null): string {
     year: 'numeric',
   });
 }
+
+watch(
+  () => refreshBakal.getBool,
+  async () => {
+    if (refreshBakal.getBool == true) {
+      await fetchData();
+    }
+  },
+  { deep: true },
+);
 </script>
 
 <template>

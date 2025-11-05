@@ -155,3 +155,5 @@ resetdb.ps1
 #vscode
 .vscode/
 
+server/uploads/dokumen
+
