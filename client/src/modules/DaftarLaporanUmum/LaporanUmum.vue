@@ -261,45 +261,31 @@ async function cetakLaporanHarian() {
     doc.text(alamatKantorWrapped, pageWidth - 85, y, { align: 'left' });
     y += alamatKantorWrapped.length * 4;
 
-    // Box Nomor/Tanggal (Kanan)
-    y += 8;
-    const boxX = pageWidth - 85;
-    const boxWidth = 70;
-    const boxHeight = 10;
-    doc.setDrawColor(255, 0, 0); // Border merah
-    doc.setLineWidth(0.5);
-    doc.rect(boxX, y, boxWidth, boxHeight);
-
-    doc.setFont('times', 'bold');
-    doc.setFontSize(11);
-    doc.text(`${day} / ${month} / ${year.slice(-2)}`, boxX + 3, y + 6);
-
-    doc.setFont('times', 'normal');
-    doc.setFontSize(11);
-    doc.text('/ ...... / ...... /', boxX + 45, y + 6, { align: 'center' });
-    doc.setTextColor(0, 0, 0); // Reset warna text
-
     // ==================== JUDUL ====================
     y += 18;
     doc.setFillColor(220, 220, 220);
     doc.rect(leftMargin, y, rightMargin - leftMargin, 8, 'F');
     doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.3);
     doc.rect(leftMargin, y, rightMargin - leftMargin, 8);
     doc.setFont('times', 'bold');
     doc.setFontSize(12);
     doc.text('ZAKAT / INFAQ / DONASI', pageWidth / 2, y + 5.5, { align: 'center' });
 
-    y += 12;
+    y += 20;
 
     // ==================== JENIS PEMBAYARAN: ZAKAT ====================
     doc.setFont('times', 'bold');
     doc.setFontSize(10);
     doc.text('• Jenis Pembayaran : Zakat', leftMargin + 5, y);
-    y += 7;
+    y += 3; // Dikurangi dari 7 jadi 5
 
     // Tabel Zakat
     const colWidths = [15, 75, 55, 35]; // No, Nama Muzakki, Tipe Zakat, Jumlah
     const tableWidth = colWidths.reduce((a, b) => a + b, 0);
+
+    // Set line width untuk border tipis
+    doc.setLineWidth(0.2);
 
     // Header tabel
     doc.setFillColor(220, 220, 220);
@@ -347,26 +333,32 @@ async function cetakLaporanHarian() {
         y += 7;
       });
     } else {
-      // Tampilkan baris kosong jika tidak ada data
+      // Tampilkan pesan "Data tidak ditemukan"
       doc.rect(leftMargin, y, tableWidth, 7, 'D');
+      doc.setFont('times', 'italic');
+      doc.setTextColor(150, 150, 150);
+      doc.text('Data tidak ditemukan', leftMargin + tableWidth / 2, y + 5, { align: 'center' });
+      doc.setTextColor(0, 0, 0);
+      doc.setFont('times', 'normal');
       y += 7;
     }
 
-    // Row Jumlah Total Zakat
+    // Row Jumlah Total Zakat dengan background gray
     doc.setFont('times', 'bold');
-    doc.rect(leftMargin, y, tableWidth, 7, 'D');
+    doc.setFillColor(240, 240, 240);
+    doc.rect(leftMargin, y, tableWidth, 7, 'FD');
     xPos = leftMargin + colWidths[0];
     doc.text('Jumlah Total', xPos + 2, y + 5);
     xPos = leftMargin + colWidths[0] + colWidths[1] + colWidths[2];
     doc.text(formatRupiah(laporanData.zakat.total), xPos + 2, y + 5);
 
-    y += 12;
+    y += 20;
 
     // ==================== JENIS PEMBAYARAN: INFAQ ====================
     doc.setFont('times', 'bold');
     doc.setFontSize(10);
     doc.text('• Jenis Pembayaran : Infaq', leftMargin + 5, y);
-    y += 7;
+    y += 3; // Dikurangi dari 7 jadi 5
 
     // Tabel Infaq (3 kolom - tanpa tipe)
     const colWidthsInfaq = [15, 130, 35];
@@ -399,23 +391,31 @@ async function cetakLaporanHarian() {
       });
     } else {
       doc.rect(leftMargin, y, tableWidthInfaq, 7, 'D');
+      doc.setFont('times', 'italic');
+      doc.setTextColor(150, 150, 150);
+      doc.text('Data tidak ditemukan', leftMargin + tableWidthInfaq / 2, y + 5, {
+        align: 'center',
+      });
+      doc.setTextColor(0, 0, 0);
+      doc.setFont('times', 'normal');
       y += 7;
     }
 
-    // Total Infaq
+    // Total Infaq dengan background gray
     doc.setFont('times', 'bold');
-    doc.rect(leftMargin, y, tableWidthInfaq, 7, 'D');
+    doc.setFillColor(240, 240, 240);
+    doc.rect(leftMargin, y, tableWidthInfaq, 7, 'FD');
     xPos = leftMargin + colWidthsInfaq[0];
     doc.text('Jumlah Total', xPos + 2, y + 5);
     xPos = leftMargin + colWidthsInfaq[0] + colWidthsInfaq[1];
     doc.text(formatRupiah(laporanData.infaq.total), xPos + 2, y + 5);
 
-    y += 12;
+    y += 20;
 
     // ==================== JENIS PEMBAYARAN: DONASI ====================
     doc.setFont('times', 'bold');
     doc.text('• Jenis Pembayaran : Donasi', leftMargin + 5, y);
-    y += 7;
+    y += 3; // Dikurangi dari 7 jadi 5
 
     // Tabel Donasi
     const colWidthsDonasi = [15, 130, 35];
@@ -447,24 +447,32 @@ async function cetakLaporanHarian() {
       });
     } else {
       doc.rect(leftMargin, y, tableWidthDonasi, 7, 'D');
+      doc.setFont('times', 'italic');
+      doc.setTextColor(150, 150, 150);
+      doc.text('Data tidak ditemukan', leftMargin + tableWidthDonasi / 2, y + 5, {
+        align: 'center',
+      });
+      doc.setTextColor(0, 0, 0);
+      doc.setFont('times', 'normal');
       y += 7;
     }
 
-    // Total Donasi
+    // Total Donasi dengan background gray
     doc.setFont('times', 'bold');
-    doc.rect(leftMargin, y, tableWidthDonasi, 7, 'D');
+    doc.setFillColor(240, 240, 240);
+    doc.rect(leftMargin, y, tableWidthDonasi, 7, 'FD');
     xPos = leftMargin + colWidthsDonasi[0];
     doc.text('Jumlah Total', xPos + 2, y + 5);
     xPos = leftMargin + colWidthsDonasi[0] + colWidthsDonasi[1];
     doc.text(formatRupiah(laporanData.donasi.total), xPos + 2, y + 5);
 
-    y += 12;
+    y += 25;
 
     // ==================== GRAND TOTAL ====================
     doc.setFont('times', 'bold');
     doc.setFontSize(11);
     doc.text(`• Grand Total : ${formatRupiah(laporanData.grandTotal)}`, leftMargin + 5, y);
-    y += 5;
+    y += 8;
 
     doc.setFont('times', 'italic');
     doc.setFontSize(10);
@@ -481,6 +489,7 @@ async function cetakLaporanHarian() {
 
     // Garis pemisah
     doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.3);
     doc.line(10, pageHeight - 20, pageWidth - 10, pageHeight - 20);
 
     // Teks footer
