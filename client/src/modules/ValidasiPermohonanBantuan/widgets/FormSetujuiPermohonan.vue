@@ -18,6 +18,9 @@ import {
   get_info_approve_permohonan,
 } from '@/service/validasi_permohonan_bantuan';
 
+import { RefreshBakal } from '@/stores/refresh';
+const refreshBakal = RefreshBakal();
+
 // Composable: notification & confirmation
 const { showNotification, notificationType, notificationMessage, displayNotification } =
   useNotification();
@@ -168,6 +171,7 @@ const handleSubmit = async () => {
       if (response.error) {
         displayNotification(response.error_msg || 'Gagal menyetujui permohonan', 'error');
       } else {
+        refreshBakal.setBool(true);
         emit('status', {
           error_msg:
             response.error_msg ||

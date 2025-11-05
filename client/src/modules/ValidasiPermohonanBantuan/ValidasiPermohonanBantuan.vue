@@ -10,7 +10,7 @@ import Confirmation from '@/components/Modal/Confirmation.vue';
 import Notification from '@/components/Modal/Notification.vue';
 import Pagination from '@/components/Pagination/Pagination.vue';
 import SkeletonTable from '@/components/SkeletonTable/SkeletonTable.vue';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 
 // Form
 import FormEditFile from '@/modules/ValidasiPermohonanBantuan/widgets/FormEditFile.vue';
@@ -21,6 +21,9 @@ import FormTolakPermohonan from '@/modules/ValidasiPermohonanBantuan/widgets/For
 
 // Config API
 const BASEURL = import.meta.env.VITE_APP_API_BASE_URL;
+
+import { RefreshValidasi } from '@/stores/refresh';
+const refreshValidasi = RefreshValidasi();
 
 // Composable
 import { useConfirmation } from '@/composables/useConfirmation';
@@ -189,6 +192,8 @@ async function fetchData() {
     dataValidasiPermohonanBantuan.value = response.data;
     totalRow.value = response.total;
 
+    refreshValidasi.setBool(false);
+
     kegiatanOption.value = filterTypeResponse.data;
   } catch (error) {
     displayNotification('Gagal mengambil data validasi permohonan bantuan', 'error');
@@ -200,6 +205,16 @@ async function fetchData() {
 onMounted(async () => {
   await fetchData();
 });
+
+watch(
+  () => refreshValidasi.getBool,
+  async () => {
+    if (refreshValidasi.getBool == true) {
+      await fetchData();
+    }
+  },
+  { deep: true },
+);
 </script>
 
 <template>

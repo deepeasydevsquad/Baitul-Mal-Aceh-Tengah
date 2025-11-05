@@ -138,9 +138,10 @@ class Model_r {
                   [Op.gte]: moment(body.type_date.start).format("YYYY-MM-DD"),
                 },
               },
+              { status_kegiatan: "sedang_berlangsung" },
             ],
           }
-        : {};
+        : { status_kegiatan: "sedang_berlangsung" };
 
     try {
       console.log("🚀 Mulai eksekusi query Program.findAll() ...");

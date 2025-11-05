@@ -20,6 +20,10 @@ import {
   get_list_syarat,
 } from '@/service/permohonan_bantuan';
 
+import { RefreshValidasi } from '@/stores/refresh';
+const refresh = RefreshValidasi();
+//
+
 // State: Loading
 const isLoading = ref(false);
 
@@ -215,6 +219,7 @@ const handleSubmit = async () => {
   try {
     const response = await add_permohonan_bantuan(formData);
     console.log(response);
+    refresh.setBool(true);
     emit('status', { error_msg: response.error_msg || response, error: response.error });
   } catch (error: any) {
     console.error(error);
