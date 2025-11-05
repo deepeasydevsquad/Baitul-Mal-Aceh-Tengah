@@ -108,6 +108,7 @@ const arr_router = [
   "survey_lapangan",
   "bakal_penerima_bantuan",
   "logo",
+  "member_area",
 ];
 
 const arr = {};

@@ -1,19 +1,22 @@
 <script setup lang="ts">
-import { ref, defineEmits, watch } from 'vue'
+import { ref, defineEmits, watch } from 'vue';
 import Notification from '@/components/Modal/Notification.vue';
-import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
-import InputText from '@/components/Form/InputText.vue'
-import { edit_profile_member, get_info_edit_profile_member } from '@/service/auth'
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
+import InputText from '@/components/Form/InputText.vue';
+import { edit_profile_member, get_info_edit_profile_member } from '@/service/auth';
+
+import { Fullname } from '@/stores/memberInfo';
+const fullname = Fullname();
 
 // Props dan Emit
-const props = defineProps<{ formStatus: boolean }>()
+const props = defineProps<{ formStatus: boolean }>();
 const emit = defineEmits<{
-  (e: 'cancel'): void
-  (e: 'submitted'): void
-  (e: 'notify', payload: { type: string; message: string }): void
-}>()
+  (e: 'cancel'): void;
+  (e: 'submitted'): void;
+  (e: 'notify', payload: { type: string; message: string }): void;
+}>();
 
-const isLoading = ref(false)
+const isLoading = ref(false);
 
 const timeoutId = ref<number | null>(null);
 const showNotification = ref<boolean>(false);
@@ -40,14 +43,14 @@ const form = ref({
   username: '',
   password: '',
   confirm_password: '',
-})
+});
 
 const errors = ref<Record<string, string>>({
   fullname: '',
   username: '',
   password: '',
   confirm_password: '',
-})
+});
 
 // Reset form
 const resetForm = () => {
@@ -61,54 +64,54 @@ const resetForm = () => {
     username: '',
     password: '',
     confirm_password: '',
-  }
-  errors.value = {}
-}
+  };
+  errors.value = {};
+};
 
 // Tutup modal
 const HideModal = () => {
   if (!isLoading.value) {
-    resetForm()
-    emit('cancel')
+    resetForm();
+    emit('cancel');
   }
-}
+};
 
 // Ambil data profil member
 async function fetchData() {
-  isLoading.value = true
+  isLoading.value = true;
   try {
-    const res = await get_info_edit_profile_member()
-    console.log(res)
-    form.value = res.data
+    const res = await get_info_edit_profile_member();
+    console.log(res);
+    form.value = res.data;
   } catch (error) {
-    console.error(error)
+    console.error(error);
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
 }
 
 // Validasi form
 const validateForm = () => {
-  let valid = true
-  errors.value = {}
+  let valid = true;
+  errors.value = {};
 
   if (!form.value.fullname) {
-    errors.value.fullname = 'Nama lengkap wajib diisi'
-    valid = false
+    errors.value.fullname = 'Nama lengkap wajib diisi';
+    valid = false;
   }
 
   if (!form.value.username) {
-    errors.value.username = 'Username wajib diisi'
-    valid = false
+    errors.value.username = 'Username wajib diisi';
+    valid = false;
   }
 
   if (form.value.password && form.value.password !== form.value.confirm_password) {
-    errors.value.confirm_password = 'Konfirmasi password tidak sesuai'
-    valid = false
+    errors.value.confirm_password = 'Konfirmasi password tidak sesuai';
+    valid = false;
   }
 
-  return valid
-}
+  return valid;
+};
 
 const logout = async () => {
   displayNotification('Proses logout berhasil dilakukan.', 'success');
@@ -119,8 +122,8 @@ const logout = async () => {
 
 // Submit
 const handleSubmit = async () => {
-  if (!validateForm()) return
-  isLoading.value = true
+  if (!validateForm()) return;
+  isLoading.value = true;
   const dataToSend = {
     kode: form.value.kode,
     tipe: form.value.tipe,
@@ -130,29 +133,33 @@ const handleSubmit = async () => {
     whatsapp_number: form.value.whatsapp_number,
     username: form.value.username,
     password: form.value.password || '',
-  }
-  console.log(dataToSend)
+  };
+  console.log(dataToSend);
   try {
-    const res = await edit_profile_member(dataToSend)
-    console.log(res)
-    emit('notify', { type: res.error ? 'error' : 'success', message: res.error_msg })
+    const res = await edit_profile_member(dataToSend);
+    fullname.setString(form.value.fullname);
+    console.log(res);
+    emit('notify', { type: res.error ? 'error' : 'success', message: res.error_msg });
   } catch (error: any) {
-    console.error(error)
-    emit('notify', { type: 'error', message: error.response?.data?.message || 'Gagal mengubah profile' })
+    console.error(error);
+    emit('notify', {
+      type: 'error',
+      message: error.response?.data?.message || 'Gagal mengubah profile',
+    });
   } finally {
-    emit('submitted')
-    logout()
-    isLoading.value = false
+    emit('submitted');
+    logout();
+    isLoading.value = false;
   }
-}
+};
 
 // Auto-fetch saat modal dibuka
 watch(
   () => props.formStatus,
   (val) => {
-    if (val) fetchData()
+    if (val) fetchData();
   },
-)
+);
 </script>
 
 <template>
@@ -188,8 +195,18 @@ watch(
               </div>
 
               <div class="grid grid-cols-2 gap-4 mb-4">
-                <InputText id="nomor_ktp" v-model="form.nomor_ktp" label="Nomor KTP" :disabled="true" />
-                <InputText id="nomor_kk" v-model="form.nomor_kk" label="Nomor KK" :disabled="true" />
+                <InputText
+                  id="nomor_ktp"
+                  v-model="form.nomor_ktp"
+                  label="Nomor KTP"
+                  :disabled="true"
+                />
+                <InputText
+                  id="nomor_kk"
+                  v-model="form.nomor_kk"
+                  label="Nomor KK"
+                  :disabled="true"
+                />
               </div>
 
               <InputText
