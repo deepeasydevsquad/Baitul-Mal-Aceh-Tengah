@@ -212,3 +212,22 @@ exports.upload_bukti_setoran = async (req, res) => {
     handleServerError(res, error);
   }
 };
+
+exports.info_bukti_setoran = async (req, res) => {
+  if (!(await handleValidationErrors(req, res))) return;
+
+  try {
+    const model_r = new Model_r(req);
+    const feedBack = await model_r.info_bukti_setoran();
+    res.status(200).json({
+      error: false,
+      data: feedBack,
+      total: 1,
+    });
+  } catch (error) {
+    console.log("=======error");
+    console.log(error);
+    console.log("=======error");
+    return handleServerError(res, error);
+  }
+};

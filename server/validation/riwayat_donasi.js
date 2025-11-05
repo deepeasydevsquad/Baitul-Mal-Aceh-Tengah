@@ -1,4 +1,4 @@
-const { Riwayat_donasi, Member } = require("../models");
+const { Op, Riwayat_donasi, Member } = require("../models");
 const multer = require("multer");
 const sharp = require("sharp");
 const path = require("path");
@@ -28,6 +28,22 @@ validation.check_id_riwayat_donasi = async (value) => {
     throw new Error("Riwayat donasi tidak terdaftar di pangkalan data");
   }
   return true;
+};
+
+// Validasi id Riwayat apakah sudah ada di database dan dalam tipe pembayaran cash atau transfer
+validation.check_id_riwayat_donasi_cash_or_transfer = async (value) => {
+  const check = await Riwayat_donasi.findOne({
+    where: {
+      id: value,
+      tipe_pembayaran: {
+        [Op.in]: ["transfer", "cash"],
+      },
+    },
+  });
+
+  if (!check) {
+    throw new Error("Riwayat donasi tidak terdaftar di pangkalan data");
+  }
 };
 
 validation.upload = (tipe = "cash") => {
