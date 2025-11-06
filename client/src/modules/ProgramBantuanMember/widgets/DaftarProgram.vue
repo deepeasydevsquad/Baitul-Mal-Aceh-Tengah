@@ -148,19 +148,31 @@ const formatRupiah = (value: number) =>
   <!-- Tampilkan list program jika showPermohonan false -->
   <div v-else class="p-6 bg-white rounded-lg shadow-lg">
     <!-- Tombol kembali -->
-    <button
+    <!-- <button
       @click="emit('back')"
       class="mb-6 bg-green-700 text-white px-5 py-2 rounded-lg hover:bg-green-800 transition-all"
     >
       ← Kembali
     </button>
 
-    <!-- Judul -->
     <h2 class="text-2xl font-extrabold text-green-900 mb-6 text-center uppercase tracking-wide">
       {{ programName }}
-    </h2>
+    </h2> -->
 
-    <div class="pb-4 flex gap-3 items-end max-w-xl mr-auto mb-8">
+    <div class="relative mb-10">
+      <button
+        @click="emit('back')"
+        class="absolute left-0 top-1/2 -translate-y-1/2 bg-green-700 text-white px-5 py-2 rounded-lg hover:bg-green-800 transition-all"
+      >
+        ← Kembali
+      </button>
+
+      <h2 class="text-2xl font-extrabold mb-15 text-green-900 text-center uppercase tracking-wide">
+        {{ programName }}
+      </h2>
+    </div>
+
+    <div class="pb-4 flex gap-3 items-end max-w-xl mx-auto mb-10">
       <InputDateRange
         id="date_range"
         v-model="filter_date_range"

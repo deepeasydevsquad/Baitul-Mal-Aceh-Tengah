@@ -229,7 +229,7 @@ function formatToRupiah(angka: number | string) {
                     <div
                       v-if="data.banner && data.banner !== '-'"
                       class="relative rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden"
-                      style="width: 100px; height: 33px"
+                      style="width: 300px; height: 99px"
                       :class="{ 'bg-gray-200': !data.banner || data.banner === '-' }"
                     >
                       <img
