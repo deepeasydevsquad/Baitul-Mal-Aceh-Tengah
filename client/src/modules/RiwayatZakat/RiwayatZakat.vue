@@ -18,6 +18,7 @@ import FormReject from '@/modules/RiwayatZakat/widgets/FormReject.vue';
 import FormUploadBuktiSetoranZakat from '@/modules/RiwayatZakat/widgets/FormUploadBuktiSetoranZakat.vue';
 import FormUploadBuktiTransfer from '@/modules/RiwayatZakat/widgets/FormUploadBuktiTransfer.vue';
 import { getCurrentInstance, onMounted, ref } from 'vue';
+import { API_URL } from '@/config/config';
 
 // import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -41,7 +42,7 @@ import { MessageTabZakat } from '@/stores/message';
 // import Form from '@/components/Modal/Form.vue';
 // import FormUploadBeritaAcara from '../BakalPenerimaBantuan/widgets/FormUploadBeritaAcara.vue';
 
-import { API_URL } from '@/config/config';
+// import { API_URL } from '@/config/config';
 const BASE_URL = API_URL;
 
 // Global Properties
@@ -296,7 +297,7 @@ async function cetakSuratSerahTerimaZakat(id: number) {
     }
 
     // Load images
-    import { API_URL } from '@/config/config';
+
     const BASE_URL = API_URL;
     const logo = BASE_URL + '/uploads/img/logos/site_logo.png';
     const logoBase64 = await loadImageAsBase64(logo);
