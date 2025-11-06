@@ -20,7 +20,8 @@ import FormSetujuiPermohonan from '@/modules/ValidasiPermohonanBantuan/widgets/F
 import FormTolakPermohonan from '@/modules/ValidasiPermohonanBantuan/widgets/FormTolakPermohonan.vue';
 
 // Config API
-const BASEURL = import.meta.env.VITE_APP_API_BASE_URL;
+import { API_URL } from '@/config/config';
+const BASE_URL = API_URL;
 
 import { RefreshValidasi } from '@/stores/refresh';
 const refreshValidasi = RefreshValidasi();

@@ -2,7 +2,7 @@
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
 import Notification from '@/components/Modal/Notification.vue';
 import BaseButton from '@/components/Button/BaseButton.vue';
-import InputFile from '@/components/Form/InputFilePdf.vue';
+import InputFile from '@/components/Form/InputFile.vue';
 import InputText from '@/components/Form/InputText.vue';
 import SelectField from '@/components/Form/SelectField.vue';
 import { useNotification } from '@/composables/useNotification';
@@ -410,7 +410,7 @@ onBeforeUnmount(() => {
                   :id="`syarat_${generateFieldName(syarat.name)}`"
                   :label="`${syarat.name} *`"
                   buttonText="Pilih File"
-                  accept=".pdf"
+                  :accept="'.pdf,.jpeg,.jpg,.png'"
                   :error="errors[generateFieldName(syarat.name)]"
                   :maxSize="1000"
                   @file-selected="(file) => handleFileUpload(generateFieldName(syarat.name))(file)"

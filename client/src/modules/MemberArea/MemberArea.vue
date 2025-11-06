@@ -8,16 +8,9 @@ import Stats from './widgets/Stats.vue';
 import LoadOverlay from '@/components/Loading/LoadOverlay.vue';
 onMounted(() => {
   const token = localStorage.getItem('member_access_token');
-  console.log('xxx');
-  console.log(token);
-
-  console.log('xxx');
-
-  // if (!token) {
-  //   window.location.href = '/'; // direct ke root
-  // } else {
-  //   // get data utama di area member
-  // }
+  if (!token) {
+    window.location.href = '/'; // direct ke root
+  }
 });
 </script>
 <template>

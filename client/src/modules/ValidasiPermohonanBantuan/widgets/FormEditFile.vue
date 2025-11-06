@@ -13,7 +13,8 @@ import { useNotification } from '@/composables/useNotification';
 import { edit_file, get_info_edit_file } from '@/service/validasi_permohonan_bantuan';
 
 // Config API
-const BASEURL = import.meta.env.VITE_APP_API_BASE_URL;
+import { API_URL } from '@/config/config';
+const BASE_URL = API_URL;
 
 // State: Loading
 const isLoading = ref(false);

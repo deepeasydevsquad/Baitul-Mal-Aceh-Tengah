@@ -22,7 +22,8 @@ const { showNotification, notificationType, notificationMessage, displayNotifica
   useNotification();
 
 // State Data
-const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
+import { API_URL } from '@/config/config';
+const BASE_URL = API_URL;
 
 interface PengaturanUmum {
   icon: File | null;

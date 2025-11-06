@@ -1,135 +1,138 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
-import Notification from '@/components/Modal/Notification.vue'
-import BaseButton from '@/components/Button/BaseButton.vue'
-import InputFile from '@/components/Form/InputFile.vue'
-import InputText from '@/components/Form/InputText.vue'
-import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
+import Notification from '@/components/Modal/Notification.vue';
+import BaseButton from '@/components/Button/BaseButton.vue';
+import InputFile from '@/components/Form/InputFile.vue';
+import InputText from '@/components/Form/InputText.vue';
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
 
-const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL
+import { API_URL } from '@/config/config';
+const BASE_URL = API_URL;
 
 // Composable
-import { useNotification } from '@/composables/useNotification'
+import { useNotification } from '@/composables/useNotification';
 
 // Service
-import { edit_tab, get_info_edit_tab } from '@/service/daftar_tab'
+import { edit_tab, get_info_edit_tab } from '@/service/daftar_tab';
 
 // Composable: notification
 const { showNotification, notificationType, notificationMessage, displayNotification } =
-useNotification()
+  useNotification();
 
 interface Props {
-  isModalOpen: boolean
-  selectedTab: any
+  isModalOpen: boolean;
+  selectedTab: any;
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 
 const emit = defineEmits<{
-  (e: 'close'): void
-  (e: 'status', payload: { error_msg?: string; error?: boolean }): void
-}>()
+  (e: 'close'): void;
+  (e: 'status', payload: { error_msg?: string; error?: boolean }): void;
+}>();
 
 // Function: Close modal
 const closeModal = () => {
-  resetForm()
-  emit('close')
-}
+  resetForm();
+  emit('close');
+};
 
 // Function: Reset form
 const resetForm = () => {
-  form.desc = ''
-  errors.value = {}
-}
+  form.desc = '';
+  errors.value = {};
+};
 
 // Function: Validate form
 const errors = ref<Record<string, string>>({
-  desc: ''
-})
+  desc: '',
+});
 
 const validateForm = () => {
-  let isValid = true
+  let isValid = true;
 
   // Reset errors
-  errors.value = {}
+  errors.value = {};
 
   if (!form.value.desc) {
-    errors.value.desc = 'Deskripsi tidak boleh kosong'
-    isValid = false
+    errors.value.desc = 'Deskripsi tidak boleh kosong';
+    isValid = false;
   }
 
-  console.log(errors.value)
+  console.log(errors.value);
 
-  return isValid
-}
+  return isValid;
+};
 
 // State: Loading
-const isLoading = ref(true)
+const isLoading = ref(true);
 
 // Function: Fetch Data
 const fetchData = async () => {
-  if (!props.selectedTab || !props.selectedTab.id) return
+  if (!props.selectedTab || !props.selectedTab.id) return;
   try {
-    const response =  await get_info_edit_tab(props.selectedTab.id)
-    form.value.desc = response.data.desc
+    const response = await get_info_edit_tab(props.selectedTab.id);
+    form.value.desc = response.data.desc;
 
-    console.log(response)
+    console.log(response);
   } catch (error) {
-    displayNotification('Gagal mengambil data daftar_tab', 'error')
+    displayNotification('Gagal mengambil data daftar_tab', 'error');
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
-}
+};
 
 // Function: Handle submit
-const isSubmitting = ref(false)
+const isSubmitting = ref(false);
 const form = ref<{ desc: string }>({
-  desc: ''
-})
+  desc: '',
+});
 
 const handleSubmit = async () => {
-  if (!validateForm()) return
+  if (!validateForm()) return;
 
-  const formData = { id: '', desc: ''}
-  
-  formData.id = props.selectedTab.id
-  formData.desc = form.value.desc
+  const formData = { id: '', desc: '' };
+
+  formData.id = props.selectedTab.id;
+  formData.desc = form.value.desc;
 
   isSubmitting.value = true;
-  console.log("Data tersimpan!:", formData)
+  console.log('Data tersimpan!:', formData);
 
   try {
-    const response = await edit_tab(formData)
-    console.log(response)
-    emit('status', { error_msg: response.message, error: response.error })
-    closeModal()
-
+    const response = await edit_tab(formData);
+    console.log(response);
+    emit('status', { error_msg: response.message, error: response.error });
+    closeModal();
   } catch (error: any) {
-    console.error(error)
-    displayNotification(error.response.data.error_msg || error.response.data.message, 'error')
+    console.error(error);
+    displayNotification(error.response.data.error_msg || error.response.data.message, 'error');
   } finally {
-    isSubmitting.value = false
+    isSubmitting.value = false;
   }
-}
+};
 
 // Function: Handle escape & Fetch Data
 const handleEscape = (e: KeyboardEvent) => {
-  if (e.key === 'Escape' && props.isModalOpen) closeModal()
-}
+  if (e.key === 'Escape' && props.isModalOpen) closeModal();
+};
 onMounted(async () => {
-  await fetchData()
-  document.addEventListener('keydown', handleEscape)
-})
+  await fetchData();
+  document.addEventListener('keydown', handleEscape);
+});
 
 onBeforeUnmount(async () => {
-  await fetchData()
-  document.removeEventListener('keydown', handleEscape)
-})
+  await fetchData();
+  document.removeEventListener('keydown', handleEscape);
+});
 
-watch(() => props.selectedTab, (val) => {
-  if (props.isModalOpen && val?.id) fetchData()
-})
+watch(
+  () => props.selectedTab,
+  (val) => {
+    if (props.isModalOpen && val?.id) fetchData();
+  },
+);
 </script>
 
 <template>
@@ -149,15 +152,10 @@ watch(() => props.selectedTab, (val) => {
       aria-labelledby="modal-title"
     >
       <LoadingSpinner v-if="isLoading" label="Memuat halaman..." />
-      <div
-        v-else
-        class="relative max-w-md w-full bg-white shadow-2xl rounded-2xl p-6 space-y-6"
-      >
+      <div v-else class="relative max-w-md w-full bg-white shadow-2xl rounded-2xl p-6 space-y-6">
         <!-- Header -->
         <div class="flex items-center justify-between">
-          <h2 id="modal-title" class="text-xl font-semibold text-gray-800">
-            Edit Tab
-          </h2>
+          <h2 id="modal-title" class="text-xl font-semibold text-gray-800">Edit Tab</h2>
           <button
             class="text-gray-400 text-lg hover:text-gray-600"
             @click="closeModal"
@@ -169,20 +167,20 @@ watch(() => props.selectedTab, (val) => {
 
         <!-- Deskripsi  -->
         <div>
-            <textarea
-              id="runningText"
-              v-model="form.desc"
-              rows="4"
-              class="mt-1 block w-full px-3 py-2 text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': errors.desc }"
-              placeholder="isi Deskripsi Tab disini..."
-              :disabled="isSubmitting"
-              maxlength="500"
-              required
-              aria-required="true"
-              :aria-invalid="!!errors"
-              aria-describedby="text-error counter-info"
-            ></textarea>
+          <textarea
+            id="runningText"
+            v-model="form.desc"
+            rows="4"
+            class="mt-1 block w-full px-3 py-2 text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': errors.desc }"
+            placeholder="isi Deskripsi Tab disini..."
+            :disabled="isSubmitting"
+            maxlength="500"
+            required
+            aria-required="true"
+            :aria-invalid="!!errors"
+            aria-describedby="text-error counter-info"
+          ></textarea>
         </div>
 
         <!-- Actions -->

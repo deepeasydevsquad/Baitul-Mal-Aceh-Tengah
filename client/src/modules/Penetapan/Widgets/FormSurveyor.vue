@@ -1,202 +1,203 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue'
-import Notification from '@/components/Modal/Notification.vue'
-import BaseButton from '@/components/Button/BaseButton.vue'
-import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
-import SelectField from '@/components/Form/SelectField.vue'
-import InputFile from '@/components/Form/InputFile.vue'
-import InputText from '@/components/Form/InputText.vue'
-import DeleteIcon from '@/components/Icons/DeleteIcon.vue'
+import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue';
+import Notification from '@/components/Modal/Notification.vue';
+import BaseButton from '@/components/Button/BaseButton.vue';
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
+import SelectField from '@/components/Form/SelectField.vue';
+import InputFile from '@/components/Form/InputFile.vue';
+import InputText from '@/components/Form/InputText.vue';
+import DeleteIcon from '@/components/Icons/DeleteIcon.vue';
 
-import { useNotification } from '@/composables/useNotification'
-import { add_surveyor, detail_surveyor, daftar_surveyor } from '@/service/penetapan'
+import { useNotification } from '@/composables/useNotification';
+import { add_surveyor, detail_surveyor, daftar_surveyor } from '@/service/penetapan';
 
 const { showNotification, notificationType, notificationMessage, displayNotification } =
-  useNotification()
+  useNotification();
 
 interface Props {
-  isModalOpen: boolean
-  selectedKegiatan: any
+  isModalOpen: boolean;
+  selectedKegiatan: any;
 }
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 const emit = defineEmits<{
-  (e: 'close'): void
-  (e: 'status', payload: { error_msg?: string; error?: boolean }): void
-}>()
+  (e: 'close'): void;
+  (e: 'status', payload: { error_msg?: string; error?: boolean }): void;
+}>();
 
 // State
-const isSubmitting = ref(false)
-const surveyorList = ref<any[]>([{ id: '' }])
-const surveyorOptions = ref<any[]>([])
-const nama_kegiatan = ref('')
-const form = ref<{ sk: File | string }>({ sk: '' })
-const errors = ref<Record<string, string>>({})
-const previewUrl = ref<string | null>(null)
+const isSubmitting = ref(false);
+const surveyorList = ref<any[]>([{ id: '' }]);
+const surveyorOptions = ref<any[]>([]);
+const nama_kegiatan = ref('');
+const form = ref<{ sk: File | string }>({ sk: '' });
+const errors = ref<Record<string, string>>({});
+const previewUrl = ref<string | null>(null);
 
 // Reset form
 const resetForm = () => {
-  surveyorList.value = [{ id: null }]
-  errors.value = {}
-  form.value.sk = ''
-  nama_kegiatan.value = ''
-  previewUrl.value = null
-}
+  surveyorList.value = [{ id: null }];
+  errors.value = {};
+  form.value.sk = '';
+  nama_kegiatan.value = '';
+  previewUrl.value = null;
+};
 
 // Validasi
 // Validasi
 const validateForm = () => {
-  let isValid = true
-  errors.value = {}
+  let isValid = true;
+  errors.value = {};
 
   if (!form.value.sk) {
-    errors.value['sk'] = 'File SK wajib diupload.'
-    isValid = false
+    errors.value['sk'] = 'File SK wajib diupload.';
+    isValid = false;
   }
 
-  const usedIds = new Set<string>()
+  const usedIds = new Set<string>();
   surveyorList.value.forEach((item, index) => {
     if (!item.id) {
-      errors.value[`surveyor_id_${index}`] = 'Surveyor tidak boleh kosong.'
-      isValid = false
+      errors.value[`surveyor_id_${index}`] = 'Surveyor tidak boleh kosong.';
+      isValid = false;
     } else if (usedIds.has(item.id)) {
-      errors.value[`surveyor_id_${index}`] = 'Surveyor ini sudah dipilih.'
-      isValid = false
+      errors.value[`surveyor_id_${index}`] = 'Surveyor ini sudah dipilih.';
+      isValid = false;
     } else {
-      usedIds.add(item.id)
+      usedIds.add(item.id);
     }
-  })
+  });
 
-  return isValid
-}
+  return isValid;
+};
 
 // Ambil surveyor & kegiatan
 const fetchData = async () => {
   try {
-    const response = await daftar_surveyor()
+    const response = await daftar_surveyor();
     surveyorOptions.value = [
       { id: null, name: '-- Pilih Surveyor --' },
       ...response.data.map((s: any) => ({
         id: String(s.id),
         name: s.name,
       })),
-    ]
+    ];
   } catch (error: any) {
-    const msg = error.response?.data?.message || 'Terjadi kesalahan'
-    displayNotification(msg, 'error')
+    const msg = error.response?.data?.message || 'Terjadi kesalahan';
+    displayNotification(msg, 'error');
   }
-}
+};
 
-const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL
+import { API_URL } from '@/config/config';
+const BASE_URL = API_URL;
 
 // ...
 
 // Detail surveyor by kegiatan
 const fetchDetailSurveyor = async () => {
   try {
-    const response = await detail_surveyor({ kegiatan_id: props.selectedKegiatan })
+    const response = await detail_surveyor({ kegiatan_id: props.selectedKegiatan });
     if (response.data.length > 0) {
-      surveyorList.value = response.data.map((s: any) => ({ id: String(s.id) }))
+      surveyorList.value = response.data.map((s: any) => ({ id: String(s.id) }));
 
-      nama_kegiatan.value = response.data[0]?.kegiatan || ''
+      nama_kegiatan.value = response.data[0]?.kegiatan || '';
       previewUrl.value = response.data[0]?.sk
         ? `${BASE_URL}/uploads/img/sk_penetapan/${response.data[0].sk}`
-        : null
-      form.value.sk = response.data[0]?.sk
+        : null;
+      form.value.sk = response.data[0]?.sk;
     } else {
       // fallback kalau ga ada surveyor
-      surveyorList.value = [{ id: null }]
-      previewUrl.value = null
-      form.value.sk = ''
+      surveyorList.value = [{ id: null }];
+      previewUrl.value = null;
+      form.value.sk = '';
     }
 
-    console.log('ini response data', response.data)
-    console.log('ini image list', previewUrl.value)
+    console.log('ini response data', response.data);
+    console.log('ini image list', previewUrl.value);
   } catch (error: any) {
-    const msg = error.response?.data?.message || 'Terjadi kesalahan'
-    displayNotification(msg, 'error')
+    const msg = error.response?.data?.message || 'Terjadi kesalahan';
+    displayNotification(msg, 'error');
   }
-}
+};
 
 // Watch modal
 watch(
   () => props.isModalOpen,
   async (val) => {
     if (val) {
-      await fetchDetailSurveyor()
-      await fetchData()
+      await fetchDetailSurveyor();
+      await fetchData();
     } else {
-      resetForm()
+      resetForm();
     }
   },
-)
+);
 
 // Submit
 const handleSubmit = async () => {
-  if (!validateForm()) return
-  isSubmitting.value = true
+  if (!validateForm()) return;
+  isSubmitting.value = true;
 
   try {
-    const formData = new FormData()
-    formData.append('kegiatan_id', String(props.selectedKegiatan))
-    if (form.value.sk instanceof File) formData.append('sk', form.value.sk)
+    const formData = new FormData();
+    formData.append('kegiatan_id', String(props.selectedKegiatan));
+    if (form.value.sk instanceof File) formData.append('sk', form.value.sk);
 
     surveyorList.value.forEach((s, i) => {
-      formData.append(`surveyor[${i}][surveyor_id]`, s.id)
-    })
+      formData.append(`surveyor[${i}][surveyor_id]`, s.id);
+    });
 
-    formData.append('kegiatan_name', nama_kegiatan.value)
+    formData.append('kegiatan_name', nama_kegiatan.value);
 
-    const response = await add_surveyor(formData)
-    emit('status', { error_msg: response.error_msg, error: response.error })
+    const response = await add_surveyor(formData);
+    emit('status', { error_msg: response.error_msg, error: response.error });
   } catch (error: any) {
-    const msg = error.response?.data?.message || 'Terjadi kesalahan'
-    displayNotification(msg, 'error')
+    const msg = error.response?.data?.message || 'Terjadi kesalahan';
+    displayNotification(msg, 'error');
   } finally {
-    isSubmitting.value = false
-    closeModal()
+    isSubmitting.value = false;
+    closeModal();
   }
-}
+};
 
 // Tambah / hapus surveyor
-const addField = () => surveyorList.value.push({ id: '' })
+const addField = () => surveyorList.value.push({ id: '' });
 const removeField = (index: number) => {
-  if (surveyorList.value.length > 1) surveyorList.value.splice(index, 1)
-}
+  if (surveyorList.value.length > 1) surveyorList.value.splice(index, 1);
+};
 
 // Close modal
 const closeModal = () => {
-  if (isSubmitting.value) return
-  resetForm()
-  emit('close')
-}
+  if (isSubmitting.value) return;
+  resetForm();
+  emit('close');
+};
 
 // File handler
 const handleFile = (file: File | null) => {
   if (!file) {
-    previewUrl.value = null
-    form.value.sk = ''
-    return
+    previewUrl.value = null;
+    form.value.sk = '';
+    return;
   }
-  previewUrl.value = URL.createObjectURL(file)
-  form.value.sk = file
-}
+  previewUrl.value = URL.createObjectURL(file);
+  form.value.sk = file;
+};
 
 const fileName = computed(() => {
   if (form.value.sk instanceof File) {
-    return form.value.sk.name
+    return form.value.sk.name;
   }
   if (typeof form.value.sk === 'string' && form.value.sk) {
-    return form.value.sk.split('/').pop() || ''
+    return form.value.sk.split('/').pop() || '';
   }
-  return ''
-})
+  return '';
+});
 
 // Escape key
 const handleEscape = (e: KeyboardEvent) => {
-  if (e.key === 'Escape' && props.isModalOpen) closeModal()
-}
-onMounted(() => document.addEventListener('keydown', handleEscape))
-onBeforeUnmount(() => document.removeEventListener('keydown', handleEscape))
+  if (e.key === 'Escape' && props.isModalOpen) closeModal();
+};
+onMounted(() => document.addEventListener('keydown', handleEscape));
+onBeforeUnmount(() => document.removeEventListener('keydown', handleEscape));
 </script>
 
 <template>
