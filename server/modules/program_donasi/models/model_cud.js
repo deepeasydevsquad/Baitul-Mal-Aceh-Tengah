@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const fs = require("fs").promises;
+const fs = require("fs");
 const path = require("path");
 const {
   sequelize,
@@ -249,6 +249,7 @@ class Model_cud {
 
   // response
   async response() {
+    if (!this.t) return false; // pastikan transaksi ada
     if (this.state) {
       await writeLog(this.req, this.t, {
         msg: this.message,
