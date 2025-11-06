@@ -158,7 +158,7 @@ function openModalAdd() {
         <div class="w-full h-44 bg-gray-100 flex items-center justify-center relative">
           <img
             v-if="item.banner && !imageErrors.has(index)"
-            :src="`${BASE_URL}/uploads/img/program_kegiatan_bantuan/${item.banner}`"
+            :src="`${BASE_URL}/uploads/img/program_donasi/${item.banner}`"
             alt="Banner Program"
             class="w-full h-full object-cover"
             @error="handleImageError(index)"

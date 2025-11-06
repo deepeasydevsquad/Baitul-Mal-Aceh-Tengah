@@ -42,7 +42,6 @@ import { MessageTabZakat } from '@/stores/message';
 // import Form from '@/components/Modal/Form.vue';
 // import FormUploadBeritaAcara from '../BakalPenerimaBantuan/widgets/FormUploadBeritaAcara.vue';
 
-// import { API_URL } from '@/config/config';
 const BASE_URL = API_URL;
 
 // Global Properties
