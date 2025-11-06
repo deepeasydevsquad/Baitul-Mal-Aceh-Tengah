@@ -26,4 +26,10 @@ router.post(
   controllers.laporan_umum
 );
 
+router.get(
+  "/laporan_umum/laporan_harian",
+  authenticateTokenAdministrator,
+  controllers.laporan_harian
+);
+
 module.exports = router;

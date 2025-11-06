@@ -119,7 +119,7 @@ class Model_r {
 
       // STEP 1: Query utama
       let result = await Realisasi_permohonan.findAll({
-        order: [["id", "ASC"]],
+        order: [["id", "DESC"]],
         attributes: [
           "id",
           "status_realisasi",
