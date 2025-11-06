@@ -136,7 +136,10 @@ validation.check_nominal_yang_disetujui = async (value, { req }) => {
 };
 
 // === UPLOAD HANDLER ===
-const uploadPath = path.join(__dirname, "../uploads/dokumen/permohonan_bantuan");
+const uploadPath = path.join(
+  __dirname,
+  "../uploads/dokumen/permohonan_bantuan"
+);
 
 if (!fs.existsSync(uploadPath)) {
   fs.mkdirSync(uploadPath, { recursive: true });
@@ -161,11 +164,16 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (req, file, cb) => {
-  const allowedTypes = ["application/pdf"];
+  const allowedTypes = [
+    "application/pdf",
+    "image/png",
+    "image/jpeg",
+    "image/jpg",
+  ];
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error("Format file harus PDF"), false);
+    cb(new Error("Format file harus PDF, JPEG, JPG, PNG"), false);
   }
 };
 

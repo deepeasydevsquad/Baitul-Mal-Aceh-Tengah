@@ -410,7 +410,7 @@ onBeforeUnmount(() => {
                   :id="`syarat_${generateFieldName(syarat.name)}`"
                   :label="`${syarat.name} *`"
                   buttonText="Pilih File"
-                  accept=".pdf"
+                  accept=".pdf,.jpeg,.jpg,.png"
                   :error="errors[generateFieldName(syarat.name)]"
                   :maxSize="1000"
                   @file-selected="(file) => handleFileUpload(generateFieldName(syarat.name))(file)"

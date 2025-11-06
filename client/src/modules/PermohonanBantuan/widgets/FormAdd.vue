@@ -329,7 +329,7 @@ watch(
                 :id="`dokumen_${syaratFile.id}`"
                 :label="`${syaratFile.name}`"
                 :error="errors[`dokumen_${syaratFile.path}`]"
-                :accept="'.pdf'"
+                :accept="'.pdf,.jpg,.jpeg,.png'"
                 :showPreview="false"
                 :maxSize="1000"
                 :required="true"
