@@ -143,7 +143,7 @@ function openModalAdd() {
   <!-- Tampilkan list program jika showPermohonan false -->
   <div v-else class="p-6 bg-white rounded-lg shadow-lg">
     <!-- Judul -->
-    <h2 class="text-2xl font-extrabold text-green-900 mb-6 text-center uppercase tracking-wide">
+    <h2 class="text-2xl font-extrabold text-green-900 mb-15 text-center uppercase tracking-wide">
       DAFTAR PROGRAM DONASI
     </h2>
 
