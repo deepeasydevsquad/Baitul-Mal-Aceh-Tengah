@@ -26,7 +26,8 @@ interface Program {
   total_nominal: number;
 }
 
-const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
+import { API_URL } from '@/config/config';
+const BASE_URL = API_URL;
 const isModalAddOpen = ref(false);
 const data = ref<Program[]>([]);
 const totalEntries = ref(0);

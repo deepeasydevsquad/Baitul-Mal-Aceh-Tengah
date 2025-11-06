@@ -1,145 +1,145 @@
 <script setup lang="ts">
 // Library
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
-import Notification from '@/components/Modal/Notification.vue'
-import BaseButton from '@/components/Button/BaseButton.vue'
-import InputFile from '@/components/Form/InputFile.vue'
-import InputText from '@/components/Form/InputText.vue'
-import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue'
-
-const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
+import Notification from '@/components/Modal/Notification.vue';
+import BaseButton from '@/components/Button/BaseButton.vue';
+import InputFile from '@/components/Form/InputFile.vue';
+import InputText from '@/components/Form/InputText.vue';
+import LoadingSpinner from '@/components/Loading/LoadingSpinner.vue';
+import { API_URL } from '@/config/config';
+const BASE_URL = API_URL;
 
 // Composable
-import { useNotification } from '@/composables/useNotification'
+import { useNotification } from '@/composables/useNotification';
 
 // Service
-import { edit_kecamatan, get_info_edit_kecamatan } from '@/service/kecamatan'
+import { edit_kecamatan, get_info_edit_kecamatan } from '@/service/kecamatan';
 
 // Composable: notification
 const { showNotification, notificationType, notificationMessage, displayNotification } =
-  useNotification()
+  useNotification();
 
 interface Props {
-  isModalOpen: boolean
-  selectedKecamatan: any
+  isModalOpen: boolean;
+  selectedKecamatan: any;
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 
 const emit = defineEmits<{
-  (e: 'close'): void
-  (e: 'status', payload: { error_msg?: string; error?: boolean }): void
-}>()
+  (e: 'close'): void;
+  (e: 'status', payload: { error_msg?: string; error?: boolean }): void;
+}>();
 
 // Function: Close modal
 const closeModal = () => {
-  if (isSubmitting.value) return
-  resetForm()
-  emit('close')
-}
+  if (isSubmitting.value) return;
+  resetForm();
+  emit('close');
+};
 
 // Function: Reset form
 const resetForm = () => {
-  form.value.name = ''
-  form.value.kode = ''
-  errors.value = {}
-}
+  form.value.name = '';
+  form.value.kode = '';
+  errors.value = {};
+};
 
 // Function: Validate form
 const errors = ref<Record<string, string>>({
   name: '',
   kode: '',
-})
+});
 
 const validateForm = () => {
-  let isValid = true
+  let isValid = true;
 
   // Reset errors
-  errors.value = {}
+  errors.value = {};
 
   if (form.value.name === '') {
-    errors.value.name = 'Nama kecamatan tidak boleh kosong.'
-    isValid = false
+    errors.value.name = 'Nama kecamatan tidak boleh kosong.';
+    isValid = false;
   }
 
   if (!form.value.kode) {
-    errors.value.kode = 'Kode kecamatan wajib diisi.'
-    isValid = false
+    errors.value.kode = 'Kode kecamatan wajib diisi.';
+    isValid = false;
   }
 
-  console.log(errors.value)
+  console.log(errors.value);
 
-  return isValid
-}
+  return isValid;
+};
 
 // State: Loading
-const isLoading = ref(true)
+const isLoading = ref(true);
 
 // Function: Fetch Data
 const fetchData = async () => {
-  if (!props.selectedKecamatan || !props.selectedKecamatan.id) return
+  if (!props.selectedKecamatan || !props.selectedKecamatan.id) return;
   try {
-    const response = await get_info_edit_kecamatan(props.selectedKecamatan.id)
-    form.value.name = response.data.name
-    form.value.kode = response.data.kode
-    console.log(response)
+    const response = await get_info_edit_kecamatan(props.selectedKecamatan.id);
+    form.value.name = response.data.name;
+    form.value.kode = response.data.kode;
+    console.log(response);
   } catch (error) {
-    displayNotification('Gagal mengambil data kecamatan', 'error')
+    displayNotification('Gagal mengambil data kecamatan', 'error');
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
-}
+};
 
 // Function: Handle submit
-const isSubmitting = ref(false)
+const isSubmitting = ref(false);
 const form = ref<{ name: string; kode: string }>({
   name: '',
   kode: '',
-})
+});
 
 const handleSubmit = async () => {
-  if (!validateForm()) return
+  if (!validateForm()) return;
 
-  const kecamatan_id = props.selectedKecamatan.id
-  const formData = JSON.parse(JSON.stringify(form.value))
-  console.log(formData)
+  const kecamatan_id = props.selectedKecamatan.id;
+  const formData = JSON.parse(JSON.stringify(form.value));
+  console.log(formData);
 
-  formData.id = kecamatan_id
+  formData.id = kecamatan_id;
 
-  isSubmitting.value = true
+  isSubmitting.value = true;
   try {
-    const response = await edit_kecamatan(formData)
-    console.log(response)
-    emit('status', { error_msg: response.error_msg, error: response.error })
+    const response = await edit_kecamatan(formData);
+    console.log(response);
+    emit('status', { error_msg: response.error_msg, error: response.error });
   } catch (error: any) {
-    console.error(error)
-    displayNotification(error.response.data.error_msg || error.response.data.message, 'error')
+    console.error(error);
+    displayNotification(error.response.data.error_msg || error.response.data.message, 'error');
   } finally {
-    isSubmitting.value = false
-    closeModal()
+    isSubmitting.value = false;
+    closeModal();
   }
-}
+};
 
 // Function: Handle escape & Fetch Data
 const handleEscape = (e: KeyboardEvent) => {
-  if (e.key === 'Escape' && props.isModalOpen) closeModal()
-}
+  if (e.key === 'Escape' && props.isModalOpen) closeModal();
+};
 onMounted(async () => {
-  await fetchData()
-  document.addEventListener('keydown', handleEscape)
-})
+  await fetchData();
+  document.addEventListener('keydown', handleEscape);
+});
 
 onBeforeUnmount(async () => {
-  await fetchData()
-  document.removeEventListener('keydown', handleEscape)
-})
+  await fetchData();
+  document.removeEventListener('keydown', handleEscape);
+});
 
 watch(
   () => props.selectedKecamatan,
   (val) => {
-    if (props.isModalOpen && val?.id) fetchData()
+    if (props.isModalOpen && val?.id) fetchData();
   },
-)
+);
 </script>
 
 <template>

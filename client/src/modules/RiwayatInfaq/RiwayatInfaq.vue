@@ -291,7 +291,8 @@ async function cetakSuratSerahTerimaInfaq(id: number) {
     }
 
     // Load images
-    const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
+    import { API_URL } from '@/config/config';
+    const BASE_URL = API_URL;
     const logo = BASE_URL + '/uploads/img/logos/site_logo.png';
     const logoBase64 = await loadImageAsBase64(logo);
     const footer = '../../../public/images/ziwah.png';
