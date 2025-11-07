@@ -77,7 +77,9 @@ class Model_cud {
       runningText.is_active = newIsActive;
       await runningText.save({ transaction: this.t });
 
-      this.message = `Memperbaharui Status running Text dengan ID ${body.id} menjadi ${newIsActive ? "Aktif" : "Tidak Aktif"}`;
+      this.message = `Memperbaharui Status running Text dengan ID ${
+        body.id
+      } menjadi ${newIsActive ? "Aktif" : "Tidak Aktif"}`;
     } catch (error) {
       this.state = false;
       this.message = error.message;
@@ -90,7 +92,6 @@ class Model_cud {
 
     try {
       console.log("Received order updates:", orderArray);
-
 
       const records = await Running_text.findAll({
         where: {
@@ -128,6 +129,27 @@ class Model_cud {
       });
 
       this.message = `Order Running Text berhasil diperbaharui (${updates.length} records).`;
+    } catch (error) {
+      this.state = false;
+      this.message = error.message;
+    }
+  }
+
+  async update_speed() {
+    await this.initialize();
+    const body = this.req.body;
+
+    try {
+      // Update speed untuk semua record
+      await Running_text.update(
+        { speed: body.speed },
+        {
+          where: {},
+          transaction: this.t,
+        }
+      );
+
+      this.message = `Memperbaharui kecepatan running text menjadi ${body.speed} pixel/detik`;
     } catch (error) {
       this.state = false;
       this.message = error.message;

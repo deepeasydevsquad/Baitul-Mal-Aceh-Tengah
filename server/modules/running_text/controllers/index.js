@@ -161,13 +161,60 @@ controllers.getActiveRunningText = async (req, res) => {
       data: data,
     });
   } catch (error) {
-    console.log("_-----------------------------XX");
-    console.log("_-----------------------------XX");
-    console.log("_-----------------------------XX");
-    console.error("Error in getActiveRunningText:", error);
     res.status(500).json({
       error: true,
       message: "Terjadi kesalahan saat mengambil running text aktif.",
+      details: error.message,
+    });
+  }
+};
+
+// Get current speed setting
+controllers.getSpeedSetting = async (req, res) => {
+  try {
+    const model_r = new Model_r(req);
+    const result = await model_r.get_speed_setting();
+
+    res.status(200).json({
+      error: false,
+      message: "Pengaturan kecepatan berhasil diambil.",
+      data: result,
+    });
+  } catch (error) {
+    console.error("Error in getSpeedSetting:", error);
+    res.status(500).json({
+      error: true,
+      message: "Terjadi kesalahan saat mengambil pengaturan kecepatan.",
+      details: error.message,
+    });
+  }
+};
+
+// Update speed setting
+controllers.updateSpeedSetting = async (req, res) => {
+  if (!(await handleValidationErrors(req, res))) return;
+
+  try {
+    const model_cud = new Model_cud(req);
+    await model_cud.update_speed();
+
+    if (await model_cud.response()) {
+      res.status(200).json({
+        error: false,
+        message: "Kecepatan running text berhasil diperbarui.",
+        data: { speed: req.body.speed },
+      });
+    } else {
+      res.status(400).json({
+        error: true,
+        message: "Kecepatan running text gagal diperbarui.",
+      });
+    }
+  } catch (error) {
+    console.error("Error in updateSpeedSetting:", error);
+    res.status(500).json({
+      error: true,
+      message: "Terjadi kesalahan saat memperbarui kecepatan.",
       details: error.message,
     });
   }

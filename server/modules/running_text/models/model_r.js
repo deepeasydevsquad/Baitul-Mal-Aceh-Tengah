@@ -49,12 +49,28 @@ class model_r {
     }
   }
 
-  async info_runningtext (id) {
+  async info_runningtext(id) {
     try {
       const info_runningtext = await Running_text.findByPk(id);
       return info_runningtext;
     } catch (error) {
       console.error("Error in model_r.info_runningtext:", error);
+      throw error;
+    }
+  }
+
+  async get_speed_setting() {
+    try {
+      // Ambil speed dari record pertama (atau record mana saja, karena speed seharusnya sama untuk semua)
+      const runningText = await Running_text.findOne();
+
+      if (!runningText) {
+        return { speed: 80 }; // default speed
+      }
+
+      return { speed: runningText.speed };
+    } catch (error) {
+      console.error("Error in model_r.get_speed_setting:", error);
       throw error;
     }
   }
