@@ -302,7 +302,7 @@ async function cetakSuratSerahTerimaZakat(id: number) {
     const BASE_URL = API_URL;
     const logo = BASE_URL + '/uploads/img/logos/site_logo.png';
     const logoBase64 = await loadImageAsBase64(logo);
-    const footer = '../../../public/images/ziwah.png';
+    const footer = '/images/ziwah.png';
     const footerBase64 = await loadImageAsBase64(footer);
 
     // Inisialisasi PDF
