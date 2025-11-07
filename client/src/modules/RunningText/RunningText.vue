@@ -294,30 +294,26 @@ const handleEdit = (runningText: RunningText) => {
 </script>
 
 <template>
-  <div class="mx-auto px-4">
-    <div class="flex justify-between items-center mb-6">
-      <div class="flex gap-2">
-        <BaseButton
-          @click="openModalAdd()"
-          variant="primary"
-          :loading="isModalAddOpen || isModalEditOpen"
-          type="button"
-        >
-          <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" />
-          Tambahkan Teks
-        </BaseButton>
-
-        <!-- Speed Settings Button -->
-        <BaseButton
-          @click="openModalSpeed()"
-          variant="secondary"
-          type="button"
-          title="Pengaturan Kecepatan"
-        >
-          <font-awesome-icon icon="fa-solid fa-gear" class="text-lg" />
-        </BaseButton>
-      </div>
-
+  <div class="mx-auto p-4">
+    <div class="flex justify-between items-center mb-6 gap-4">
+      <BaseButton
+        @click="openModalAdd()"
+        variant="primary"
+        :loading="isModalAddOpen || isModalEditOpen"
+        type="button"
+      >
+        <font-awesome-icon icon="fa-solid fa-plus" class="mr-2" />
+        Tambahkan Teks</BaseButton
+      >
+      <!-- Speed Settings Button -->
+      <BaseButton
+        @click="openModalSpeed()"
+        variant="secondary"
+        type="button"
+        title="Pengaturan Kecepatan"
+      >
+        <font-awesome-icon icon="fa-solid fa-gear" class="text-lg" />
+      </BaseButton>
       <div class="flex items-center">
         <label for="search" class="mr-2 text-sm font-medium text-gray-600">Cari</label>
         <input

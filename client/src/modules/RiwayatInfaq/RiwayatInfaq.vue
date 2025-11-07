@@ -330,28 +330,28 @@ async function cetakSuratSerahTerimaInfaq(id: number) {
     y += alamatKantorWrapped.length * 2;
 
     // Box Nomor Bukti (Kanan)
-    y += 8;
-    const boxX = pageWidth - 85;
-    const boxWidth = 70;
-    const boxHeight = 10;
-    doc.setDrawColor(255, 0, 0); // Border merah
-    doc.setLineWidth(0.5);
-    doc.rect(boxX, y, boxWidth, boxHeight);
+    // y += 8;
+    // const boxX = pageWidth - 85;
+    // const boxWidth = 70;
+    // const boxHeight = 10;
+    // doc.setDrawColor(255, 0, 0); // Border merah
+    // doc.setLineWidth(0.5);
+    // doc.rect(boxX, y, boxWidth, boxHeight);
 
-    doc.setFont('times', 'bold');
-    doc.setFontSize(11);
-    doc.text(
-      `${buktiData.waktu.tanggal} / ${buktiData.waktu.bulan_num} / ${buktiData.waktu.tahun_shrt}`,
-      boxX + 3,
-      y + 6,
-    );
+    // doc.setFont('times', 'bold');
+    // doc.setFontSize(11);
+    // doc.text(
+    //   `${buktiData.waktu.tanggal} / ${buktiData.waktu.bulan_num} / ${buktiData.waktu.tahun_shrt}`,
+    //   boxX + 3,
+    //   y + 6,
+    // );
 
-    // Background merah untuk periodekan
-    doc.setFont('times', 'normal');
-    doc.setFontSize(11);
-    // doc.text(buktiData.kode, boxX + 45, y + 6, { align: 'center' }); // Ini direvisi sebelumnya
-    doc.text('/ ...... / ...... /', boxX + 45, y + 6, { align: 'center' });
-    doc.setTextColor(0, 0, 0); // Reset warna text
+    // // Background merah untuk periodekan
+    // doc.setFont('times', 'normal');
+    // doc.setFontSize(11);
+    // // doc.text(buktiData.kode, boxX + 45, y + 6, { align: 'center' }); // Ini direvisi sebelumnya
+    // doc.text('/ ...... / ...... /', boxX + 45, y + 6, { align: 'center' });
+    // doc.setTextColor(0, 0, 0); // Reset warna text
 
     // ==================== JUDUL BAGIAN UTAMA ====================
     y += 18;

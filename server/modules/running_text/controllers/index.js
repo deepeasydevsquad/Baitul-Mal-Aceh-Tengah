@@ -161,10 +161,6 @@ controllers.getActiveRunningText = async (req, res) => {
       data: data,
     });
   } catch (error) {
-    console.log("_-----------------------------XX");
-    console.log("_-----------------------------XX");
-    console.log("_-----------------------------XX");
-    console.error("Error in getActiveRunningText:", error);
     res.status(500).json({
       error: true,
       message: "Terjadi kesalahan saat mengambil running text aktif.",
@@ -182,14 +178,22 @@ controllers.getSpeedSetting = async (req, res) => {
     res.status(200).json({
       error: false,
       message: "Pengaturan kecepatan berhasil diambil.",
+<<<<<<< HEAD
       data: result
+=======
+      data: result,
+>>>>>>> staging
     });
   } catch (error) {
     console.error("Error in getSpeedSetting:", error);
     res.status(500).json({
       error: true,
       message: "Terjadi kesalahan saat mengambil pengaturan kecepatan.",
+<<<<<<< HEAD
       details: error.message
+=======
+      details: error.message,
+>>>>>>> staging
     });
   }
 };
@@ -206,12 +210,20 @@ controllers.updateSpeedSetting = async (req, res) => {
       res.status(200).json({
         error: false,
         message: "Kecepatan running text berhasil diperbarui.",
+<<<<<<< HEAD
         data: { speed: req.body.speed }
+=======
+        data: { speed: req.body.speed },
+>>>>>>> staging
       });
     } else {
       res.status(400).json({
         error: true,
+<<<<<<< HEAD
         message: "Kecepatan running text gagal diperbarui."
+=======
+        message: "Kecepatan running text gagal diperbarui.",
+>>>>>>> staging
       });
     }
   } catch (error) {
@@ -219,7 +231,11 @@ controllers.updateSpeedSetting = async (req, res) => {
     res.status(500).json({
       error: true,
       message: "Terjadi kesalahan saat memperbarui kecepatan.",
+<<<<<<< HEAD
       details: error.message
+=======
+      details: error.message,
+>>>>>>> staging
     });
   }
 };

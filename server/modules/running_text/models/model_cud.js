@@ -78,7 +78,9 @@ class Model_cud {
       runningText.is_active = newIsActive;
       await runningText.save({ transaction: this.t });
 
-      this.message = `Memperbaharui Status running Text dengan ID ${body.id} menjadi ${newIsActive ? "Aktif" : "Tidak Aktif"}`;
+      this.message = `Memperbaharui Status running Text dengan ID ${
+        body.id
+      } menjadi ${newIsActive ? "Aktif" : "Tidak Aktif"}`;
     } catch (error) {
       this.state = false;
       this.message = error.message;
@@ -142,9 +144,9 @@ class Model_cud {
       // Update speed untuk semua record
       await Running_text.update(
         { speed: body.speed },
-        { 
+        {
           where: {},
-          transaction: this.t 
+          transaction: this.t,
         }
       );
 
