@@ -100,7 +100,7 @@ const isModalRealisasiOpen = ref(false);
 
 function openModalUploadMassal() {
   if (!selectedKegiatan.value || selectedKegiatan.value === 0) {
-    displayNotification('Pilih kegiatan terlebih dahulu', 'warning', 3000);
+    displayNotification('Pilih kegiatan pada filter terlebih dahulu', 'warning', 3000);
     return;
   }
 

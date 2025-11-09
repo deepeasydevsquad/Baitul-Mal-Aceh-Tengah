@@ -158,8 +158,9 @@ const validateForm = () => {
       isValid = false;
     }
   } else {
+    // upload MOU + Bukti Transaksi + PKS
     if (!form.value.mou) {
-      errors.value.mou = 'MOU harus diupload';
+      errors.value.mou = 'MOU + Bukti Transaksi + PKS harus diupload';
       isValid = false;
     }
   }
@@ -452,7 +453,7 @@ watch(
               v-if="form.tipe === 'transfer'"
               id="bukti_transfer"
               label="Upload Bukti Transfer"
-              accept=".jpg,.jpeg,.png"
+              accept=".pdf,.jpg,.jpeg,.png"
               :max-size="1000"
               note="Ukuran file berkas maksimal 1MB"
               :error="errors.bukti_transfer"
@@ -464,8 +465,8 @@ watch(
             <InputFile
               v-if="form.tipe === 'bantuan_langsung'"
               id="mou"
-              label="Upload MOU"
-              accept=".jpg,.jpeg,.png"
+              label="Upload MOU + Bukti Transaksi + PKS"
+              accept=".pdf,.jpg,.jpeg,.png"
               :max-size="1000"
               note="Ukuran file berkas maksimal 1MB"
               :error="errors.mou"
