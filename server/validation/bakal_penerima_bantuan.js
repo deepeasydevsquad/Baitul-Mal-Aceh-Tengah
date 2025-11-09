@@ -223,11 +223,16 @@ const storageRealisasi = multer.diskStorage({
 });
 
 const fileFilterRealisasi = (req, file, cb) => {
-  const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
+  const allowedTypes = [
+    "application/pdf",
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+  ];
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error("Format file harus gambar (JPG, JPEG, PNG)"), false);
+    cb(new Error("Format file harus PDF atau gambar (JPG, JPEG, PNG)"), false);
   }
 };
 

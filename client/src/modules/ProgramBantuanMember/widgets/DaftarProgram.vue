@@ -262,7 +262,7 @@ const formatRupiah = (value: number) =>
     </div>
 
     <!-- No Data -->
-    <div v-else class="text-center text-gray-500 mt-10">Belum ada data kegiatan</div>
+    <div v-else class="text-center text-gray-500 my-15">Belum ada data kegiatan</div>
 
     <!-- Pagination -->
     <div

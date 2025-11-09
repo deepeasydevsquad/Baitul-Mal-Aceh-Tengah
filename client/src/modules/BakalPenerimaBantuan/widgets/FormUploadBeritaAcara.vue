@@ -224,7 +224,7 @@ watch(
           <InputFile
             id="berita_acara"
             label="Berita Acara"
-            accept=".jpg,.jpeg,.png"
+            accept=".pdf,.jpg,.jpeg,.png"
             :max-size="1000"
             note="Ukuran maksimal file berita acara adalah 1MB"
             :error="errors.berita_acara"
