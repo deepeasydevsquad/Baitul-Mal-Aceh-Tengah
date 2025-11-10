@@ -16,6 +16,10 @@ controllers.running_text = async (req, res) => {
     const model_r = new Model_r(req);
     const { data, total } = await model_r.content_text();
 
+    console.log("___________------_________");
+    console.log(data);
+    console.log(total);
+    console.log("___________------_________");
     res.status(200).json({
       error: false,
       message: "Data Berhasil Ditemukan.",
@@ -161,6 +165,9 @@ controllers.getActiveRunningText = async (req, res) => {
       data: data,
     });
   } catch (error) {
+    console.log('______________1');
+    console.log(error);
+    console.log('______________1');
     res.status(500).json({
       error: true,
       message: "Terjadi kesalahan saat mengambil running text aktif.",

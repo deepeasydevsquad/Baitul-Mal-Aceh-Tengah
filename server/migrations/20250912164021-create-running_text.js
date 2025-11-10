@@ -23,6 +23,11 @@ module.exports = {
         type: Sequelize.INTEGER,
         defaultValue: 0
       },
+      speed: {
+        allowNull: false,
+        type: Sequelize.INTEGER,
+        defaultValue: 80
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

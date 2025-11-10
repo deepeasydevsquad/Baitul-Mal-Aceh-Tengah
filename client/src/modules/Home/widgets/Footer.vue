@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch, nextTick } from 'vue';
-import { getActiveRunningText } from '@/service/running_text';
+import { getActiveRunningText, getSpeedSetting } from '@/service/running_text';
 
 // --- State Management ---
 const combinedActiveText = ref(
   'SELAMAT DATANG DI APLIKASI MUSTAHIK DAN MUZAKKI BAITUL MAL KABUPATEN ACEH TENGAH',
 );
 const isLoading = ref(true);
+const speed = ref(80);
 
 // Ref untuk elemen teks yang akan dianimasikan
 const marqueeTextRef = ref<HTMLElement | null>(null);
@@ -39,15 +40,32 @@ const fetchData = async () => {
   }
 };
 
+const fetchSpeedSetting = async () => {
+  try {
+    const response = await getSpeedSetting();
+    speed.value = response.data.speed;
+    console.log('[Footer.vue] Speed loaded:', speed.value);
+  } catch (error) {
+    console.error('Gagal mengambil pengaturan kecepatan:', error);
+    speed.value = 80;
+  }
+};
+
+
 const updateMarqueeParameters = () => {
   if (marqueeTextRef.value && marqueeTextRef.value.parentElement) {
     const container = marqueeTextRef.value.parentElement;
     textWidth.value = marqueeTextRef.value.scrollWidth;
     containerWidth.value = container.offsetWidth;
 
-    const speed = 80;
     const distance = textWidth.value + containerWidth.value;
-    animationDuration.value = distance / speed / 0.99;
+    animationDuration.value = distance / speed.value / 0.99;
+
+    console.log('[Footer.vue] Updated animation parameters:', {
+      speed: speed.value,
+      distance,
+      duration: animationDuration.value,
+    });
   }
 };
 
@@ -59,18 +77,23 @@ const marqueeStyle = computed(() => {
     animation: `scroll-and-pause var(--animation-duration) linear infinite`,
   };
 });
-
-onMounted(() => {
-  fetchData();
+  
+onMounted(async () => {
+  await Promise.all([fetchData(), fetchSpeedSetting()]);
   if (marqueeTextRef.value && marqueeTextRef.value.parentElement) {
     const resizeObserver = new ResizeObserver(() => {
       updateMarqueeParameters();
     });
     resizeObserver.observe(marqueeTextRef.value.parentElement);
   }
+
+  // Polling untuk update speed setiap 30 detik
+  setInterval(async () => {
+    await fetchSpeedSetting();
+  }, 30000);
 });
 
-watch([combinedActiveText, isLoading], async () => {
+watch([combinedActiveText, isLoading, speed], async () => {
   await nextTick();
 
   requestAnimationFrame(() => {

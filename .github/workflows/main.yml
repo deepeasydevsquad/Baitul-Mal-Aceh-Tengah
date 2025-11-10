@@ -1,0 +1,72 @@
+name: CI/CD Deploy Aplikasi Baitulmal Aceh Tengah
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
+    - name: Login to DockerHub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_HUB_USER }}
+        password: ${{ secrets.DOCKER_HUB_PASS }}
+
+    - name: Build and push client image
+      run: |
+        docker build -t muammar88/baitulmal_client:1.0.0 ./client
+        docker push muammar88/baitulmal_client:1.0.0
+
+    - name: Build and push backend image
+      run: |
+        docker build -t muammar88/baitulmal_server:1.0.0 ./server
+        docker push muammar88/baitulmal_server:1.0.0
+
+    - name: Deploy to Ubuntu server via SSH
+      uses: appleboy/ssh-action@v1
+      with:
+        host: ${{ secrets.IP_SERVER_DATABASE_MACHINE }}
+        username: ${{ secrets.SSH_USER_DATABASE_MACHINE }}
+        key: ${{ secrets.SSH_PRIVATE_KEY_DATABASE_MACHINE }}
+        script: |
+          cd /home/dbmachine/baitulmal
+
+          # Pull latest images
+          docker pull muammar88/baitulmal_client:1.0.0
+          docker pull muammar88/baitulmal_server:1.0.0
+
+          # Restart services
+          docker-compose down
+          docker-compose up -d --force-recreate
+
+          echo "⏳ Waiting for MySQL to be ready..."
+          until docker exec mysql_container_baitulmal mysqladmin ping -uroot -p"root_password" --silent; do
+            echo "   ... still waiting for MySQL"
+            sleep 5
+          done
+
+          echo "⏳ Waiting for Container_server_baitulmal to be running..."
+          until [ "$(docker inspect -f '{{.State.Running}}' Container_server_baitulmal)" == "true" ]; do
+            echo "   ... still waiting for Container_server_baitulmal"
+            sleep 5
+          done
+
+          echo "🗑 Dropping and creating database..."
+          docker exec -i mysql_container_baitulmal mysql -uroot -p"root_password" -e "DROP DATABASE IF EXISTS baitulmalacehtengah_db; CREATE DATABASE baitulmalacehtengah_db;"
+
+          echo "📜 Running Sequelize migrations..."
+          if docker exec -i Container_server_baitulmal npx sequelize-cli db:migrate; then
+            echo "🌱 Seeding database..."
+            docker exec -i Container_server_baitulmal npx sequelize-cli db:seed:all --debug
+            echo "🔄 Restarting Container_server..."
+            docker restart Container_server_baitulmal
+          else
+            echo "⚠️ Migration failed. Skipping seed."
+          fi
+          

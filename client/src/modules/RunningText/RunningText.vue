@@ -346,7 +346,7 @@ const handleEdit = (runningText: RunningText) => {
               :key="data.id"
               class="hover:bg-gray-50 transition-colors"
             >
-              <td class="px-6 py-4 text-center font-medium text-gray-800 whitespace-nowrap">
+              <td class="px-6 py-4 text-left font-medium text-gray-800 whitespace-nowrap">
                 <p
                   class="text-gray-900 break-words whitespace-normal leading-relaxed max-w-[600px] line-clamp-4"
                 >
@@ -363,7 +363,7 @@ const handleEdit = (runningText: RunningText) => {
                   {{ data.is_active ? 'Aktif' : 'Tidak Aktif' }}
                 </span>
               </td>
-              <td class="px-6 py-4 flex">
+              <td class="py-4 flex justify-center items-center">
                 <div class="flex justify-center items-center gap-2">
                   <ToggleSwitch
                     :id="data.id"

@@ -22,6 +22,7 @@ class Model_cud {
         content: body.content.trim(),
         is_active: false,
         order: 0,
+        speed: 80, // default speed
       });
 
       this.message = `Menambahkan running text dengan content ${body.content.trim()} dengan ID ${
