@@ -24,7 +24,11 @@ const fetchData = async () => {
     const activeTexts = response.data;
 
     if (activeTexts && activeTexts.length > 0) {
-      combinedActiveText.value = activeTexts.map((text: any) => text.content).join('   |||   ');
+      combinedActiveText.value = activeTexts
+        .map((text: any) => text.content)
+        .join(
+          '\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0',
+        );
     } else {
       combinedActiveText.value = 'Tidak ada informasi untuk ditampilkan saat ini.';
     }
@@ -46,6 +50,7 @@ const fetchSpeedSetting = async () => {
     speed.value = 80;
   }
 };
+
 
 const updateMarqueeParameters = () => {
   if (marqueeTextRef.value && marqueeTextRef.value.parentElement) {
@@ -72,10 +77,9 @@ const marqueeStyle = computed(() => {
     animation: `scroll-and-pause var(--animation-duration) linear infinite`,
   };
 });
-
+  
 onMounted(async () => {
   await Promise.all([fetchData(), fetchSpeedSetting()]);
-
   if (marqueeTextRef.value && marqueeTextRef.value.parentElement) {
     const resizeObserver = new ResizeObserver(() => {
       updateMarqueeParameters();
