@@ -1,8 +1,10 @@
 import api_administrator from './api_administrator';
 import axios from 'axios';
+import { API_URL } from '@/config/config';
+//const API_BASE_URL = API_URL;
 
 const api_public = axios.create({
-  baseURL: import.meta.env.VITE_APP_API_BASE_URL,
+  baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
