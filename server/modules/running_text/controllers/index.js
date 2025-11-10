@@ -161,6 +161,9 @@ controllers.getActiveRunningText = async (req, res) => {
       data: data,
     });
   } catch (error) {
+    console.log('______________1');
+    console.log(error);
+    console.log('______________1');
     res.status(500).json({
       error: true,
       message: "Terjadi kesalahan saat mengambil running text aktif.",
