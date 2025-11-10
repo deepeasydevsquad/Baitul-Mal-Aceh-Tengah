@@ -44,6 +44,7 @@ class model_r {
 
       return { data: rows, total: count };
     } catch (error) {
+      console.log("_______________2");
       console.error("Error in model_r.content_text:", error);
       throw error;
     }
